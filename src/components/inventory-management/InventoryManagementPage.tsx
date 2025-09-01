@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { InventoryTable } from './components/InventoryTable';
-import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
 import { DeleteInventoryDialog } from './components/DeleteInventoryDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
@@ -16,8 +16,8 @@ import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 
 const InventoryManagementPage = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -48,84 +48,74 @@ const InventoryManagementPage = () => {
 
   const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
     useInventoryFilters(inventoryItems);
-  
-  const totalPages = getTotalPages(filteredItems.length);
+
+  const itemsPerPage = 10;
   const paginatedItems = getPaginatedItems(filteredItems, currentPage);
-  
-  // Calculate stock counts for filtered items
-  const inStockCount = filteredItems.filter(item => (item.qty_available || 0) > 0).length;
-  const outOfStockCount = filteredItems.filter(item => (item.qty_available || 0) <= 0).length;
-  
+  const totalPages = getTotalPages(filteredItems.length);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // Reset to first page when search changes
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-  const handleCreateItem = async (item: any) => {
-    try {
-      await createItem(item);
-      toast({
-        title: "Success",
-        description: "Inventory item created successfully"
-      });
-      setIsAddDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create inventory item",
-        variant: "destructive"
-      });
-    }
+  // Calculate stock counts
+  const inStockCount = inventoryItems.filter(item => (item.qty_available || 0) > 0).length;
+  const outOfStockCount = inventoryItems.filter(item => (item.qty_available || 0) === 0).length;
+
+  // Handle navigation for create/edit
+  const handleCreateNew = () => {
+    navigate('/app/cadets/inventory_record?mode=create');
   };
-  const handleUpdateItem = async (item: any) => {
-    try {
-      await updateItem(item);
-      toast({
-        title: "Success",
-        description: "Inventory item updated successfully"
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update inventory item",
-        variant: "destructive"
-      });
-    }
+
+  const handleEditItem = async (item: any) => {
+    navigate(`/app/cadets/inventory_record?mode=edit&id=${item.id}`);
   };
 
   const handleViewItem = (item: any) => {
     setViewingItem(item);
   };
+
+  const handleBulkImport = async (items: any[]) => {
+    try {
+      await bulkCreateItems(items);
+      toast({
+        title: "Success",
+        description: "Inventory items imported successfully"
+      });
+      setIsBulkDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to import inventory items",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleDeleteItem = (item: any) => {
     setDeletingItem(item);
   };
 
   const handleConfirmDelete = async () => {
-    if (!deletingItem) return;
-    
-    try {
-      await deleteItem(deletingItem.id);
-      toast({
-        title: "Success",
-        description: "Inventory item deleted successfully"
-      });
-      setDeletingItem(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete inventory item",
-        variant: "destructive"
-      });
+    if (deletingItem) {
+      try {
+        await deleteItem(deletingItem.id);
+        setDeletingItem(null);
+        toast({
+          title: "Success",
+          description: "Inventory item deleted successfully"
+        });
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete inventory item",
+          variant: "destructive"
+        });
+      }
     }
   };
-  const handleBulkImport = async (items: any[]) => {
-    // Import items in bulk for better performance
-    await bulkCreateItems(items);
-  };
-  const exportToCSV = () => {
+
+  const handleExport = () => {
     if (!filteredItems.length) {
       toast({
         title: "No Data",
@@ -150,15 +140,20 @@ const InventoryManagementPage = () => {
       description: "Inventory data exported successfully"
     });
   };
+
   if (error) {
-    return <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
           <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Inventory</h2>
           <p className="text-red-600">Failed to load inventory items. Please try again later.</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="p-6 space-y-6">
+
+  return (
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold">Inventory Management</h1>
@@ -166,50 +161,59 @@ const InventoryManagementPage = () => {
         </div>
         <div className="flex gap-2">
           <InventoryActions
-            onAddItem={() => setIsAddDialogOpen(true)}
+            onAddItem={handleCreateNew}
             onBulkOperations={() => setIsBulkDialogOpen(true)}
-            onExport={exportToCSV}
+            onExport={handleExport}
           />
         </div>
       </div>
 
+      <StockCounter 
+        inStockCount={inStockCount} 
+        outOfStockCount={outOfStockCount} 
+      />
+
+      <InventoryFilters
+        showOutOfStockOnly={showOutOfStockOnly}
+        onShowOutOfStockChange={setShowOutOfStockOnly}
+      />
+
       <StandardTableWrapper
-        title=""
+        title="Inventory Items"
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        searchPlaceholder="Search by item, category, item ID, size, or stock number..."
-        selectedCount={selectedItems.length}
-        columns={columns}
-        visibleColumns={enabledColumns.map(col => col.key)}
-        onToggleColumn={toggleColumn}
-        columnsLoading={columnsLoading}
-        stockCounter={
-          <StockCounter 
-            inStockCount={inStockCount}
-            outOfStockCount={outOfStockCount}
-          />
-        }
-        extraControls={
-          <InventoryFilters
-            showOutOfStockOnly={showOutOfStockOnly}
-            onShowOutOfStockChange={setShowOutOfStockOnly}
-          />
-        }
+        searchPlaceholder="Search inventory items..."
       >
-        <InventoryTable items={paginatedItems as any} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onView={handleViewItem} onDelete={handleDeleteItem} />
+        <InventoryTable 
+          items={paginatedItems as any}
+          isLoading={isLoading} 
+          selectedItems={selectedItems} 
+          visibleColumns={enabledColumns.map(col => col.key)} 
+          onSelectionChange={setSelectedItems} 
+          onEdit={handleEditItem} 
+          onView={handleViewItem} 
+          onDelete={handleDeleteItem} 
+        />
       </StandardTableWrapper>
 
-      <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredItems.length} onPageChange={handlePageChange} />
+      <TablePagination 
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+        totalItems={filteredItems.length} 
+        onPageChange={handlePageChange} 
+      />
 
-      <AddInventoryItemDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onSubmit={handleCreateItem} />
+      <BulkOperationsDialog
+        open={isBulkDialogOpen}
+        onOpenChange={setIsBulkDialogOpen}
+        onImport={handleBulkImport}
+      />
 
-      <BulkOperationsDialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen} onImport={handleBulkImport} />
-      
       {viewingItem && (
         <EditInventoryItemDialog
-          item={viewingItem}
           open={!!viewingItem}
-          onOpenChange={(open) => !open && setViewingItem(null)}
+          onOpenChange={() => setViewingItem(null)}
+          item={viewingItem}
           onSubmit={async () => {}}
           viewOnly={true}
         />
@@ -222,6 +226,8 @@ const InventoryManagementPage = () => {
         onConfirm={handleConfirmDelete} 
         loading={false}
       />
-    </div>;
+    </div>
+  );
 };
+
 export default InventoryManagementPage;
