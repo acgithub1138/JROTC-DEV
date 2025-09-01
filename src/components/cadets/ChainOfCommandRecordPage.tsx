@@ -246,44 +246,92 @@ export const ChainOfCommandRecordPage: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-6">
-              {/* Cadet Selection */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="cadet" className="w-32 text-right shrink-0">Cadet</Label>
-                <div className="flex-1">
-                  <Select 
-                    value={formData.cadet_id} 
-                    onValueChange={value => handleFieldChange('cadet_id', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select cadet..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {activeCadets.map(cadet => (
-                        <SelectItem key={cadet.id} value={cadet.id}>
-                          {formatCadetName(cadet)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {/* First row: Cadet and Role */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="cadet" className="w-32 text-right shrink-0">Cadet</Label>
+                  <div className="flex-1">
+                    <Select 
+                      value={formData.cadet_id} 
+                      onValueChange={value => handleFieldChange('cadet_id', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select cadet..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {activeCadets.map(cadet => (
+                          <SelectItem key={cadet.id} value={cadet.id}>
+                            {formatCadetName(cadet)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="role" className="w-32 text-right shrink-0">Role *</Label>
+                  <div className="flex-1">
+                    <Input 
+                      id="role" 
+                      value={formData.role} 
+                      onChange={e => handleFieldChange('role', e.target.value)}
+                      placeholder="Enter job role..." 
+                      required 
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Role */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="role" className="w-32 text-right shrink-0">Role *</Label>
-                <div className="flex-1">
-                  <Input 
-                    id="role" 
-                    value={formData.role} 
-                    onChange={e => handleFieldChange('role', e.target.value)}
-                    placeholder="Enter job role..." 
-                    required 
-                  />
+              {/* Second row: Reports To and Assistant */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="reports_to" className="w-32 text-right shrink-0">Reports To *</Label>
+                  <div className="flex-1">
+                    <Select 
+                      value={formData.reports_to} 
+                      onValueChange={value => handleFieldChange('reports_to', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NA">NA</SelectItem>
+                        {[...roles].sort().map(role => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="assistant" className="w-32 text-right shrink-0">Assistant *</Label>
+                  <div className="flex-1">
+                    <Select 
+                      value={formData.assistant} 
+                      onValueChange={value => handleFieldChange('assistant', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NA">NA</SelectItem>
+                        {[...roles].sort().map(role => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              {/* Email Address */}
+              {/* Third row: Email Address */}
               <div className="flex items-center gap-4">
                 <Label htmlFor="email_address" className="w-32 text-right shrink-0">Email Address</Label>
                 <div className="flex-1">
@@ -294,52 +342,6 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                     onChange={e => handleFieldChange('email_address', e.target.value)}
                     placeholder="Enter email address..." 
                   />
-                </div>
-              </div>
-
-              {/* Reports To */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="reports_to" className="w-32 text-right shrink-0">Reports To *</Label>
-                <div className="flex-1">
-                  <Select 
-                    value={formData.reports_to} 
-                    onValueChange={value => handleFieldChange('reports_to', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NA">NA</SelectItem>
-                      {[...roles].sort().map(role => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Assistant */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="assistant" className="w-32 text-right shrink-0">Assistant *</Label>
-                <div className="flex-1">
-                  <Select 
-                    value={formData.assistant} 
-                    onValueChange={value => handleFieldChange('assistant', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NA">NA</SelectItem>
-                      {[...roles].sort().map(role => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
             </div>
