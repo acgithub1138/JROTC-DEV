@@ -367,6 +367,7 @@ export const CPCompetitionRecordPage = () => {
                     <Input
                       type="date"
                       value={formData.end_date}
+                      onChange={(e) => updateFormData('end_date', e.target.value)}
                       required
                       disabled={isViewMode}
                     />
