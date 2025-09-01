@@ -251,7 +251,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Name *</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Name *</FormLabel>
                       <div className="flex-1">
                         <FormControl>
                           <Input placeholder="Enter contact name" {...field} />
@@ -267,7 +267,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Type</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Type</FormLabel>
                       <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -296,7 +296,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Phone</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Phone</FormLabel>
                       <div className="flex-1">
                         <FormControl>
                           <Input placeholder="Phone number" {...field} />
@@ -312,7 +312,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Email</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Email</FormLabel>
                       <div className="flex-1">
                         <FormControl>
                           <Input type="email" placeholder="Email address" {...field} />
@@ -331,7 +331,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="cadet_id"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Cadet</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Cadet</FormLabel>
                       <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -359,7 +359,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Status</FormLabel>
+                      <FormLabel className="w-8 text-left shrink-0">Status</FormLabel>
                       <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -388,7 +388,7 @@ export const ContactRecordPage: React.FC = () => {
                     name="type_other"
                     render={({ field }) => (
                       <FormItem className="flex items-center gap-2">
-                        <FormLabel className="w-16 text-left shrink-0">Other</FormLabel>
+                        <FormLabel className="w-8 text-left shrink-0">Other</FormLabel>
                         <div className="flex-1">
                           <FormControl>
                             <Input placeholder="Specify other type" {...field} />
@@ -408,7 +408,7 @@ export const ContactRecordPage: React.FC = () => {
                 name="notes"
                 render={({ field }) => (
                   <FormItem className="flex items-start gap-2">
-                    <FormLabel className="w-16 text-left shrink-0 pt-2">Notes</FormLabel>
+                    <FormLabel className="w-8 text-left shrink-0 pt-2">Notes</FormLabel>
                     <div className="flex-1">
                       <FormControl>
                         <Textarea 
