@@ -215,6 +215,27 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 - Provides better user experience on both desktop and mobile devices
 - Maintains consistency with modern web application patterns
 
+### 17. URL Parameter Extraction in Complex Routes
+**Issue**: When converting modals to pages within complex route structures (like `/app/module/entity/{id}/subpage`), standard `useParams` may not capture all required parameters correctly.
+**Solution**: Use the splat parameter (`*`) in `useParams` and extract the needed parameters manually from the route path.
+
+**Implementation**:
+```typescript
+// Instead of expecting competitionId to be directly available
+const { competitionId } = useParams<{ competitionId: string }>();
+
+// Use splat parameter and extract manually for complex routes
+const { '*': splat } = useParams();
+const competitionId = splat?.split('/')[2]; // competition-details/{competitionId}/resources_record
+```
+
+**Key Points**:
+- Complex nested routes may not have all parameters directly available via `useParams`
+- The splat parameter (`*`) captures the entire remaining path after the base route
+- Split the splat path to extract specific segments based on known route structure
+- Add debug logging during development to verify parameter extraction
+- This is especially common in layouts that handle multiple sub-routes
+
 ## Best Practices Summary
 
 1. **Always show loading states** when fetching data for edit/view modes
@@ -233,3 +254,4 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 14. **Test across devices** and screen sizes
 15. **Use consistent form field layout** with right-aligned labels in fixed-width columns for professional appearance
 16. **Place action buttons in top right corner** for better accessibility and user experience - users don't need to scroll to save their work
+17. **Use splat parameter extraction** for complex nested routes where standard `useParams` doesn't capture all required parameters
