@@ -54,13 +54,12 @@ interface FormData {
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Extract competition ID from pathname since route isn't parameterized
   const competitionId = React.useMemo(() => {
     const match = location.pathname.match(/\/competition-details\/([^\/]+)\/events_record/);
     return match?.[1] || null;
   }, [location.pathname]);
-  
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || 'create';
@@ -140,7 +139,7 @@ export const CompetitionEventRecord: React.FC = () => {
   useEffect(() => {
     if (existingEvent && (isEditMode || isViewMode) && eventTypes.length > 0) {
       const convertedData = convertEventToFormData(existingEvent);
-      
+
       // Fetch score sheets first for proper template loading, then set form data
       if (convertedData.event && competitionId) {
         const loadData = async () => {
@@ -527,28 +526,19 @@ export const CompetitionEventRecord: React.FC = () => {
           <h1 className="text-2xl font-bold">{pageTitle}</h1>
         </div>
         <div className="flex items-center gap-2">
-          {canEditForm && (
-            <>
+          {canEditForm && <>
               <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
                 Cancel
               </Button>
-              {isEditMode && canDelete && (
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
+              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
                   <Trash2 className="h-4 w-4" />
                   Delete Event
-                </Button>
-              )}
-              <Button 
-                type="submit" 
-                form="event-form"
-                disabled={isSaving} 
-                className="flex items-center gap-2"
-              >
+                </Button>}
+              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center gap-2">
                 <Save className="h-4 w-4" />
                 {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save Changes'}
               </Button>
-            </>
-          )}
+            </>}
 
         </div>
       </div>
@@ -617,21 +607,17 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label className="text-right">Judges</Label>
-                <MultiSelectJudges
-                  judges={judges}
-                  selectedJudgeIds={formData.judges}
-                  onChange={(judgeIds) => setFormData(prev => ({ ...prev, judges: judgeIds }))}
-                  disabled={isViewMode}
-                />
+                <MultiSelectJudges judges={judges} selectedJudgeIds={formData.judges} onChange={judgeIds => setFormData(prev => ({
+                ...prev,
+                judges: judgeIds
+              }))} disabled={isViewMode} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label className="text-right">Resources</Label>
-                <MultiSelectResources
-                  resources={schoolUsers}
-                  selectedResourceIds={formData.resources}
-                  onChange={(resourceIds) => setFormData(prev => ({ ...prev, resources: resourceIds }))}
-                  disabled={isViewMode}
-                />
+                <MultiSelectResources resources={schoolUsers} selectedResourceIds={formData.resources} onChange={resourceIds => setFormData(prev => ({
+                ...prev,
+                resources: resourceIds
+              }))} disabled={isViewMode} />
               </div>
             </div>
 
@@ -720,21 +706,21 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label></Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-center">
                   <Label>Lunch Start Time</Label>
                 </div>
                 <div>
                   <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_hour: value
-                  }))} disabled={isViewMode}>
+                  ...prev,
+                  lunch_start_hour: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                         {i.toString().padStart(2, '0')}
                       </SelectItem>)}
                     </SelectContent>
@@ -742,9 +728,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_minute: value
-                  }))} disabled={isViewMode}>
+                  ...prev,
+                  lunch_start_minute: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -763,21 +749,21 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label></Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-center">
                   <Label>Lunch End Time</Label>
                 </div>
                 <div>
                   <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_hour: value
-                  }))} disabled={isViewMode}>
+                  ...prev,
+                  lunch_end_hour: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                         {i.toString().padStart(2, '0')}
                       </SelectItem>)}
                     </SelectContent>
@@ -785,9 +771,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_minute: value
-                  }))} disabled={isViewMode}>
+                  ...prev,
+                  lunch_end_minute: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
