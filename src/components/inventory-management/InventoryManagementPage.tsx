@@ -47,19 +47,19 @@ const InventoryManagementPage = () => {
     useInventoryItems();
 
   const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
-    useInventoryFilters(inventoryItems);
+    useInventoryFilters(inventoryItems || []);
 
   const itemsPerPage = 10;
-  const paginatedItems = getPaginatedItems(filteredItems, currentPage);
-  const totalPages = getTotalPages(filteredItems.length);
+  const paginatedItems = getPaginatedItems(filteredItems || [], currentPage);
+  const totalPages = getTotalPages((filteredItems || []).length);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   // Calculate stock counts
-  const inStockCount = inventoryItems.filter(item => (item.qty_available || 0) > 0).length;
-  const outOfStockCount = inventoryItems.filter(item => (item.qty_available || 0) === 0).length;
+  const inStockCount = (inventoryItems || []).filter(item => (item.qty_available || 0) > 0).length;
+  const outOfStockCount = (inventoryItems || []).filter(item => (item.qty_available || 0) === 0).length;
 
   // Handle navigation for create/edit
   const handleCreateNew = () => {
@@ -116,7 +116,8 @@ const InventoryManagementPage = () => {
   };
 
   const handleExport = () => {
-    if (!filteredItems.length) {
+    const safeFilteredItems = filteredItems || [];
+    if (!safeFilteredItems.length) {
       toast({
         title: "No Data",
         description: "No inventory items to export",
@@ -125,7 +126,7 @@ const InventoryManagementPage = () => {
       return;
     }
     const headers = ['Item ID', 'Item', 'Category', 'Sub Category', 'Size', 'Gender', 'Total Qty', 'Issued Qty', 'Available Qty', 'Stock Number', 'Unit'];
-    const csvContent = [headers.join(','), ...filteredItems.map(item => [item.item_id || '', item.item || '', item.category || '', item.sub_category || '', item.size || '', item.gender || '', item.qty_total || 0, item.qty_issued || 0, item.qty_available || 0, item.stock_number || '', item.unit_of_measure || ''].join(','))].join('\n');
+    const csvContent = [headers.join(','), ...safeFilteredItems.map(item => [item.item_id || '', item.item || '', item.category || '', item.sub_category || '', item.size || '', item.gender || '', item.qty_total || 0, item.qty_issued || 0, item.qty_available || 0, item.stock_number || '', item.unit_of_measure || ''].join(','))].join('\n');
     const blob = new Blob([csvContent], {
       type: 'text/csv'
     });
@@ -199,7 +200,7 @@ const InventoryManagementPage = () => {
       <TablePagination 
         currentPage={currentPage} 
         totalPages={totalPages} 
-        totalItems={filteredItems.length} 
+        totalItems={(filteredItems || []).length} 
         onPageChange={handlePageChange} 
       />
 
