@@ -14,6 +14,7 @@ import { useInventoryTablePermissions } from '@/hooks/useOptimizedInventoryPermi
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
 import { ViewInventoryItemDialog } from './ViewInventoryItemDialog';
+import { useNavigate } from 'react-router-dom';
 import type { Tables } from '@/integrations/supabase/types';
 type InventoryItem = Tables<'inventory_items'>;
 interface InventoryTableProps {
@@ -42,6 +43,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     field: 'qty_total' | 'qty_issued';
   } | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
+  const navigate = useNavigate();
   const {
     getPaddingClass
   } = useTableSettings();
@@ -185,11 +187,11 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                <TableCell className={getPaddingClass()}>
                 <Checkbox checked={selectedItems.includes(item.id)} onCheckedChange={checked => handleSelectItem(item.id, !!checked)} />
               </TableCell>
-                 {isColumnVisible('item_id') && <TableCell className={`font-medium ${getPaddingClass()}`}>
-                     <button onClick={() => handleView(item)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
-                       {item.item_id}
-                     </button>
-                   </TableCell>}
+                  {isColumnVisible('item_id') && <TableCell className={`font-medium ${getPaddingClass()}`}>
+                      <button onClick={() => navigate(`/app/cadets/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                        {item.item_id}
+                      </button>
+                    </TableCell>}
                {isColumnVisible('item') && <TableCell className={getPaddingClass()}>{item.item}</TableCell>}
                {isColumnVisible('category') && <TableCell className={getPaddingClass()}>{item.category}</TableCell>}
                {isColumnVisible('sub_category') && <TableCell className={getPaddingClass()}>{item.sub_category}</TableCell>}
