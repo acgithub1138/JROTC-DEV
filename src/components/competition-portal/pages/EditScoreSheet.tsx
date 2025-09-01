@@ -96,23 +96,6 @@ export const EditScoreSheet: React.FC = () => {
       if (data.total_points) {
         setTotalPoints(Number(data.total_points));
       }
-
-      // Find and set the template
-      if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet) && 'template_id' in data.score_sheet) {
-        const scoreSheet = data.score_sheet as { template_id?: string };
-        if (scoreSheet.template_id) {
-          const template = templates.find(t => t.id === scoreSheet.template_id);
-          if (template) {
-            setSelectedTemplate(template);
-          }
-        }
-      } else if (data.event) {
-        // Try to find template by event type
-        const template = templates.find(t => t.event === data.event);
-        if (template) {
-          setSelectedTemplate(template);
-        }
-      }
     } catch (err: any) {
       setError(err.message || 'Failed to load score sheet');
     } finally {
@@ -122,23 +105,45 @@ export const EditScoreSheet: React.FC = () => {
 
   useEffect(() => {
     fetchEvent();
-  }, [eventId, competitionId, templates]);
+  }, [eventId, competitionId]);
 
-  const handleScoreChange = (newScores: Record<string, any>, newTotalPoints: number) => {
+  // Separate effect to handle template loading when templates change
+  useEffect(() => {
+    if (event && templates.length > 0 && !selectedTemplate) {
+      // Find and set the template
+      if (event.score_sheet && typeof event.score_sheet === 'object' && !Array.isArray(event.score_sheet) && 'template_id' in event.score_sheet) {
+        const scoreSheet = event.score_sheet as { template_id?: string };
+        if (scoreSheet.template_id) {
+          const template = templates.find(t => t.id === scoreSheet.template_id);
+          if (template) {
+            setSelectedTemplate(template);
+          }
+        }
+      } else if (event.event) {
+        // Try to find template by event type
+        const template = templates.find(t => t.event === event.event);
+        if (template) {
+          setSelectedTemplate(template);
+        }
+      }
+    }
+  }, [event, templates]);
+
+  const handleScoreChange = React.useCallback((newScores: Record<string, any>, newTotalPoints: number) => {
     setScores(newScores);
     setTotalPoints(newTotalPoints);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const handleJudgeNumberChange = (value: string) => {
+  const handleJudgeNumberChange = React.useCallback((value: string) => {
     setJudgeNumber(value);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const handleTeamNameChange = (value: string) => {
+  const handleTeamNameChange = React.useCallback((value: string) => {
     setTeamName(value);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
   const handleSave = async () => {
     if (!event) return;
