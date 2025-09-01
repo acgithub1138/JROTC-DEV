@@ -150,26 +150,6 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 - Ensure proper touch interactions
 - Use responsive breakpoints
 
-### 15. Form Field Layout and Label Positioning
-**Issue**: Inconsistent form layouts with labels positioned incorrectly, creating too much or too little space between labels and fields.
-**Solution**: Use a consistent grid-based layout with right-aligned labels in a fixed-width column.
-
-**Implementation**:
-```tsx
-// Correct pattern - consistent label-field layout
-<div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-  <Label htmlFor="fieldName" className="text-right">Field Label *</Label>
-  <Input id="fieldName" value={value} onChange={onChange} />
-</div>
-```
-
-**Key Points**:
-- Use fixed width for label column (140px works well for most labels)
-- Right-align labels with `text-right` class to position them closer to fields
-- Apply consistently across all form fields in the same component
-- Use `gap-4` for appropriate spacing between label and field columns
-- This creates professional, aligned forms that match user expectations
-
 ## Best Practices Summary
 
 1. **Always show loading states** when fetching data for edit/view modes
@@ -186,4 +166,3 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 12. **Place specific routes before general routes** in matching logic
 13. **Convert to autonomous page pattern** from controlled modal pattern
 14. **Test across devices** and screen sizes
-15. **Use consistent form field layout** with right-aligned labels in fixed-width columns for professional appearance
