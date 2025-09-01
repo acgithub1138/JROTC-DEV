@@ -418,7 +418,7 @@ export const CPCompetitionRecordPage = () => {
             {/* Entry Fee and Max Participants */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">Entry Fee</Label>
-              <div className="col-span-3">
+              <div className="col-span-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Input
