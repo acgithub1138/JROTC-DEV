@@ -407,7 +407,7 @@ const handleEditSubmit = async (data: any) => {
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
                         {canManage ? (
-                          <button onClick={() => navigate(`/mobile/competition-portal/manage/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+                          <button onClick={() => navigate(`/app/competition-portal/manage/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                             {competition.name}
                           </button>
                         ) : (
@@ -513,7 +513,7 @@ const handleEditSubmit = async (data: any) => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => navigate(`/mobile/competition-portal/manage/${competition.id}`)}>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => navigate(`/app/competition-portal/manage/${competition.id}`)}>
               <GitCompareArrows className="w-3 h-3" />
             </Button>
           </TooltipTrigger>
