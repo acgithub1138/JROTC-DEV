@@ -195,7 +195,7 @@ const handleViewCompetition = (competition: Competition) => {
 };
 
 const handleOpenEdit = (competition: Competition) => {
-  navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}`);
+  navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}&mode=edit`);
 };
 
 const handleEditSubmit = async (data: any) => {
@@ -407,7 +407,7 @@ const handleEditSubmit = async (data: any) => {
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
                         {canManage ? (
-                          <button onClick={() => navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+                          <button onClick={() => navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}&mode=edit`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                             {competition.name}
                           </button>
                         ) : (
