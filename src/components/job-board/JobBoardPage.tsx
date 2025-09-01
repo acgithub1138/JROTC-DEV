@@ -61,7 +61,7 @@ const JobBoardPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
-          {canCreate && <Button onClick={() => navigate('/app/inventory/inventory_record?mode=create')}>
+          {canCreate && <Button onClick={() => navigate('/app/job-board/coc_record?mode=create')}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
             </Button>}
@@ -87,7 +87,7 @@ const JobBoardPage = () => {
               <TabsContent value="table" className="mt-4">
                 <JobBoardTable 
                   jobs={filteredJobs} 
-                  onEditJob={canUpdate ? (job) => navigate(`/app/inventory/inventory_record?mode=edit&id=${job.id}`) : undefined} 
+                  onEditJob={canUpdate ? (job) => navigate(`/app/job-board/coc_record?mode=edit&id=${job.id}`) : undefined} 
                   onDeleteJob={canDelete ? setDeletingJob : undefined} 
                   readOnly={!canUpdate && !canDelete} 
                 />
@@ -97,7 +97,7 @@ const JobBoardPage = () => {
                 <JobBoardChart 
                   jobs={filteredJobs} 
                   onRefresh={handleRefresh} 
-                  onUpdateJob={canUpdate ? (jobId, updates) => navigate(`/app/inventory/inventory_record?mode=edit&id=${jobId}`) : undefined} 
+                  onUpdateJob={canUpdate ? (jobId, updates) => navigate(`/app/job-board/coc_record?mode=edit&id=${jobId}`) : undefined} 
                   readOnly={!canUpdate} 
                 />
               </TabsContent>

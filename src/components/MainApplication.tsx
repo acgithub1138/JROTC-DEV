@@ -218,7 +218,7 @@ const MainApplication = () => {
           <Route path="cadets/inspection_edit" element={<InspectionEditPage />} />
           <Route path="cadets/service_record" element={<CommunityServiceCreatePage />} />
           <Route path="cadets/service_record_edit/:id" element={<CommunityServiceEditPage />} />
-            <Route path="inventory/inventory_record" element={<ChainOfCommandRecordPage />} />
+            <Route path="job-board/coc_record" element={<ChainOfCommandRecordPage />} />
             <Route path="teams/team_record" element={<TeamRecordPage />} />
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
