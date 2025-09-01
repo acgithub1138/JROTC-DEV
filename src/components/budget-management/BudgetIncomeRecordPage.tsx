@@ -211,8 +211,8 @@ export const BudgetIncomeRecordPage: React.FC = () => {
           description: "Income record has been created successfully."
         });
         
-        // Navigate to the view page
-        navigate(`/app/budget/income_record?mode=view&id=${newRecord.id}`);
+        // Navigate back to budget overview
+        navigate('/app/budget');
       } else if (currentMode === 'edit' && recordId) {
         updateTransaction(recordId, budgetData);
         toast({

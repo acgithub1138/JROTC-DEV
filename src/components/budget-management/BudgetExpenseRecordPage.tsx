@@ -220,8 +220,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
           description: "Expense record has been created successfully."
         });
         
-        // Navigate to the view page
-        navigate(`/app/budget/expense_record?mode=view&id=${newRecord.id}`);
+        // Navigate back to budget overview
+        navigate('/app/budget');
       } else if (currentMode === 'edit' && recordId) {
         updateTransaction(recordId, budgetData);
         toast({
