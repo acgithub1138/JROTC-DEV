@@ -234,12 +234,40 @@ export const CPCompetitionRecordPage = () => {
         }
       }
       
+      // Validate required date/time fields
+      if (!formData.start_date || !formData.start_time_hour || !formData.start_time_minute) {
+        toast.error('Start date and time are required');
+        return;
+      }
+      
+      if (!formData.end_date || !formData.end_time_hour || !formData.end_time_minute) {
+        toast.error('End date and time are required');
+        return;
+      }
+
       // Combine date and time fields into datetime strings
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      
+      // Validate created dates
+      if (isNaN(startDateTime.getTime())) {
+        toast.error('Invalid start date/time');
+        return;
+      }
+      
+      if (isNaN(endDateTime.getTime())) {
+        toast.error('Invalid end date/time');
+        return;
+      }
+      
       const registrationDeadline = formData.registration_deadline_date 
         ? new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_hour}:${formData.registration_deadline_minute}:00`)
         : null;
+        
+      if (registrationDeadline && isNaN(registrationDeadline.getTime())) {
+        toast.error('Invalid registration deadline date/time');
+        return;
+      }
 
       // Submit data that matches cp_competitions schema
       const submissionData = {
@@ -396,12 +424,30 @@ export const CPCompetitionRecordPage = () => {
                   </div>
                   <div>
                     <Select value={formData.start_time_hour} onValueChange={(value) => updateFormData('start_time_hour', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Select value={formData.start_time_minute} onValueChange={(value) => updateFormData('start_time_minute', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -424,12 +470,30 @@ export const CPCompetitionRecordPage = () => {
                   </div>
                   <div>
                     <Select value={formData.end_time_hour} onValueChange={(value) => updateFormData('end_time_hour', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Select value={formData.end_time_minute} onValueChange={(value) => updateFormData('end_time_minute', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -510,12 +574,30 @@ export const CPCompetitionRecordPage = () => {
                   </div>
                   <div>
                     <Select value={formData.registration_deadline_hour} onValueChange={(value) => updateFormData('registration_deadline_hour', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Select value={formData.registration_deadline_minute} onValueChange={(value) => updateFormData('registration_deadline_minute', value)} disabled={isViewMode}>
-...
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
