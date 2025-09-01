@@ -231,7 +231,7 @@ export const ScheduleEditRecord = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(-1);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`);
     }
   };
 
@@ -239,7 +239,7 @@ export const ScheduleEditRecord = () => {
     setLocalSchedule(initialSchedule);
     resetChanges();
     setShowUnsavedDialog(false);
-    navigate(-1);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`);
   };
 
   // Get available schools for a specific time slot
