@@ -20,13 +20,13 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
-  competition_event_types?: { name: string } | null;
+  competition_event_types?: {
+    name: string;
+  } | null;
 };
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
-
 interface FormData {
   event: string;
   location: string;
@@ -48,32 +48,45 @@ interface FormData {
   judges: string[];
   resources: string[];
 }
-
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
-  const { competitionId } = useParams();
+  const {
+    competitionId
+  } = useParams();
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || 'create';
-
   const [existingEvent, setExistingEvent] = useState<CompEvent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-
-  const [judges, setJudges] = useState<Array<{ id: string; name: string }>>([]);
+  const [judges, setJudges] = useState<Array<{
+    id: string;
+    name: string;
+  }>>([]);
   const [scoreSheets, setScoreSheets] = useState<Array<{
     id: string;
     template_name: string;
     jrotc_program: string;
   }>>([]);
-
-  const { users: schoolUsers, isLoading: usersLoading } = useSchoolUsers(true);
-  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
-  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
-  const { canCreate, canEdit, canDelete } = useCompetitionEventsPermissions();
-
+  const {
+    users: schoolUsers,
+    isLoading: usersLoading
+  } = useSchoolUsers(true);
+  const {
+    timezone,
+    isLoading: timezoneLoading
+  } = useSchoolTimezone();
+  const {
+    eventTypes,
+    isLoading: eventTypesLoading
+  } = useCompetitionEventTypes();
+  const {
+    canCreate,
+    canEdit,
+    canDelete
+  } = useCompetitionEventsPermissions();
   const initialFormData: FormData = {
     event: '',
     location: '',
@@ -95,15 +108,15 @@ export const CompetitionEventRecord: React.FC = () => {
     judges: [],
     resources: []
   };
-
   const [formData, setFormData] = useState<FormData>(initialFormData);
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: mode === 'create' ? initialFormData : existingEvent ? convertEventToFormData(existingEvent) : initialFormData,
     currentData: formData,
     enabled: mode !== 'view'
   });
-
   const isEditMode = mode === 'edit';
   const isViewMode = mode === 'view';
   const isCreateMode = mode === 'create';
@@ -140,24 +153,18 @@ export const CompetitionEventRecord: React.FC = () => {
 
   // Calculate max participants when interval is set
   useEffect(() => {
-    if (formData.interval && 
-        formData.start_date && formData.start_hour && formData.start_minute &&
-        formData.end_hour && formData.end_minute) {
-      
+    if (formData.interval && formData.start_date && formData.start_hour && formData.start_minute && formData.end_hour && formData.end_minute) {
       const startTime = new Date(`${formData.start_date}T${formData.start_hour.padStart(2, '0')}:${formData.start_minute.padStart(2, '0')}:00`);
       const endTime = new Date(`${formData.start_date}T${formData.end_hour.padStart(2, '0')}:${formData.end_minute.padStart(2, '0')}:00`);
-      
       let totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-      
+
       // Subtract lunch break if defined
-      if (formData.lunch_start_hour && formData.lunch_start_minute && 
-          formData.lunch_end_hour && formData.lunch_end_minute) {
+      if (formData.lunch_start_hour && formData.lunch_start_minute && formData.lunch_end_hour && formData.lunch_end_minute) {
         const lunchStart = new Date(`${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`);
         const lunchEnd = new Date(`${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`);
         const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
         totalMinutes -= lunchMinutes;
       }
-      
       const interval = parseInt(formData.interval);
       if (interval > 0 && totalMinutes > 0) {
         const maxParticipants = Math.floor(totalMinutes / interval);
@@ -167,10 +174,7 @@ export const CompetitionEventRecord: React.FC = () => {
         }));
       }
     }
-  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, 
-      formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute,
-      formData.lunch_end_hour, formData.lunch_end_minute]);
-
+  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute]);
   function convertEventToFormData(event: CompEvent): FormData {
     // Convert UTC times to school timezone Date objects
     const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
@@ -185,7 +189,6 @@ export const CompetitionEventRecord: React.FC = () => {
     } else if (event.event) {
       matchingEventType = eventTypes.find(et => et.id === event.event);
     }
-
     return {
       event: matchingEventType?.id || '',
       location: event.location || '',
@@ -208,22 +211,17 @@ export const CompetitionEventRecord: React.FC = () => {
       resources: event.resources || []
     };
   }
-
   const fetchEventData = async () => {
     if (!eventId || !competitionId) return;
-
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('cp_comp_events')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_events').select(`
           *,
           competition_event_types:event(name)
-        `)
-        .eq('id', eventId)
-        .eq('competition_id', competitionId)
-        .single();
-
+        `).eq('id', eventId).eq('competition_id', competitionId).single();
       if (error) throw error;
       setExistingEvent(data);
     } catch (error) {
@@ -234,15 +232,14 @@ export const CompetitionEventRecord: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const fetchJudges = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cp_judges')
-        .select('id, name')
-        .eq('available', true)
-        .order('name', { ascending: true });
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_judges').select('id, name').eq('available', true).order('name', {
+        ascending: true
+      });
       if (error) throw error;
       setJudges(data || []);
     } catch (error) {
@@ -250,23 +247,17 @@ export const CompetitionEventRecord: React.FC = () => {
       toast.error('Failed to load judges');
     }
   };
-
   const fetchCompetitionDate = async () => {
     if (!competitionId) return;
-
     try {
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('start_date, end_date')
-        .eq('id', competitionId)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
       if (error) throw error;
-
       if (data?.start_date && !timezoneLoading) {
         const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
         const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
-        
         setFormData(prev => ({
           ...prev,
           start_date: startDate,
@@ -277,31 +268,24 @@ export const CompetitionEventRecord: React.FC = () => {
       console.error('Error fetching competition date:', error);
     }
   };
-
   const fetchFilteredScoreSheets = async () => {
     if (!formData.event || !competitionId) {
       setScoreSheets([]);
       return;
     }
-
     try {
-      const { data: competitionData, error: competitionError } = await supabase
-        .from('cp_competitions')
-        .select('program')
-        .eq('id', competitionId)
-        .maybeSingle();
-
+      const {
+        data: competitionData,
+        error: competitionError
+      } = await supabase.from('cp_competitions').select('program').eq('id', competitionId).maybeSingle();
       if (competitionError) throw competitionError;
-
       if (competitionData?.program) {
-        const { data, error } = await supabase
-          .from('competition_templates')
-          .select('id, template_name, jrotc_program')
-          .eq('is_active', true)
-          .eq('jrotc_program', competitionData.program)
-          .eq('event', formData.event)
-          .order('template_name', { ascending: true });
-        
+        const {
+          data,
+          error
+        } = await supabase.from('competition_templates').select('id, template_name, jrotc_program').eq('is_active', true).eq('jrotc_program', competitionData.program).eq('event', formData.event).order('template_name', {
+          ascending: true
+        });
         if (error) throw error;
         setScoreSheets(data || []);
       } else {
@@ -312,19 +296,15 @@ export const CompetitionEventRecord: React.FC = () => {
       toast.error('Failed to load score sheets');
     }
   };
-
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
     if (!date || !hour || !minute || !timezone) return null;
-    
     const schoolDateTime = new Date(`${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`);
     const utcDateTime = convertFromSchoolTimezone(schoolDateTime, timezone);
-    
     return utcDateTime.toISOString();
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation for mandatory fields
     if (!formData.event) {
       toast.error('Please select an event');
@@ -366,7 +346,6 @@ export const CompetitionEventRecord: React.FC = () => {
     // Validation for date/time ordering
     const startDateTime = new Date(`${formData.start_date}T${formData.start_hour.padStart(2, '0')}:${formData.start_minute.padStart(2, '0')}:00`);
     const endDateTime = new Date(`${formData.end_date}T${formData.end_hour.padStart(2, '0')}:${formData.end_minute.padStart(2, '0')}:00`);
-    
     if (endDateTime <= startDateTime) {
       toast.error('End date & time must be after start date & time');
       return;
@@ -376,30 +355,25 @@ export const CompetitionEventRecord: React.FC = () => {
     if (formData.lunch_start_hour && formData.lunch_start_minute && formData.lunch_end_hour && formData.lunch_end_minute) {
       const lunchStartDateTime = new Date(`${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`);
       const lunchEndDateTime = new Date(`${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`);
-      
       if (lunchStartDateTime <= startDateTime) {
         toast.error('Lunch break start must be after event start time');
         return;
       }
-      
       if (lunchEndDateTime >= endDateTime) {
         toast.error('Lunch break end must be before event end time');
         return;
       }
-      
       if (lunchEndDateTime <= lunchStartDateTime) {
         toast.error('Lunch break end must be after lunch break start');
         return;
       }
     }
-
     setIsSaving(true);
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
       const lunch_start_time = combineDateTime(formData.start_date, formData.lunch_start_hour, formData.lunch_start_minute);
       const lunch_end_time = combineDateTime(formData.start_date, formData.lunch_end_hour, formData.lunch_end_minute);
-
       const eventData = {
         competition_id: competitionId,
         event: formData.event,
@@ -416,28 +390,24 @@ export const CompetitionEventRecord: React.FC = () => {
         judges: formData.judges,
         resources: formData.resources
       };
-
       if (isCreateMode) {
-        const { error } = await supabase
-          .from('cp_comp_events')
-          .insert({
-            ...eventData,
-            school_id: undefined, // Let database handle this via auth context
-            created_by: undefined // Let database handle this via auth context
-          });
-        
+        const {
+          error
+        } = await supabase.from('cp_comp_events').insert({
+          ...eventData,
+          school_id: undefined,
+          // Let database handle this via auth context
+          created_by: undefined // Let database handle this via auth context
+        });
         if (error) throw error;
         toast.success('Event created successfully');
       } else if (isEditMode && eventId) {
-        const { error } = await supabase
-          .from('cp_comp_events')
-          .update(eventData)
-          .eq('id', eventId);
-        
+        const {
+          error
+        } = await supabase.from('cp_comp_events').update(eventData).eq('id', eventId);
         if (error) throw error;
         toast.success('Event updated successfully');
       }
-
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}`);
     } catch (error) {
@@ -447,19 +417,14 @@ export const CompetitionEventRecord: React.FC = () => {
       setIsSaving(false);
     }
   };
-
   const handleDelete = async () => {
     if (!eventId) return;
-
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('cp_comp_events')
-        .delete()
-        .eq('id', eventId);
-
+      const {
+        error
+      } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
       if (error) throw error;
-      
       toast.success('Event deleted successfully');
       navigate(`/app/competition-portal/competition-details/${competitionId}`);
     } catch (error) {
@@ -470,7 +435,6 @@ export const CompetitionEventRecord: React.FC = () => {
       setShowDeleteDialog(false);
     }
   };
-
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -478,7 +442,6 @@ export const CompetitionEventRecord: React.FC = () => {
       navigate(`/app/competition-portal/competition-details/${competitionId}`);
     }
   };
-
   const addJudge = (judgeId: string) => {
     if (!formData.judges.includes(judgeId)) {
       setFormData(prev => ({
@@ -487,14 +450,12 @@ export const CompetitionEventRecord: React.FC = () => {
       }));
     }
   };
-
   const removeJudge = (judgeId: string) => {
     setFormData(prev => ({
       ...prev,
       judges: prev.judges.filter(id => id !== judgeId)
     }));
   };
-
   const addResource = (resourceId: string) => {
     if (!formData.resources.includes(resourceId)) {
       setFormData(prev => ({
@@ -503,74 +464,47 @@ export const CompetitionEventRecord: React.FC = () => {
       }));
     }
   };
-
   const removeResource = (resourceId: string) => {
     setFormData(prev => ({
       ...prev,
       resources: prev.resources.filter(id => id !== resourceId)
     }));
   };
-
   const getSelectedJudges = () => {
     return judges.filter(judge => formData.judges.includes(judge.id));
   };
-
   const getAvailableJudges = () => {
     return judges.filter(judge => !formData.judges.includes(judge.id));
   };
-
   const getSelectedResources = () => {
     return schoolUsers.filter(user => formData.resources.includes(user.id));
   };
-
   const getAvailableResources = () => {
-    return schoolUsers
-      .filter(user => !formData.resources.includes(user.id))
-      .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
+    return schoolUsers.filter(user => !formData.resources.includes(user.id)).sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
   };
 
   // Show loading state while waiting for data
   if ((isEditMode || isViewMode) && eventId && !existingEvent && isLoading) {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="h-8 bg-muted rounded animate-pulse" />
         <div className="h-64 bg-muted rounded animate-pulse" />
-      </div>
-    );
+      </div>;
   }
-
-  const pageTitle = isCreateMode ? 'Add Competition Event' : 
-                   isEditMode ? 'Edit Competition Event' :
-                   'View Competition Event';
-
-  const canEditForm = (isCreateMode && canCreate) || (isEditMode && canEdit);
-
-  return (
-    <div className="p-6 space-y-6">
+  const pageTitle = isCreateMode ? 'Add Competition Event' : isEditMode ? 'Edit Competition Event' : 'View Competition Event';
+  const canEditForm = isCreateMode && canCreate || isEditMode && canEdit;
+  return <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBack}
-            className="flex items-center gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
           <h1 className="text-2xl font-bold">{pageTitle}</h1>
         </div>
-        {isEditMode && canDelete && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            className="flex items-center gap-2"
-          >
+        {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
             Delete Event
-          </Button>
-        )}
+          </Button>}
       </div>
 
       <Card>
@@ -582,22 +516,17 @@ export const CompetitionEventRecord: React.FC = () => {
             {/* Event Selection */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="event" className="text-right">Event *</Label>
-              <Select 
-                value={formData.event} 
-                onValueChange={value => setFormData(prev => ({ ...prev, event: value }))}
-                disabled={isViewMode}
-              >
+              <Select value={formData.event} onValueChange={value => setFormData(prev => ({
+              ...prev,
+              event: value
+            }))} disabled={isViewMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select an event" />
                 </SelectTrigger>
                 <SelectContent>
-                  {eventTypes
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(eventType => (
-                      <SelectItem key={eventType.id} value={eventType.id}>
+                  {eventTypes.sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <SelectItem key={eventType.id} value={eventType.id}>
                         {eventType.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -605,14 +534,10 @@ export const CompetitionEventRecord: React.FC = () => {
             {/* Location */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="location" className="text-right">Location *</Label>
-              <Input 
-                id="location" 
-                value={formData.location} 
-                onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))} 
-                placeholder="Event location" 
-                disabled={isViewMode}
-                required 
-              />
+              <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
+              ...prev,
+              location: e.target.value
+            }))} placeholder="Event location" disabled={isViewMode} required />
             </div>
 
             {/* Start Date & Time */}
@@ -620,49 +545,50 @@ export const CompetitionEventRecord: React.FC = () => {
               <Label className="text-right">Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
-                  <Input 
-                    type="date" 
-                    value={formData.start_date} 
-                    onChange={e => {
-                      setFormData(prev => ({ ...prev, start_date: e.target.value }));
-                      if (e.target.value && !formData.end_date) {
-                        setFormData(prev => ({ ...prev, end_date: e.target.value }));
-                      }
-                    }} 
-                    disabled={isViewMode}
-                    required 
-                  />
+                  <Input type="date" value={formData.start_date} onChange={e => {
+                  setFormData(prev => ({
+                    ...prev,
+                    start_date: e.target.value
+                  }));
+                  if (e.target.value && !formData.end_date) {
+                    setFormData(prev => ({
+                      ...prev,
+                      end_date: e.target.value
+                    }));
+                  }
+                }} disabled={isViewMode} required />
                 </div>
                 <div>
-                  <Select 
-                    value={formData.start_hour} 
-                    onValueChange={value => {
-                      setFormData(prev => ({ ...prev, start_hour: value }));
-                      if (value && !formData.end_hour) {
-                        const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
-                        setFormData(prev => ({ ...prev, end_hour: nextHour > '23' ? '23' : nextHour }));
-                      }
-                    }}
-                    disabled={isViewMode}
-                  >
+                  <Select value={formData.start_hour} onValueChange={value => {
+                  setFormData(prev => ({
+                    ...prev,
+                    start_hour: value
+                  }));
+                  if (value && !formData.end_hour) {
+                    const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                    setFormData(prev => ({
+                      ...prev,
+                      end_hour: nextHour > '23' ? '23' : nextHour
+                    }));
+                  }
+                }} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Select 
-                    value={formData.start_minute} 
-                    onValueChange={value => setFormData(prev => ({ ...prev, start_minute: value }))}
-                    disabled={isViewMode}
-                  >
+                  <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  start_minute: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -682,38 +608,33 @@ export const CompetitionEventRecord: React.FC = () => {
               <Label className="text-right">End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
-                  <Input 
-                    type="date" 
-                    value={formData.end_date} 
-                    onChange={e => setFormData(prev => ({ ...prev, end_date: e.target.value }))} 
-                    disabled={isViewMode}
-                    required 
-                  />
+                  <Input type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
+                  ...prev,
+                  end_date: e.target.value
+                }))} disabled={isViewMode} required />
                 </div>
                 <div>
-                  <Select 
-                    value={formData.end_hour} 
-                    onValueChange={value => setFormData(prev => ({ ...prev, end_hour: value }))}
-                    disabled={isViewMode}
-                  >
+                  <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  end_hour: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Select 
-                    value={formData.end_minute} 
-                    onValueChange={value => setFormData(prev => ({ ...prev, end_minute: value }))}
-                    disabled={isViewMode}
-                  >
+                  <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  end_minute: value
+                }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -735,27 +656,25 @@ export const CompetitionEventRecord: React.FC = () => {
                 <div>
                   <Label className="text-sm text-muted-foreground mb-2 block">Start Time</Label>
                   <div className="flex gap-2">
-                    <Select 
-                      value={formData.lunch_start_hour} 
-                      onValueChange={value => setFormData(prev => ({ ...prev, lunch_start_hour: value }))}
-                      disabled={isViewMode}
-                    >
+                    <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    lunch_start_hour: value
+                  }))} disabled={isViewMode}>
                       <SelectTrigger>
                         <SelectValue placeholder="Hour" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {Array.from({
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <Select 
-                      value={formData.lunch_start_minute} 
-                      onValueChange={value => setFormData(prev => ({ ...prev, lunch_start_minute: value }))}
-                      disabled={isViewMode}
-                    >
+                    <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    lunch_start_minute: value
+                  }))} disabled={isViewMode}>
                       <SelectTrigger>
                         <SelectValue placeholder="Min" />
                       </SelectTrigger>
@@ -771,27 +690,25 @@ export const CompetitionEventRecord: React.FC = () => {
                 <div>
                   <Label className="text-sm text-muted-foreground mb-2 block">End Time</Label>
                   <div className="flex gap-2">
-                    <Select 
-                      value={formData.lunch_end_hour} 
-                      onValueChange={value => setFormData(prev => ({ ...prev, lunch_end_hour: value }))}
-                      disabled={isViewMode}
-                    >
+                    <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    lunch_end_hour: value
+                  }))} disabled={isViewMode}>
                       <SelectTrigger>
                         <SelectValue placeholder="Hour" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {Array.from({
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <Select 
-                      value={formData.lunch_end_minute} 
-                      onValueChange={value => setFormData(prev => ({ ...prev, lunch_end_minute: value }))}
-                      disabled={isViewMode}
-                    >
+                    <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    lunch_end_minute: value
+                  }))} disabled={isViewMode}>
                       <SelectTrigger>
                         <SelectValue placeholder="Min" />
                       </SelectTrigger>
@@ -811,62 +728,43 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
-                <Input 
-                  id="interval" 
-                  type="number" 
-                  value={formData.interval} 
-                  onChange={e => setFormData(prev => ({ ...prev, interval: e.target.value }))} 
-                  placeholder="Interval in minutes" 
-                  disabled={isViewMode}
-                  required 
-                />
+                <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
+                ...prev,
+                interval: e.target.value
+              }))} placeholder="Interval in minutes" disabled={isViewMode} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
-                <Input 
-                  id="max_participants" 
-                  type="number" 
-                  value={formData.max_participants} 
-                  onChange={e => setFormData(prev => ({ ...prev, max_participants: e.target.value }))} 
-                  placeholder="Maximum participants" 
-                  disabled={isViewMode}
-                  required 
-                />
+                <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
+                ...prev,
+                max_participants: e.target.value
+              }))} placeholder="Maximum participants" disabled={isViewMode} required />
               </div>
             </div>
 
             {/* Fee */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="fee" className="text-right">Fee *</Label>
-              <Input 
-                id="fee" 
-                type="number" 
-                step="0.01" 
-                value={formData.fee} 
-                onChange={e => setFormData(prev => ({ ...prev, fee: e.target.value }))} 
-                placeholder="Event fee" 
-                disabled={isViewMode}
-                required 
-              />
+              <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
+              ...prev,
+              fee: e.target.value
+            }))} placeholder="Event fee" disabled={isViewMode} required />
             </div>
 
             {/* Score Sheet */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
-              <Select 
-                value={formData.score_sheet} 
-                onValueChange={value => setFormData(prev => ({ ...prev, score_sheet: value }))}
-                disabled={isViewMode}
-              >
+              <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
+              ...prev,
+              score_sheet: value
+            }))} disabled={isViewMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a score template" />
                 </SelectTrigger>
                 <SelectContent>
-                  {scoreSheets.map(sheet => (
-                    <SelectItem key={sheet.id} value={sheet.id}>
+                  {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
                       {sheet.template_name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -874,117 +772,74 @@ export const CompetitionEventRecord: React.FC = () => {
             {/* Notes */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
               <Label htmlFor="notes" className="mt-2 text-right">Notes</Label>
-              <Textarea 
-                id="notes" 
-                value={formData.notes} 
-                onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))} 
-                placeholder="Additional notes about the event" 
-                disabled={isViewMode}
-                rows={3}
-              />
+              <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
+              ...prev,
+              notes: e.target.value
+            }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} />
             </div>
 
             {/* Judges */}
             <div className="space-y-4">
-              <Label className="font-medium text-right block">Judges</Label>
-              {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+              
+              {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                   <Label className="text-right">Add Judge</Label>
                   <Select onValueChange={addJudge}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a judge to add" />
                     </SelectTrigger>
                     <SelectContent>
-                      {getAvailableJudges().map(judge => (
-                        <SelectItem key={judge.id} value={judge.id}>
+                      {getAvailableJudges().map(judge => <SelectItem key={judge.id} value={judge.id}>
                           {judge.name}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
-              )}
-              {getSelectedJudges().length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {getSelectedJudges().map(judge => (
-                    <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
+                </div>}
+              {getSelectedJudges().length > 0 && <div className="flex flex-wrap gap-2">
+                  {getSelectedJudges().map(judge => <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
                       {judge.name}
-                      {!isViewMode && (
-                        <button 
-                          type="button" 
-                          onClick={() => removeJudge(judge.id)}
-                          className="ml-1 hover:text-destructive"
-                        >
+                      {!isViewMode && <button type="button" onClick={() => removeJudge(judge.id)} className="ml-1 hover:text-destructive">
                           ×
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                        </button>}
+                    </Badge>)}
+                </div>}
             </div>
 
             {/* Resources */}
             <div className="space-y-4">
-              <Label className="font-medium text-right block">Resources</Label>
-              {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+              
+              {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                   <Label className="text-right">Add Resource</Label>
                   <Select onValueChange={addResource}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a resource to add" />
                     </SelectTrigger>
                     <SelectContent>
-                      {getAvailableResources().map(user => (
-                        <SelectItem key={user.id} value={user.id}>
+                      {getAvailableResources().map(user => <SelectItem key={user.id} value={user.id}>
                           {user.last_name}, {user.first_name}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
-              )}
-              {getSelectedResources().length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {getSelectedResources().map(user => (
-                    <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
+                </div>}
+              {getSelectedResources().length > 0 && <div className="flex flex-wrap gap-2">
+                  {getSelectedResources().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
                       {user.last_name}, {user.first_name}
-                      {!isViewMode && (
-                        <button 
-                          type="button" 
-                          onClick={() => removeResource(user.id)}
-                          className="ml-1 hover:text-destructive"
-                        >
+                      {!isViewMode && <button type="button" onClick={() => removeResource(user.id)} className="ml-1 hover:text-destructive">
                           ×
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                        </button>}
+                    </Badge>)}
+                </div>}
             </div>
 
             {/* Form Actions */}
-            {canEditForm && (
-              <div className="flex justify-end gap-4 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={isSaving}
-                >
+            {canEditForm && <div className="flex justify-end gap-4 pt-6">
+                <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSaving}
-                  className="flex items-center gap-2"
-                >
+                <Button type="submit" disabled={isSaving} className="flex items-center gap-2">
                   <Save className="h-4 w-4" />
                   {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save Changes'}
                 </Button>
-              </div>
-            )}
+              </div>}
           </form>
         </CardContent>
       </Card>
@@ -1000,11 +855,7 @@ export const CompetitionEventRecord: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isSaving}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={isSaving} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {isSaving ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1012,15 +863,9 @@ export const CompetitionEventRecord: React.FC = () => {
       </AlertDialog>
 
       {/* Unsaved Changes Dialog */}
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={() => {
-          setShowUnsavedDialog(false);
-          navigate(`/app/competition-portal/competition-details/${competitionId}`);
-        }}
-        onCancel={() => setShowUnsavedDialog(false)}
-      />
-    </div>
-  );
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={() => {
+      setShowUnsavedDialog(false);
+      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+    }} onCancel={() => setShowUnsavedDialog(false)} />
+    </div>;
 };
