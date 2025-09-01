@@ -506,10 +506,30 @@ export const CompetitionEventRecord: React.FC = () => {
           </Button>
           <h1 className="text-2xl font-bold">{pageTitle}</h1>
         </div>
-        {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4" />
-            Delete Event
-          </Button>}
+        <div className="flex items-center gap-2">
+          {canEditForm && (
+            <>
+              <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                form="event-form"
+                disabled={isSaving} 
+                className="flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save Changes'}
+              </Button>
+            </>
+          )}
+          {isEditMode && canDelete && (
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Delete Event
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -517,7 +537,7 @@ export const CompetitionEventRecord: React.FC = () => {
           <CardTitle>{pageTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
@@ -836,16 +856,6 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
 
-            {/* Form Actions */}
-            {canEditForm && <div className="flex justify-end gap-4 pt-6">
-                <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSaving} className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save Changes'}
-                </Button>
-              </div>}
           </form>
         </CardContent>
       </Card>
