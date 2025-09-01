@@ -12,9 +12,9 @@ import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useAuth } from '@/contexts/AuthContext';
-import { ScheduleEditModal } from '../modals/ScheduleEditModal';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 interface CompetitionScheduleTabProps {
   competitionId: string;
   readOnly?: boolean;
@@ -30,6 +30,7 @@ export const CompetitionScheduleTab = ({
   readOnly = false,
   permissions
 }: CompetitionScheduleTabProps) => {
+  const navigate = useNavigate();
   const {
     events,
     timeline,
@@ -54,7 +55,6 @@ export const CompetitionScheduleTab = ({
   const {
     userProfile
   } = useAuth();
-  const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
 
   // Fetch registered schools for this competition
@@ -87,14 +87,8 @@ export const CompetitionScheduleTab = ({
     return timeline?.timeSlots || [];
   };
   const handleEditEvent = (event: ScheduleEvent) => {
-    setSelectedEvent(event);
-  };
-  const handleModalClose = async () => {
-    setSelectedEvent(null);
-    // Small delay to ensure modal is fully closed before refetching
-    setTimeout(async () => {
-      await refetch();
-    }, 100);
+    const currentPath = window.location.pathname;
+    navigate(`${currentPath}/schedule_record?eventId=${event.id}`);
   };
   const getAssignedSchoolForSlot = (eventId: string, timeSlot: Date) => {
     return timeline?.getAssignedSchool(eventId, timeSlot) || null;
@@ -384,7 +378,7 @@ export const CompetitionScheduleTab = ({
           </CardContent>
         </Card>
 
-        {selectedEvent && <ScheduleEditModal event={selectedEvent} competitionId={competitionId} isOpen={!!selectedEvent} onClose={handleModalClose} updateScheduleSlot={updateScheduleSlot} getAvailableSchools={getAvailableSchools} timeline={timeline} />}
+        
       </div>
     </TooltipProvider>;
 };
