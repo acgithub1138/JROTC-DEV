@@ -245,14 +245,14 @@ export const ContactRecordPage: React.FC = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {/* Row 1: Name - Type */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-3 items-center gap-3">
-                      <FormLabel className="text-left">Name *</FormLabel>
-                      <div className="col-span-2">
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Name *</FormLabel>
+                      <div className="flex-1">
                         <FormControl>
                           <Input placeholder="Enter contact name" {...field} />
                         </FormControl>
@@ -266,16 +266,16 @@ export const ContactRecordPage: React.FC = () => {
                   control={form.control}
                   name="type"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-3 items-center gap-3">
-                      <FormLabel className="text-left">Type</FormLabel>
-                      <div className="col-span-2">
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Type</FormLabel>
+                      <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select contact type" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-background border shadow-lg z-50">
                             <SelectItem value="parent">Parent</SelectItem>
                             <SelectItem value="relative">Relative</SelectItem>
                             <SelectItem value="friend">Friend</SelectItem>
@@ -290,14 +290,14 @@ export const ContactRecordPage: React.FC = () => {
               </div>
 
               {/* Row 2: Phone - Email */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-3 items-center gap-3">
-                      <FormLabel className="text-left">Phone</FormLabel>
-                      <div className="col-span-2">
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Phone</FormLabel>
+                      <div className="flex-1">
                         <FormControl>
                           <Input placeholder="Phone number" {...field} />
                         </FormControl>
@@ -311,9 +311,9 @@ export const ContactRecordPage: React.FC = () => {
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-3 items-center gap-3">
-                      <FormLabel className="text-left">Email</FormLabel>
-                      <div className="col-span-2">
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Email</FormLabel>
+                      <div className="flex-1">
                         <FormControl>
                           <Input type="email" placeholder="Email address" {...field} />
                         </FormControl>
@@ -324,42 +324,50 @@ export const ContactRecordPage: React.FC = () => {
                 />
               </div>
 
-              {/* Row 3: Other Type (conditional) - Status */}
-              <div className="grid grid-cols-2 gap-6">
-                {form.watch('type') === 'other' ? (
-                  <FormField
-                    control={form.control}
-                    name="type_other"
-                    render={({ field }) => (
-                      <FormItem className="grid grid-cols-3 items-center gap-3">
-                        <FormLabel className="text-left">Other</FormLabel>
-                        <div className="col-span-2">
+              {/* Row 3: Cadet - Status */}
+              <div className="grid grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="cadet_id"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Cadet</FormLabel>
+                      <div className="flex-1">
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input placeholder="Specify other type" {...field} />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select cadet" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                ) : (
-                  <div></div>
-                )}
+                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                            <SelectItem value="none">No cadet selected</SelectItem>
+                            {cadets.map(cadet => (
+                              <SelectItem key={cadet.id} value={cadet.id}>
+                                {cadet.last_name}, {cadet.first_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
                   name="status"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-3 items-center gap-3">
-                      <FormLabel className="text-left">Status</FormLabel>
-                      <div className="col-span-2">
+                    <FormItem className="flex items-center gap-2">
+                      <FormLabel className="w-16 text-left shrink-0">Status</FormLabel>
+                      <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-background border shadow-lg z-50">
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="semi_active">Semi-Active</SelectItem>
                             <SelectItem value="not_active">Not Active</SelectItem>
@@ -372,44 +380,36 @@ export const ContactRecordPage: React.FC = () => {
                 />
               </div>
 
-              {/* Row 4: Cadet */}
-              <FormField
-                control={form.control}
-                name="cadet_id"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-6 items-center gap-3">
-                    <FormLabel className="text-left">Cadet (Optional)</FormLabel>
-                    <div className="col-span-2">
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select cadet" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">No cadet selected</SelectItem>
-                          {cadets.map(cadet => (
-                            <SelectItem key={cadet.id} value={cadet.id}>
-                              {cadet.last_name}, {cadet.first_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </div>
-                    <div className="col-span-3"></div>
-                  </FormItem>
-                )}
-              />
+              {/* Other Type Field (conditional) */}
+              {form.watch('type') === 'other' && (
+                <div className="grid grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="type_other"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2">
+                        <FormLabel className="w-16 text-left shrink-0">Other</FormLabel>
+                        <div className="flex-1">
+                          <FormControl>
+                            <Input placeholder="Specify other type" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  <div></div>
+                </div>
+              )}
 
-              {/* Row 5: Notes */}
+              {/* Notes Field */}
               <FormField
                 control={form.control}
                 name="notes"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-6 items-start gap-3">
-                    <FormLabel className="text-left pt-2">Notes</FormLabel>
-                    <div className="col-span-5">
+                  <FormItem className="flex items-start gap-2">
+                    <FormLabel className="w-16 text-left shrink-0 pt-2">Notes</FormLabel>
+                    <div className="flex-1">
                       <FormControl>
                         <Textarea 
                           placeholder="Additional notes" 
