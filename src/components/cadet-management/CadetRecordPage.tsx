@@ -304,11 +304,26 @@ export const CadetRecordPage: React.FC = () => {
       <div className="mt-6">
         <Tabs defaultValue="pt-tests" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="pt-tests">PT Tests</TabsTrigger>
-            <TabsTrigger value="inspection">Inspection</TabsTrigger>
-            <TabsTrigger value="community-service">Community Service</TabsTrigger>
-            <TabsTrigger value="equipment">Equipment</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="pt-tests">
+              <span className="hidden sm:inline">PT Tests</span>
+              <span className="sm:hidden">PT</span>
+            </TabsTrigger>
+            <TabsTrigger value="inspection">
+              <span className="hidden sm:inline">Inspection</span>
+              <span className="sm:hidden">Insp</span>
+            </TabsTrigger>
+            <TabsTrigger value="community-service">
+              <span className="hidden sm:inline">Community Service</span>
+              <span className="sm:hidden">CS</span>
+            </TabsTrigger>
+            <TabsTrigger value="equipment">
+              <span className="hidden sm:inline">Equipment</span>
+              <span className="sm:hidden">Equp</span>
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <span className="hidden sm:inline">History</span>
+              <span className="sm:hidden">Hstry</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="pt-tests" className="mt-6">
