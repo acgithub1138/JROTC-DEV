@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, Upload, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
-import { JudgesBulkImportDialog } from './components/JudgesBulkImportDialog';
+
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 export const JudgesPage: React.FC = () => {
@@ -20,11 +20,10 @@ export const JudgesPage: React.FC = () => {
     judges,
     isLoading,
     deleteJudge,
-    bulkImportJudges,
     bulkUpdateStatus,
     isBulkUpdating
   } = useJudges();
-  const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
+  
   const [deleteConfirmJudge, setDeleteConfirmJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
@@ -158,7 +157,7 @@ export const JudgesPage: React.FC = () => {
         </div>
         {canCreate && (
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowBulkImportDialog(true)}>
+            <Button variant="outline" onClick={() => navigate('/app/competition-portal/judges/judges_bulk_upload')}>
               <Upload className="w-4 h-4 mr-2" />
               Bulk Upload
             </Button>
@@ -233,11 +232,6 @@ export const JudgesPage: React.FC = () => {
           </CardContent>
         </Card>}
 
-      <JudgesBulkImportDialog 
-        open={showBulkImportDialog} 
-        onOpenChange={setShowBulkImportDialog} 
-        onBulkImport={bulkImportJudges}
-      />
 
       <AlertDialog open={!!deleteConfirmJudge} onOpenChange={(open) => !open && setDeleteConfirmJudge(null)}>
         <AlertDialogContent>
