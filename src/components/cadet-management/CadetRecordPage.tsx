@@ -263,18 +263,16 @@ export const CadetRecordPage: React.FC = () => {
   return <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
-        {canSidebar && (
-          <Button variant="outline" onClick={handleBack} className="mb-4">
+        {canSidebar && <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cadets
-          </Button>
-        )}
+          </Button>}
         
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">
-                <span className="text-blue-600">
+                <span className="text-black">
                   {currentCadet.last_name}, {currentCadet.first_name}
                 </span>
               </h1>
@@ -286,11 +284,7 @@ export const CadetRecordPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button
-              onClick={() => navigate(`/app/cadets/my_service_record?cadet_id=${currentCadet.id}`)}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
+            <Button onClick={() => navigate(`/app/cadets/my_service_record?cadet_id=${currentCadet.id}`)} variant="outline" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Add Service Hours
             </Button>
