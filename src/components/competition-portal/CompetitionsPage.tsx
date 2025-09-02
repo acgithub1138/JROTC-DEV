@@ -191,7 +191,7 @@ const CompetitionsPage = () => {
   // Remove unused modal functions and state
   const canCreateCompetition = canCreate;
 const handleViewCompetition = (competition: Competition) => {
-  navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}&mode=view`);
+  navigate(`/app/competition-portal/competition-details/${competition.id}`);
 };
 
 const handleOpenEdit = (competition: Competition) => {
