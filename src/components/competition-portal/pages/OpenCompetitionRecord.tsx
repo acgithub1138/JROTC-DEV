@@ -415,17 +415,22 @@ export const OpenCompetitionRecord: React.FC = () => {
           .eq('school_id', userProfile.school_id);
         if (deleteScheduleError) throw deleteScheduleError;
       } else {
-        // Create calendar event for new registrations
+        // Create calendar event for new registrations (silently)
         try {
-          await createEvent({
-            title: competition.name,
-            description: `Competition registration - ${competition.name}`,
-            location: competition.location || '',
-            start_date: competition.start_date,
-            end_date: competition.end_date || competition.start_date,
-            event_type: 'b04588d5-acae-4141-a0cf-20c46bb1ec72',
-            is_all_day: true
-          });
+          // Insert directly to avoid the success toast from useEvents hook
+          await supabase
+            .from('events')
+            .insert({
+              title: competition.name,
+              description: `Competition registration - ${competition.name}`,
+              location: competition.location || '',
+              start_date: competition.start_date,
+              end_date: competition.end_date || competition.start_date,
+              event_type: 'b04588d5-acae-4141-a0cf-20c46bb1ec72',
+              is_all_day: true,
+              school_id: userProfile.school_id,
+              created_by: userProfile.id,
+            });
         } catch (calendarError) {
           console.error('Error creating calendar event:', calendarError);
         }
