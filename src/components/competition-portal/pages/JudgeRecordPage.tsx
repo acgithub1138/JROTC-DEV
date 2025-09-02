@@ -233,6 +233,16 @@ export const JudgeRecordPage: React.FC = () => {
               <Button type="button" variant="outline" onClick={handleBack}>
                 Cancel
               </Button>
+              {showDeleteButton && (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </Button>
+              )}
               <Button 
                 type="submit" 
                 form="judge-form"
@@ -243,16 +253,7 @@ export const JudgeRecordPage: React.FC = () => {
               </Button>
             </>
           )}
-          {showDeleteButton && (
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4" />
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </Button>
-          )}
+
         </div>
       </div>
 
