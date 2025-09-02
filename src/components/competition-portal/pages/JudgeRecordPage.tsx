@@ -249,7 +249,7 @@ export const JudgeRecordPage: React.FC = () => {
                 disabled={isCreating || isUpdating}
               >
                 <Save className="h-4 w-4" />
-                {isCreating || isUpdating ? 'Saving...' : (isCreateMode ? 'Create Judge' : 'Save Changes')}
+                {isCreating || isUpdating ? 'Saving...' : (isCreateMode ? 'Create Judge' : 'Save')}
               </Button>
             </>
           )}
