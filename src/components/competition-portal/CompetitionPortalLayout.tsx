@@ -17,6 +17,7 @@ import { ScheduleEditRecord } from './pages/ScheduleEditRecord';
 import { ViewScoreSheet } from './pages/ViewScoreSheet';
 import { EditScoreSheet } from './pages/EditScoreSheet';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
+import { OpenCompetitionRecord } from './pages/OpenCompetitionRecord';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { CPCompetitionRecordPage } from './CPCompetitionRecordPage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -153,6 +154,8 @@ const CompetitionPortalLayout = () => {
       return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/settings') {
       return <CompetitionSettingsPage />;
+    } else if (path.startsWith('/app/competition-portal/open-competitions/') && path.includes('open_comp_record')) {
+      return <OpenCompetitionRecord />;
     } else if (path === '/app/competition-portal/open-competitions') {
       return <OpenCompetitionsPage />;
     }

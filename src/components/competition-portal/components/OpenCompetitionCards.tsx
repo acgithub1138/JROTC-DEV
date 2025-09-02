@@ -213,7 +213,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                   variant="outline" 
                   size="sm"
                   className="flex-1" 
-                  onClick={() => onViewDetails(competition.id)}
+                  onClick={() => {
+                    window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
+                  }}
                 >
                   <Eye className="w-3 h-3 mr-1" />
                   View
@@ -225,7 +227,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                     <Button 
                       size="sm"
                       className="flex-1" 
-                      onClick={() => onRegisterInterest(competition.id)}
+                      onClick={() => {
+                        window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
+                      }}
                     >
                       Edit
                     </Button>
@@ -248,7 +252,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                     <Button 
                       size="sm"
                       className="flex-1" 
-                      onClick={() => onRegisterInterest(competition.id)}
+                      onClick={() => {
+                        window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
+                      }}
                     >
                       Register
                     </Button>
