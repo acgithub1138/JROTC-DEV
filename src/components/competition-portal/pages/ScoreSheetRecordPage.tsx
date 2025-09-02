@@ -26,7 +26,7 @@ export const ScoreSheetRecordPage = () => {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   const { canCreate, canUpdate, canViewDetails } = useCPScoreSheetsPermissions();
-  const { createTemplate, updateTemplate, templates } = useCompetitionTemplates();
+  const { createTemplate, updateTemplate, templates, isLoading: templatesLoading } = useCompetitionTemplates();
 
   // Load template data if editing/viewing
   useEffect(() => {
@@ -43,6 +43,12 @@ export const ScoreSheetRecordPage = () => {
         return;
       }
 
+      // Wait for templates to be loaded
+      if (templatesLoading) {
+        setIsLoading(true);
+        return;
+      }
+
       try {
         setIsLoading(true);
         const foundTemplate = templates.find(t => t.id === templateId);
@@ -50,6 +56,7 @@ export const ScoreSheetRecordPage = () => {
           setError('Template not found');
         } else {
           setTemplate(foundTemplate);
+          setError(null);
         }
       } catch (err) {
         setError('Failed to load template');
@@ -59,7 +66,7 @@ export const ScoreSheetRecordPage = () => {
     };
 
     loadTemplate();
-  }, [templateId, mode, templates]);
+  }, [templateId, mode, templates, templatesLoading]);
 
   // Check permissions
   useEffect(() => {
