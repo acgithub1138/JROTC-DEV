@@ -6,7 +6,6 @@ import { Plus, Search, ArrowUpDown } from 'lucide-react';
 import { ColumnSelector } from '@/components/ui/column-selector';
 import { CompetitionPlacementCards } from '../components/CompetitionPlacementCards';
 
-import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
 
 import { DeleteCompetitionDialog } from '../components/DeleteCompetitionDialog';
@@ -56,8 +55,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
   const { canViewDetails } = useTablePermissions('competitions');
   const [viewingCompetition, setViewingCompetition] = useState<ExtendedCompetition | null>(null);
-  const [selectedCompetition, setSelectedCompetition] = useState<ExtendedCompetition | null>(null);
-  const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [deletingCompetition, setDeletingCompetition] = useState<ExtendedCompetition | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,9 +67,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     deleteCompetition
   } = useCompetitions();
 
-  const {
-    createEvent
-  } = useCompetitionEvents(selectedCompetition?.source_competition_id, selectedCompetition?.source_type);
   
   const {
     columns,
@@ -108,19 +102,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
 
 
   const handleAddEvent = (competition: ExtendedCompetition) => {
-    setSelectedCompetition(competition);
-    setShowAddEventDialog(true);
-  };
-
-  const handleEventCreated = async (eventData: any) => {
-    try {
-      await createEvent(eventData);
-      setShowAddEventDialog(false);
-      setSelectedCompetition(null);
-    } catch (error) {
-      console.error('Failed to create event:', error);
-      // Keep dialog open on error so user can retry
-    }
+    navigate(`/app/competition-portal/my-competitions/add_competition_event?competitionId=${competition.id}&returnPath=${encodeURIComponent('/app/competition-portal/my-competitions')}`);
   };
 
   const handleViewScoreSheets = (competition: ExtendedCompetition) => {
@@ -190,14 +172,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         canAddEvent={canCreate && !readOnly}
       />
 
-      {selectedCompetition && (
-        <AddEventDialog 
-          open={showAddEventDialog} 
-          onOpenChange={setShowAddEventDialog} 
-          competitionId={selectedCompetition.id} 
-          onEventCreated={handleEventCreated} 
-        />
-      )}
 
       {viewingCompetition && (
         <ViewCompetitionDialog

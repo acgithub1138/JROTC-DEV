@@ -21,6 +21,7 @@ import { OpenCompetitionRecord } from './pages/OpenCompetitionRecord';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { CPCompetitionRecordPage } from './CPCompetitionRecordPage';
 import { AddCompetitionPage } from './my-competitions/AddCompetitionPage';
+import { AddCompetitionEventPage } from './my-competitions/AddCompetitionEventPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -128,6 +129,8 @@ const CompetitionPortalLayout = () => {
       return <CPCompetitionRecordPage />;
     } else if (path === '/app/competition-portal/competitions') {
       return <CompetitionsPage />;
+    } else if (path.startsWith('/app/competition-portal/my-competitions/add_competition_event')) {
+      return <AddCompetitionEventPage />;
     } else if (path.startsWith('/app/competition-portal/my-competitions/add_competition')) {
       return <AddCompetitionPage />;
     } else if (path === '/app/competition-portal/my-competitions') {

@@ -8,7 +8,6 @@ import { ScoreSheetTable } from './components/score-sheet-viewer/ScoreSheetTable
 import { useScoreSheetData } from './components/score-sheet-viewer/hooks/useScoreSheetData';
 import { useCompetitions } from './hooks/useCompetitions';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
-import { AddEventDialog } from './components/AddEventDialog';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const ScoreSheetPage = () => {
@@ -21,7 +20,6 @@ export const ScoreSheetPage = () => {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
-  const [showAddEventDialog, setShowAddEventDialog] = useState(false);
 
   // Get competition data
   const { competitions, isLoading: compsLoading } = useCompetitions();
@@ -29,7 +27,6 @@ export const ScoreSheetPage = () => {
   const { canCreate } = useTablePermissions('competitions');
 
   const { events, schoolMap, isLoading, refetch } = useScoreSheetData(competition, true);
-  const { createEvent } = useCompetitionEvents(competitionId);
 
   // Build school options from events
   const schoolOptions = Array.from(new Set(events.map((e: any) => e.school_id)))
@@ -70,15 +67,9 @@ export const ScoreSheetPage = () => {
     navigate('/app/competition-portal/my-competitions');
   };
 
-  const handleEventCreated = async (eventData: any) => {
-    try {
-      await createEvent(eventData);
-      setShowAddEventDialog(false);
-      refetch(); // Refresh the score sheet data
-    } catch (error) {
-      console.error('Failed to create event:', error);
-      // Keep dialog open on error so user can retry
-    }
+  const handleAddEvent = () => {
+    const returnPath = `/app/competition-portal/my-competitions/score-sheets/${competitionId}`;
+    navigate(`/app/competition-portal/my-competitions/add_competition_event?competitionId=${competitionId}&returnPath=${encodeURIComponent(returnPath)}`);
   };
 
   if (compsLoading) {
@@ -114,7 +105,7 @@ export const ScoreSheetPage = () => {
           <h1 className="text-2xl font-bold">Score Sheets for {competition.name}</h1>
           <div className="flex gap-2">
             {canCreate && (
-              <Button onClick={() => setShowAddEventDialog(true)}>
+              <Button onClick={handleAddEvent}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Score Sheet
               </Button>
@@ -180,14 +171,6 @@ export const ScoreSheetPage = () => {
           )}
         </div>
 
-        {canCreate && competition && (
-          <AddEventDialog 
-            open={showAddEventDialog} 
-            onOpenChange={setShowAddEventDialog} 
-            competitionId={competition.id} 
-            onEventCreated={handleEventCreated} 
-          />
-        )}
       </div>
     </div>
   );
