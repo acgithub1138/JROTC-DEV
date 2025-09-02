@@ -61,10 +61,26 @@ export const CadetTabsContent = ({
   
   // Filter available tabs based on permissions
   const availableTabs = [
-    { value: 'cadets', label: `Cadets (${profiles.length})`, canAccess: canAccessCadets },
-    { value: 'pt-tests', label: 'PT Tests', canAccess: canAccessPTTests },
-    { value: 'uniform-inspection', label: 'Uniform Inspection', canAccess: canAccessUniformInspection },
-    { value: 'community-service', label: 'Community Service', canAccess: canAccessCommunityService }
+    { 
+      value: 'cadets', 
+      label: isMobile ? `CdTs (${profiles.length})` : `Cadets (${profiles.length})`, 
+      canAccess: canAccessCadets 
+    },
+    { 
+      value: 'pt-tests', 
+      label: isMobile ? 'PT' : 'PT Tests', 
+      canAccess: canAccessPTTests 
+    },
+    { 
+      value: 'uniform-inspection', 
+      label: isMobile ? 'Insp' : 'Uniform Inspection', 
+      canAccess: canAccessUniformInspection 
+    },
+    { 
+      value: 'community-service', 
+      label: isMobile ? 'CS' : 'Community Service', 
+      canAccess: canAccessCommunityService 
+    }
   ].filter(tab => tab.canAccess);
   
   const gridCols = availableTabs.length === 1 ? 'grid-cols-1' : 
