@@ -86,9 +86,19 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
                     <span className="font-semibold">{entry.description}</span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground">
-                      {entry.details || '-'}
-                    </span>
+                    <div className="text-sm text-muted-foreground">
+                      {entry.details ? (
+                        entry.details.includes(',') ? (
+                          <ul className="list-disc list-inside space-y-1">
+                            {entry.details.split(',').map((item, index) => (
+                              <li key={index}>{item.trim()}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span>{entry.details}</span>
+                        )
+                      ) : '-'}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <span className="text-sm">
