@@ -31,6 +31,7 @@ import { CPCompetitionRecordPage } from './competition-portal/CPCompetitionRecor
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
 import { CadetRecordPage } from '@/components/cadet-management/CadetRecordPage';
+import { CadetBulkUploadPage } from '@/components/cadet-management/CadetBulkUploadPage';
 import { MyServiceRecordPage } from '@/components/cadet-management/MyServiceRecordPage';
 import { PTTestCreatePage } from './cadet-management/PTTestCreatePage';
 import { PTTestEditPage } from './cadet-management/PTTestEditPage';
@@ -218,6 +219,7 @@ const MainApplication = () => {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
+            <Route path="cadets/cadet_bulk_upload" element={<CadetBulkUploadPage />} />
             <Route path="cadets/my_service_record" element={<MyServiceRecordPage />} />
           <Route path="cadets/pt_test_create" element={<PTTestCreatePage />} />
           <Route path="cadets/pt_test_edit" element={<PTTestEditPage />} />

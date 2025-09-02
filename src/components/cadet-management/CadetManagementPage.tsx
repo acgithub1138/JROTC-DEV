@@ -146,7 +146,6 @@ const CadetManagementPage = () => {
   return <div className="p-6 space-y-6">
       <CadetPageHeader 
         onAddCadet={() => navigate('/app/cadets/cadet_record?mode=create')} 
-        onBulkImport={() => setBulkImportDialogOpen(true)} 
       />
 
       <Card>

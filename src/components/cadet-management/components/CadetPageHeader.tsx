@@ -1,15 +1,16 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Upload } from 'lucide-react';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface CadetPageHeaderProps {
   onAddCadet: () => void;
-  onBulkImport: () => void;
 }
 
-export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderProps) => {
+export const CadetPageHeader = ({ onAddCadet }: CadetPageHeaderProps) => {
+  const navigate = useNavigate();
   const { canCreate, canBulkImport } = useCadetPermissions();
 
   return (
@@ -22,7 +23,7 @@ export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderPro
       </div>
       <div className="flex gap-2">
         {canBulkImport && (
-          <Button variant="outline" onClick={onBulkImport} className="hidden md:flex">
+          <Button variant="outline" onClick={() => navigate('/app/cadets/cadet_bulk_upload')} className="hidden md:flex">
             <Upload className="w-4 h-4 mr-2" />
             Bulk Import
           </Button>
