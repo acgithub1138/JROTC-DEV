@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 interface Judge {
   id: string;
@@ -16,6 +16,7 @@ interface Judge {
 interface JudgesTableProps {
   judges: Judge[];
   isLoading: boolean;
+  onView: (judge: Judge) => void;
   onEdit: (judge: Judge) => void;
   onDelete: (judge: Judge) => void;
   selectedJudges: string[];
@@ -29,6 +30,7 @@ interface JudgesTableProps {
 export const JudgesTable: React.FC<JudgesTableProps> = ({
   judges,
   isLoading,
+  onView,
   onEdit,
   onDelete,
   selectedJudges,
@@ -40,6 +42,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
   getSortIcon
 }) => {
   const {
+    canView,
     canEdit,
     canDelete
   } = useCPJudgesPermissions();
@@ -131,12 +134,21 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(judge)}>
+                  {canView && (
+                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onView(judge)}>
+                      <Eye className="w-3 h-3" />
+                    </Button>
+                  )}
+                  {canEdit && (
+                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(judge)}>
                       <Edit className="w-3 h-3" />
-                    </Button>}
-                  {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(judge)}>
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(judge)}>
                       <Trash2 className="w-3 h-3" />
-                    </Button>}
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>)}

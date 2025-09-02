@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,11 +7,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, Upload, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
-import { JudgeDialog } from './components/JudgeDialog';
 import { JudgesBulkImportDialog } from './components/JudgesBulkImportDialog';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 export const JudgesPage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     canView,
     canCreate
@@ -18,16 +19,12 @@ export const JudgesPage: React.FC = () => {
   const {
     judges,
     isLoading,
-    createJudge,
-    updateJudge,
     deleteJudge,
     bulkImportJudges,
     bulkUpdateStatus,
     isBulkUpdating
   } = useJudges();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
-  const [editingJudge, setEditingJudge] = useState<any>(null);
   const [deleteConfirmJudge, setDeleteConfirmJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
@@ -48,7 +45,15 @@ export const JudgesPage: React.FC = () => {
   };
 
   const handleEdit = (judge: any) => {
-    setEditingJudge(judge);
+    navigate(`/app/competition-portal/judges/judge_record?mode=edit&id=${judge.id}`);
+  };
+
+  const handleView = (judge: any) => {
+    navigate(`/app/competition-portal/judges/judge_record?mode=view&id=${judge.id}`);
+  };
+
+  const handleCreateJudge = () => {
+    navigate('/app/competition-portal/judges/judge_record?mode=create');
   };
 
   const handleDeleteClick = (judge: any) => {
@@ -60,22 +65,6 @@ export const JudgesPage: React.FC = () => {
       await deleteJudge(deleteConfirmJudge.id);
       setDeleteConfirmJudge(null);
     }
-  };
-  const handleSubmit = async (data: any) => {
-    if (editingJudge) {
-      await updateJudge({
-        id: editingJudge.id,
-        ...data
-      });
-    } else {
-      await createJudge(data);
-    }
-    setShowCreateDialog(false);
-    setEditingJudge(null);
-  };
-  const handleCloseDialog = () => {
-    setShowCreateDialog(false);
-    setEditingJudge(null);
   };
 
   const handleSelectJudge = (judgeId: string, checked: boolean) => {
@@ -173,7 +162,7 @@ export const JudgesPage: React.FC = () => {
               <Upload className="w-4 h-4 mr-2" />
               Bulk Upload
             </Button>
-            <Button onClick={() => setShowCreateDialog(true)}>
+            <Button onClick={handleCreateJudge}>
               <Plus className="w-4 h-4 mr-2" />
               Create Judge
             </Button>
@@ -230,6 +219,7 @@ export const JudgesPage: React.FC = () => {
             <JudgesTable 
               judges={filteredAndSortedJudges} 
               isLoading={isLoading} 
+              onView={handleView}
               onEdit={handleEdit} 
               onDelete={handleDeleteClick}
               selectedJudges={selectedJudges}
@@ -243,7 +233,6 @@ export const JudgesPage: React.FC = () => {
           </CardContent>
         </Card>}
 
-      <JudgeDialog open={showCreateDialog || !!editingJudge} onOpenChange={handleCloseDialog} judge={editingJudge} onSubmit={handleSubmit} />
       <JudgesBulkImportDialog 
         open={showBulkImportDialog} 
         onOpenChange={setShowBulkImportDialog} 

@@ -252,7 +252,7 @@ const MainApplication = () => {
             <Route path="competition-portal/competitions" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/teams" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/score-sheets" element={<CompetitionPortalLayout />} />
-            <Route path="competition-portal/judges" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/judges/judge_record" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/analytics" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/settings" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/open-competitions" element={<CompetitionPortalLayout />} />
