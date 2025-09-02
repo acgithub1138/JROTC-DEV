@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +11,8 @@ import {
   Search, 
   Users, 
 } from 'lucide-react';
-import CreateUserDialog from './CreateUserDialog';
 import { UserTable } from './components/UserTable';
 import { BulkUserActions } from './components/BulkUserActions';
-import { UserEditDialog } from './components/UserEditDialog';
 import { UserConfirmationDialogs } from './components/UserConfirmationDialogs';
 import { useUserManagement } from './hooks/useUserManagement';
 import { useUserPermissions } from './hooks/useUserPermissions';
@@ -21,6 +20,7 @@ import { User } from './types';
 import { useAuth } from '@/contexts/AuthContext';
 
 const UserAdminPage = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const {
     users,
@@ -46,8 +46,6 @@ const UserAdminPage = () => {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'active' | 'disabled'>('active');
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [userToDisable, setUserToDisable] = useState<User | null>(null);
   const [bulkDisableLoading, setBulkDisableLoading] = useState(false);
@@ -205,16 +203,10 @@ const UserAdminPage = () => {
           </p>
         </div>
         {canCreateUsers() && (
-          <CreateUserDialog 
-            allowedRoles={getAllowedRoles()}
-            trigger={
-              <Button>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Create User
-              </Button>
-            }
-            onUserCreated={fetchUsers}
-          />
+          <Button onClick={() => navigate('/app/users/users_record?mode=create')}>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Create User
+          </Button>
         )}
       </div>
 
@@ -287,10 +279,7 @@ const UserAdminPage = () => {
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-                onEditUser={(user) => {
-                  setEditingUser(user);
-                  setEditDialogOpen(true);
-                }}
+                onEditUser={(user) => navigate(`/app/users/users_record?mode=edit&id=${user.id}`)}
                 onDisableUser={(user) => {
                   setUserToDisable(user);
                   setDisableDialogOpen(true);
@@ -319,10 +308,7 @@ const UserAdminPage = () => {
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-                onEditUser={(user) => {
-                  setEditingUser(user);
-                  setEditDialogOpen(true);
-                }}
+                onEditUser={(user) => navigate(`/app/users/users_record?mode=edit&id=${user.id}`)}
                 onDisableUser={(user) => {
                   setUserToDisable(user);
                   setDisableDialogOpen(true);
@@ -384,18 +370,6 @@ const UserAdminPage = () => {
           </Tabs>
         </CardContent>
       </Card>
-
-      <UserEditDialog
-        user={editingUser}
-        schools={schools}
-        allowedRoles={getAllowedRoles()}
-        canResetPassword={canResetPassword}
-        isAdmin={userProfile?.role === 'admin'}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onUpdateUser={updateUser}
-        onResetPassword={handleResetPassword}
-      />
 
       <UserConfirmationDialogs
         disableDialogOpen={disableDialogOpen}

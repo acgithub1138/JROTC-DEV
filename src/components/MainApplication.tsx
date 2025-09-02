@@ -33,6 +33,7 @@ import CadetManagementPage from '@/components/cadet-management/CadetManagementPa
 import { CadetRecordPage } from '@/components/cadet-management/CadetRecordPage';
 import { CadetBulkUploadPage } from '@/components/cadet-management/CadetBulkUploadPage';
 import SchoolRecordPage from './school-management/SchoolRecordPage';
+import UserRecordPage from './user-management/UserRecordPage';
 import { MyServiceRecordPage } from '@/components/cadet-management/MyServiceRecordPage';
 import { PTTestCreatePage } from './cadet-management/PTTestCreatePage';
 import { PTTestEditPage } from './cadet-management/PTTestEditPage';
@@ -215,6 +216,7 @@ const MainApplication = () => {
             <Route path="school" element={<SchoolManagementPage />} />
             <Route path="school/school_record" element={<SchoolRecordPage />} />
             <Route path="users" element={<UserAdminPage />} />
+            <Route path="users/users_record" element={<UserRecordPage />} />
             <Route path="email" element={<EmailManagementPage />} />
             <Route path="email/template_record" element={<EmailTemplateRecordPage />} />
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
