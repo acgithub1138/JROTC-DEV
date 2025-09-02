@@ -15,6 +15,8 @@ import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
 import { ViewInventoryItemDialog } from './ViewInventoryItemDialog';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Tables } from '@/integrations/supabase/types';
 type InventoryItem = Tables<'inventory_items'>;
 interface InventoryTableProps {
@@ -44,6 +46,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   } | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     getPaddingClass
   } = useTableSettings();
@@ -138,6 +141,145 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />)}
       </div>;
   }
+
+  // Mobile card view
+  if (isMobile) {
+    return (
+      <>
+        <div className="space-y-4">
+          {sortedItems.map(item => (
+            <Card key={item.id} className="w-full">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={selectedItems.includes(item.id)} 
+                      onCheckedChange={checked => handleSelectItem(item.id, !!checked)} 
+                    />
+                    <CardTitle className="text-lg">
+                      <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                        {item.item_id}
+                      </button>
+                    </CardTitle>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {getAvailabilityStatus(item)}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <h4 className="font-medium">{item.item}</h4>
+                  <p className="text-sm text-muted-foreground">{item.category}</p>
+                </div>
+                
+                {isColumnVisible('sub_category') && item.sub_category && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Sub Category:</span>
+                    <p className="text-sm">{item.sub_category}</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {isColumnVisible('size') && item.size && (
+                    <div>
+                      <span className="text-muted-foreground">Size:</span>
+                      <p className="font-medium">{item.size}</p>
+                    </div>
+                  )}
+                  {isColumnVisible('gender') && item.gender && (
+                    <div>
+                      <span className="text-muted-foreground">Gender:</span>
+                      <p>{getGenderBadge(item.gender)}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  {isColumnVisible('qty_total') && (
+                    <div>
+                      <span className="text-muted-foreground">Total:</span>
+                      <p className="font-medium">{item.qty_total || 0}</p>
+                    </div>
+                  )}
+                  {isColumnVisible('qty_issued') && (
+                    <div>
+                      <span className="text-muted-foreground">Issued:</span>
+                      <p className="font-medium">{item.qty_issued || 0}</p>
+                    </div>
+                  )}
+                  {isColumnVisible('qty_available') && (
+                    <div>
+                      <span className="text-muted-foreground">Available:</span>
+                      <p className="font-medium">{item.qty_available || 0}</p>
+                    </div>
+                  )}
+                </div>
+
+                {isColumnVisible('stock_number') && item.stock_number && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Stock #:</span>
+                    <span className="ml-1">{item.stock_number}</span>
+                  </div>
+                )}
+
+                {isColumnVisible('unit_of_measure') && item.unit_of_measure && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Unit:</span>
+                    <span className="ml-1">{getUnitOfMeasureBadge(item.unit_of_measure)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center pt-2">
+                  <div className="flex items-center gap-2">
+                    {item.issued_to && item.issued_to.length > 0 && (
+                      <IssuedUsersPopover issuedTo={item.issued_to} />
+                    )}
+                  </div>
+                  <TableActionButtons 
+                    canView={false} 
+                    canEdit={canUpdate} 
+                    canDelete={canDelete} 
+                    onEdit={() => handleEdit(item)} 
+                    onDelete={() => onDelete(item)} 
+                    customActions={[{
+                      icon: <History className="w-3 h-3" />,
+                      label: "View history",
+                      onClick: () => setHistoryItem(item),
+                      show: true
+                    }]} 
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {sortedItems.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No inventory items found
+            </div>
+          )}
+        </div>
+
+        <ViewInventoryItemDialog 
+          item={viewingItem} 
+          open={!!viewingItem} 
+          onOpenChange={open => !open && setViewingItem(null)} 
+          onEdit={async item => {
+            await onEdit(item);
+            setViewingItem(null);
+          }} 
+        />
+
+        <InventoryHistoryDialog 
+          item={historyItem} 
+          open={!!historyItem} 
+          onOpenChange={open => !open && setHistoryItem(null)} 
+        />
+      </>
+    );
+  }
+
+  // Desktop table view
   return <>
       <StandardTable>
         <StandardTableHeader>

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { JobBoardWithCadet } from '../types';
 interface JobBoardTableProps {
   jobs: JobBoardWithCadet[];
@@ -16,11 +18,66 @@ export const JobBoardTable = ({
   readOnly = false
 }: JobBoardTableProps) => {
   const { canEdit, canDelete } = useTablePermissions('job_board');
+  const isMobile = useIsMobile();
   
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
     if (!cadet) return 'Unassigned';
     return `${cadet.last_name}, ${cadet.first_name}`;
   };
+
+  // Mobile card view
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {jobs.map(job => (
+          <Card key={job.id} className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">
+                {formatCadetName(job.cadet)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground font-medium">Role:</span>
+                  <p>{job.role}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground font-medium">Reports To:</span>
+                  <p>{job.reports_to || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground font-medium">Assistant To:</span>
+                  <p>{job.assistant || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground font-medium">Email:</span>
+                  <p>{job.email_address || '-'}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end pt-2">
+                <TableActionButtons
+                  canEdit={canEdit}
+                  canDelete={canDelete}
+                  onEdit={onEditJob ? () => onEditJob(job) : undefined}
+                  onDelete={onDeleteJob ? () => onDeleteJob(job) : undefined}
+                  readOnly={readOnly}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {jobs.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No jobs found
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop table view
   return <Table>
       <TableHeader>
         <TableRow>

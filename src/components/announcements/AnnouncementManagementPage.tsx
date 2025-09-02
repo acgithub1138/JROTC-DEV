@@ -10,11 +10,13 @@ import { useAnnouncements, useDeleteAnnouncement, Announcement } from '@/hooks/u
 import { Plus, Edit, Trash2, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const AnnouncementManagementPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const {
     canCreate,
     canEdit,
@@ -31,6 +33,7 @@ const AnnouncementManagementPage = () => {
 
   // Filter announcements based on active tab
   const filteredAnnouncements = announcements?.filter(announcement => activeTab === 'active' ? announcement.is_active : !announcement.is_active) || [];
+  
   const handleCreate = () => {
     navigate('/app/announcements/announcements_record?mode=create');
   };
@@ -67,8 +70,136 @@ const AnnouncementManagementPage = () => {
     if (priority >= 5) return 'Medium';
     return 'Low';
   };
+
+  // Render announcement cards for mobile
+  const renderAnnouncementCards = (announcements: Announcement[]) => (
+    <div className="space-y-4">
+      {announcements.map(announcement => (
+        <Card key={announcement.id} className="w-full">
+          <CardHeader className="pb-3">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-lg">
+                {canViewDetails ? (
+                  <button 
+                    onClick={() => handleView(announcement)} 
+                    className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-left"
+                  >
+                    {announcement.title}
+                  </button>
+                ) : (
+                  <span>{announcement.title}</span>
+                )}
+              </CardTitle>
+              <div className="flex flex-col gap-1">
+                <Badge variant="secondary" className={getPriorityColor(announcement.priority)}>
+                  {getPriorityLabel(announcement.priority)}
+                </Badge>
+                <Badge variant={announcement.is_active ? "default" : "outline"}>
+                  {announcement.is_active ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Published:</span>
+                <p className="font-medium">{format(new Date(announcement.publish_date), 'MMM d, yyyy')}</p>
+              </div>
+              {announcement.expire_date && (
+                <div>
+                  <span className="text-muted-foreground">Expires:</span>
+                  <p className="font-medium">{format(new Date(announcement.expire_date), 'MMM d, yyyy')}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-2">
+              {canEdit && (
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEdit(announcement)} title="Edit">
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+              {canDelete && (
+                <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // Render announcement table for desktop
+  const renderAnnouncementTable = (announcements: Announcement[]) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="py-0">Title</TableHead>
+          <TableHead>Priority</TableHead>
+          <TableHead>Publish Date</TableHead>
+          <TableHead>Exp Date</TableHead>
+          <TableHead>Active</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {announcements.map(announcement => 
+          <TableRow key={announcement.id}>
+            <TableCell className="font-medium max-w-[300px] py-[6px]">
+              <div 
+                className={`truncate transition-colors ${
+                  canViewDetails 
+                    ? 'cursor-pointer text-blue-600 hover:text-blue-800' 
+                    : 'text-foreground'
+                }`}
+                title={announcement.title}
+                onClick={canViewDetails ? () => handleView(announcement) : undefined}
+              >
+                {announcement.title}
+              </div>
+            </TableCell>
+            <TableCell>
+              <Badge variant="secondary" className={getPriorityColor(announcement.priority)}>
+                {getPriorityLabel(announcement.priority)}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
+            </TableCell>
+            <TableCell>
+              {announcement.expire_date ? format(new Date(announcement.expire_date), 'MMM d, yyyy') : '-'}
+            </TableCell>
+            <TableCell>
+              <Badge variant={announcement.is_active ? "default" : "outline"}>
+                {announcement.is_active ? "Active" : "Inactive"}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center justify-center gap-2">
+                {canEdit && 
+                  <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                }
+                {canDelete && 
+                  <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                }
+              </div>
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  );
+
   if (isLoading) {
-    return <div className="p-6 space-y-6">
+    return (
+      <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Announcements</h1>
@@ -76,16 +207,21 @@ const AnnouncementManagementPage = () => {
           </div>
         </div>
         <div className="grid gap-4">
-          {[1, 2, 3].map(i => <Card key={i} className="animate-pulse">
+          {[1, 2, 3].map(i => (
+            <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="h-4 bg-muted rounded mb-2"></div>
                 <div className="h-3 bg-muted rounded w-3/4"></div>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="p-6 space-y-6">
+
+  return (
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -94,10 +230,12 @@ const AnnouncementManagementPage = () => {
             Manage school announcements and important notifications
           </p>
         </div>
-        {canCreate && <Button onClick={handleCreate}>
+        {canCreate && 
+          <Button onClick={handleCreate}>
             <Plus className="w-4 h-4 mr-2" />
             Create Announcement
-          </Button>}
+          </Button>
+        }
       </div>
 
       {/* Announcements Table with Tabs */}
@@ -117,131 +255,31 @@ const AnnouncementManagementPage = () => {
             </TabsList>
             
             <TabsContent value="active" className="mt-6">
-              {filteredAnnouncements.length > 0 ? <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="py-0">Title</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Publish Date</TableHead>
-                      <TableHead>Exp Date</TableHead>
-                      <TableHead>Active</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
-                        <TableCell className="font-medium max-w-[300px] py-[6px]">
-                          <div 
-                            className={`truncate transition-colors ${
-                              canViewDetails 
-                                ? 'cursor-pointer text-blue-600 hover:text-blue-800' 
-                                : 'text-foreground'
-                            }`}
-                            title={announcement.title}
-                            onClick={canViewDetails ? () => handleView(announcement) : undefined}
-                          >
-                            {announcement.title}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={getPriorityColor(announcement.priority)}>
-                            {getPriorityLabel(announcement.priority)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
-                        </TableCell>
-                        <TableCell>
-                          {announcement.expire_date ? format(new Date(announcement.expire_date), 'MMM d, yyyy') : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={announcement.is_active ? "default" : "outline"}>
-                            {announcement.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-2">
-                            {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
-                                <Edit className="w-3 h-3" />
-                              </Button>}
-                            {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
-                                <Trash2 className="w-3 h-3" />
-                              </Button>}
-                          </div>
-                        </TableCell>
-                      </TableRow>)}
-                  </TableBody>
-                </Table> : <div className="flex flex-col items-center justify-center py-12">
+              {filteredAnnouncements.length > 0 ? (
+                isMobile ? renderAnnouncementCards(filteredAnnouncements) : renderAnnouncementTable(filteredAnnouncements)
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
                   <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No active announcements</h3>
                   <p className="text-muted-foreground text-center">
                     Create your first announcement to keep everyone informed
                   </p>
-                </div>}
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="inactive" className="mt-6">
-              {filteredAnnouncements.length > 0 ? <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Publish Date</TableHead>
-                      <TableHead>Exp Date</TableHead>
-                      <TableHead>Active</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
-                        <TableCell className="font-medium max-w-[300px]">
-                          <div 
-                            className={`truncate transition-colors ${
-                              canViewDetails 
-                                ? 'cursor-pointer text-blue-600 hover:text-blue-800' 
-                                : 'text-foreground'
-                            }`}
-                            title={announcement.title}
-                            onClick={canViewDetails ? () => handleView(announcement) : undefined}
-                          >
-                            {announcement.title}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={getPriorityColor(announcement.priority)}>
-                            {getPriorityLabel(announcement.priority)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
-                        </TableCell>
-                        <TableCell>
-                          {announcement.expire_date ? format(new Date(announcement.expire_date), 'MMM d, yyyy') : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={announcement.is_active ? "default" : "outline"}>
-                            {announcement.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-2">
-                            {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
-                                <Edit className="w-3 h-3" />
-                              </Button>}
-                            {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
-                                <Trash2 className="w-3 h-3" />
-                              </Button>}
-                          </div>
-                        </TableCell>
-                      </TableRow>)}
-                  </TableBody>
-                </Table> : <div className="flex flex-col items-center justify-center py-12">
+              {filteredAnnouncements.length > 0 ? (
+                isMobile ? renderAnnouncementCards(filteredAnnouncements) : renderAnnouncementTable(filteredAnnouncements)
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
                   <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No inactive announcements</h3>
                   <p className="text-muted-foreground text-center">
                     All announcements are currently active
                   </p>
-                </div>}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -258,12 +296,17 @@ const AnnouncementManagementPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteAnnouncementId && handleDelete(deleteAnnouncementId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction 
+              onClick={() => deleteAnnouncementId && handleDelete(deleteAnnouncementId)} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  );
 };
+
 export default AnnouncementManagementPage;
