@@ -45,70 +45,72 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Program, Event, and Template Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-        <Label htmlFor="program" className="text-right">Branch *</Label>
-        <Select value={selectedProgram} onValueChange={onProgramChange} disabled={templatesLoading}>
-          <SelectTrigger id="program">
-            <SelectValue placeholder="Select a program..." />
-          </SelectTrigger>
-          <SelectContent>
-            {availablePrograms.map(program => {
-              // Proper capitalization for branch names
-              const formatBranchName = (branch: string) => {
-                const branchMap: Record<string, string> = {
-                  'air_force': 'Air Force',
-                  'marine_corps': 'Marine Corps',
-                  'army': 'Army',
-                  'navy': 'Navy',
-                  'space_force': 'Space Force',
-                  'coast_guard': 'Coast Guard'
+      {/* Program, Event, and Template Selection - All on one row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="program">Branch *</Label>
+          <Select value={selectedProgram} onValueChange={onProgramChange} disabled={templatesLoading}>
+            <SelectTrigger id="program">
+              <SelectValue placeholder="Select a program..." />
+            </SelectTrigger>
+            <SelectContent>
+              {availablePrograms.map(program => {
+                // Proper capitalization for branch names
+                const formatBranchName = (branch: string) => {
+                  const branchMap: Record<string, string> = {
+                    'air_force': 'Air Force',
+                    'marine_corps': 'Marine Corps',
+                    'army': 'Army',
+                    'navy': 'Navy',
+                    'space_force': 'Space Force',
+                    'coast_guard': 'Coast Guard'
+                  };
+                  return branchMap[branch] || branch.split('_').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                  ).join(' ');
                 };
-                return branchMap[branch] || branch.split('_').map(word => 
-                  word.charAt(0).toUpperCase() + word.slice(1)
-                ).join(' ');
-              };
-              
-              return (
-                <SelectItem key={program} value={program}>
-                  {formatBranchName(program)}
+                
+                return (
+                  <SelectItem key={program} value={program}>
+                    {formatBranchName(program)}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="event">Event *</Label>
+          <Select value={selectedEvent} onValueChange={onEventChange} disabled={templatesLoading || !selectedProgram}>
+            <SelectTrigger id="event">
+              <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableEvents.map(event => (
+                <SelectItem key={event} value={event}>
+                  {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-        <Label htmlFor="event" className="text-right">Event *</Label>
-        <Select value={selectedEvent} onValueChange={onEventChange} disabled={templatesLoading || !selectedProgram}>
-          <SelectTrigger id="event">
-            <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
-          </SelectTrigger>
-          <SelectContent>
-            {availableEvents.map(event => (
-              <SelectItem key={event} value={event}>
-                {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-        <Label htmlFor="template" className="text-right">Template Name *</Label>
-        <Select value={selectedTemplateId} onValueChange={onTemplateChange} disabled={templatesLoading || !selectedEvent}>
-          <SelectTrigger id="template">
-            <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
-          </SelectTrigger>
-          <SelectContent>
-            {filteredTemplates.map(template => (
-              <SelectItem key={template.id} value={template.id}>
-                {template.template_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-1">
+          <Label htmlFor="template">Template Name *</Label>
+          <Select value={selectedTemplateId} onValueChange={onTemplateChange} disabled={templatesLoading || !selectedEvent}>
+            <SelectTrigger id="template">
+              <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredTemplates.map(template => (
+                <SelectItem key={template.id} value={template.id}>
+                  {template.template_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Judge Number */}
