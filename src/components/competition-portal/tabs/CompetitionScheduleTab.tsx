@@ -248,15 +248,13 @@ export const CompetitionScheduleTab = ({
                 })}
               </tbody>
             </table> :
-      // Individual school format with location under event
+      // Individual school format with separate location column
       <table className="w-full border-collapse border border-black text-xs">
               <thead>
                 <tr>
                   <th className="border border-black p-1 text-left font-bold">Time</th>
-                  <th className="border border-black p-1 text-left font-bold">
-                    <div>Event</div>
-                    <div className="text-xs font-normal">(Location)</div>
-                  </th>
+                  <th className="border border-black p-1 text-left font-bold">Event</th>
+                  <th className="border border-black p-1 text-left font-bold">Location</th>
                 </tr>
               </thead>
               <tbody>
@@ -266,10 +264,8 @@ export const CompetitionScheduleTab = ({
             location: string;
           }>).map((item, index) => <tr key={index}>
                     <td className="border border-black p-1">{item.time}</td>
-                    <td className="border border-black p-1">
-                      <div className="font-medium">{item.event}</div>
-                      <div className="text-xs text-gray-600">({item.location})</div>
-                    </td>
+                    <td className="border border-black p-1 font-medium">{item.event}</td>
+                    <td className="border border-black p-1">{item.location}</td>
                   </tr>)}
               </tbody>
             </table>}
