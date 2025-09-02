@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCadetInspections } from '@/hooks/useCadetRecords';
 interface InspectionTabProps {
   cadetId: string;
@@ -9,10 +11,30 @@ interface InspectionTabProps {
 export const InspectionTab: React.FC<InspectionTabProps> = ({
   cadetId
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+  
   const {
     data: inspections = [],
     isLoading
   } = useCadetInspections(cadetId);
+
+  // Calculate pagination
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return inspections.slice(startIndex, endIndex);
+  }, [inspections, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(inspections.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -48,7 +70,16 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
     return 'Needs Improvement';
   };
   return <Card>
-      
+      <CardHeader>
+        <CardTitle>
+          Inspection Records
+          {inspections.length > 0 && (
+            <span className="text-sm font-normal text-muted-foreground ml-2">
+              ({inspections.length} total records)
+            </span>
+          )}
+        </CardTitle>
+      </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -62,7 +93,7 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
               </tr>
             </thead>
             <tbody>
-              {inspections.map(inspection => <tr key={inspection.id} className="border-b hover:bg-muted/50">
+              {paginatedData.map(inspection => <tr key={inspection.id} className="border-b hover:bg-muted/50">
                   <td className="p-3 font-medium px-[8px] py-[8px]">
                     {format(new Date(inspection.date), 'PPP')}
                   </td>
@@ -86,6 +117,38 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, inspections.length)} of {inspections.length} records
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>;
 };

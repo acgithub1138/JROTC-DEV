@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit } from 'lucide-react';
+import { Plus, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCadetPTTests } from '@/hooks/useCadetRecords';
 interface PTTestsTabProps {
   cadetId: string;
@@ -13,10 +13,30 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
   cadetId
 }) => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+  
   const {
     data: ptTests = [],
     isLoading
   } = useCadetPTTests(cadetId);
+
+  // Calculate pagination
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return ptTests.slice(startIndex, endIndex);
+  }, [ptTests, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(ptTests.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -46,7 +66,16 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   return <Card>
-      
+      <CardHeader>
+        <CardTitle>
+          PT Test Records
+          {ptTests.length > 0 && (
+            <span className="text-sm font-normal text-muted-foreground ml-2">
+              ({ptTests.length} total records)
+            </span>
+          )}
+        </CardTitle>
+      </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -61,7 +90,7 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
               </tr>
             </thead>
             <tbody>
-              {ptTests.map(test => <tr key={test.id} className="border-b hover:bg-muted/50">
+              {paginatedData.map(test => <tr key={test.id} className="border-b hover:bg-muted/50">
                   <td className="p-3 font-medium px-[8px] py-[4px]">
                     {format(new Date(test.date), 'PPP')}
                   </td>
@@ -78,6 +107,38 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, ptTests.length)} of {ptTests.length} records
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>;
 };
