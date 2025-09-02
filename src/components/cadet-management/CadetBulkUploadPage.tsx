@@ -72,7 +72,8 @@ export const CadetBulkUploadPage: React.FC = () => {
           grade: row['Grade'] || '',
           rank: row['Rank'] || '',
           flight: row['Flight'] || '',
-          cadet_year: convertCadetYear(rawCadetYear)
+          cadet_year: convertCadetYear(rawCadetYear),
+          start_year: row['Freshman Year'] ? parseInt(row['Freshman Year']) : undefined
         };
         const errors = validateCadetData(cadet);
         return {
@@ -105,7 +106,7 @@ export const CadetBulkUploadPage: React.FC = () => {
     }
   }, [handleFileUpload]);
 
-  const updateCadet = (id: string, field: keyof NewCadet, value: string) => {
+  const updateCadet = (id: string, field: keyof NewCadet, value: string | number | undefined) => {
     setParsedCadets(prev => prev.map(cadet => {
       if (cadet.id === id) {
         const updated = {
@@ -213,6 +214,7 @@ export const CadetBulkUploadPage: React.FC = () => {
                     <span>• Flight</span>
                     <span>• Rank</span>
                     <span>• Cadet Year (or Year)</span>
+                    <span>• Freshman Year</span>
                   </div>
                 </div>
               </div>
@@ -258,6 +260,7 @@ export const CadetBulkUploadPage: React.FC = () => {
                       <TableHead>Rank</TableHead>
                       <TableHead>Flight</TableHead>
                       <TableHead>Cadet Year</TableHead>
+                      <TableHead>Freshman Year</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -393,6 +396,17 @@ export const CadetBulkUploadPage: React.FC = () => {
                           ) : cadet.cadet_year ? (
                             <Badge variant="outline" className="text-xs">{cadet.cadet_year}</Badge>
                           ) : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {editingRow === cadet.id ? (
+                            <Input
+                              type="number"
+                              value={cadet.start_year || ''}
+                              onChange={e => updateCadet(cadet.id, 'start_year', parseInt(e.target.value) || undefined)}
+                              className="h-8"
+                              placeholder="2024"
+                            />
+                          ) : cadet.start_year || '-'}
                         </TableCell>
                         <TableCell>
                           {cadet.isValid ? (
