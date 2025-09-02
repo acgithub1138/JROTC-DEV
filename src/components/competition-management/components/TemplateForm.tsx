@@ -26,24 +26,29 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   onFormChange,
   useBuilder
 }) => {
-  const { templates } = useCompetitionTemplates();
-  const { eventTypes } = useCompetitionEventTypes();
-  const { userProfile } = useAuth();
-  
+  const {
+    templates
+  } = useCompetitionTemplates();
+  const {
+    eventTypes
+  } = useCompetitionEventTypes();
+  const {
+    userProfile
+  } = useAuth();
+
   // Helper function to get event UUID from name or return UUID if already valid
   const getEventUuid = (eventValue: string | undefined | null): string => {
     if (!eventValue) return '';
-    
+
     // Check if it's already a UUID (36 characters with dashes)
     if (eventValue.length === 36 && eventValue.includes('-')) {
       return eventValue;
     }
-    
+
     // Otherwise, find the event type by name and return its UUID
     const eventType = eventTypes.find(et => et.name === eventValue);
     return eventType ? eventType.id : '';
   };
-  
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
     description: (template as any)?.description || '',
@@ -58,7 +63,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   const [initialFormData] = useState(formData);
   const [jsonText, setJsonText] = useState(JSON.stringify(formData.scores, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
-  
   const isAdmin = userProfile?.role === 'admin';
   const programOptions = [{
     value: 'air_force',
@@ -82,19 +86,21 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
+
     // For manual JSON mode, validate and parse JSON before submitting
     if (!useBuilder) {
       try {
         const parsedScores = JSON.parse(jsonText);
-        setFormData(prev => ({ ...prev, scores: parsedScores }));
+        setFormData(prev => ({
+          ...prev,
+          scores: parsedScores
+        }));
         setJsonError(null);
       } catch (error) {
         setJsonError('Invalid JSON format. Please fix the JSON before saving.');
         return;
       }
     }
-    
     try {
       setIsSubmitting(true);
       await onSubmit({
@@ -113,17 +119,14 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     const eventType = eventTypes.find(et => et.id === eventId);
     const eventName = eventType ? eventType.name : eventId;
     const baseName = `${programLabel} - ${eventName}`;
-    
+
     // Check if this exact name exists
-    const existingTemplates = templates.filter(t => 
-      t.template_name.startsWith(baseName) && 
-      (!template || t.id !== template.id) // Exclude current template when editing
+    const existingTemplates = templates.filter(t => t.template_name.startsWith(baseName) && (!template || t.id !== template.id) // Exclude current template when editing
     );
-    
     if (existingTemplates.length === 0) {
       return baseName;
     }
-    
+
     // Find the highest number suffix
     let maxNumber = 0;
     existingTemplates.forEach(t => {
@@ -133,10 +136,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         maxNumber = Math.max(maxNumber, num);
       }
     });
-    
     return `${baseName} ${maxNumber + 1}`;
   };
-
   useEffect(() => {
     // Auto-generate template name when program or event changes (but not when editing existing template)
     if (!template && formData.jrotc_program && formData.event) {
@@ -160,22 +161,23 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       }
     }
   }, [eventTypes, template]);
-
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleJsonTextChange = (value: string) => {
     setJsonText(value);
     setJsonError(null);
-    
+
     // Try to parse JSON and update form data if valid
     try {
       const parsed = JSON.parse(value);
-      setFormData(prev => ({ ...prev, scores: parsed }));
+      setFormData(prev => ({
+        ...prev,
+        scores: parsed
+      }));
     } catch {
       // Invalid JSON, keep the text but don't update scores yet
     }
@@ -216,11 +218,9 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
               <SelectValue placeholder="Select event type..." />
             </SelectTrigger>
             <SelectContent>
-              {eventTypes.map(eventType => (
-                <SelectItem key={eventType.id} value={eventType.id}>
+              {eventTypes.map(eventType => <SelectItem key={eventType.id} value={eventType.id}>
                   {eventType.name}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -232,17 +232,17 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
           <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="judges">Judges</Label>
-          <Select value={String(formData.judges)} onValueChange={(value) => updateFormData('judges', parseInt(value, 10))}>
+          <Label htmlFor="judges">Number of event Judges</Label>
+          <Select value={String(formData.judges)} onValueChange={value => updateFormData('judges', parseInt(value, 10))}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                <SelectItem key={n} value={String(n)}>
+              {Array.from({
+              length: 10
+            }, (_, i) => i + 1).map(n => <SelectItem key={n} value={String(n)}>
                   {n}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -250,39 +250,22 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
 
       <div className="space-y-1">
         <Label htmlFor="description">Description</Label>
-        <Textarea 
-          id="description" 
-          value={formData.description} 
-          onChange={e => updateFormData('description', e.target.value)} 
-          placeholder="Describe what this template is for..."
-          rows={3}
-        />
+        <Textarea id="description" value={formData.description} onChange={e => updateFormData('description', e.target.value)} placeholder="Describe what this template is for..." rows={3} />
       </div>
 
-      {isAdmin && (
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="is_global"
-            checked={formData.is_global}
-            onCheckedChange={(checked) => updateFormData('is_global', checked)}
-          />
+      {isAdmin && <div className="flex items-center space-x-2">
+          <Checkbox id="is_global" checked={formData.is_global} onCheckedChange={checked => updateFormData('is_global', checked)} />
           <Label htmlFor="is_global" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Global Template
           </Label>
           <p className="text-xs text-muted-foreground">
             Global templates are visible to all schools and can only be edited by admins
           </p>
-        </div>
-      )}
+        </div>}
 
       <div className="space-y-2">        
         {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-1">
-            <Textarea 
-              value={jsonText} 
-              onChange={e => handleJsonTextChange(e.target.value)} 
-              rows={10} 
-              className="font-mono text-sm" 
-              placeholder={`{
+            <Textarea value={jsonText} onChange={e => handleJsonTextChange(e.target.value)} rows={10} className="font-mono text-sm" placeholder={`{
   "criteria": [
     {
       "name": "Uniform Inspection",
@@ -291,11 +274,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       "penalty": false
     }
   ]
-}`} 
-            />
-            {jsonError && (
-              <p className="text-sm text-destructive">{jsonError}</p>
-            )}
+}`} />
+            {jsonError && <p className="text-sm text-destructive">{jsonError}</p>}
             <p className="text-sm text-muted-foreground">
               Define the JSON structure for this score sheet template.
             </p>
