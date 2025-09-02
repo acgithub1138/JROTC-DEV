@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,12 @@ export const OpenCompetitionRecord: React.FC = () => {
   const { timezone } = useSchoolTimezone();
   const { createEvent } = useEvents({ eventType: '', assignedTo: '' });
 
+  // Extract competitionId from URL if useParams doesn't work due to nested routing
+  const location = useLocation();
+  const urlCompetitionId = competitionId || location.pathname.split('/')[4]; // Get the 5th segment of the path
+  
   console.log('OpenCompetitionRecord - competitionId from params:', competitionId);
+  console.log('OpenCompetitionRecord - urlCompetitionId from path:', urlCompetitionId);
   console.log('OpenCompetitionRecord - current URL:', window.location.pathname);
 
   // Data state
@@ -117,18 +122,18 @@ export const OpenCompetitionRecord: React.FC = () => {
 
   // Fetch competition details
   const fetchCompetition = useCallback(async () => {
-    console.log('fetchCompetition called with competitionId:', competitionId);
-    if (!competitionId) {
-      console.log('No competitionId provided, returning');
+    console.log('fetchCompetition called with urlCompetitionId:', urlCompetitionId);
+    if (!urlCompetitionId) {
+      console.log('No urlCompetitionId provided, returning');
       return;
     }
 
     try {
-      console.log('Fetching competition from database with ID:', competitionId);
+      console.log('Fetching competition from database with ID:', urlCompetitionId);
       const { data: comp, error } = await supabase
         .from('cp_competitions')
         .select('*')
-        .eq('id', competitionId)
+        .eq('id', urlCompetitionId)
         .single();
 
       console.log('Database response:', { comp, error });
@@ -143,11 +148,11 @@ export const OpenCompetitionRecord: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [competitionId, toast]);
+  }, [urlCompetitionId, toast]);
 
   // Fetch competition events
   const fetchEvents = useCallback(async () => {
-    if (!competitionId) return;
+    if (!urlCompetitionId) return;
 
     try {
       const { data, error } = await supabase
@@ -156,7 +161,7 @@ export const OpenCompetitionRecord: React.FC = () => {
           *,
           competition_event_types:event(name, description)
         `)
-        .eq('competition_id', competitionId)
+        .eq('competition_id', urlCompetitionId)
         .order('start_time');
 
       if (error) throw error;
@@ -169,17 +174,17 @@ export const OpenCompetitionRecord: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [competitionId, toast]);
+  }, [urlCompetitionId, toast]);
 
   // Fetch existing registrations
   const fetchRegistrations = useCallback(async () => {
-    if (!competitionId || !userProfile?.school_id) return;
+    if (!urlCompetitionId || !userProfile?.school_id) return;
 
     try {
       const { data: registrations, error: regError } = await supabase
         .from('cp_event_registrations')
         .select('event_id')
-        .eq('competition_id', competitionId)
+        .eq('competition_id', urlCompetitionId)
         .eq('school_id', userProfile.school_id);
 
       if (regError) throw regError;
@@ -187,7 +192,7 @@ export const OpenCompetitionRecord: React.FC = () => {
       const { data: schedules, error: schedError } = await supabase
         .from('cp_event_schedules')
         .select('event_id, scheduled_time')
-        .eq('competition_id', competitionId)
+        .eq('competition_id', urlCompetitionId)
         .eq('school_id', userProfile.school_id);
 
       if (schedError) throw schedError;
@@ -197,7 +202,7 @@ export const OpenCompetitionRecord: React.FC = () => {
     } catch (error) {
       console.error('Error fetching registrations:', error);
     }
-  }, [competitionId, userProfile?.school_id]);
+  }, [urlCompetitionId, userProfile?.school_id]);
 
   // Generate time slots for an event
   const generateTimeSlots = (event: CompetitionEvent): TimeSlot[] => {
@@ -241,20 +246,20 @@ export const OpenCompetitionRecord: React.FC = () => {
 
   // Fetch occupied slots
   const fetchOccupiedSlots = useCallback(async () => {
-    if (!competitionId) return;
+    if (!urlCompetitionId) return;
     
     try {
       const { data: schedules, error } = await supabase
         .from('cp_event_schedules')
         .select('event_id, scheduled_time, school_id, school_name')
-        .eq('competition_id', competitionId);
+        .eq('competition_id', urlCompetitionId);
 
       if (error) throw error;
 
       const { data: compSchools, error: compErr } = await supabase
         .from('cp_comp_schools')
         .select('school_id, school_name')
-        .eq('competition_id', competitionId);
+        .eq('competition_id', urlCompetitionId);
       if (compErr) throw compErr;
 
       const nameBySchool = new Map<string, string>();
@@ -285,7 +290,7 @@ export const OpenCompetitionRecord: React.FC = () => {
     } catch (error) {
       console.error('Error fetching occupied slots:', error);
     }
-  }, [competitionId, userProfile?.school_id]);
+  }, [urlCompetitionId, userProfile?.school_id]);
 
   // Initialize data on component mount
   useEffect(() => {
