@@ -119,6 +119,7 @@ const CompetitionPortalLayout = () => {
   // Function to render content based on current route
   const renderContent = () => {
     const path = location.pathname;
+    console.log('CompetitionPortalLayout - Current path:', path);
     
     if (path === '/app/competition-portal' || path === '/app/competition-portal/' || path === '/app/competition-portal/dashboard') {
       return <CompetitionDashboard />;
@@ -155,11 +156,13 @@ const CompetitionPortalLayout = () => {
     } else if (path === '/app/competition-portal/settings') {
       return <CompetitionSettingsPage />;
     } else if (path.startsWith('/app/competition-portal/open-competitions/') && path.includes('open_comp_record')) {
+      console.log('CompetitionPortalLayout - Rendering OpenCompetitionRecord');
       return <OpenCompetitionRecord />;
     } else if (path === '/app/competition-portal/open-competitions') {
       return <OpenCompetitionsPage />;
     }
     
+    console.log('CompetitionPortalLayout - Defaulting to CompetitionDashboard');
     // Default to dashboard
     return <CompetitionDashboard />;
   };

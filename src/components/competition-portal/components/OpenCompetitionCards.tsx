@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   onCancelRegistration,
   permissions,
 }) => {
+  const navigate = useNavigate();
   const defaultPermissions = useOpenCompsOpenPermissions();
   const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = permissions || defaultPermissions;
   
@@ -213,9 +215,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                   variant="outline" 
                   size="sm"
                   className="flex-1" 
-                  onClick={() => {
-                    window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
-                  }}
+                  onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
                 >
                   <Eye className="w-3 h-3 mr-1" />
                   View
@@ -227,9 +227,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                     <Button 
                       size="sm"
                       className="flex-1" 
-                      onClick={() => {
-                        window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
-                      }}
+                      onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
                     >
                       Edit
                     </Button>
@@ -252,9 +250,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                     <Button 
                       size="sm"
                       className="flex-1" 
-                      onClick={() => {
-                        window.location.href = `/app/competition-portal/open-competitions/${competition.id}/open_comp_record`;
-                      }}
+                      onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
                     >
                       Register
                     </Button>
