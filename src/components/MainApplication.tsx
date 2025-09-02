@@ -32,6 +32,7 @@ import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
 import { CadetRecordPage } from '@/components/cadet-management/CadetRecordPage';
 import { CadetBulkUploadPage } from '@/components/cadet-management/CadetBulkUploadPage';
+import SchoolRecordPage from './school-management/SchoolRecordPage';
 import { MyServiceRecordPage } from '@/components/cadet-management/MyServiceRecordPage';
 import { PTTestCreatePage } from './cadet-management/PTTestCreatePage';
 import { PTTestEditPage } from './cadet-management/PTTestEditPage';
@@ -212,6 +213,7 @@ const MainApplication = () => {
             <Route path="incidents" element={<IncidentManagementPage />} />
             <Route path="incidents/incident_record" element={<IncidentRecordPage />} />
             <Route path="school" element={<SchoolManagementPage />} />
+            <Route path="school/school_record" element={<SchoolRecordPage />} />
             <Route path="users" element={<UserAdminPage />} />
             <Route path="email" element={<EmailManagementPage />} />
             <Route path="email/template_record" element={<EmailTemplateRecordPage />} />

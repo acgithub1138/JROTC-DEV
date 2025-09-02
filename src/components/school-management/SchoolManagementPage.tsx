@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,12 +17,8 @@ import { format, addYears } from 'date-fns';
 import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
-import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Building2, Edit, Trash2, Search, Plus, CalendarIcon, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { FileUpload } from '@/components/ui/file-upload';
 interface School {
   id: string;
   name: string;
@@ -47,6 +44,7 @@ interface School {
 type SortField = 'name' | 'contact' | 'competition_module' | 'competition_portal' | 'subscription_start' | 'subscription_end';
 type SortDirection = 'asc' | 'desc';
 const SchoolManagementPage = () => {
+  const navigate = useNavigate();
   const {
     userProfile
   } = useAuth();
@@ -57,43 +55,11 @@ const SchoolManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingSchool, setEditingSchool] = useState<School | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [createSchoolOpen, setCreateSchoolOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const {
-    hasUnsavedChanges,
-    resetChanges
-  } = useUnsavedChanges({
-    initialData: schools.find(s => s.id === editingSchool?.id) || {},
-    currentData: editingSchool || {},
-    enabled: editDialogOpen && !!editingSchool
-  });
   const RECORDS_PER_PAGE = 25;
-  const emptySchool: Omit<School, 'id' | 'created_at'> = {
-    name: '',
-    initials: '',
-    jrotc_program: undefined,
-    contact: '',
-    address: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    phone: '',
-    email: '',
-    competition_module: false,
-    competition_portal: false,
-    subscription_start: undefined,
-    subscription_end: undefined,
-    referred_by: '',
-    notes: ''
-  };
   const fetchSchools = async () => {
     try {
       const {
@@ -119,97 +85,10 @@ const SchoolManagementPage = () => {
     fetchSchools();
   }, []);
   const handleCreateSchool = () => {
-    setCreateSchoolOpen(true);
+    navigate('/app/school/school_record?mode=create');
   };
   const handleEditSchool = (school: School) => {
-    setEditingSchool(school);
-    setEditDialogOpen(true);
-  };
-  const uploadLogo = async (file: File, schoolId: string): Promise<string | null> => {
-    try {
-      setIsUploadingLogo(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${schoolId}/logo.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('school-logos')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('school-logos')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error uploading logo:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload logo",
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setIsUploadingLogo(false);
-    }
-  };
-
-  const handleSaveSchool = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingSchool) return;
-    
-    try {
-      let logoUrl = editingSchool.logo_url;
-      
-      // Upload logo if a new file was selected
-      if (logoFile) {
-        logoUrl = await uploadLogo(logoFile, editingSchool.id);
-        if (!logoUrl) return; // Upload failed
-      }
-
-      const {
-        error
-      } = await supabase.from('schools').update({
-        name: editingSchool.name,
-        initials: editingSchool.initials,
-        jrotc_program: editingSchool.jrotc_program,
-        contact: editingSchool.contact,
-        address: editingSchool.address,
-        city: editingSchool.city,
-        state: editingSchool.state,
-        zip_code: editingSchool.zip_code,
-        phone: editingSchool.phone,
-        email: editingSchool.email,
-        competition_module: editingSchool.competition_module,
-        competition_portal: editingSchool.competition_portal,
-        subscription_start: editingSchool.subscription_start,
-        subscription_end: editingSchool.subscription_end,
-        referred_by: editingSchool.referred_by,
-        notes: editingSchool.notes,
-        timezone: editingSchool.timezone,
-        logo_url: logoUrl
-      }).eq('id', editingSchool.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Success",
-        description: "School updated successfully"
-      });
-      resetChanges();
-      setEditDialogOpen(false);
-      setEditingSchool(null);
-      setLogoFile(null);
-      fetchSchools();
-    } catch (error) {
-      console.error('Error saving school:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save school",
-        variant: "destructive"
-      });
-    }
+    navigate(`/app/school/school_record?mode=edit&id=${school.id}`);
   };
   const handleDeleteSchool = async () => {
     if (!schoolToDelete) return;
@@ -302,31 +181,6 @@ const SchoolManagementPage = () => {
     threeMonthsFromNow.setMonth(today.getMonth() + 3);
     const subscriptionEnd = new Date(endDate);
     return subscriptionEnd <= threeMonthsFromNow && subscriptionEnd >= today;
-  };
-  const handleEditDialogOpenChange = (open: boolean) => {
-    if (!open && hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-      return;
-    }
-    setEditDialogOpen(open);
-    if (!open) {
-      setEditingSchool(null);
-      setLogoFile(null);
-    }
-  };
-  const handleDiscardChanges = () => {
-    const originalSchool = schools.find(s => s.id === editingSchool?.id);
-    if (originalSchool) {
-      setEditingSchool(originalSchool);
-    }
-    resetChanges();
-    setShowUnsavedDialog(false);
-    setEditDialogOpen(false);
-    setEditingSchool(null);
-    setLogoFile(null);
-  };
-  const handleContinueEditing = () => {
-    setShowUnsavedDialog(false);
   };
   if (loading) {
     return <div className="p-6">
@@ -507,242 +361,6 @@ const SchoolManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Create School Dialog */}
-      <CreateSchoolDialog open={createSchoolOpen} onOpenChange={open => {
-      setCreateSchoolOpen(open);
-      if (!open) {
-        fetchSchools(); // Refresh the list when dialog closes
-      }
-    }} />
-
-      {/* Edit School Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={handleEditDialogOpenChange}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto ">
-          <DialogHeader>
-            <DialogTitle>Edit School</DialogTitle>
-          </DialogHeader>
-          {editingSchool && <form onSubmit={handleSaveSchool} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">School Name *</Label>
-                  <Input id="name" value={editingSchool.name} onChange={e => setEditingSchool({
-                ...editingSchool,
-                name: e.target.value
-              })} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="initials">School Initials</Label>
-                  <Input id="initials" value={editingSchool.initials || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                initials: e.target.value
-              })} placeholder="Enter school initials" />
-                </div>
-              </div>
-
-              <FileUpload
-                label="School Logo"
-                accept="image/*"
-                maxSize={5}
-                onFileSelect={setLogoFile}
-                onFileDelete={() => {
-                  setEditingSchool({
-                    ...editingSchool,
-                    logo_url: null
-                  });
-                  setLogoFile(null);
-                }}
-                currentFileUrl={editingSchool.logo_url}
-                disabled={isUploadingLogo}
-              />
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contact">Contact</Label>
-                  <Input id="contact" value={editingSchool.contact || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                contact: e.target.value
-              })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jrotc_program">JROTC Program</Label>
-                  <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
-                ...editingSchool,
-                jrotc_program: value as School['jrotc_program']
-              })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select JROTC Program" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="air_force">Air Force JROTC</SelectItem>
-                      <SelectItem value="army">Army JROTC</SelectItem>
-                      <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
-                      <SelectItem value="navy">Navy JROTC</SelectItem>
-                      <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
-                      <SelectItem value="space_force">Space Force JROTC</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" value={editingSchool.address || ''} onChange={e => setEditingSchool({
-              ...editingSchool,
-              address: e.target.value
-            })} />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input id="city" value={editingSchool.city || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                city: e.target.value
-              })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="state">State</Label>
-                  <Input id="state" value={editingSchool.state || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                state: e.target.value
-              })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="zip_code">ZIP Code</Label>
-                  <Input id="zip_code" value={editingSchool.zip_code || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                zip_code: e.target.value
-              })} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" value={editingSchool.phone || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                phone: e.target.value
-              })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={editingSchool.email || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                email: e.target.value
-              })} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="subscription_start">Subscription Start</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {editingSchool.subscription_start ? format(new Date(editingSchool.subscription_start), "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={editingSchool.subscription_start ? new Date(editingSchool.subscription_start) : undefined} onSelect={date => {
-                    const startDate = date ? date.toISOString().split('T')[0] : undefined;
-                    const endDate = date ? addYears(date, 1).toISOString().split('T')[0] : undefined;
-                    setEditingSchool({
-                      ...editingSchool,
-                      subscription_start: startDate,
-                      subscription_end: endDate
-                    });
-                  }} initialFocus className="p-3 pointer-events-auto" />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="subscription_end">Subscription End</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {editingSchool.subscription_end ? format(new Date(editingSchool.subscription_end), "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={editingSchool.subscription_end ? new Date(editingSchool.subscription_end) : undefined} onSelect={date => setEditingSchool({
-                    ...editingSchool,
-                    subscription_end: date ? date.toISOString().split('T')[0] : undefined
-                  })} initialFocus className="p-3 pointer-events-auto" />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="referred_by">Referred By</Label>
-                <Input id="referred_by" value={editingSchool.referred_by || ''} onChange={e => setEditingSchool({
-              ...editingSchool,
-              referred_by: e.target.value
-            })} placeholder="Who referred this school?" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  
-                  <div className="flex items-center space-x-2 pt-2">
-                    <Checkbox id="competition_module" checked={editingSchool.competition_module || false} onCheckedChange={checked => setEditingSchool({
-                  ...editingSchool,
-                  competition_module: checked as boolean
-                })} />
-                    <Label htmlFor="competition_module">Competition Tracking</Label>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  
-                  <div className="flex items-center space-x-2 pt-2">
-                    <Checkbox id="competition_portal" checked={editingSchool.competition_portal || false} onCheckedChange={checked => setEditingSchool({
-                  ...editingSchool,
-                  competition_portal: checked as boolean
-                })} />
-                    <Label htmlFor="competition_portal">Competition Portal</Label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" value={editingSchool.notes || ''} onChange={e => setEditingSchool({
-              ...editingSchool,
-              notes: e.target.value
-            })} placeholder="Additional notes about this school..." rows={3} />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select value={editingSchool.timezone || 'America/New_York'} onValueChange={value => setEditingSchool({
-              ...editingSchool,
-              timezone: value
-            })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select timezone" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-md z-50">
-                    {COMMON_TIMEZONES.map(tz => <SelectItem key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => handleEditDialogOpenChange(false)} disabled={isUploadingLogo}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isUploadingLogo}>
-                  {isUploadingLogo ? 'Uploading...' : 'Update School'}
-                </Button>
-              </div>
-            </form>}
-        </DialogContent>
-      </Dialog>
-
       {/* Delete School Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
@@ -768,7 +386,6 @@ const SchoolManagementPage = () => {
         </DialogContent>
       </Dialog>
 
-      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
     </div>;
 };
 export default SchoolManagementPage;
