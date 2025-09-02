@@ -71,6 +71,9 @@ export const OpenCompetitionRecord: React.FC = () => {
   const { timezone } = useSchoolTimezone();
   const { createEvent } = useEvents({ eventType: '', assignedTo: '' });
 
+  console.log('OpenCompetitionRecord - competitionId from params:', competitionId);
+  console.log('OpenCompetitionRecord - current URL:', window.location.pathname);
+
   // Data state
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [events, setEvents] = useState<CompetitionEvent[]>([]);
@@ -114,16 +117,23 @@ export const OpenCompetitionRecord: React.FC = () => {
 
   // Fetch competition details
   const fetchCompetition = useCallback(async () => {
-    if (!competitionId) return;
+    console.log('fetchCompetition called with competitionId:', competitionId);
+    if (!competitionId) {
+      console.log('No competitionId provided, returning');
+      return;
+    }
 
     try {
+      console.log('Fetching competition from database with ID:', competitionId);
       const { data: comp, error } = await supabase
         .from('cp_competitions')
         .select('*')
         .eq('id', competitionId)
         .single();
 
+      console.log('Database response:', { comp, error });
       if (error) throw error;
+      console.log('Setting competition data:', comp);
       setCompetition(comp);
     } catch (error) {
       console.error('Error fetching competition:', error);
