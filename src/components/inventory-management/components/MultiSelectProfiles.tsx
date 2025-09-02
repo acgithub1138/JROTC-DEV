@@ -18,11 +18,14 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
   disabled = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { users, isLoading } = useSchoolUsers();
+  const { users, isLoading } = useSchoolUsers(true);
 
-  const selectedUsers = users?.filter(user => value.includes(user.id)) || [];
+  // Filter for active cadets only
+  const cadets = users?.filter(user => user.role === 'cadet' && user.active) || [];
+
+  const selectedUsers = cadets?.filter(user => value.includes(user.id)) || [];
   
-  const filteredUsers = users?.filter(user => {
+  const filteredUsers = cadets?.filter(user => {
     const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   }) || [];
@@ -44,7 +47,7 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
       {/* Selected users display */}
       {selectedUsers.length > 0 && (
         <div className="space-y-2">
-          <span className="text-sm font-medium">Selected Users ({selectedUsers.length})</span>
+          <span className="text-sm font-medium">Selected Cadets ({selectedUsers.length})</span>
           <div className="flex flex-wrap gap-2">
             {selectedUsers.map((user) => (
               <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
@@ -69,7 +72,7 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search users..."
+              placeholder="Search cadets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -81,9 +84,9 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
         <ScrollArea className="h-48">
           <div className="p-2">
             {isLoading ? (
-              <div className="text-sm text-gray-500 p-2">Loading users...</div>
+              <div className="text-sm text-gray-500 p-2">Loading cadets...</div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-sm text-gray-500 p-2">No users found.</div>
+              <div className="text-sm text-gray-500 p-2">No active cadets found.</div>
             ) : (
               <div className="space-y-2">
                 {filteredUsers.map((user) => (
