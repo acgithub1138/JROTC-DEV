@@ -354,7 +354,7 @@ export const ScoreSheetRecordPage = () => {
                   <div>
                     <div className="text-sm font-medium">Event Type</div>
                     <div className="mt-1">
-                      <Badge variant="outline">{template?.event}</Badge>
+                      <Badge variant="outline">{template?.competition_event_types?.name || template?.event}</Badge>
                     </div>
                   </div>
                   <div>
