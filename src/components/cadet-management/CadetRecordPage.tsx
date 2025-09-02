@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PTTestsTab } from './components/tabs/PTTestsTab';
 import { InspectionTab } from './components/tabs/InspectionTab';
 import { CommunityServiceTab } from './components/tabs/CommunityServiceTab';
-import { EquipmentTab } from './components/tabs/EquipmentTab';
+import { ProfileEquipmentTab } from './components/ProfileEquipmentTab';
 import { HistoryTab } from './components/tabs/HistoryTab';
 import { Profile } from './types';
 type CadetRecordMode = 'create' | 'edit' | 'view';
@@ -324,7 +324,7 @@ export const CadetRecordPage: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="equipment" className="mt-6">
-            <EquipmentTab cadetId={currentCadet.id} />
+            <ProfileEquipmentTab profileId={currentCadet.id} />
           </TabsContent>
           
           <TabsContent value="history" className="mt-6">
