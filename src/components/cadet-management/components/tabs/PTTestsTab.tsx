@@ -77,7 +77,8 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b py-[6px] px-[8px]">
@@ -106,6 +107,40 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                 </tr>)}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {paginatedData.map(test => (
+            <Card key={test.id} className="p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="font-medium">
+                  {format(new Date(test.date), 'PPP')}
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Push-ups:</span>
+                  <div className="font-medium">{test.push_ups || 'N/A'}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sit-ups:</span>
+                  <div className="font-medium">{test.sit_ups || 'N/A'}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Plank:</span>
+                  <div className="font-medium">{formatTime(test.plank_time)}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Mile Run:</span>
+                  <div className="font-medium">{formatTime(test.mile_time)}</div>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
         
         {/* Pagination Controls */}

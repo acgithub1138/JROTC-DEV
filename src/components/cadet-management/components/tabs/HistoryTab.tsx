@@ -93,7 +93,8 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="overflow-x-auto hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
@@ -139,6 +140,47 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
                 </TableRow>)}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {paginatedData.map(entry => (
+            <Card key={entry.id} className="p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  {getTypeIcon(entry.type)}
+                  <Badge variant={getTypeBadgeVariant(entry.type)} className="text-xs">
+                    {entry.type}
+                  </Badge>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <span className="text-muted-foreground text-sm">User:</span>
+                  <div className="font-semibold">{entry.user_name || 'Unknown'}</div>
+                </div>
+                {entry.details && (
+                  <div>
+                    <span className="text-muted-foreground text-sm">Details:</span>
+                    <div className="text-sm mt-1">
+                      {entry.details.includes(',') ? (
+                        <ul className="list-disc list-inside space-y-1">
+                          {entry.details.split(',').map((item, index) => (
+                            <li key={index}>{item.trim()}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span>{entry.details}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground pt-2 border-t">
+                  {format(new Date(entry.date), 'MMM dd, yyyy HH:mm')}
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
         
         {/* Pagination Controls */}

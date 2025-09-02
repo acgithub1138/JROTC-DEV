@@ -72,7 +72,8 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b">
@@ -104,6 +105,36 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
                 </tr>)}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {paginatedData.map(service => (
+            <Card key={service.id} className="p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="font-medium">
+                  {format(new Date(service.date), 'PPP')}
+                </div>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {service.hours} hrs
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <div className="text-muted-foreground text-sm">Event:</div>
+                  <div className="font-medium">{service.event}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground text-sm">Notes:</div>
+                  <div className="text-sm mt-1">{service.notes || 'No notes'}</div>
+                </div>
+                <div className="text-xs text-muted-foreground pt-2 border-t">
+                  Recorded: {format(new Date(service.created_at), 'PP')}
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
         
         {/* Pagination Controls */}

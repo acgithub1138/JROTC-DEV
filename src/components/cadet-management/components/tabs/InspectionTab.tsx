@@ -81,7 +81,8 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b">
@@ -116,6 +117,37 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
                 </tr>)}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {paginatedData.map(inspection => (
+            <Card key={inspection.id} className="p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="font-medium">
+                  {format(new Date(inspection.date), 'PPP')}
+                </div>
+                <Badge variant={getGradeBadgeVariant(inspection.grade)}>
+                  {inspection.grade}%
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-sm">Status:</span>
+                  <Badge variant="outline" className="text-xs">
+                    {getGradeLabel(inspection.grade)}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-muted-foreground text-sm">Notes:</div>
+                  <div className="text-sm mt-1">{inspection.notes || 'No notes'}</div>
+                </div>
+                <div className="text-xs text-muted-foreground pt-2 border-t">
+                  Recorded: {format(new Date(inspection.created_at), 'PP')}
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
         
         {/* Pagination Controls */}
