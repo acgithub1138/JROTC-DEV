@@ -3,8 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Edit, Trash2, Eye, Phone, Mail, Calendar } from 'lucide-react';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface Judge {
   id: string;
   name: string;
@@ -46,6 +48,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
     canEdit,
     canDelete
   } = useCPJudgesPermissions();
+  const isMobile = useIsMobile();
   
   const isAllSelected = judges.length > 0 && selectedJudges.length === judges.length;
   const isIndeterminate = selectedJudges.length > 0 && selectedJudges.length < judges.length;
@@ -57,6 +60,102 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
         No judges found. Create your first judge to get started.
       </div>;
   }
+
+  // Mobile Card View
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              checked={isAllSelected}
+              onCheckedChange={onSelectAll}
+              aria-label="Select all judges"
+              className={isIndeterminate ? "data-[state=checked]:bg-primary data-[state=checked]:opacity-50" : ""}
+            />
+            <span className="text-sm text-muted-foreground">
+              {selectedJudges.length > 0 ? `${selectedJudges.length} selected` : 'Select all'}
+            </span>
+          </div>
+        </div>
+        
+        {judges.map((judge) => (
+          <Card key={judge.id} className="p-4">
+            <CardContent className="p-0">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={selectedJudges.includes(judge.id)}
+                    onCheckedChange={(checked) => onSelectJudge(judge.id, checked as boolean)}
+                    aria-label={`Select ${judge.name}`}
+                  />
+                  <div>
+                    <h3 className="font-medium">{judge.name}</h3>
+                    <Badge variant={judge.available ? "default" : "secondary"} className="mt-1">
+                      {judge.available ? 'Available' : 'Unavailable'}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex space-x-1">
+                  {canView && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onView(judge)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {canEdit && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onEdit(judge)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => onDelete(judge)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {judge.phone && (
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{judge.phone}</span>
+                  </div>
+                )}
+                {judge.email && (
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4" />
+                    <span>{judge.email}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Created {new Date(judge.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop Table View
   return <div className="border rounded-lg">
       <Table>
         <TableHeader>

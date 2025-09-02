@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown, Calendar, Award } from 'lucide-react';
 import { type CompetitionTemplate } from '../../competition-portal/my-competitions/hooks/useCompetitionTemplates';
 import { SortConfig } from '@/components/ui/sortable-table';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface TemplatesTableProps {
   templates: CompetitionTemplate[];
   isLoading: boolean;
@@ -32,6 +34,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
   canCopyTemplate
 }) => {
   const [deleteConfirmTemplate, setDeleteConfirmTemplate] = useState<CompetitionTemplate | null>(null);
+  const isMobile = useIsMobile();
   const handleDeleteClick = (template: CompetitionTemplate) => {
     setDeleteConfirmTemplate(template);
   };
@@ -71,6 +74,142 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
         <p>No templates found</p>
       </div>;
   }
+
+  // Mobile Card View
+  if (isMobile) {
+    return <>
+      <div className="space-y-4">
+        {templates.map((template) => (
+          <Card key={template.id} className="p-4">
+            <CardContent className="p-0">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-medium">{template.template_name}</h3>
+                    {template.is_global && (
+                      <div title="Global Template">
+                        <Globe className="w-4 h-4 text-blue-500" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <Badge variant="outline">
+                      {template.competition_event_types?.name || template.event}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {template.jrotc_program.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Created {new Date(template.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col space-y-1 ml-2">
+                  {onPreview && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            onClick={() => onPreview(template)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Preview template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {onCopy && canCopyTemplate?.(template) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            onClick={() => onCopy(template.id)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Copy template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {onEdit && canEditTemplate?.(template) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            onClick={() => onEdit(template)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {onDelete && canEditTemplate?.(template) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8 text-destructive hover:text-destructive" 
+                            onClick={() => handleDeleteClick(template)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <AlertDialog open={!!deleteConfirmTemplate} onOpenChange={open => !open && setDeleteConfirmTemplate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the template "{deleteConfirmTemplate?.template_name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>;
+  }
+
+  // Desktop Table View  
   return <>
       <div className="rounded-md border">
         <Table>
