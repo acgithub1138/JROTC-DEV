@@ -18,6 +18,7 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useCommunityService, CommunityServiceRecord } from '../hooks/useCommunityService';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface CommunityServiceTabProps {
   searchTerm?: string;
 }
@@ -25,6 +26,7 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
   searchTerm
 }) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     userProfile
   } = useAuth();
@@ -149,7 +151,50 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
             </p>
             {canCreate && !debouncedSearchTerm && !selectedDate}
           </div>
-        </Card> : <Card>
+        </Card> : 
+        isMobile ? (
+          <div className="space-y-4">
+            {sortedData.map(record => (
+              <Card key={record.id} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 className="font-medium">{record.cadet.last_name}, {record.cadet.first_name}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      {record.cadet.grade && (
+                        <Badge variant="outline" className="text-xs">
+                          {record.cadet.grade}
+                        </Badge>
+                      )}
+                      <span className="text-sm text-muted-foreground">
+                        {format(new Date(record.date), 'MMM d, yyyy')}
+                      </span>
+                    </div>
+                  </div>
+                  {(canEdit || canDelete) && (
+                    <TableActionButtons 
+                      canView={false} 
+                      canEdit={canEdit} 
+                      canDelete={canDelete} 
+                      onEdit={() => handleEditRecord(record)} 
+                      onDelete={() => handleDeleteRecord(record)} 
+                    />
+                  )}
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Hours:</span>
+                    <span className="font-medium">{record.hours}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Event:</span>
+                    <p className="text-sm mt-1">{record.event}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+        <Card>
           <Table>
             <TableHeader>
               <TableRow>
@@ -200,7 +245,8 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
                 </TableRow>)}
             </TableBody>
           </Table>
-        </Card>}
+        </Card>
+        )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteRecordId} onOpenChange={() => setDeleteRecordId(null)}>

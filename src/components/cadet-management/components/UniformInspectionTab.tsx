@@ -19,6 +19,7 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { UniformInspectionBulkDialog } from './UniformInspectionBulkDialog';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface UniformInspectionTabProps {
   searchTerm?: string;
 }
@@ -39,6 +40,7 @@ export const UniformInspectionTab = ({
   searchTerm: externalSearchTerm = ''
 }: UniformInspectionTabProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     userProfile
   } = useAuth();
@@ -182,7 +184,53 @@ export const UniformInspectionTab = ({
                 Try selecting a different date or clearing the date filter.
               </p>}
           </CardContent>
-        </Card> : <Card>
+        </Card> : 
+        isMobile ? (
+          <div className="space-y-4">
+            {sortedData.map(inspection => (
+              <Card key={inspection.id}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-medium">{inspection.profiles.last_name}, {inspection.profiles.first_name}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        {inspection.profiles.grade && (
+                          <Badge variant="outline" className="text-xs">
+                            {inspection.profiles.grade}
+                          </Badge>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          {formatTimeForDisplay(inspection.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                        </span>
+                      </div>
+                    </div>
+                    {(canUpdate || canDelete) && (
+                      <TableActionButtons 
+                        canEdit={canUpdate} 
+                        canDelete={canDelete} 
+                        onEdit={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
+                        onDelete={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
+                      />
+                    )}
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Score:</span>
+                      <span className="font-medium">{inspection.grade || '-'}</span>
+                    </div>
+                    {inspection.notes && (
+                      <div>
+                        <span className="text-muted-foreground">Notes:</span>
+                        <p className="text-sm mt-1">{inspection.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+        <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -246,7 +294,8 @@ export const UniformInspectionTab = ({
               </TableBody>
             </Table>
           </CardContent>
-        </Card>}
+        </Card>
+        )}
 
     </div>;
 };

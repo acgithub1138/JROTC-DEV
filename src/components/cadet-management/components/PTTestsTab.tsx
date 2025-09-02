@@ -20,6 +20,7 @@ import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { usePTTestEdit } from '../hooks/usePTTestEdit';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
@@ -44,6 +45,7 @@ export const PTTestsTab = ({
   searchTerm: externalSearchTerm = ''
 }: PTTestsTabProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     userProfile
   } = useAuth();
@@ -208,7 +210,84 @@ export const PTTestsTab = ({
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No PT tests found</p>
           </CardContent>
-        </Card> : <Card>
+        </Card> : 
+        isMobile ? (
+          <div className="space-y-4">
+            {sortedData.map(test => (
+              <Card key={test.id}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-medium">{test.profiles.last_name}, {test.profiles.first_name}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        {test.profiles.grade && (
+                          <Badge variant="outline" className="text-xs">
+                            {test.profiles.grade}
+                          </Badge>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          {formatTimeForDisplay(test.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                        </span>
+                      </div>
+                    </div>
+                    {(canUpdate || canDelete) && (
+                      <div className="flex gap-2">
+                        {canUpdate && (
+                          <Button variant="outline" size="icon" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)} className="h-8 w-8">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700" disabled={isDeleting}>
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this PT test for {test.profiles.first_name} {test.profiles.last_name}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(test)} disabled={isDeleting}>
+                                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Push-Ups:</span>
+                      <span className="ml-2 font-medium">{test.push_ups || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Sit-Ups:</span>
+                      <span className="ml-2 font-medium">{test.sit_ups || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Plank:</span>
+                      <span className="ml-2 font-medium">{formatTime(test.plank_time)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Mile:</span>
+                      <span className="ml-2 font-medium">{formatTime(test.mile_time)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+        <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -316,6 +395,7 @@ export const PTTestsTab = ({
               </TableBody>
             </Table>
           </CardContent>
-        </Card>}
+        </Card>
+        )}
     </div>;
 };
