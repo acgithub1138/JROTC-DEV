@@ -20,6 +20,10 @@ export const ScoreSheetPage = () => {
     const match = location.pathname.match(/my-competitions\/score-sheets\/([^/?]+)/);
     return match?.[1] || '';
   }, [location.pathname]);
+  
+  // Check if this is a portal competition
+  const searchParams = new URLSearchParams(location.search);
+  const isPortalCompetition = searchParams.get('source') === 'portal';
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
@@ -174,16 +178,18 @@ export const ScoreSheetPage = () => {
                 selectedEvent={selectedEvent}
                 onEventChange={setSelectedEvent}
               />
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="show-all-schools"
-                  checked={showAllSchools}
-                  onCheckedChange={handleToggleChange}
-                />
-                <label htmlFor="show-all-schools" className="text-sm font-medium">
-                  Show All Schools
-                </label>
-              </div>
+              {isPortalCompetition && (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="show-all-schools"
+                    checked={showAllSchools}
+                    onCheckedChange={handleToggleChange}
+                  />
+                  <label htmlFor="show-all-schools" className="text-sm font-medium">
+                    Show All Schools
+                  </label>
+                </div>
+              )}
             </div>
             <Button
               variant="outline"
