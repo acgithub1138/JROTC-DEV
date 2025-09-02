@@ -23,7 +23,11 @@ const TeamsManagementPage = () => {
   } = useTeamMutations();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('teams');
+  const {
+    canCreate,
+    canEdit: canUpdate,
+    canDelete
+  } = useTablePermissions('teams');
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
   const [viewMembersDialogOpen, setViewMembersDialogOpen] = useState(false);
   const [emailTeam, setEmailTeam] = useState<TeamWithMembers | null>(null);
@@ -31,7 +35,6 @@ const TeamsManagementPage = () => {
   const handleAddTeam = () => {
     navigate('/app/teams/team_record');
   };
-
   const handleEditTeam = (team: TeamWithMembers) => {
     navigate(`/app/teams/team_record?id=${team.id}`);
   };
@@ -61,36 +64,12 @@ const TeamsManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <TeamsPageHeader 
-        onAddTeam={handleAddTeam} 
-        canCreate={canCreate} 
-      />
+      <TeamsPageHeader onAddTeam={handleAddTeam} canCreate={canCreate} />
 
       <Card>
         
-        <CardContent>
-          {isMobile ? (
-            <TeamCards 
-              teams={teams} 
-              isLoading={loading} 
-              onEdit={handleEditTeam} 
-              onDelete={handleDeleteTeam} 
-              onViewMembers={handleViewMembers} 
-              onSendEmail={handleSendEmail}
-              canUpdate={canUpdate}
-              canDelete={canDelete}
-            />
-          ) : (
-            <TeamsTable 
-              teams={teams} 
-              onEditTeam={handleEditTeam} 
-              onDeleteTeam={handleDeleteTeam} 
-              onSendEmail={handleSendEmail} 
-              onViewMembers={handleViewMembers}
-              canUpdate={canUpdate}
-              canDelete={canDelete}
-            />
-          )}
+        <CardContent className="py-[8px]">
+          {isMobile ? <TeamCards teams={teams} isLoading={loading} onEdit={handleEditTeam} onDelete={handleDeleteTeam} onViewMembers={handleViewMembers} onSendEmail={handleSendEmail} canUpdate={canUpdate} canDelete={canDelete} /> : <TeamsTable teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteTeam} onSendEmail={handleSendEmail} onViewMembers={handleViewMembers} canUpdate={canUpdate} canDelete={canDelete} />}
 
           {teams.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No teams found. Create your first team to get started.
