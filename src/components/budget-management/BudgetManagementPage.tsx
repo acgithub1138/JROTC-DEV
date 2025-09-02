@@ -116,7 +116,7 @@ const BudgetManagementPage = () => {
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
-          {canView && (
+          {!isMobile && canView && (
             <Button 
               onClick={exportToExcel} 
               variant="outline" 
