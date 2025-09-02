@@ -185,30 +185,17 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
-                    <h3 
-                      className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
-                      onClick={() => onView?.(competition)}
-                    >
-                      {competition.name}
-                    </h3>
-                    <div className="flex items-center gap-6 mt-1 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between">
+                      <h3 
+                        className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => onView?.(competition)}
+                      >
+                        {competition.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="w-4 h-4" />
                         {new Date(competition.competition_date).toLocaleDateString()}
                       </div>
-                      {competition.location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          <a 
-                            href={`https://www.google.com/maps/place/${competition.location.replace(/ /g, '+')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline cursor-pointer"
-                          >
-                            {competition.location}
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
