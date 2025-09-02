@@ -43,7 +43,6 @@ export const SubtaskAssigneeField: React.FC<SubtaskAssigneeFieldProps> = ({
             <SelectContent>
               <SelectItem value="unassigned">Unassigned</SelectItem>
               {users
-                .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
                 .sort((a, b) => {
                   const aName = `${a.last_name}, ${a.first_name}`;
                   const bName = `${b.last_name}, ${b.first_name}`;

@@ -20,12 +20,9 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const { users, isLoading } = useSchoolUsers(true);
 
-  // Filter for active cadets only
-  const cadets = users?.filter(user => user.role === 'cadet' && user.active) || [];
-
-  const selectedUsers = cadets?.filter(user => value.includes(user.id)) || [];
+  const selectedUsers = users?.filter(user => value.includes(user.id)) || [];
   
-  const filteredUsers = cadets?.filter(user => {
+  const filteredUsers = users?.filter(user => {
     const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   }) || [];

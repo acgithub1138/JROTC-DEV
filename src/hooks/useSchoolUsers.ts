@@ -27,6 +27,10 @@ export const useSchoolUsers = (activeOnly?: boolean) => {
 
       if (activeOnly !== undefined) {
         query = query.eq('active', activeOnly);
+        // When filtering for active users, also filter for users with grades
+        if (activeOnly === true) {
+          query = query.not('grade', 'is', null);
+        }
       }
 
       const { data, error } = await query;

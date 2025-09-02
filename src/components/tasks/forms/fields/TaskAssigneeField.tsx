@@ -33,7 +33,6 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({
             <SelectContent>
               <SelectItem value="unassigned">Unassigned</SelectItem>
               {users
-                .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
                 .sort((a, b) => a.last_name.localeCompare(b.last_name))
                 .map((user) => (
                   <SelectItem key={user.id} value={user.id}>
