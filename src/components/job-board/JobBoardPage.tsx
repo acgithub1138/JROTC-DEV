@@ -13,11 +13,13 @@ import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
 import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 const JobBoardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
   const [activeTab, setActiveTab] = useState('table');
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     canManageHierarchy,
     canCreate,
@@ -80,8 +82,8 @@ const JobBoardPage = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="table">Chain of Command</TabsTrigger>
-                <TabsTrigger value="chart">Chain of Command Chart</TabsTrigger>
+                <TabsTrigger value="table">{isMobile ? 'COC' : 'Chain of Command'}</TabsTrigger>
+                <TabsTrigger value="chart">{isMobile ? 'COC Chart' : 'Chain of Command Chart'}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="table" className="mt-4">
