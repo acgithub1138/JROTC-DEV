@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, FileDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
@@ -12,6 +12,7 @@ import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useExportBudgetTransactions } from './hooks/useExportBudgetTransactions';
 export interface BudgetTransaction {
   id: string;
   school_id: string;
@@ -41,7 +42,8 @@ export interface BudgetFilters {
 }
 const BudgetManagementPage = () => {
   const navigate = useNavigate();
-  const { canCreate, canEdit: canUpdate } = useTablePermissions('budget');
+  const { canCreate, canEdit: canUpdate, canView } = useTablePermissions('budget');
+  const { exportToExcel, isExporting } = useExportBudgetTransactions();
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
   const [deletingItem, setDeletingItem] = useState<BudgetTransaction | null>(null);
   const [filters, setFilters] = useState<BudgetFilters>({
@@ -114,6 +116,17 @@ const BudgetManagementPage = () => {
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
+          {canView && (
+            <Button 
+              onClick={exportToExcel} 
+              variant="outline" 
+              disabled={isExporting}
+              className="flex items-center"
+            >
+              <FileDown className="w-4 h-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Export to Excel'}
+            </Button>
+          )}
           {canCreate && (
             <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
