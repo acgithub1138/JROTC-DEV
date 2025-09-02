@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Plus } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { EventSelector } from './components/score-sheet-viewer/EventSelector';
 import { SchoolSelector } from './components/score-sheet-viewer/SchoolSelector';
 import { ScoreSheetTable } from './components/score-sheet-viewer/ScoreSheetTable';
 import { useScoreSheetData } from './components/score-sheet-viewer/hooks/useScoreSheetData';
 import { useCompetitions } from './hooks/useCompetitions';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
+import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const ScoreSheetPage = () => {
@@ -20,6 +23,8 @@ export const ScoreSheetPage = () => {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
+  const [showAllSchools, setShowAllSchools] = useState<boolean>(false);
+  const [selectedSchoolIds, setSelectedSchoolIds] = useState<string[]>([]);
 
   // Get competition data
   const { competitions, isLoading: compsLoading } = useCompetitions();
@@ -27,6 +32,7 @@ export const ScoreSheetPage = () => {
   const { canCreate } = useTablePermissions('competitions');
 
   const { events, schoolMap, isLoading, refetch } = useScoreSheetData(competition, true);
+  const { schools: allSchools } = useCompetitionSchools(competitionId);
 
   // Build school options from events
   const schoolOptions = Array.from(new Set(events.map((e: any) => e.school_id)))
@@ -55,13 +61,22 @@ export const ScoreSheetPage = () => {
   }, [selectedSchoolId]);
 
   useEffect(() => {
-    if (selectedSchoolId && selectedEvent) {
-      const filtered = (events as any[]).filter(event => event.school_id === selectedSchoolId && event.competition_event_types?.name === selectedEvent);
+    if (showAllSchools && selectedEvent && selectedSchoolIds.length > 0) {
+      const filtered = (events as any[]).filter(event => 
+        selectedSchoolIds.includes(event.school_id) && 
+        event.competition_event_types?.name === selectedEvent
+      );
+      setFilteredEvents(filtered);
+    } else if (!showAllSchools && selectedSchoolId && selectedEvent) {
+      const filtered = (events as any[]).filter(event => 
+        event.school_id === selectedSchoolId && 
+        event.competition_event_types?.name === selectedEvent
+      );
       setFilteredEvents(filtered);
     } else {
       setFilteredEvents([]);
     }
-  }, [selectedSchoolId, selectedEvent, events]);
+  }, [selectedSchoolId, selectedEvent, events, showAllSchools, selectedSchoolIds]);
 
   const handleBack = () => {
     navigate('/app/competition-portal/my-competitions');
@@ -71,6 +86,33 @@ export const ScoreSheetPage = () => {
     const returnPath = `/app/competition-portal/my-competitions/score-sheets/${competitionId}`;
     navigate(`/app/competition-portal/my-competitions/add_competition_event?competitionId=${competitionId}&returnPath=${encodeURIComponent(returnPath)}`);
   };
+
+  const handleSchoolSelection = (schoolId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedSchoolIds(prev => [...prev, schoolId]);
+    } else {
+      setSelectedSchoolIds(prev => prev.filter(id => id !== schoolId));
+    }
+  };
+
+  const handleToggleChange = (checked: boolean) => {
+    setShowAllSchools(checked);
+    if (!checked) {
+      setSelectedSchoolIds([]);
+    }
+  };
+
+  // Group events by school for multi-school view
+  const groupedEvents = selectedSchoolIds.reduce((acc, schoolId) => {
+    const schoolEvents = filteredEvents.filter(event => event.school_id === schoolId);
+    if (schoolEvents.length > 0) {
+      acc[schoolId] = {
+        name: schoolMap?.[schoolId] || allSchools.find(s => s.school_id === schoolId)?.school_name || 'Unknown School',
+        events: schoolEvents
+      };
+    }
+    return acc;
+  }, {} as Record<string, { name: string; events: any[] }>);
 
   if (compsLoading) {
     return (
@@ -120,16 +162,28 @@ export const ScoreSheetPage = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-6 flex-wrap">
-              <SchoolSelector
-                schools={schoolOptions}
-                selectedSchoolId={selectedSchoolId}
-                onSchoolChange={setSelectedSchoolId}
-              />
+              {!showAllSchools && (
+                <SchoolSelector
+                  schools={schoolOptions}
+                  selectedSchoolId={selectedSchoolId}
+                  onSchoolChange={setSelectedSchoolId}
+                />
+              )}
               <EventSelector
-                events={eventsForSelectedSchool}
+                events={showAllSchools ? events : eventsForSelectedSchool}
                 selectedEvent={selectedEvent}
                 onEventChange={setSelectedEvent}
               />
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="show-all-schools"
+                  checked={showAllSchools}
+                  onCheckedChange={handleToggleChange}
+                />
+                <label htmlFor="show-all-schools" className="text-sm font-medium">
+                  Show All Schools
+                </label>
+              </div>
             </div>
             <Button
               variant="outline"
@@ -142,7 +196,62 @@ export const ScoreSheetPage = () => {
             </Button>
           </div>
 
-          {selectedEvent && filteredEvents.length > 0 ? (
+          {showAllSchools && selectedEvent && (
+            <div className="space-y-4">
+              <div className="text-sm font-medium">Select Schools to View:</div>
+              <div className="grid grid-cols-3 gap-4">
+                {allSchools
+                  .filter(school => 
+                    events.some(event => 
+                      event.school_id === school.school_id && 
+                      event.competition_event_types?.name === selectedEvent
+                    )
+                  )
+                  .map((school) => (
+                    <div key={school.school_id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={school.school_id}
+                        checked={selectedSchoolIds.includes(school.school_id || '')}
+                        onCheckedChange={(checked) => 
+                          handleSchoolSelection(school.school_id || '', checked as boolean)
+                        }
+                      />
+                      <label
+                        htmlFor={school.school_id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {school.school_name}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {showAllSchools && selectedEvent ? (
+            selectedSchoolIds.length > 0 ? (
+              <div className="space-y-8">
+                {Object.entries(groupedEvents).map(([schoolId, schoolData]) => (
+                  <div key={schoolId} className="space-y-4">
+                    <div className="border-b pb-2">
+                      <h3 className="text-lg font-semibold">{schoolData.name}</h3>
+                      <div className="text-sm text-muted-foreground">
+                        {schoolData.events.length} score sheet{schoolData.events.length !== 1 ? 's' : ''} for {selectedEvent}
+                      </div>
+                    </div>
+                    <ScoreSheetTable 
+                      events={schoolData.events} 
+                      onEventsRefresh={refetch}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Select schools to view their score sheets for {selectedEvent}
+              </div>
+            )
+          ) : !showAllSchools && selectedEvent && filteredEvents.length > 0 ? (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
                 Showing {filteredEvents.length} score sheets for {selectedEvent}
@@ -153,7 +262,7 @@ export const ScoreSheetPage = () => {
                 onEventsRefresh={refetch}
               />
             </div>
-          ) : selectedEvent && filteredEvents.length === 0 ? (
+          ) : !showAllSchools && selectedEvent && filteredEvents.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No score sheets found for {selectedEvent}
             </div>
@@ -164,6 +273,8 @@ export const ScoreSheetPage = () => {
                   <p>No events with score sheets found for this competition.</p>
                   <p className="text-sm mt-2">Add some event score sheets first.</p>
                 </div>
+              ) : showAllSchools ? (
+                'Select an event type and schools to view score sheets'
               ) : (
                 'Select an event type to view score sheets'
               )}
