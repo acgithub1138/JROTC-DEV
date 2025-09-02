@@ -74,10 +74,6 @@ export const OpenCompetitionRecord: React.FC = () => {
   // Extract competitionId from URL if useParams doesn't work due to nested routing
   const location = useLocation();
   const urlCompetitionId = competitionId || location.pathname.split('/')[4]; // Get the 5th segment of the path
-  
-  console.log('OpenCompetitionRecord - competitionId from params:', competitionId);
-  console.log('OpenCompetitionRecord - urlCompetitionId from path:', urlCompetitionId);
-  console.log('OpenCompetitionRecord - current URL:', window.location.pathname);
 
   // Data state
   const [competition, setCompetition] = useState<Competition | null>(null);
@@ -122,23 +118,16 @@ export const OpenCompetitionRecord: React.FC = () => {
 
   // Fetch competition details
   const fetchCompetition = useCallback(async () => {
-    console.log('fetchCompetition called with urlCompetitionId:', urlCompetitionId);
-    if (!urlCompetitionId) {
-      console.log('No urlCompetitionId provided, returning');
-      return;
-    }
+    if (!urlCompetitionId) return;
 
     try {
-      console.log('Fetching competition from database with ID:', urlCompetitionId);
       const { data: comp, error } = await supabase
         .from('cp_competitions')
         .select('*')
         .eq('id', urlCompetitionId)
         .single();
 
-      console.log('Database response:', { comp, error });
       if (error) throw error;
-      console.log('Setting competition data:', comp);
       setCompetition(comp);
     } catch (error) {
       console.error('Error fetching competition:', error);
@@ -148,7 +137,7 @@ export const OpenCompetitionRecord: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [urlCompetitionId, toast]);
+  }, [urlCompetitionId]);
 
   // Fetch competition events
   const fetchEvents = useCallback(async () => {
@@ -174,7 +163,7 @@ export const OpenCompetitionRecord: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [urlCompetitionId, toast]);
+  }, [urlCompetitionId]);
 
   // Fetch existing registrations
   const fetchRegistrations = useCallback(async () => {
@@ -294,6 +283,8 @@ export const OpenCompetitionRecord: React.FC = () => {
 
   // Initialize data on component mount
   useEffect(() => {
+    if (!urlCompetitionId) return;
+    
     const loadData = async () => {
       setIsLoading(true);
       await Promise.all([
@@ -306,7 +297,7 @@ export const OpenCompetitionRecord: React.FC = () => {
     };
     
     loadData();
-  }, [fetchCompetition, fetchEvents, fetchRegistrations, fetchOccupiedSlots]);
+  }, [urlCompetitionId, userProfile?.school_id]);
 
   // Initialize selected events and time slots with current registrations
   useEffect(() => {
