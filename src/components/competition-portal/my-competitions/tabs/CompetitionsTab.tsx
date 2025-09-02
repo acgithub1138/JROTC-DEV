@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search, ArrowUpDown } from 'lucide-react';
 import { ColumnSelector } from '@/components/ui/column-selector';
 import { CompetitionPlacementCards } from '../components/CompetitionPlacementCards';
-import { CompetitionDialog } from '../components/CompetitionDialog';
+
 import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
 
@@ -55,8 +55,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
   const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
   const { canViewDetails } = useTablePermissions('competitions');
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingCompetition, setEditingCompetition] = useState<ExtendedCompetition | null>(null);
   const [viewingCompetition, setViewingCompetition] = useState<ExtendedCompetition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<ExtendedCompetition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
@@ -108,15 +106,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     }
   });
 
-  const handleSubmit = async (data: any) => {
-    if (editingCompetition) {
-      await updateCompetition(editingCompetition.id, data);
-      setEditingCompetition(null);
-    } else {
-      await createCompetition(data);
-      setShowAddDialog(false);
-    }
-  };
 
   const handleAddEvent = (competition: ExtendedCompetition) => {
     setSelectedCompetition(competition);
@@ -173,7 +162,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         </div>
         <div className="flex items-center gap-2">
           {!readOnly && canCreate && (
-            <Button onClick={() => setShowAddDialog(true)}>
+            <Button onClick={() => navigate('/app/competition-portal/my-competitions/add_competition')}>
               <Plus className="w-4 h-4 mr-2" />
               Add Competition
             </Button>
@@ -184,11 +173,11 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       <CompetitionPlacementCards 
         competitions={sortedData} 
         isLoading={isLoading} 
-        onEdit={readOnly || !canUpdate ? undefined : (competition) => {
-          // Don't allow editing portal events
-          if (competition.source_type === 'portal') return;
-          setEditingCompetition(competition);
-        }} 
+      onEdit={readOnly || !canUpdate ? undefined : (competition) => {
+        // Don't allow editing portal events
+        if (competition.source_type === 'portal') return;
+        navigate(`/app/competition-portal/my-competitions/add_competition?mode=edit&id=${competition.id}`);
+      }}
         onDelete={readOnly || !canDelete ? undefined : (competition) => {
           // Don't allow deleting portal events
           if (competition.source_type === 'portal') return;
@@ -201,29 +190,13 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         canAddEvent={canCreate && !readOnly}
       />
 
-      {!readOnly && canCreate && (
-        <>
-          <CompetitionDialog 
-            open={showAddDialog || !!editingCompetition} 
-            onOpenChange={open => {
-              if (!open) {
-                setShowAddDialog(false);
-                setEditingCompetition(null);
-              }
-            }} 
-            competition={editingCompetition as any} 
-            onSubmit={handleSubmit} 
-          />
-
-          {selectedCompetition && (
-            <AddEventDialog 
-              open={showAddEventDialog} 
-              onOpenChange={setShowAddEventDialog} 
-              competitionId={selectedCompetition.id} 
-              onEventCreated={handleEventCreated} 
-            />
-          )}
-        </>
+      {selectedCompetition && (
+        <AddEventDialog 
+          open={showAddEventDialog} 
+          onOpenChange={setShowAddEventDialog} 
+          competitionId={selectedCompetition.id} 
+          onEventCreated={handleEventCreated} 
+        />
       )}
 
       {viewingCompetition && (
@@ -232,7 +205,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           onOpenChange={() => setViewingCompetition(null)}
           competition={viewingCompetition}
           onEdit={() => {
-            setEditingCompetition(viewingCompetition);
+            navigate(`/app/competition-portal/my-competitions/add_competition?mode=edit&id=${viewingCompetition.id}`);
             setViewingCompetition(null);
           }}
         />
