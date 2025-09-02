@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
 import { AddEventForm } from './components/add-event/AddEventForm';
-import { CadetSelector } from '@/components/competition-management/components/add-event/CadetSelector';
-import { ScoreSheetSection } from '@/components/competition-management/components/add-event/ScoreSheetSection';
+import { CadetSelector } from './components/add-event/CadetSelector';
+import { ScoreSheetSection } from './components/add-event/ScoreSheetSection';
 import { useAddEventLogic } from './components/add-event/useAddEventLogic';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -233,6 +233,8 @@ export const AddCompetitionEventPage: React.FC = () => {
                 onTemplateChange={handleTemplateChange} 
                 onJudgeNumberChange={setJudgeNumber} 
                 onTeamNameChange={setTeamName} 
+                showDetails={Boolean(selectedTemplate)}
+                maxJudges={(selectedTemplate as any)?.judges}
               />
 
               {selectedTemplate && (
