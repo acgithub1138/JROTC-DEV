@@ -527,6 +527,34 @@ export const OpenCompetitionRecord: React.FC = () => {
         .eq('school_id', userProfile.school_id);
       if (schedError) throw schedError;
 
+      // Delete associated calendar event
+      try {
+        const { data: calendarEvents, error: fetchError } = await supabase
+          .from('events')
+          .select('id')
+          .eq('school_id', userProfile.school_id)
+          .eq('title', competition.name)
+          .eq('event_type', 'b04588d5-acae-4141-a0cf-20c46bb1ec72')
+          .ilike('description', `%Competition registration - ${competition.name}%`);
+
+        if (fetchError) {
+          console.error('Error fetching calendar events:', fetchError);
+        } else if (calendarEvents && calendarEvents.length > 0) {
+          // Delete the calendar events
+          const { error: deleteCalendarError } = await supabase
+            .from('events')
+            .delete()
+            .in('id', calendarEvents.map(event => event.id));
+          
+          if (deleteCalendarError) {
+            console.error('Error deleting calendar events:', deleteCalendarError);
+          }
+        }
+      } catch (calendarError) {
+        console.error('Error handling calendar event deletion:', calendarError);
+        // Don't throw here - we don't want to fail the entire cancellation for calendar issues
+      }
+
       // Delete competition registration
       const { error: compError } = await supabase
         .from('cp_comp_schools')
@@ -537,7 +565,7 @@ export const OpenCompetitionRecord: React.FC = () => {
 
       toast({
         title: "Registration Cancelled",
-        description: "Your registration has been successfully cancelled."
+        description: "Your registration and calendar event have been successfully cancelled."
       });
 
       // Reset state
