@@ -24,6 +24,7 @@ import { AddCompetitionPage } from './my-competitions/AddCompetitionPage';
 import { AddCompetitionEventPage } from './my-competitions/AddCompetitionEventPage';
 import { JudgeRecordPage } from './pages/JudgeRecordPage';
 import { JudgesBulkUploadPage } from './pages/JudgesBulkUploadPage';
+import { ScoreSheetRecordPage } from './pages/ScoreSheetRecordPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -155,6 +156,8 @@ const CompetitionPortalLayout = () => {
       return <ViewScoreSheet />;
     } else if (path.startsWith('/app/competition-portal/competition-details/')) {
       return <CompetitionDetailsPage />;
+    } else if (path.startsWith('/app/competition-portal/score-sheets/score_sheet_record')) {
+      return <ScoreSheetRecordPage />;
     } else if (path === '/app/competition-portal/score-sheets') {
       return <ScoreSheetsPage />;
     } else if (path.startsWith('/app/competition-portal/judges/judges_bulk_upload')) {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCPScoreSheetsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -7,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { TemplatesTable } from '../competition-management/components/TemplatesTable';
-import { TemplateDialog } from '../competition-management/components/TemplateDialog';
-import { TemplatePreviewDialog } from '../competition-management/components/TemplatePreviewDialog';
 import { useCompetitionTemplates, type CompetitionTemplate } from './my-competitions/hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { TablePagination } from '@/components/ui/table-pagination';
@@ -19,9 +18,7 @@ import type { Database } from '@/integrations/supabase/types';
 
 export const ScoreSheetsPage = () => {
   const { userProfile } = useAuth();
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<CompetitionTemplate | null>(null);
-  const [previewTemplate, setPreviewTemplate] = useState<CompetitionTemplate | null>(null);
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   
   const {
@@ -30,8 +27,6 @@ export const ScoreSheetsPage = () => {
     showOnlyMyTemplates,
     searchQuery,
     setSearchQuery,
-    createTemplate,
-    updateTemplate,
     deleteTemplate,
     copyTemplate,
     toggleMyTemplatesFilter,
@@ -70,16 +65,16 @@ export const ScoreSheetsPage = () => {
 
   const { canCreate, canUpdate, canDelete, canViewDetails, canView } = useCPScoreSheetsPermissions();
 
-  const handleSubmit = async (data: any) => {
-    if (editingTemplate) {
-      await updateTemplate(editingTemplate.id, data);
-      setEditingTemplate(null);
-    } else {
-      await createTemplate(data);
-      setShowAddDialog(false);
-    }
-    // Refetch to ensure consistent data display
-    refetch();
+  const handleAddTemplate = () => {
+    navigate('/app/competition-portal/score-sheets/score_sheet_record?mode=create');
+  };
+
+  const handleEditTemplate = (template: CompetitionTemplate) => {
+    navigate(`/app/competition-portal/score-sheets/score_sheet_record?mode=edit&id=${template.id}`);
+  };
+
+  const handleViewTemplate = (template: CompetitionTemplate) => {
+    navigate(`/app/competition-portal/score-sheets/score_sheet_record?mode=view&id=${template.id}`);
   };
 
   const handleCopy = async (templateId: string) => {
@@ -126,7 +121,7 @@ export const ScoreSheetsPage = () => {
               <Label htmlFor="my-templates">My Templates</Label>
             </div>
             {canCreate && (
-              <Button onClick={() => setShowAddDialog(true)}>
+              <Button onClick={handleAddTemplate}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Template
               </Button>
@@ -139,10 +134,10 @@ export const ScoreSheetsPage = () => {
           isLoading={isLoading}
           sortConfig={sortConfig}
           onSort={handleSort}
-          onEdit={canUpdate ? (t: any) => setEditingTemplate(t) : undefined}
+          onEdit={canUpdate ? handleEditTemplate : undefined}
           onDelete={canDelete ? deleteTemplate : undefined}
           onCopy={canCreate ? handleCopy : undefined}
-          onPreview={canViewDetails ? (t: any) => setPreviewTemplate(t) : undefined}
+          onPreview={canViewDetails ? handleViewTemplate : undefined}
           canEditTemplate={(t: any) => canEditTemplate(t)}
           canCopyTemplate={(t: any) => canCreate && canCopyTemplate(t)}
         />
@@ -155,25 +150,6 @@ export const ScoreSheetsPage = () => {
           onPageChange={setCurrentPage}
         />
 
-        {(canCreate || canUpdate) && (
-          <TemplateDialog
-            open={showAddDialog || !!editingTemplate}
-            onOpenChange={(open) => {
-              if (!open) {
-                setShowAddDialog(false);
-                setEditingTemplate(null);
-              }
-            }}
-            template={editingTemplate as any}
-            onSubmit={handleSubmit}
-          />
-        )}
-
-        <TemplatePreviewDialog
-          open={!!previewTemplate}
-          onOpenChange={(open) => !open && setPreviewTemplate(null)}
-          template={previewTemplate as any}
-        />
       </div>
     </div>
   );
