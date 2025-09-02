@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { InventoryTable } from './components/InventoryTable';
 import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
 import { DeleteInventoryDialog } from './components/DeleteInventoryDialog';
-import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { InventoryActions } from './components/InventoryActions';
 import { InventoryFilters } from './components/InventoryFilters';
 import { StockCounter } from './components/StockCounter';
@@ -18,7 +17,6 @@ import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 const InventoryManagementPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [viewingItem, setViewingItem] = useState<any>(null);
   const [deletingItem, setDeletingItem] = useState<any>(null);
@@ -43,7 +41,7 @@ const InventoryManagementPage = () => {
   const { columns, enabledColumns, toggleColumn, isLoading: columnsLoading } = 
     useColumnPreferences('inventory', availableColumns);
 
-  const { inventoryItems, isLoading, error, createItem, bulkCreateItems, updateItem, deleteItem } = 
+  const { inventoryItems, isLoading, error, updateItem, deleteItem } = 
     useInventoryItems();
 
   const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
@@ -72,23 +70,6 @@ const InventoryManagementPage = () => {
 
   const handleViewItem = (item: any) => {
     navigate(`/app/inventory/inventory_record?id=${item.id}`);
-  };
-
-  const handleBulkImport = async (items: any[]) => {
-    try {
-      await bulkCreateItems(items);
-      toast({
-        title: "Success",
-        description: "Inventory items imported successfully"
-      });
-      setIsBulkDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to import inventory items",
-        variant: "destructive"
-      });
-    }
   };
 
   const handleDeleteItem = (item: any) => {
@@ -163,7 +144,6 @@ const InventoryManagementPage = () => {
         <div className="flex gap-2">
           <InventoryActions
             onAddItem={handleCreateNew}
-            onBulkOperations={() => setIsBulkDialogOpen(true)}
             onExport={handleExport}
           />
         </div>
@@ -204,12 +184,6 @@ const InventoryManagementPage = () => {
         totalPages={totalPages} 
         totalItems={(filteredItems || []).length} 
         onPageChange={handlePageChange} 
-      />
-
-      <BulkOperationsDialog
-        open={isBulkDialogOpen}
-        onOpenChange={setIsBulkDialogOpen}
-        onImport={handleBulkImport}
       />
 
       {viewingItem && (

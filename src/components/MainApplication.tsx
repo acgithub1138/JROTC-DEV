@@ -43,6 +43,7 @@ import JobBoardPage from '@/components/job-board/JobBoardPage';
 import TeamsManagementPage from '@/components/teams/TeamsManagementPage';
 import InventoryManagementPage from '@/components/inventory-management/InventoryManagementPage';
 import { InventoryRecordPage } from '@/components/inventory-management/InventoryRecordPage';
+import { InventoryBulkUploadPage } from '@/components/inventory-management/InventoryBulkUploadPage';
 import BudgetManagementPage from '@/components/budget-management/BudgetManagementPage';
 import { BudgetIncomeRecordPage } from '@/components/budget-management/BudgetIncomeRecordPage';
 import { BudgetExpenseRecordPage } from '@/components/budget-management/BudgetExpenseRecordPage';
@@ -233,6 +234,7 @@ const MainApplication = () => {
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />
             <Route path="inventory/inventory_record" element={<InventoryRecordPage />} />
+            <Route path="inventory/inventory_bulk_upload" element={<InventoryBulkUploadPage />} />
             <Route path="budget" element={<BudgetManagementPage />} />
             <Route path="budget/income_record" element={<BudgetIncomeRecordPage />} />
             <Route path="budget/expense_record" element={<BudgetExpenseRecordPage />} />

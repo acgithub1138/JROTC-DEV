@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
-import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { InventoryActions } from './components/InventoryActions';
 import { InventoryFilters } from './components/InventoryFilters';
 import { StockCounter } from './components/StockCounter';
@@ -18,7 +17,6 @@ import { useOptimizedInventoryPermissions } from '@/hooks/useOptimizedInventoryP
 const InventoryManagementPageOptimized = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [viewingItem, setViewingItem] = useState<any>(null);
   const { toast } = useToast();
@@ -45,7 +43,7 @@ const InventoryManagementPageOptimized = () => {
   const { columns, enabledColumns, toggleColumn, isLoading: columnsLoading } = 
     useColumnPreferences('inventory', availableColumns);
 
-  const { inventoryItems, isLoading, error, createItem, bulkCreateItems, updateItem, deleteItem } = 
+  const { inventoryItems, isLoading, error, createItem, updateItem, deleteItem } = 
     useInventoryItems();
 
   const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
@@ -121,10 +119,6 @@ const InventoryManagementPageOptimized = () => {
         variant: "destructive"
       });
     }
-  };
-
-  const handleBulkImport = async (items: any[]) => {
-    await bulkCreateItems(items);
   };
 
   const exportToCSV = () => {
@@ -203,7 +197,6 @@ const InventoryManagementPageOptimized = () => {
         <div className="flex gap-2">
           <InventoryActions
             onAddItem={() => setIsAddDialogOpen(true)}
-            onBulkOperations={() => setIsBulkDialogOpen(true)}
             onExport={exportToCSV}
           />
         </div>
@@ -255,12 +248,6 @@ const InventoryManagementPageOptimized = () => {
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen} 
         onSubmit={handleCreateItem} 
-      />
-
-      <BulkOperationsDialog 
-        open={isBulkDialogOpen} 
-        onOpenChange={setIsBulkDialogOpen} 
-        onImport={handleBulkImport} 
       />
       
       {viewingItem && (
