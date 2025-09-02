@@ -102,39 +102,35 @@ export const useCadetHistory = (cadetId: string) => {
       if (!cadetId) return [];
       
       try {
-        // Get profile updates from profiles table
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, created_at, updated_at, rank, grade, flight, cadet_year')
-          .eq('id', cadetId)
-          .single();
+        // Get detailed profile change history from profile_history table
+        const { data: historyData, error: historyError } = await supabase
+          .from('profile_history')
+          .select(`
+            id,
+            field_name,
+            old_value,
+            new_value,
+            created_at,
+            changed_by,
+            profiles!changed_by(first_name, last_name)
+          `)
+          .eq('profile_id', cadetId)
+          .order('created_at', { ascending: false });
 
-        if (profileError) throw profileError;
+        if (historyError) throw historyError;
 
-        // Create history entries from profile data
-        const historyEntries = [];
-        
-        if (profileData) {
-          historyEntries.push({
-            id: `profile-created-${profileData.id}`,
-            date: profileData.created_at,
-            type: 'Profile Created',
-            user_name: 'System',
-            details: `Initial rank: ${profileData.rank || 'Not set'}`
-          });
+        // Transform the data into history entries
+        const historyEntries = (historyData || []).map(entry => ({
+          id: entry.id,
+          date: entry.created_at,
+          type: 'Profile Updated',
+          user_name: entry.profiles 
+            ? `${entry.profiles.first_name || ''} ${entry.profiles.last_name || ''}`.trim() || 'Unknown User'
+            : 'System',
+          details: `${formatFieldName(entry.field_name)}: ${entry.old_value || 'Not set'} → ${entry.new_value || 'Not set'}`
+        }));
 
-          if (profileData.updated_at !== profileData.created_at) {
-            historyEntries.push({
-              id: `profile-updated-${profileData.id}`,
-              date: profileData.updated_at,
-              type: 'Profile Updated',
-              user_name: 'System',
-              details: `Current rank: ${profileData.rank || 'Not set'}, Grade: ${profileData.grade || 'Not set'}`
-            });
-          }
-        }
-
-        return historyEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return historyEntries;
       } catch (error) {
         console.warn('History query failed:', error);
         return [];
@@ -142,4 +138,22 @@ export const useCadetHistory = (cadetId: string) => {
     },
     enabled: !!cadetId,
   });
+};
+
+// Helper function to format field names nicely
+const formatFieldName = (fieldName: string): string => {
+  const fieldMap: Record<string, string> = {
+    'rank': 'Rank',
+    'grade': 'Grade',
+    'flight': 'Flight',
+    'role': 'Role',
+    'cadet_year': 'Cadet Year',
+    'first_name': 'First Name',
+    'last_name': 'Last Name',
+    'email': 'Email',
+    'phone': 'Phone',
+    'start_year': 'Start Year'
+  };
+  
+  return fieldMap[fieldName] || fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
 };
