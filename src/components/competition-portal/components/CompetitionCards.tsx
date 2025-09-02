@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { CalendarDays, Users, GitCompareArrows, X } from 'lucide-react';
+import { CalendarDays, Users, Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Competition {
@@ -83,11 +83,11 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                             className="h-8 w-8" 
                             onClick={() => handleEditCompetition(competition)}
                           >
-                            <GitCompareArrows className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Manage Competition</p>
+                          <p>Edit Competition</p>
                         </TooltipContent>
                       </Tooltip>
                       
