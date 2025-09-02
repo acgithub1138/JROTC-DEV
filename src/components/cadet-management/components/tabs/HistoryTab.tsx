@@ -67,7 +67,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead className="px-[8px] py-[8px]">Type</TableHead>
-                <TableHead className="px-[8px] py-[8px]">Description</TableHead>
+                <TableHead className="px-[8px] py-[8px]">User</TableHead>
                 <TableHead className="px-[8px] py-[8px]">Details</TableHead>
                 <TableHead className="px-[8px] py-[8px]">Date</TableHead>
               </TableRow>
@@ -83,7 +83,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-semibold">{entry.description}</span>
+                    <span className="font-semibold">{entry.user_name || 'Unknown'}</span>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm text-muted-foreground">

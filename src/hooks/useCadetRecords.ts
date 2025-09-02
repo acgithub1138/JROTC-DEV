@@ -119,7 +119,7 @@ export const useCadetHistory = (cadetId: string) => {
             id: `profile-created-${profileData.id}`,
             date: profileData.created_at,
             type: 'Profile Created',
-            description: 'Cadet profile was created',
+            user_name: 'System',
             details: `Initial rank: ${profileData.rank || 'Not set'}`
           });
 
@@ -128,7 +128,7 @@ export const useCadetHistory = (cadetId: string) => {
               id: `profile-updated-${profileData.id}`,
               date: profileData.updated_at,
               type: 'Profile Updated',
-              description: 'Cadet profile was updated',
+              user_name: 'System',
               details: `Current rank: ${profileData.rank || 'Not set'}, Grade: ${profileData.grade || 'Not set'}`
             });
           }
