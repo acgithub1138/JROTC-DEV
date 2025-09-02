@@ -274,7 +274,7 @@ export const CadetRecordPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">
-                <span className="text-blue-600 font-mono">
+                <span className="text-blue-600">
                   {currentCadet.last_name}, {currentCadet.first_name}
                 </span>
               </h1>
