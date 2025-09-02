@@ -618,11 +618,16 @@ export const OpenCompetitionRecord: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Competition Details */}
           <Card>
-            <CardHeader>
+            <CardHeader className="relative">
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
                 Competition Information
               </CardTitle>
+              {competition.program && (
+                <Badge variant="secondary" className="absolute top-4 right-4">
+                  {competition.program.replace('_', ' ').toUpperCase()}
+                </Badge>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {competition.description && (
@@ -669,11 +674,6 @@ export const OpenCompetitionRecord: React.FC = () => {
                   </div>
                 )}
                 
-                {competition.program && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{competition.program.replace('_', ' ').toUpperCase()}</Badge>
-                  </div>
-                )}
               </div>
 
               {/* SOP Section */}
