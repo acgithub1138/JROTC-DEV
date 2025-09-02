@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useOpenCompsOpenPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 interface Competition {
   id: string;
   name: string;
@@ -27,7 +26,6 @@ interface Competition {
   sop_link?: string;
   sop_text?: string;
 }
-
 interface OpenCompetitionCardsProps {
   competitions: Competition[];
   registrations: any[];
@@ -42,27 +40,29 @@ interface OpenCompetitionCardsProps {
     canDelete: boolean;
   };
 }
-
 export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   competitions,
   registrations,
   onViewDetails,
   onRegisterInterest,
   onCancelRegistration,
-  permissions,
+  permissions
 }) => {
   const navigate = useNavigate();
   const defaultPermissions = useOpenCompsOpenPermissions();
-  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = permissions || defaultPermissions;
-  
+  const {
+    canRead,
+    canViewDetails,
+    canCreate,
+    canUpdate,
+    canDelete
+  } = permissions || defaultPermissions;
   const [showSopModal, setShowSopModal] = useState(false);
   const [selectedSopText, setSelectedSopText] = useState('');
   const [selectedCompetitionName, setSelectedCompetitionName] = useState('');
-  
   const isRegistered = (competitionId: string) => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
   };
-
   const handleViewSop = (sopText: string, competitionName: string) => {
     setSelectedSopText(sopText);
     setSelectedCompetitionName(competitionName);
@@ -71,45 +71,31 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
 
   // Check if user can read records
   if (!canRead) {
-    return (
-      <div className="text-center py-12">
+    return <div className="text-center py-12">
         <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
         <p className="text-gray-600">
           You don't have permission to view competitions.
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {competitions.map((competition) => (
-        <Card key={competition.id} className="hover:shadow-lg transition-shadow relative">
-          {isRegistered(competition.id) && (
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+  return <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {competitions.map(competition => <Card key={competition.id} className="hover:shadow-lg transition-shadow relative">
+          {isRegistered(competition.id) && <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
               <Badge variant="default" className="bg-green-500 text-white">
                 Registered
               </Badge>
-            </div>
-          )}
+            </div>}
           <CardHeader className={isRegistered(competition.id) ? "pt-12" : ""}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <CardTitle className="text-lg line-clamp-2">
-                  {canViewDetails ? (
-                    <button
-                      onClick={() => {
-                        // Navigate to score sheet page for this competition
-                        window.location.href = `/app/competitions/score-sheets/${competition.id}`;
-                      }}
-                      className="text-left hover:text-primary hover:underline transition-colors cursor-pointer w-full"
-                    >
+                  {canViewDetails ? <button onClick={() => {
+                // Navigate to score sheet page for this competition
+                window.location.href = `/app/competitions/score-sheets/${competition.id}`;
+              }} className="text-left hover:text-primary hover:underline transition-colors cursor-pointer w-full">
                       {competition.name}
-                    </button>
-                  ) : (
-                    competition.name
-                  )}
+                    </button> : competition.name}
                 </CardTitle>
                 <CardDescription className="mt-1">
                   {competition.description || 'No description available'}
@@ -123,144 +109,75 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2 text-sm text-muted-foreground">
-              {competition.fee && (
-                <div className="flex items-center gap-2">
+              {competition.fee && <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
                   <span className="font-medium text-green-600">
                     ${competition.fee.toFixed(2)} entry fee
                   </span>
-                </div>
-              )}
+                </div>}
               <div className="flex items-center gap-2">
                 <CalendarDays className="w-4 h-4" />
                 <span>
                   {format(new Date(competition.start_date), 'MMM d, yyyy')}
-                  {competition.end_date && 
-                    format(new Date(competition.end_date), 'MMM d, yyyy') !== format(new Date(competition.start_date), 'MMM d, yyyy') && 
-                    ` - ${format(new Date(competition.end_date), 'MMM d, yyyy')}`
-                  }
+                  {competition.end_date && format(new Date(competition.end_date), 'MMM d, yyyy') !== format(new Date(competition.start_date), 'MMM d, yyyy') && ` - ${format(new Date(competition.end_date), 'MMM d, yyyy')}`}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 <span>
                   <div>
-                    <a 
-                      href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline cursor-pointer"
-                    >
+                    <a href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">
                       {competition.address}
                     </a>
                   </div>
                   <div>
-                    <a 
-                      href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-primary hover:underline cursor-pointer"
-                    >
+                    <a href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`} target="_blank" rel="noopener noreferrer" className="block text-primary hover:underline cursor-pointer">
                       {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
                     </a>
                   </div>
                 </span>
               </div>
-              {competition.max_participants && (
-                <div className="flex items-center gap-2">
+              {competition.max_participants && <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>Max {competition.max_participants} participants</span>
-                </div>
-              )}
-              {competition.registration_deadline && (
-                <div className="text-sm">
+                </div>}
+              {competition.registration_deadline && <div className="text-sm">
                   <strong>Registration Deadline:</strong> {format(new Date(competition.registration_deadline), 'MMM d, yyyy')}
-                </div>
-              )}
+                </div>}
               <div className="text-sm">
                 <strong>Hosting School:</strong> {competition.hosting_school || 'Not specified'}
               </div>
-              {(competition.sop_link || competition.sop_text) && (
-                <div className="flex items-center gap-2">
+              {(competition.sop_link || competition.sop_text) && <div className="flex items-center gap-2">
                   <span>
                     <strong>SOP:</strong>{' '}
-                    {competition.sop_link ? (
-                      <a 
-                        href={competition.sop_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline cursor-pointer"
-                      >
+                    {competition.sop_link ? <a href={competition.sop_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">
                         {competition.sop_link}
-                      </a>
-                    ) : competition.sop_text ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-1 text-primary hover:text-primary-dark"
-                        onClick={() => handleViewSop(competition.sop_text, competition.name)}
-                      >
+                      </a> : competition.sop_text ? <Button variant="ghost" size="sm" className="h-auto p-1 text-primary hover:text-primary-dark" onClick={() => handleViewSop(competition.sop_text, competition.name)}>
                         <Eye className="w-3 h-3 mr-1" />
                         View
-                      </Button>
-                    ) : null}
+                      </Button> : null}
                   </span>
-                </div>
-              )}
+                </div>}
             </div>
             
             <div className="flex gap-1">
-              {canViewDetails && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="flex-1" 
-                  onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  View
-                </Button>
-              )}
-              {isRegistered(competition.id) ? (
-                <>
-                  {canUpdate && (
-                    <Button 
-                      size="sm"
-                      className="flex-1" 
-                      onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
-                    >
+              {canViewDetails}
+              {isRegistered(competition.id) ? <>
+                  {canUpdate && <Button size="sm" className="flex-1" onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}>
                       Edit
-                    </Button>
-                  )}
-                  {canDelete && (
-                    <Button 
-                      variant="destructive"
-                      size="sm"
-                      className="flex-1" 
-                      onClick={() => onCancelRegistration(competition.id)}
-                    >
+                    </Button>}
+                  {canDelete && <Button variant="destructive" size="sm" className="flex-1" onClick={() => onCancelRegistration(competition.id)}>
                       <X className="w-3 h-3 mr-1" />
                       Cancel
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <>
-                  {canCreate && (
-                    <Button 
-                      size="sm"
-                      className="flex-1" 
-                      onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}
-                    >
+                    </Button>}
+                </> : <>
+                  {canCreate && <Button size="sm" className="flex-1" onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}>
                       Register
-                    </Button>
-                  )}
-                </>
-              )}
+                    </Button>}
+                </>}
             </div>
           </CardContent>
-        </Card>
-      ))}
+        </Card>)}
       
       {/* SOP Modal */}
       <Dialog open={showSopModal} onOpenChange={setShowSopModal}>
@@ -272,7 +189,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto">
-            <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-muted rounded-md" dangerouslySetInnerHTML={{ __html: selectedSopText }}>
+            <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-muted rounded-md" dangerouslySetInnerHTML={{
+            __html: selectedSopText
+          }}>
             </div>
           </div>
           <DialogFooter>
@@ -282,6 +201,5 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 };
