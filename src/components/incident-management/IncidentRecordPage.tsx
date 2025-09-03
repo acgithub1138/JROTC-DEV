@@ -136,7 +136,8 @@ export const IncidentRecordPage: React.FC = () => {
   const {
     comments,
     isLoading: commentsLoading,
-    addComment
+    addComment,
+    addSystemComment
   } = useIncidentComments(incident?.id || '');
 
   // Update currentMode when URL mode changes
@@ -183,10 +184,70 @@ export const IncidentRecordPage: React.FC = () => {
         Object.entries(updateData).filter(([_, value]) => value !== undefined)
       );
       
+      // Generate change tracking comments
+      const changes: string[] = [];
+      
+      // Helper functions to get display names
+      const getStatusLabel = (value: string) => statusOptions.find(s => s.value === value)?.label || value;
+      const getPriorityLabel = (value: string) => priorityOptions.find(p => p.value === value)?.label || value;
+      const getCategoryLabel = (value: string) => categoryOptions.find(c => c.value === value)?.label || value;
+      const getUserName = (userId: string | null) => {
+        if (!userId) return 'Unassigned';
+        const user = allUsers.find(u => u.id === userId);
+        return user ? `${user.last_name}, ${user.first_name}` : 'Admin';
+      };
+      
+      // Check each field for changes
+      if (filteredUpdateData.title && filteredUpdateData.title !== incident.title) {
+        changes.push(`Title changed from "${incident.title}" to "${filteredUpdateData.title}"`);
+      }
+      
+      if (filteredUpdateData.description && filteredUpdateData.description !== incident.description) {
+        const oldDesc = incident.description || 'No description';
+        changes.push(`Description updated`);
+      }
+      
+      if (filteredUpdateData.status && filteredUpdateData.status !== incident.status) {
+        const oldStatus = getStatusLabel(incident.status);
+        const newStatus = getStatusLabel(filteredUpdateData.status);
+        changes.push(`Status changed from "${oldStatus}" to "${newStatus}"`);
+      }
+      
+      if (filteredUpdateData.priority && filteredUpdateData.priority !== incident.priority) {
+        const oldPriority = getPriorityLabel(incident.priority);
+        const newPriority = getPriorityLabel(filteredUpdateData.priority);
+        changes.push(`Priority changed from "${oldPriority}" to "${newPriority}"`);
+      }
+      
+      if (filteredUpdateData.category && filteredUpdateData.category !== incident.category) {
+        const oldCategory = getCategoryLabel(incident.category);
+        const newCategory = getCategoryLabel(filteredUpdateData.category);
+        changes.push(`Category changed from "${oldCategory}" to "${newCategory}"`);
+      }
+      
+      if (filteredUpdateData.assigned_to_admin !== incident.assigned_to_admin) {
+        const oldAssignee = getUserName(incident.assigned_to_admin);
+        const newAssignee = getUserName(filteredUpdateData.assigned_to_admin || null);
+        changes.push(`Assignment changed from "${oldAssignee}" to "${newAssignee}"`);
+      }
+      
+      if (filteredUpdateData.due_date && filteredUpdateData.due_date !== incident.due_date) {
+        const oldDate = incident.due_date ? format(new Date(incident.due_date), 'MM/dd/yyyy') : 'No due date';
+        const newDate = format(new Date(filteredUpdateData.due_date), 'MM/dd/yyyy');
+        changes.push(`Due date changed from "${oldDate}" to "${newDate}"`);
+      }
+      
+      // Update the incident
       await updateIncident.mutateAsync({
         id: incident.id,
         data: filteredUpdateData
       });
+      
+      // Add system comment for changes if any were made
+      if (changes.length > 0) {
+        const changeMessage = changes.join('\n');
+        await addSystemComment.mutateAsync(changeMessage);
+      }
       
       setHasUnsavedChanges(false);
       setEditingSummary(false);
