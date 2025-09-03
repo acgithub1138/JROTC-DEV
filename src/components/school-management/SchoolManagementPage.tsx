@@ -18,6 +18,7 @@ import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Edit, Trash2, Search, Plus, CalendarIcon, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 interface School {
   id: string;
@@ -51,6 +52,7 @@ const SchoolManagementPage = () => {
   const {
     toast
   } = useToast();
+  const isMobile = useIsMobile();
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -221,108 +223,178 @@ const SchoolManagementPage = () => {
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('name')}>
-                    <span className="flex items-center gap-2">
-                      Name
-                      {getSortIcon('name')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('contact')}>
-                    <span className="flex items-center gap-2">
-                      Contact
-                      {getSortIcon('contact')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_module')}>
-                    <span className="flex items-center gap-2">
-                      My Competitions
-                      {getSortIcon('competition_module')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_portal')}>
-                    <span className="flex items-center gap-2">
-                      Competition Portal
-                      {getSortIcon('competition_portal')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('subscription_start')}>
-                    <span className="flex items-center gap-2">
-                      Subscription Start
-                      {getSortIcon('subscription_start')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('subscription_end')}>
-                    <span className="flex items-center gap-2">
-                      Subscription End
-                      {getSortIcon('subscription_end')}
-                    </span>
-                  </Button>
-                </TableHead>
-                <TableHead className="text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedSchools.map(school => <TableRow key={school.id}>
-                  <TableCell className={`font-medium py-2 ${isSubscriptionExpiringSoon(school.subscription_end) ? 'bg-red-100 text-black' : ''}`}>
-                    {school.name}
-                  </TableCell>
-                  <TableCell className="py-2">{school.contact || '-'}</TableCell>
-                  <TableCell className="py-2">{school.competition_module ? 'Yes' : 'No'}</TableCell>
-                  <TableCell className="py-2">{school.competition_portal ? 'Yes' : 'No'}</TableCell>
-                  <TableCell className="py-2">
-                    {school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : '-'}
-                  </TableCell>
-                  <TableCell className="py-2">
-                    {school.subscription_end ? format(new Date(school.subscription_end), "MM/dd/yyyy") : '-'}
-                  </TableCell>
-                  <TableCell className="text-right py-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditSchool(school)}>
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit school</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => {
-                          setSchoolToDelete(school);
-                          setDeleteDialogOpen(true);
-                        }}>
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete school</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+{isMobile ? (
+            // Mobile Card View
+            <div className="space-y-4">
+              {paginatedSchools.map(school => (
+                <Card key={school.id} className={`${isSubscriptionExpiringSoon(school.subscription_end) ? 'border-red-200 bg-red-50' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className={`font-semibold text-lg ${isSubscriptionExpiringSoon(school.subscription_end) ? 'text-black' : ''}`}>
+                        {school.name}
+                      </h3>
+                      <div className="flex gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEditSchool(school)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit school</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => {
+                            setSchoolToDelete(school);
+                            setDeleteDialogOpen(true);
+                          }}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Delete school</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </div>
-                  </TableCell>
-                </TableRow>)}
-            </TableBody>
-          </Table>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Contact:</span>
+                        <span>{school.contact || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">My Competitions:</span>
+                        <span>{school.competition_module ? 'Yes' : 'No'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Competition Portal:</span>
+                        <span>{school.competition_portal ? 'Yes' : 'No'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subscription Start:</span>
+                        <span>{school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subscription End:</span>
+                        <span>{school.subscription_end ? format(new Date(school.subscription_end), "MM/dd/yyyy") : '-'}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            // Desktop Table View
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('name')}>
+                      <span className="flex items-center gap-2">
+                        Name
+                        {getSortIcon('name')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('contact')}>
+                      <span className="flex items-center gap-2">
+                        Contact
+                        {getSortIcon('contact')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_module')}>
+                      <span className="flex items-center gap-2">
+                        My Competitions
+                        {getSortIcon('competition_module')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_portal')}>
+                      <span className="flex items-center gap-2">
+                        Competition Portal
+                        {getSortIcon('competition_portal')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('subscription_start')}>
+                      <span className="flex items-center gap-2">
+                        Subscription Start
+                        {getSortIcon('subscription_start')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('subscription_end')}>
+                      <span className="flex items-center gap-2">
+                        Subscription End
+                        {getSortIcon('subscription_end')}
+                      </span>
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedSchools.map(school => <TableRow key={school.id}>
+                    <TableCell className={`font-medium py-2 ${isSubscriptionExpiringSoon(school.subscription_end) ? 'bg-red-100 text-black' : ''}`}>
+                      {school.name}
+                    </TableCell>
+                    <TableCell className="py-2">{school.contact || '-'}</TableCell>
+                    <TableCell className="py-2">{school.competition_module ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="py-2">{school.competition_portal ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="py-2">
+                      {school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : '-'}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {school.subscription_end ? format(new Date(school.subscription_end), "MM/dd/yyyy") : '-'}
+                    </TableCell>
+                    <TableCell className="text-right py-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditSchool(school)}>
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit school</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => {
+                            setSchoolToDelete(school);
+                            setDeleteDialogOpen(true);
+                          }}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Delete school</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                  </TableRow>)}
+              </TableBody>
+            </Table>
+          )}
 
           {filteredSchools.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No schools found

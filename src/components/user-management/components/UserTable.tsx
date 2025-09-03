@@ -1,9 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, X, UserPlus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { User } from '../types';
 import { getRoleIcon, getRoleColor } from './UserRoleUtils';
 
@@ -42,6 +44,7 @@ export const UserTable = ({
   onDisableUser,
   onEnableUser,
 }: UserTableProps) => {
+  const isMobile = useIsMobile();
   const getSortIcon = (field: string) => {
     if (!onSort || sortField !== field) {
       return <ArrowUpDown className="w-4 h-4 ml-1" />;
@@ -56,6 +59,112 @@ export const UserTable = ({
       onSort(field);
     }
   };
+  if (isMobile) {
+    // Mobile Card View
+    return (
+      <div className="space-y-4">
+        {users.map((user) => (
+          <Card key={user.id} className={activeTab === 'disabled' ? 'opacity-60' : ''}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  {(activeTab === 'active' ? canDisableUser(user) : canEnableUser(user)) && (
+                    <Checkbox
+                      checked={selectedUsers.has(user.id)}
+                      onCheckedChange={(checked) => onSelectUser(user.id, checked as boolean)}
+                      aria-label={`Select ${user.first_name} ${user.last_name}`}
+                    />
+                  )}
+                  <h3 className="font-semibold text-lg">
+                    {user.first_name} {user.last_name}
+                  </h3>
+                </div>
+                <div className="flex gap-2">
+                  {canEditUser(user) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => onEditUser(user)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit user</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {activeTab === 'active' && canDisableUser(user) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon" 
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300"
+                            onClick={() => onDisableUser(user)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Disable user</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {activeTab === 'disabled' && canEnableUser(user) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => onEnableUser(user)}
+                          >
+                            <UserPlus className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Enable user</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Role:</span>
+                  <Badge variant="secondary" className={`${getRoleColor(user.user_roles?.role_name || user.role)} flex items-center gap-1 w-fit`}>
+                    {getRoleIcon(user.user_roles?.role_name || user.role)}
+                    {(user.user_roles?.role_name || user.role).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">School:</span>
+                  <span className="text-right">{user.schools?.name || 'No school assigned'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Created:</span>
+                  <span>{new Date(user.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop Table View
   return (
     <Table>
       <TableHeader>
