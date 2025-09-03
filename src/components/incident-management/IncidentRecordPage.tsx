@@ -110,9 +110,9 @@ export const IncidentRecordPage: React.FC = () => {
   const {
     users: allUsers
   } = useSchoolUsers();
-  const {
-    users: activeUsers
-  } = useSchoolUsers(true);
+  
+  // Get active users for incident assignment (don't filter by grade)
+  const activeUsers = allUsers.filter(user => user.active);
 
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<IncidentRecordMode>(mode);
