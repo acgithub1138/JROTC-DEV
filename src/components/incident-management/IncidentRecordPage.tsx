@@ -10,7 +10,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { IncidentCommentsSection } from './components/IncidentCommentsSection';
 import { IncidentFormContent } from './forms/IncidentFormContent';
 import { EditableIncidentField } from './components/EditableIncidentField';
-import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { IncidentAttachmentSection } from './components/IncidentAttachmentSection';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 import { useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentMutations } from '@/hooks/incidents/useIncidentMutations';
@@ -617,11 +617,11 @@ export const IncidentRecordPage: React.FC = () => {
           <Card>
             <CardHeader className="py-[8px]">
               <CardTitle className="flex items-center justify-between">
-                <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showTitleWithCount={true} />
+                <IncidentAttachmentSection incidentId={incident.id} canEdit={canEditIncident} defaultOpen={true} showTitleWithCount={true} />
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showContentOnly={true} />
+              <IncidentAttachmentSection incidentId={incident.id} canEdit={canEditIncident} defaultOpen={true} showContentOnly={true} />
             </CardContent>
           </Card>
         </div>
