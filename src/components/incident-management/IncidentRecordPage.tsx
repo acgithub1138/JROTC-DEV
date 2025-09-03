@@ -13,6 +13,7 @@ import { EditableIncidentField } from './components/EditableIncidentField';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 import { useIncidents } from '@/hooks/incidents/useIncidents';
+import { useIncidentMutations } from '@/hooks/incidents/useIncidentMutations';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useIncidentPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useAuth } from '@/contexts/AuthContext';
@@ -95,6 +96,7 @@ export const IncidentRecordPage: React.FC = () => {
     incidents,
     isLoading: incidentsLoading
   } = useIncidents();
+  const { updateIncident } = useIncidentMutations();
   const incident = incidents.find(i => i.id === incidentId);
   const {
     data: statusOptions = []
@@ -161,23 +163,37 @@ export const IncidentRecordPage: React.FC = () => {
   // Handle save changes
   const handleSaveChanges = async () => {
     if (!incident || !hasUnsavedChanges) return;
+    
     try {
       setIsLoading(true);
-      // This would need to be implemented with actual incident update mutation
-      // Similar to the task implementation
-      toast({
-        title: "Changes Saved",
-        description: "Incident has been updated successfully."
+      
+      // Prepare update data with only the fields that can be updated
+      const updateData = {
+        title: editedIncident.title,
+        description: editedIncident.description,
+        status: editedIncident.status,
+        priority: editedIncident.priority,
+        category: editedIncident.category,
+        assigned_to_admin: editedIncident.assigned_to_admin,
+        due_date: editedIncident.due_date
+      };
+      
+      // Filter out undefined values
+      const filteredUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+      
+      await updateIncident.mutateAsync({
+        id: incident.id,
+        data: filteredUpdateData
       });
+      
       setHasUnsavedChanges(false);
       setEditingSummary(false);
       setEditingDescription(false);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive"
-      });
+      console.error('Failed to save incident changes:', error);
+      // The error toast is already handled by the mutation
     } finally {
       setIsLoading(false);
     }
@@ -397,9 +413,9 @@ export const IncidentRecordPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {canEditIncident && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+            {canEditIncident && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading || updateIncident.isPending} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading || updateIncident.isPending ? 'Saving...' : 'Save Changes'}
               </Button>}
           </div>
         </div>
