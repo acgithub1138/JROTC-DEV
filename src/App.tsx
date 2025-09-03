@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PermissionProvider } from "@/contexts/PermissionContext";
 import { SidebarPreferencesProvider } from "@/contexts/SidebarPreferencesContext";
@@ -81,7 +81,7 @@ const App = () => (
                 <Route path="contact" element={<ContactPage />} />
                 <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="terms-conditions" element={<TermsConditionsPage />} />
-                <Route path="login" element={<LoginPage />} />
+                <Route path="login" element={<Navigate to="/app/auth" replace />} />
                 
                 {/* Product Module Pages */}
                 <Route path="products/cadet-management" element={<ProductPage module="cadet" />} />
@@ -261,8 +261,8 @@ const App = () => (
               {/* Parent Registration Route */}
               <Route path="/parent-register" element={<ParentRegistrationPage />} />
 
-              {/* Redirect /app/login to login */}
-              <Route path="/app/login" element={<LoginPage />} />
+              {/* Redirect /app/login to /app/auth */}
+              <Route path="/app/login" element={<Navigate to="/app/auth" replace />} />
               
               {/* Protected Application Routes */}
               <Route 
