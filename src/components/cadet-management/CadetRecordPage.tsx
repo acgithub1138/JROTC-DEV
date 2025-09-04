@@ -284,10 +284,12 @@ export const CadetRecordPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button onClick={() => navigate(`/app/cadets/my_service_record?cadet_id=${currentCadet.id}`)} variant="outline" className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add Service Hours
-            </Button>
+            {userProfile?.id === currentCadet.id && (
+              <Button onClick={() => navigate(`/app/cadets/my_service_record?cadet_id=${currentCadet.id}`)} variant="outline" className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Service Hours
+              </Button>
+            )}
             {canEditCadet}
             {canEditCadet && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isSubmitting} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
