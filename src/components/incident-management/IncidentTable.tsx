@@ -124,19 +124,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 <h4 className="font-medium">{incident.title}</h4>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Assigned To:</span>
-                  <p className="font-medium">
-                    {incident.assigned_to_admin 
-                      ? (userProfile?.role === 'admin' 
-                          ? ((incident as any).assigned_to_admin_profile 
-                              ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
-                              : 'Admin')
-                          : 'Admin')
-                      : 'Unassigned'}
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Created By:</span>
                   <p className="font-medium">
@@ -203,7 +191,6 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
-            <TableHead>Assigned To</TableHead>
             <TableHead>Created By</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -241,15 +228,6 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 <Badge variant="secondary" className={getPriorityBadgeClass(incident.priority)}>
                   {incident.priority}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {incident.assigned_to_admin 
-                  ? (userProfile?.role === 'admin' 
-                      ? ((incident as any).assigned_to_admin_profile 
-                          ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
-                          : 'Admin')
-                      : 'Admin')
-                  : 'Unassigned'}
               </TableCell>
               <TableCell>
                 {(incident as any).created_by_profile 
