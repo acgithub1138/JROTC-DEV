@@ -83,7 +83,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
     item: currentRecord?.item || '',
     type: (currentRecord?.type as 'equipment' | 'travel' | 'meals' | 'supplies' | 'other') || 'other' as const,
     description: currentRecord?.description || '',
-    date: currentRecord?.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
+    date: currentRecord?.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
     amount: currentRecord?.amount || 0,
     payment_method: (currentRecord?.payment_method as 'cash' | 'check' | 'debit_card' | 'credit_card' | 'other') || 'cash' as const,
     status: (currentRecord?.status as 'pending' | 'paid' | 'not_paid') || 'pending' as const
@@ -113,7 +113,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
         item: currentRecord.item || '',
         type: (currentRecord.type as 'equipment' | 'travel' | 'meals' | 'supplies' | 'other') || 'other' as const,
         description: currentRecord.description || '',
-        date: currentRecord.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
+        date: currentRecord.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
         amount: currentRecord.amount || 0,
         payment_method: (currentRecord.payment_method as 'cash' | 'check' | 'debit_card' | 'credit_card' | 'other') || 'cash' as const,
         status: (currentRecord.status as 'pending' | 'paid' | 'not_paid') || 'pending' as const

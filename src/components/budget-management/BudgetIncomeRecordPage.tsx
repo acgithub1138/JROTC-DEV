@@ -80,7 +80,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
     item: currentRecord?.item || '',
     type: (currentRecord?.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
     description: currentRecord?.description || '',
-    date: currentRecord?.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
+    date: currentRecord?.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
     amount: currentRecord?.amount || 0
   };
 
@@ -108,7 +108,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         item: currentRecord.item || '',
         type: (currentRecord.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
         description: currentRecord.description || '',
-        date: currentRecord.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
+        date: currentRecord.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
         amount: currentRecord.amount || 0
       };
       form.reset(newDefaults);
