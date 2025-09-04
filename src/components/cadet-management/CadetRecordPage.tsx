@@ -168,7 +168,7 @@ export const CadetRecordPage: React.FC = () => {
     navigate('/app/cadets');
   };
   const handleCadetUpdated = (updatedCadet: Profile) => {
-    navigate(`/app/cadets/cadet_record?mode=view&id=${updatedCadet.id}`);
+    navigate('/app/cadets');
   };
   const handleCancel = () => {
     if (currentMode === 'create') {
