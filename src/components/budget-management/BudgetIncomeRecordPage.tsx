@@ -22,6 +22,8 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { getSchoolDateKey, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -40,6 +42,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { timezone } = useSchoolTimezone();
   
   // Extract mode and record ID from URL parameters
   const mode = searchParams.get('mode') as BudgetRecordMode || 'view';
@@ -77,7 +80,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
     item: currentRecord?.item || '',
     type: (currentRecord?.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
     description: currentRecord?.description || '',
-    date: currentRecord?.date ? new Date(currentRecord.date) : new Date(),
+    date: currentRecord?.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
     amount: currentRecord?.amount || 0
   };
 
@@ -105,7 +108,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         item: currentRecord.item || '',
         type: (currentRecord.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
         description: currentRecord.description || '',
-        date: currentRecord.date ? new Date(currentRecord.date) : new Date(),
+        date: currentRecord.date ? convertToSchoolTimezone(currentRecord.date, timezone) : new Date(),
         amount: currentRecord.amount || 0
       };
       form.reset(newDefaults);
@@ -192,7 +195,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         category: 'income' as const,
         type: data.type,
         description: data.description,
-        date: `${data.date.getFullYear()}-${String(data.date.getMonth() + 1).padStart(2, '0')}-${String(data.date.getDate()).padStart(2, '0')}`,
+        date: getSchoolDateKey(data.date, timezone),
         amount: data.amount,
         archive: false
       };
