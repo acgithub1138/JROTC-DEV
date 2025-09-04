@@ -127,7 +127,7 @@ export const CalendarRecordPage: React.FC = () => {
   // Load event data if editing
   useEffect(() => {
     const loadEvent = async () => {
-      if (!eventId || timezoneLoading) return;
+      if (!eventId || timezoneLoading || !events || events.length === 0) return;
       
       setIsLoading(true);
       try {
@@ -180,7 +180,7 @@ export const CalendarRecordPage: React.FC = () => {
     };
 
     loadEvent();
-  }, [eventId, events, form, navigate, timezone, timezoneLoading]);
+  }, [eventId, events, form, navigate, timezone, timezoneLoading, toast]);
 
   // Set default values for new events
   useEffect(() => {
