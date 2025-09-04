@@ -199,7 +199,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
         category: 'expense' as const,
         type: data.type,
         description: data.description,
-        date: format(data.date, 'yyyy-MM-dd'),
+        date: `${data.date.getFullYear()}-${String(data.date.getMonth() + 1).padStart(2, '0')}-${String(data.date.getDate()).padStart(2, '0')}`,
         amount: data.amount,
         payment_method: data.payment_method,
         status: data.status,
