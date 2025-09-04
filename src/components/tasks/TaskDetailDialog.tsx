@@ -14,6 +14,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, Copy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -38,6 +40,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   onOpenChange,
   onEdit
 }) => {
+  const { timezone } = useSchoolTimezone();
   const {
     userProfile
   } = useAuth();
@@ -453,7 +456,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                       });
                     }
                   }} className="h-8 w-auto min-w-[150px]" /> : <span className="text-sm font-medium">
-                        {currentTask.due_date ? format(new Date(currentTask.due_date), 'PPP') : 'No due date'}
+                        {currentTask.due_date ? formatTimeForDisplay(currentTask.due_date, TIME_FORMATS.FULL_DATE, timezone) : 'No due date'}
                       </span>}
                  </div>
               </CardContent>
@@ -495,9 +498,9 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
-                   <span className="text-sm font-medium">
-                     {format(new Date(currentTask.created_at), 'PPP')}
-                   </span>
+                    <span className="text-sm font-medium">
+                      {formatTimeForDisplay(currentTask.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+                    </span>
                  </div>
                  
                </CardContent>

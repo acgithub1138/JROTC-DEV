@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 
@@ -24,6 +26,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   onNewCommentChange
 }) => {
   const [internalNewComment, setInternalNewComment] = useState('');
+  const { timezone } = useSchoolTimezone();
   
   // Use external comment state if provided, otherwise use internal state
   const newComment = externalNewComment !== undefined ? externalNewComment : internalNewComment;
@@ -200,9 +203,9 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>
                 )}
               </div>
-              <span className="text-xs text-gray-500">
-                {format(new Date(comment.created_at), 'MMM d, yyyy HH:mm')}
-              </span>
+               <span className="text-xs text-gray-500">
+                 {formatTimeForDisplay(comment.created_at, TIME_FORMATS.DATETIME_24H, timezone)}
+               </span>
             </div>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">
               {renderCommentText(comment.comment_text)}

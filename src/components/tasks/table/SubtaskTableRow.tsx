@@ -4,8 +4,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { format } from 'date-fns';
 import { Eye } from 'lucide-react';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
@@ -37,6 +38,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
   onSelectTask,
 }) => {
   const { canUpdate } = useTaskPermissions();
+  const { timezone } = useSchoolTimezone();
   const { updateSubtask } = useSubtasks();
   const { handleSystemComment } = useSubtaskSystemComments();
   const { addComment } = useSubtaskComments(subtask.id);
@@ -211,11 +213,11 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {subtask.due_date ? format(new Date(subtask.due_date), 'MMM d, yyyy') : 'No due date'}
+            {subtask.due_date ? formatTimeForDisplay(subtask.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">
-          {format(new Date(subtask.created_at), 'MMM d, yyyy')}
+          {formatTimeForDisplay(subtask.created_at, TIME_FORMATS.SHORT_DATE, timezone)}
         </TableCell>
         <TableCell className="py-2">
           <TableActionButtons

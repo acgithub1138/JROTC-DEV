@@ -11,6 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
 import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -36,6 +38,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   onOpenChange,
   onEdit
 }) => {
+  const { timezone } = useSchoolTimezone();
   const {
     userProfile
   } = useAuth();
@@ -388,9 +391,9 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
-                   <span className="text-sm font-medium">
-                     {format(new Date(currentSubtask.created_at), 'PPP')}
-                   </span>
+                    <span className="text-sm font-medium">
+                      {formatTimeForDisplay(currentSubtask.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+                    </span>
                  </div>
                  
                </CardContent>

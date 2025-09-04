@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { format } from 'date-fns';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { SubtaskTableRow } from './SubtaskTableRow';
@@ -52,6 +53,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 }) => {
   const navigate = useNavigate();
   const { canCreate, canUpdate, canViewDetails } = useTaskPermissions();
+  const { timezone } = useSchoolTimezone();
   const { updateTask } = useTasks();
   const { handleSystemComment } = useTaskSystemComments();
   const { addComment } = useTaskComments(task.id);
@@ -282,11 +284,11 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'}
+            {task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">
-          {format(new Date(task.created_at), 'MMM d, yyyy')}
+          {formatTimeForDisplay(task.created_at, TIME_FORMATS.SHORT_DATE, timezone)}
         </TableCell>
         <TableCell className="py-2">
           <TableActionButtons

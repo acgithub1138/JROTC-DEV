@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Flag, Calendar as CalendarIcon, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { EditableField } from './EditableField';
 import { EditState } from '../types/TaskDetailTypes';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
@@ -39,6 +41,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
   onQuickUpdate
 }) => {
   const { canAssign } = useTaskPermissions();
+  const { timezone } = useSchoolTimezone();
   const currentStatusOption = statusOptions.find(option => option.value === task.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === task.priority);
 
@@ -99,7 +102,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
             <EditableField
               field="due_date"
               currentValue={task.due_date ? new Date(task.due_date) : null}
-              displayValue={task.due_date ? format(new Date(task.due_date), 'PPP') : 'No due date'}
+              displayValue={task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.FULL_DATE, timezone) : 'No due date'}
               type="date"
               canEdit={canEdit}
               editState={editState}
@@ -160,9 +163,9 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Created:</span>
-            <span className="text-sm font-medium">
-              {format(new Date(task.created_at), 'PPP')}
-            </span>
+             <span className="text-sm font-medium">
+               {formatTimeForDisplay(task.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+             </span>
           </div>
         </CardContent>
       </Card>
