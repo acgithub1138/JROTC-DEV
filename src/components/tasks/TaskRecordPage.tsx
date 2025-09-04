@@ -22,6 +22,8 @@ import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
@@ -38,9 +40,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const {
     toast
   } = useToast();
-  const {
-    userProfile
-  } = useAuth();
+  const { userProfile } = useAuth();
+  const { timezone } = useSchoolTimezone();
 
   // Extract mode and record ID from URL parameters
   const mode = searchParams.get('mode') as TaskRecordMode || 'view';
@@ -514,7 +515,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             case 'assigned_to':
               return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
             case 'due_date':
-              return `Due date changed to ${editedRecord.due_date ? formatInTimeZone(new Date(editedRecord.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}`;
+              return `Due date changed to ${editedRecord.due_date ? formatTimeForDisplay(editedRecord.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}`;
             default:
               return `${field} updated`;
           }
@@ -749,17 +750,17 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                           </Badge>}
                      </div>
                    </div>
-                   <div>
-                       <span className="text-sm text-muted-foreground">Created</span>
-                       <p className="font-medium">
-                         {formatInTimeZone(new Date(record.created_at), 'America/New_York', 'M/d/yyyy')}
-                       </p>
-                   </div>
+                    <div>
+                        <span className="text-sm text-muted-foreground">Created</span>
+                        <p className="font-medium">
+                          {formatTimeForDisplay(record.created_at, TIME_FORMATS.DATE_ONLY, timezone)}
+                        </p>
+                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Due Date</span>
-                       {editingSummary ? <Input type="date" value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
-                           {record.due_date ? formatInTimeZone(new Date(record.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}
-                         </p>}
+                        {editingSummary ? <Input type="date" value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
+                            {record.due_date ? formatTimeForDisplay(record.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}
+                          </p>}
                    </div>
                  </div>
                </CardContent>
@@ -887,9 +888,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                                    </span>
                                    {comment.is_system_comment ? <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge> : <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>}
                                  </div>
-                                 <span className="text-xs text-muted-foreground">
-                                   {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                                 </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatTimeForDisplay(comment.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}
+                                  </span>
                                </div>
                                <div className="text-sm whitespace-pre-wrap">
                                  {comment.comment_text.startsWith('• ') || comment.comment_text.includes('\n• ') ? <div className="space-y-1">
