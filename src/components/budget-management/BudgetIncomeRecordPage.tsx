@@ -548,6 +548,19 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                     <p className="text-sm">{currentRecord.description}</p>
                   </div>
                 )}
+                
+                {/* Attachments Section for View Mode */}
+                {recordId && (
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-2">Attachments</h3>
+                    <AttachmentSection
+                      recordType="budget_transaction"
+                      recordId={recordId}
+                      canEdit={false}
+                      showContentOnly
+                    />
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
