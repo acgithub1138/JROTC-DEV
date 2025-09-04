@@ -9,6 +9,7 @@ import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { format } from 'date-fns';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { SubtaskTableRow } from './SubtaskTableRow';
@@ -284,7 +285,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
+            {task.due_date ? format(new Date(task.due_date), TIME_FORMATS.SHORT_DATE) : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">
