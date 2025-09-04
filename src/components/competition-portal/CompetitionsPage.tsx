@@ -195,7 +195,7 @@ const handleViewCompetition = (competition: Competition) => {
 };
 
 const handleOpenEdit = (competition: Competition) => {
-  navigate(`/app/competition-portal/competition-details/${competition.id}`);
+  navigate(`/app/competition-portal/competitions/competition_record?mode=edit&id=${competition.id}`);
 };
 
 const handleEditSubmit = async (data: any) => {
