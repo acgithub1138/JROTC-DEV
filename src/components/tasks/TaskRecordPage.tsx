@@ -515,7 +515,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             case 'assigned_to':
               return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
             case 'due_date':
-              return `Due date changed to ${editedRecord.due_date ? format(new Date(editedRecord.due_date), TIME_FORMATS.DATE_ONLY) : 'No due date'}`;
+              return `Due date changed to ${editedRecord.due_date ? formatTimeForDisplay(editedRecord.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}`;
             default:
               return `${field} updated`;
           }
@@ -759,7 +759,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                    <div>
                      <span className="text-sm text-muted-foreground">Due Date</span>
                         {editingSummary ? <Input type="date" value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
-                            {record.due_date ? format(new Date(record.due_date), TIME_FORMATS.DATE_ONLY) : 'No due date'}
+                            {record.due_date ? formatTimeForDisplay(record.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}
                           </p>}
                    </div>
                  </div>

@@ -236,7 +236,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
                 const dateValue = e.target.value;
                 if (dateValue) {
                   // Create date object from input value with validation
-                  const date = new Date(dateValue + 'T00:00:00');
+                  const date = new Date(dateValue + 'T12:00:00');
                   const tomorrow = new Date();
                   tomorrow.setDate(tomorrow.getDate() + 1);
                   tomorrow.setHours(0, 0, 0, 0);

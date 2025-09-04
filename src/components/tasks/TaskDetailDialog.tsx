@@ -447,7 +447,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                     if (dateValue) {
                       setEditData({
                         ...editData,
-                        due_date: new Date(dateValue + 'T00:00:00')
+                        due_date: new Date(dateValue + 'T12:00:00')
                       });
                     } else {
                       setEditData({

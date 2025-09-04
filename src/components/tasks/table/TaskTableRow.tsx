@@ -285,7 +285,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {task.due_date ? format(new Date(task.due_date), TIME_FORMATS.SHORT_DATE) : 'No due date'}
+            {task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">

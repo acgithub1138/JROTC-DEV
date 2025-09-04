@@ -28,7 +28,7 @@ export const TaskDueDateField: React.FC<TaskDueDateFieldProps> = ({ form }) => {
               onChange={(e) => {
                 const dateValue = e.target.value;
                 if (dateValue) {
-                  const date = new Date(dateValue + 'T00:00:00');
+                  const date = new Date(dateValue + 'T12:00:00');
                   field.onChange(date);
                 } else {
                   field.onChange(undefined);
