@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Calendar, CreditCard, FileText, Edit, Tag } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
-import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
 interface ViewBudgetItemDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export const ViewBudgetItemDialog = ({
   onEdit,
 }) => {
   const { canEdit: canUpdate } = useTablePermissions('budget');
+  const { timezone } = useSchoolTimezone();
 
   const getCategoryBadge = (category: 'income' | 'expense') => {
     const variants = {
@@ -140,7 +142,7 @@ export const ViewBudgetItemDialog = ({
                   <label className="text-sm font-medium text-muted-foreground">Date</label>
                   <div className="flex items-center gap-2 mt-1">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-base">{format(new Date(item.date), 'PPP')}</p>
+                    <p className="text-base">{formatTimeForDisplay(item.date, TIME_FORMATS.FULL_DATE, timezone)}</p>
                   </div>
                 </div>
               </div>

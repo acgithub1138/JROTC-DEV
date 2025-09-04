@@ -25,6 +25,7 @@ import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { getSchoolDateKey, convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
 const expenseSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -611,7 +612,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                   <div>
                     <h3 className="font-medium text-sm text-muted-foreground mb-1">Date</h3>
                     <p className="text-sm">
-                      {currentRecord?.date ? format(new Date(currentRecord.date), 'PPP') : 'N/A'}
+                      {currentRecord?.date ? formatTimeForDisplay(currentRecord.date, TIME_FORMATS.FULL_DATE, timezone) : 'N/A'}
                     </p>
                   </div>
                   <div>
