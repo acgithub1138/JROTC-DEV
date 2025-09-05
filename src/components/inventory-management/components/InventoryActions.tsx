@@ -24,7 +24,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
 
   return (
     <>
-      {!isMobile && (canView || isLoading) && (
+      {!isMobile && (canBulkImport || isLoading) && (
         <Button variant="outline" onClick={onExport}>
           <Download className="w-4 h-4 mr-2" />
           Export CSV
