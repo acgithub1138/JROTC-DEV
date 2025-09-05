@@ -15,7 +15,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   onExport
 }) => {
   const navigate = useNavigate();
-  const { canCreate, canBulkImport, isLoading } = useInventoryActionsPermissions();
+  const { canView, canCreate, canBulkImport, isLoading } = useInventoryActionsPermissions();
   const isMobile = useIsMobile();
 
   const handleBulkOperations = () => {
@@ -24,7 +24,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
 
   return (
     <>
-      {!isMobile && (
+      {!isMobile && (canView || isLoading) && (
         <Button variant="outline" onClick={onExport}>
           <Download className="w-4 h-4 mr-2" />
           Export CSV
