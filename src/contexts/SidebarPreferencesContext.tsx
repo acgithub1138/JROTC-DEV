@@ -53,13 +53,15 @@ const MODULE_MAPPING: { [key: string]: string } = {
 // Database-driven menu items function
 const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (module: string, action: string) => boolean): Promise<MenuItem[]> => {
   try {
-    // Always include dashboard as the first item
+    // Check if user has dashboard sidebar permission
+    const hasDashboardPermission = hasPermission('dashboard', 'sidebar');
+    
     const dashboardItem: MenuItem = {
       id: 'dashboard',
       label: 'Dashboard',
       icon: 'LayoutDashboard',
       path: '/app/dashboard',
-      isVisible: true,
+      isVisible: hasDashboardPermission,
       order: 1
     };
 
@@ -103,7 +105,12 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     }
 
     // Generate menu items dynamically from modules
-    const menuItems: MenuItem[] = [dashboardItem];
+    const menuItems: MenuItem[] = [];
+    
+    // Add dashboard only if user has permission
+    if (hasDashboardPermission) {
+      menuItems.push(dashboardItem);
+    }
     
     for (const module of modules) {
       // Skip dashboard and competition portal modules since dashboard is already added
@@ -127,15 +134,16 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     return menuItems;
   } catch (error) {
     console.error('Exception in fetchMenuItemsFromDatabase:', error);
-    // Fallback to just dashboard
-    return [{
+    // Fallback to dashboard only if user has permission
+    const hasDashboardPermission = hasPermission('dashboard', 'sidebar');
+    return hasDashboardPermission ? [{
       id: 'dashboard',
       label: 'Dashboard', 
       icon: 'LayoutDashboard',
       path: '/app/dashboard',
       isVisible: true,
       order: 1
-    }];
+    }] : [];
   }
 };
 
@@ -261,15 +269,16 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
       lastProfileRef.current = profileKey;
     } catch (error) {
       console.error('SidebarPreferencesContext: Error in loadPreferences:', error);
-      // Fall back to minimal dashboard item
-      const fallbackItems = [{
+      // Fall back to dashboard item only if user has permission
+      const hasDashboardPermission = hasPermission('dashboard', 'sidebar');
+      const fallbackItems = hasDashboardPermission ? [{
         id: 'dashboard',
         label: 'Dashboard',
         icon: 'LayoutDashboard',
         path: '/app/dashboard',
         isVisible: true,
         order: 1
-      }];
+      }] : [];
       console.log('SidebarPreferencesContext: Using fallback items:', fallbackItems);
       setMenuItems(fallbackItems);
       cacheRef.current[cacheKey] = fallbackItems;
