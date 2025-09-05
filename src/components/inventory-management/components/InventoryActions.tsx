@@ -15,7 +15,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   onExport
 }) => {
   const navigate = useNavigate();
-  const { canView, canCreate, canBulkImport, isLoading } = useInventoryActionsPermissions();
+  const { canCreate, canBulkImport, isLoading } = useInventoryActionsPermissions();
   const isMobile = useIsMobile();
 
   const handleBulkOperations = () => {
