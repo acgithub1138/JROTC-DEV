@@ -60,7 +60,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     canUpdate,
     canUpdateAssigned,
     canView,
-    canDelete
+    canDelete,
+    canAssign
   } = useTaskPermissions();
   const {
     tasks,
@@ -719,20 +720,20 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                              </Badge>}
                         </div>
                       </div>
-                   <div>
-                     <span className="text-sm text-muted-foreground">Assigned to</span>
-                      {editingSummary ? <Select value={editedRecord.assigned_to || 'unassigned'} onValueChange={value => handleRecordFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
-                          <SelectTrigger className="w-full mt-1">
-                            <SelectValue placeholder="Select user" />
-                          </SelectTrigger>
-                           <SelectContent>
-                             <SelectItem value="unassigned">Unassigned</SelectItem>
-                             {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
-                                 {user.last_name}, {user.first_name}
-                               </SelectItem>)}
-                           </SelectContent>
-                        </Select> : <p className="font-medium">{getAssignedUserName()}</p>}
-                   </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Assigned to</span>
+                       {editingSummary && canAssign ? <Select value={editedRecord.assigned_to || 'unassigned'} onValueChange={value => handleRecordFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
+                           <SelectTrigger className="w-full mt-1">
+                             <SelectValue placeholder="Select user" />
+                           </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
+                              {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
+                                  {user.last_name}, {user.first_name}
+                                </SelectItem>)}
+                            </SelectContent>
+                         </Select> : <p className="font-medium">{getAssignedUserName()}</p>}
+                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Priority</span>
                      <div className="mt-1">
