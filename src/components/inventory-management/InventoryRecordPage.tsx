@@ -63,7 +63,7 @@ export const InventoryRecordPage: React.FC = () => {
   const { categories, subCategories, isCategoriesLoading, isSubCategoriesLoading, getSubCategoriesForCategory } = useInventoryCategories();
   
   // Find current record
-  const currentRecord = recordId ? inventoryItems.find(item => item.id === recordId) : null;
+  const currentRecord = recordId && inventoryItems ? inventoryItems.find(item => item.id === recordId) : null;
   
   // Local state
   const [currentMode, setCurrentMode] = useState<InventoryRecordMode>(mode);
