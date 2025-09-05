@@ -101,6 +101,10 @@ const ContactManagementPage = () => {
     navigate(`/app/contacts/contact_record?id=${contact.id}`);
   };
 
+  const handleViewContact = (contact: Contact) => {
+    navigate(`/app/contacts/contact_record?id=${contact.id}`);
+  };
+
   const handleDeleteContact = (contact: Contact) => {
     setDeletingContact(contact);
   };
@@ -143,6 +147,7 @@ const ContactManagementPage = () => {
             isLoading={isLoading}
             onEdit={handleEditContact}
             onView={setViewingContact}
+            onNavigateToRecord={handleViewContact}
             onDelete={handleDeleteContact}
           />
         ) : (
@@ -151,6 +156,7 @@ const ContactManagementPage = () => {
             isLoading={isLoading}
             onEdit={handleEditContact}
             onView={setViewingContact}
+            onNavigateToRecord={handleViewContact}
             onDelete={handleDeleteContact}
             sortField={sortField}
             sortDirection={sortDirection}

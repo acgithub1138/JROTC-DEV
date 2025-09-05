@@ -11,6 +11,7 @@ interface ContactTableProps {
   onEdit: (contact: Contact) => void;
   onView: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
+  onNavigateToRecord: (contact: Contact) => void;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (field: string) => void;
@@ -22,6 +23,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   onEdit,
   onView,
   onDelete,
+  onNavigateToRecord,
   sortField,
   sortDirection,
   onSort,
@@ -159,7 +161,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell className="font-medium py-[8px]">
               {canViewDetails ? (
                 <button
-                  onClick={() => onView(contact)}
+                  onClick={() => onNavigateToRecord(contact)}
                   className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
                 >
                   {contact.name}

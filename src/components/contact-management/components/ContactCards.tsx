@@ -12,6 +12,7 @@ interface ContactCardsProps {
   onEdit: (contact: Contact) => void;
   onView?: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
+  onNavigateToRecord: (contact: Contact) => void;
 }
 
 export const ContactCards: React.FC<ContactCardsProps> = ({
@@ -20,6 +21,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
   onEdit,
   onView,
   onDelete,
+  onNavigateToRecord,
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
@@ -101,7 +103,16 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">{contact.name}</CardTitle>
+                {canViewDetails ? (
+                  <button
+                    onClick={() => onNavigateToRecord(contact)}
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left"
+                  >
+                    <CardTitle className="text-lg">{contact.name}</CardTitle>
+                  </button>
+                ) : (
+                  <CardTitle className="text-lg">{contact.name}</CardTitle>
+                )}
                 <div className="flex space-x-2 mt-1">
                   {getTypeBadge(contact.type, contact.type_other)}
                   {getStatusBadge(contact.status)}
