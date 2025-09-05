@@ -26,7 +26,8 @@ const TeamsManagementPage = () => {
   const {
     canCreate,
     canEdit: canUpdate,
-    canDelete
+    canDelete,
+    canViewDetails
   } = useTablePermissions('teams');
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
   const [viewMembersDialogOpen, setViewMembersDialogOpen] = useState(false);
@@ -69,7 +70,7 @@ const TeamsManagementPage = () => {
       <Card>
         
         <CardContent className="py-[8px]">
-          {isMobile ? <TeamCards teams={teams} isLoading={loading} onEdit={handleEditTeam} onDelete={handleDeleteTeam} onViewMembers={handleViewMembers} onSendEmail={handleSendEmail} canUpdate={canUpdate} canDelete={canDelete} /> : <TeamsTable teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteTeam} onSendEmail={handleSendEmail} onViewMembers={handleViewMembers} canUpdate={canUpdate} canDelete={canDelete} />}
+          {isMobile ? <TeamCards teams={teams} isLoading={loading} onEdit={handleEditTeam} onDelete={handleDeleteTeam} onViewMembers={handleViewMembers} onSendEmail={handleSendEmail} canUpdate={canUpdate} canDelete={canDelete} canViewDetails={canViewDetails} /> : <TeamsTable teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteTeam} onSendEmail={handleSendEmail} onViewMembers={handleViewMembers} canUpdate={canUpdate} canDelete={canDelete} canViewDetails={canViewDetails} />}
 
           {teams.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No teams found. Create your first team to get started.

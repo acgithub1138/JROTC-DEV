@@ -14,6 +14,7 @@ interface TeamCardsProps {
   onSendEmail: (team: TeamWithMembers) => void;
   canUpdate: boolean;
   canDelete: boolean;
+  canViewDetails: boolean;
 }
 
 export const TeamCards: React.FC<TeamCardsProps> = ({
@@ -25,6 +26,7 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   onSendEmail,
   canUpdate,
   canDelete: canDeleteProp,
+  canViewDetails,
 }) => {
   const getTypeColor = (type?: string) => {
     if (!type) return 'bg-gray-100 text-gray-800';
@@ -101,13 +103,15 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
             </div>
             
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewMembers(team)}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
+              {canViewDetails && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewMembers(team)}
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

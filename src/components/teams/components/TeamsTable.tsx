@@ -30,9 +30,10 @@ interface TeamsTableProps {
   onViewMembers: (team: TeamWithMembers) => void;
   canUpdate: boolean;
   canDelete: boolean;
+  canViewDetails: boolean;
 }
 
-export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onViewMembers, canUpdate, canDelete }: TeamsTableProps) => {
+export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onViewMembers, canUpdate, canDelete, canViewDetails }: TeamsTableProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState<TeamWithMembers | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -93,7 +94,7 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
               <TableCell className="py-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{team.member_count}</span> members
-                  {team.member_count > 0 && (
+                  {team.member_count > 0 && canViewDetails && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
