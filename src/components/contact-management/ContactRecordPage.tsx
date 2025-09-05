@@ -16,6 +16,7 @@ import { Contact } from './ContactManagementPage';
 import { ArrowLeft } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { toast } from 'sonner';
 
 const contactSchema = z.object({
@@ -38,6 +39,7 @@ const contactSchema = z.object({
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
+type ContactRecordMode = 'create' | 'edit' | 'view';
 
 interface Cadet {
   id: string;
@@ -50,13 +52,20 @@ export const ContactRecordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { userProfile } = useAuth();
   const { createContact, updateContact } = useContacts();
+  const { canCreate, canEdit, canView } = useTablePermissions('contacts');
   
+  // Extract mode and record ID from URL parameters
+  const mode = (searchParams.get('mode') as ContactRecordMode) || 'view';
   const contactId = searchParams.get('id');
-  const isEditMode = !!contactId;
+  
+  const [currentMode, setCurrentMode] = useState<ContactRecordMode>(mode);
+  const isEditMode = currentMode === 'edit';
+  const isViewMode = currentMode === 'view';
+  const isCreateMode = currentMode === 'create';
   
   const [contact, setContact] = useState<Contact | null>(null);
   const [cadets, setCadets] = useState<Cadet[]>([]);
-  const [isLoading, setIsLoading] = useState(isEditMode);
+  const [isLoading, setIsLoading] = useState(!!contactId);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   const form = useForm<ContactFormData>({
@@ -72,6 +81,35 @@ export const ContactRecordPage: React.FC = () => {
       notes: ''
     }
   });
+
+  // Permission checks
+  useEffect(() => {
+    if (isCreateMode && !canCreate) {
+      toast.error("You don't have permission to create contacts");
+      navigate('/app/contacts');
+      return;
+    }
+    
+    if (isViewMode && !canView) {
+      toast.error("You don't have permission to view contacts");
+      navigate('/app/contacts');
+      return;
+    }
+    
+    if (isEditMode && !canEdit) {
+      toast.error("You don't have permission to edit contacts");
+      setCurrentMode('view');
+      return;
+    }
+  }, [currentMode, canCreate, canEdit, canView, navigate]);
+
+  // Handle edit mode switch
+  const handleEdit = () => {
+    if (canEdit && contactId) {
+      setCurrentMode('edit');
+      navigate(`/app/contacts/contact_record?mode=edit&id=${contactId}`);
+    }
+  };
 
   // Initial form data for comparison
   const initialFormData = {
@@ -101,7 +139,7 @@ export const ContactRecordPage: React.FC = () => {
   const { hasUnsavedChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: currentFormData,
-    enabled: true
+    enabled: !isViewMode
   });
 
   // Load contact data if editing
@@ -228,13 +266,21 @@ export const ContactRecordPage: React.FC = () => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit Contact' : 'Add Contact'}
+            {isCreateMode ? 'Add Contact' : isEditMode ? 'Edit Contact' : 'View Contact'}
           </h1>
           <p className="text-muted-foreground">
-            {isEditMode ? 'Update contact information' : 'Create a new contact record'}
+            {isCreateMode ? 'Create a new contact record' : isEditMode ? 'Update contact information' : 'Contact details'}
           </p>
         </div>
       </div>
+
+      {isViewMode && canEdit && (
+        <div className="flex justify-end">
+          <Button onClick={handleEdit}>
+            Edit Contact
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -249,15 +295,15 @@ export const ContactRecordPage: React.FC = () => {
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Name *</FormLabel>
-                      <div className="flex-1">
-                        <FormControl>
-                          <Input placeholder="Enter contact name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
+                     <FormItem className="flex items-center gap-2">
+                       <FormLabel className="w-16 text-left shrink-0">Name *</FormLabel>
+                       <div className="flex-1">
+                         <FormControl>
+                           <Input placeholder="Enter contact name" {...field} disabled={isViewMode} />
+                         </FormControl>
+                         <FormMessage />
+                       </div>
+                     </FormItem>
                   )}
                 />
 
@@ -268,7 +314,7 @@ export const ContactRecordPage: React.FC = () => {
                     <FormItem className="flex items-center gap-2">
                       <FormLabel className="w-16 text-left shrink-0">Type *</FormLabel>
                       <div className="flex-1">
-                        <Select onValueChange={field.onChange} value={field.value}>
+                         <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select contact type" />
@@ -297,9 +343,9 @@ export const ContactRecordPage: React.FC = () => {
                     <FormItem className="flex items-center gap-2">
                       <FormLabel className="w-16 text-left shrink-0">Phone *</FormLabel>
                       <div className="flex-1">
-                        <FormControl>
-                          <Input placeholder="Phone number" {...field} />
-                        </FormControl>
+                         <FormControl>
+                           <Input placeholder="Phone number" {...field} disabled={isViewMode} />
+                         </FormControl>
                         <FormMessage />
                       </div>
                     </FormItem>
@@ -313,9 +359,9 @@ export const ContactRecordPage: React.FC = () => {
                     <FormItem className="flex items-center gap-2">
                       <FormLabel className="w-16 text-left shrink-0">Email</FormLabel>
                       <div className="flex-1">
-                        <FormControl>
-                          <Input type="email" placeholder="Email address" {...field} />
-                        </FormControl>
+                         <FormControl>
+                           <Input type="email" placeholder="Email address" {...field} disabled={isViewMode} />
+                         </FormControl>
                         <FormMessage />
                       </div>
                     </FormItem>
@@ -332,7 +378,7 @@ export const ContactRecordPage: React.FC = () => {
                     <FormItem className="flex items-center gap-2">
                       <FormLabel className="w-16 text-left shrink-0">Cadet</FormLabel>
                       <div className="flex-1">
-                        <Select onValueChange={field.onChange} value={field.value}>
+                         <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select cadet" />
@@ -360,7 +406,7 @@ export const ContactRecordPage: React.FC = () => {
                     <FormItem className="flex items-center gap-2">
                       <FormLabel className="w-16 text-left shrink-0">Status *</FormLabel>
                       <div className="flex-1">
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -389,9 +435,9 @@ export const ContactRecordPage: React.FC = () => {
                       <FormItem className="flex items-center gap-2">
                         <FormLabel className="w-16 text-left shrink-0">Other</FormLabel>
                         <div className="flex-1">
-                          <FormControl>
-                            <Input placeholder="Specify other type" {...field} />
-                          </FormControl>
+                           <FormControl>
+                             <Input placeholder="Specify other type" {...field} disabled={isViewMode} />
+                           </FormControl>
                           <FormMessage />
                         </div>
                       </FormItem>
@@ -409,31 +455,34 @@ export const ContactRecordPage: React.FC = () => {
                   <FormItem className="flex items-start gap-2">
                     <FormLabel className="w-16 text-left shrink-0 pt-2">Notes</FormLabel>
                     <div className="flex-1">
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Additional notes" 
-                          className="resize-none min-h-[100px]" 
-                          {...field} 
-                        />
-                      </FormControl>
+                       <FormControl>
+                         <Textarea 
+                           placeholder="Additional notes" 
+                           className="resize-none min-h-[100px]" 
+                           {...field} 
+                           disabled={isViewMode}
+                         />
+                       </FormControl>
                       <FormMessage />
                     </div>
                   </FormItem>
                 )}
               />
 
-              <div className="flex justify-end gap-2 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {isEditMode ? 'Update Contact' : 'Add Contact'}
-                </Button>
-              </div>
+              {!isViewMode && (
+                <div className="flex justify-end gap-2 pt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBack}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {isEditMode ? 'Update Contact' : 'Add Contact'}
+                  </Button>
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>

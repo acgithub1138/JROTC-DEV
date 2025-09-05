@@ -94,15 +94,15 @@ const ContactManagementPage = () => {
   });
 
   const handleAddContact = () => {
-    navigate('/app/contacts/contact_record');
+    navigate('/app/contacts/contact_record?mode=create');
   };
 
   const handleEditContact = (contact: Contact) => {
-    navigate(`/app/contacts/contact_record?id=${contact.id}`);
+    navigate(`/app/contacts/contact_record?mode=edit&id=${contact.id}`);
   };
 
   const handleViewContact = (contact: Contact) => {
-    navigate(`/app/contacts/contact_record?id=${contact.id}`);
+    navigate(`/app/contacts/contact_record?mode=view&id=${contact.id}`);
   };
 
   const handleDeleteContact = (contact: Contact) => {
