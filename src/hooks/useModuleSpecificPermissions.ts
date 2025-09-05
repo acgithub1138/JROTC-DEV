@@ -360,3 +360,19 @@ export const useAnnouncementPermissions = () => {
     canUpdate: hasPermission('announcements', 'update'), // alias for consistency
   };
 };
+
+// PT Test specific permissions
+export const usePTTestPermissions = () => {
+  const modulePermissions = useModulePermissions('pt_test');
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('pt_test', 'view'),
+    canEdit: hasPermission('pt_test', 'edit'),
+    canDelete: hasPermission('pt_test', 'delete'),
+    canCreate: hasPermission('pt_test', 'create'),
+    canUpdate: hasPermission('pt_test', 'update'), // alias for consistency
+  };
+};

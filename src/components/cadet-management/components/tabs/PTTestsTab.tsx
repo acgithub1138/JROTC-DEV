@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCadetPTTests } from '@/hooks/useCadetRecords';
+import { usePTTestPermissions } from '@/hooks/useModuleSpecificPermissions';
 interface PTTestsTabProps {
   cadetId: string;
 }
@@ -20,6 +21,8 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
     data: ptTests = [],
     isLoading
   } = useCadetPTTests(cadetId);
+
+  const { canEdit } = usePTTestPermissions();
 
   // Calculate pagination
   const paginatedData = useMemo(() => {
@@ -100,9 +103,11 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                   <td className="p-3 px-[8px] py-[4px]">{formatTime(test.plank_time)}</td>
                   <td className="p-3 px-[8px] py-[4px]">{formatTime(test.mile_time)}</td>
                   <td className="p-3 px-[8px] py-[4px]">
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                    </Button>
+                    {canEdit && (
+                      <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                      </Button>
+                    )}
                   </td>
                 </tr>)}
             </tbody>
@@ -117,9 +122,11 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                 <div className="font-medium">
                   {format(new Date(test.date), 'PPP')}
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
-                  <Edit className="w-4 h-4" />
-                </Button>
+                {canEdit && (
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
