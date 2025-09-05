@@ -157,9 +157,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                       onCheckedChange={checked => handleSelectItem(item.id, !!checked)} 
                     />
                     <CardTitle className="text-lg">
-                      <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
-                        {item.item_id}
-                      </button>
+                      {canViewDetails ? (
+                        <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                          {item.item_id}
+                        </button>
+                      ) : (
+                        <span className="font-medium">{item.item_id}</span>
+                      )}
                     </CardTitle>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -329,10 +333,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                <TableCell className={getPaddingClass()}>
                 <Checkbox checked={selectedItems.includes(item.id)} onCheckedChange={checked => handleSelectItem(item.id, !!checked)} />
               </TableCell>
-                  {isColumnVisible('item_id') && <TableCell className={`font-medium ${getPaddingClass()}`}>
-                      <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
-                        {item.item_id}
-                      </button>
+                   {isColumnVisible('item_id') && <TableCell className={`font-medium ${getPaddingClass()}`}>
+                      {canViewDetails ? (
+                        <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                          {item.item_id}
+                        </button>
+                      ) : (
+                        <span className="font-medium">{item.item_id}</span>
+                      )}
                     </TableCell>}
                {isColumnVisible('item') && <TableCell className={getPaddingClass()}>{item.item}</TableCell>}
                {isColumnVisible('category') && <TableCell className={getPaddingClass()}>{item.category}</TableCell>}
