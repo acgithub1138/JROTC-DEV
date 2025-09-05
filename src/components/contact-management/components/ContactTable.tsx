@@ -157,12 +157,16 @@ export const ContactTable: React.FC<ContactTableProps> = ({
       <StandardTableBody emptyMessage="No contacts found" colSpan={6}>
         {contacts.map(contact => <TableRow key={contact.id}>
             <TableCell className="font-medium py-[8px]">
-              <button
-                onClick={() => onEdit(contact)}
-                className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
-              >
-                {contact.name}
-              </button>
+              {canViewDetails ? (
+                <button
+                  onClick={() => onView(contact)}
+                  className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                >
+                  {contact.name}
+                </button>
+              ) : (
+                <span className="font-medium">{contact.name}</span>
+              )}
             </TableCell>
             <TableCell>{getTypeBadge(contact.type, contact.type_other)}</TableCell>
             <TableCell>{getStatusBadge(contact.status)}</TableCell>
