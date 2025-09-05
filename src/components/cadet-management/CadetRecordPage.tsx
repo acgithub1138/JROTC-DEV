@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, User, Calendar, Edit, Save, X, GraduationCap, Plus } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Edit, Save, X, GraduationCap, Plus, Eye, EyeOff, Key } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 import { CadetFormContent } from './forms/CadetFormContent';
 import { EditableCadetField } from './components/EditableCadetField';
@@ -13,8 +16,8 @@ import { useCadets, useCadet } from '@/hooks/useCadets';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PTTestsTab } from './components/tabs/PTTestsTab';
 import { InspectionTab } from './components/tabs/InspectionTab';
@@ -42,7 +45,8 @@ export const CadetRecordPage: React.FC = () => {
     canCreate,
     canUpdate,
     canView,
-    canSidebar
+    canSidebar,
+    canResetPassword
   } = useCadetPermissions();
 
   // Data
@@ -63,6 +67,11 @@ export const CadetRecordPage: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editingBasicInfo, setEditingBasicInfo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Password reset state
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
   // Update currentMode when URL mode changes
   React.useEffect(() => {
@@ -106,6 +115,44 @@ export const CadetRecordPage: React.FC = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle password reset
+  const handleResetPassword = async () => {
+    if (!newPassword.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a new password",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (!currentCadet) return;
+    setPasswordResetLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          userId: currentCadet.id,
+          newPassword: newPassword
+        }
+      });
+      if (error) throw error;
+      toast({
+        title: "Success",
+        description: `Password reset successfully for ${currentCadet.first_name} ${currentCadet.last_name}`
+      });
+      setNewPassword('');
+      setShowPassword(false);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset password",
+        variant: "destructive"
+      });
+    } finally {
+      setPasswordResetLoading(false);
     }
   };
 
@@ -301,6 +348,59 @@ export const CadetRecordPage: React.FC = () => {
 
       {/* Overview Cards */}
       <CadetOverviewCards cadet={currentCadet} />
+
+      {/* Password Reset Section */}
+      {canResetPassword && (
+        <Card className="mt-6">
+          <CardContent className="pt-6">
+            <Accordion type="single" collapsible>
+              <AccordionItem value="password-reset">
+                <AccordionTrigger className="text-lg font-semibold py-2">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    Reset Password
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <div className="relative">
+                      <Input 
+                        id="newPassword" 
+                        type={showPassword ? "text" : "password"} 
+                        value={newPassword} 
+                        onChange={e => setNewPassword(e.target.value)} 
+                        placeholder="Enter new password" 
+                        className="pr-10" 
+                      />
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" 
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button 
+                      type="button" 
+                      onClick={handleResetPassword} 
+                      disabled={passwordResetLoading || !newPassword.trim()} 
+                      variant="destructive"
+                    >
+                      {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Associated Records Tabs */}
       <div className="mt-6">
