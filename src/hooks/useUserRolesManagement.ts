@@ -62,7 +62,6 @@ export const useUserRolesManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['user-roles'] });
       queryClient.invalidateQueries({ queryKey: ['all-roles'] });
       queryClient.invalidateQueries({ queryKey: ['assignable-roles'] });
-      toast.success('Role updated successfully');
     },
     onError: (error: any) => {
       console.error('Error updating role:', error);
@@ -93,7 +92,6 @@ export const useUserRolesManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['user-roles'] });
       queryClient.invalidateQueries({ queryKey: ['all-roles'] });
       queryClient.invalidateQueries({ queryKey: ['assignable-roles'] });
-      toast.success('Role added successfully');
     },
     onError: (error: any) => {
       console.error('Error adding role:', error);
@@ -125,7 +123,6 @@ export const useUserRolesManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['user-roles'] });
       queryClient.invalidateQueries({ queryKey: ['all-roles'] });
       queryClient.invalidateQueries({ queryKey: ['assignable-roles'] });
-      toast.success('Roles reordered successfully');
     },
     onError: (error: any) => {
       console.error('Error reordering roles:', error);

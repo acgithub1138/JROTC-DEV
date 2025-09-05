@@ -93,12 +93,6 @@ export const RoleManagementPage: React.FC = () => {
       actionId,
       enabled
     }, {
-      onSuccess: () => {
-        toast({
-          title: 'Permission Updated',
-          description: `Permission ${enabled ? 'enabled' : 'disabled'} successfully.`
-        });
-      },
       onError: error => {
         console.error('Permission update error:', error);
         toast({
@@ -112,12 +106,6 @@ export const RoleManagementPage: React.FC = () => {
   const handleResetToDefaults = () => {
     console.log('Resetting permissions to defaults for role:', selectedRole);
     resetToDefaults(selectedRole, {
-      onSuccess: () => {
-        toast({
-          title: 'Permissions Reset',
-          description: `${selectedRole} permissions have been reset to defaults.`
-        });
-      },
       onError: error => {
         console.error('Reset permissions error:', error);
         toast({

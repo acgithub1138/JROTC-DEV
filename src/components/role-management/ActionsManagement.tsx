@@ -62,9 +62,6 @@ export const ActionsManagement: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: ['permission_actions']
       });
-      toast({
-        title: 'Action updated successfully'
-      });
       setEditingAction(null);
       setEditForm({});
     },
@@ -91,9 +88,6 @@ export const ActionsManagement: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: ['permission_actions']
       });
-      toast({
-        title: 'Action created successfully'
-      });
       resetForm();
       setIsDialogOpen(false);
     },
@@ -117,9 +111,6 @@ export const ActionsManagement: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['permission_actions']
-      });
-      toast({
-        title: 'Action deleted successfully'
       });
     },
     onError: (error: any) => {
