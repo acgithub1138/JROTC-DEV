@@ -236,7 +236,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 
                 <div className="flex justify-between items-center pt-2">
                   <div className="flex items-center gap-2">
-                    {item.issued_to && item.issued_to.length > 0 && (
+                    {item.issued_to && item.issued_to.length > 0 && canViewDetails && (
                       <IssuedUsersPopover issuedTo={item.issued_to} />
                     )}
                   </div>
@@ -250,7 +250,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                       icon: <History className="w-3 h-3" />,
                       label: "View history",
                       onClick: () => setHistoryItem(item),
-                      show: true
+                      show: canViewDetails
                     }]} 
                   />
                 </div>
@@ -373,14 +373,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                {isColumnVisible('status') && <TableCell className={getPaddingClass()}>{getAvailabilityStatus(item)}</TableCell>}
                {isColumnVisible('stock_number') && <TableCell className={getPaddingClass()}>{item.stock_number}</TableCell>}
                {isColumnVisible('unit_of_measure') && <TableCell className={getPaddingClass()}>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>}
-               <TableCell className={getPaddingClass()}>
+                <TableCell className={getPaddingClass()}>
                   <div className="flex items-center justify-center gap-2">
-                    {item.issued_to && item.issued_to.length > 0 && <IssuedUsersPopover issuedTo={item.issued_to} />}
+                    {item.issued_to && item.issued_to.length > 0 && canViewDetails && <IssuedUsersPopover issuedTo={item.issued_to} />}
                      <TableActionButtons canView={false} canEdit={canUpdate} canDelete={canDelete} onEdit={() => handleEdit(item)} onDelete={() => onDelete(item)} customActions={[{
                 icon: <History className="w-3 h-3" />,
                 label: "View history",
                 onClick: () => setHistoryItem(item),
-                show: true
+                show: canViewDetails
               }]} />
                   </div>
               </TableCell>
