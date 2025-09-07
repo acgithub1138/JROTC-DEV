@@ -283,7 +283,7 @@ const DashboardOverview = () => {
                     <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create Task</p>
                   </button>}
-                  {canCreateEvents && <button onClick={() => navigate('/app/calendar/event_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateEvents && <button onClick={() => navigate('/app/calendar/calendar_record')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                     <p className="font-medium text-sm">Create Event</p>
                   </button>}
