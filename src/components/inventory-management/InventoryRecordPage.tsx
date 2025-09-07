@@ -234,14 +234,14 @@ export const InventoryRecordPage: React.FC = () => {
   const handleEdit = () => {
     if (recordId) {
       setCurrentMode('edit');
-      navigate(`/app/cadets/inventory_record?mode=edit&id=${recordId}`);
+      navigate(`/app/inventory/inventory_record?mode=edit&id=${recordId}`);
     }
   };
 
   const handleView = () => {
     if (recordId) {
       setCurrentMode('view');
-      navigate(`/app/cadets/inventory_record?id=${recordId}`);
+      navigate(`/app/inventory/inventory_record?id=${recordId}`);
     }
   };
 
