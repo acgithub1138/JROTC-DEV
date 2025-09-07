@@ -7,8 +7,4 @@ export const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta', "Echo", "Fox
 
 export const cadetYearOptions = ['1st', '2nd', '3rd', '4th'];
 
-// Legacy roleOptions - replaced by useCadetRoles hook for dynamic roles
-export const roleOptions = [
-  { value: 'cadet', label: 'Cadet' },
-  { value: 'command_staff', label: 'Command Staff' }
-];
+
