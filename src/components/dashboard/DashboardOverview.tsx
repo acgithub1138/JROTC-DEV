@@ -347,8 +347,8 @@ const DashboardOverview = () => {
             </Card>;
       })}
       
-      {/* Quick Actions Widget for Command Staff only - positioned in stats row */}
-      {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
+      {/* Quick Actions Widget for command staff - positioned in stats row */}
+      {canViewQuickActions && userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -356,8 +356,8 @@ const DashboardOverview = () => {
         <div className="space-y-6">
           {/* My Cadets Widget for parents, My Tasks for others */}
           {canViewMyCadets && userProfile?.role === 'parent' ? <MyCadetsWidget /> : canViewMyTasks && userProfile?.role !== 'admin' ? <MyTasksWidget /> : null}
-          {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
-          {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
+          {/* Quick Actions Widget for non-command staff roles */}
+          {canViewQuickActions && userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
         {/* Right Column: Mobile Features and Events */}
