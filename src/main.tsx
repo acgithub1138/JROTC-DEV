@@ -12,25 +12,6 @@ const initializeCapacitor = async () => {
   }
 };
 
-// Suppress common harmless console warnings that spam Sentry
-const originalConsole = { ...console };
-console.warn = (...args) => {
-  const message = args.join(' ');
-  const harmlessWarnings = [
-    'Unrecognized feature',
-    'ResizeObserver loop limit exceeded',
-    'deprecated',
-    'Permissions-Policy',
-    'ambient-light-sensor',
-    'vr',
-    'battery'
-  ];
-  
-  if (!harmlessWarnings.some(warning => message.includes(warning))) {
-    originalConsole.warn(...args);
-  }
-};
-
 // Initialize app
 const startApp = async () => {
   await initializeCapacitor();

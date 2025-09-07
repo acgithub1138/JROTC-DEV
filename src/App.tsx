@@ -63,16 +63,15 @@ import ParentRegistrationPage from "@/components/auth/ParentRegistrationPage";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <PermissionProvider>
-            <SidebarPreferencesProvider>
-              <PortalProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <AuthProvider>
+        <PermissionProvider>
+          <SidebarPreferencesProvider>
+            <PortalProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               {/* Public Marketing Routes */}
               <Route path="/" element={<MarketingLayout />}>
@@ -285,7 +284,6 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-  </ErrorBoundary>
 );
 
 export default App;
