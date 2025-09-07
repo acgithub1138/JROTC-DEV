@@ -39,9 +39,16 @@ export const useInventoryItems = () => {
       // Validate required fields
       if (!item.item) throw new Error('Item name is required');
 
+      // Calculate qty_available
+      const itemWithCalculatedQty = {
+        ...item,
+        school_id: userProfile.school_id,
+        qty_available: (item.qty_total || 0) - (item.qty_issued || 0)
+      };
+
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert({ ...item, school_id: userProfile.school_id })
+        .insert(itemWithCalculatedQty)
         .select()
         .single();
 
@@ -57,10 +64,11 @@ export const useInventoryItems = () => {
     mutationFn: async (items: Omit<InventoryItemInsert, 'school_id'>[]) => {
       if (!userProfile?.school_id) throw new Error('No school ID');
 
-      // Add school_id to all items
+      // Add school_id and calculate qty_available for all items
       const itemsWithSchool = items.map(item => ({
         ...item,
-        school_id: userProfile.school_id
+        school_id: userProfile.school_id,
+        qty_available: (item.qty_total || 0) - (item.qty_issued || 0)
       }));
 
       const { data, error } = await supabase
@@ -86,9 +94,26 @@ export const useInventoryItems = () => {
         throw new Error('Issued quantity cannot be negative');
       }
 
+      // If qty_total or qty_issued are being updated, we need to get current values to recalculate qty_available
+      let finalUpdates = { ...updates };
+      
+      if (updates.qty_total !== undefined || updates.qty_issued !== undefined) {
+        // Get current item to calculate new qty_available
+        const { data: currentItem } = await supabase
+          .from('inventory_items')
+          .select('qty_total, qty_issued')
+          .eq('id', id)
+          .single();
+
+        const newQtyTotal = updates.qty_total !== undefined ? updates.qty_total : (currentItem?.qty_total || 0);
+        const newQtyIssued = updates.qty_issued !== undefined ? updates.qty_issued : (currentItem?.qty_issued || 0);
+        
+        finalUpdates.qty_available = newQtyTotal - newQtyIssued;
+      }
+
       const { data, error } = await supabase
         .from('inventory_items')
-        .update(updates)
+        .update(finalUpdates)
         .eq('id', id)
         .select()
         .single();
