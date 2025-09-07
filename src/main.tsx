@@ -12,8 +12,84 @@ const initializeCapacitor = async () => {
   }
 };
 
+// Global error handler to prevent Sentry spam
+const setupGlobalErrorHandling = () => {
+  const harmlessErrors = [
+    'Unrecognized feature',
+    'ResizeObserver loop limit exceeded',
+    'Non-Error promise rejection captured',
+    'Script error',
+    'NetworkError',
+    'ChunkLoadError',
+    'Loading chunk',
+    'Loading CSS chunk',
+    'Failed to fetch dynamically imported module'
+  ];
+
+  let errorCount = 0;
+  let lastErrorTime = 0;
+  const maxErrorsPerMinute = 5;
+
+  // Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    const error = event.reason;
+    const errorMessage = error?.message || error?.toString() || '';
+    
+    const isHarmless = harmlessErrors.some(harmless => 
+      errorMessage.includes(harmless)
+    );
+    
+    if (isHarmless) {
+      event.preventDefault(); // Prevent default handling
+      return;
+    }
+
+    // Rate limit error reporting
+    const now = Date.now();
+    if (now - lastErrorTime > 60000) {
+      errorCount = 1;
+      lastErrorTime = now;
+    } else {
+      errorCount++;
+    }
+
+    if (errorCount >= maxErrorsPerMinute) {
+      event.preventDefault(); // Prevent Sentry reporting
+    }
+  });
+
+  // Handle regular errors
+  window.addEventListener('error', (event) => {
+    const error = event.error;
+    const errorMessage = error?.message || event.message || '';
+    
+    const isHarmless = harmlessErrors.some(harmless => 
+      errorMessage.includes(harmless)
+    );
+    
+    if (isHarmless) {
+      event.preventDefault(); // Prevent default handling
+      return;
+    }
+
+    // Rate limit error reporting
+    const now = Date.now();
+    if (now - lastErrorTime > 60000) {
+      errorCount = 1;
+      lastErrorTime = now;
+    } else {
+      errorCount++;
+    }
+
+    if (errorCount >= maxErrorsPerMinute) {
+      event.preventDefault(); // Prevent Sentry reporting
+    }
+  });
+};
+
 // Initialize app
 const startApp = async () => {
+  setupGlobalErrorHandling();
   await initializeCapacitor();
   createRoot(document.getElementById("root")!).render(<App />);
 };
