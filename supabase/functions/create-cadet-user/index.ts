@@ -132,7 +132,7 @@ serve(async (req) => {
     const { data: hasCreatePermission, error: permissionError } = await supabaseAdmin
       .rpc('check_user_permission', {
         user_id: actorProfile.id,
-        module_name: 'users',
+        module_name: 'cadets',
         action_name: 'create'
       })
     
