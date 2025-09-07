@@ -26,14 +26,6 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
   statusOptions,
   priorityOptions
 }) => {
-
-  const {
-    users: allUsers
-  } = useSchoolUsers(); // All users for display purposes
-  const {
-    users: activeUsers
-  } = useSchoolUsers(true); // Active users only for editing dropdowns
-
   const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers();
   return (
     <div className="space-y-4">
@@ -95,12 +87,20 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
-			<SelectContent>
-			  <SelectItem value="unassigned">Unassigned</SelectItem>
-			  {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
-				  {user.last_name}, {user.first_name}
-				</SelectItem>)}
-			</SelectContent>
+                <SelectContent>
+                  {users
+                    .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
+                    .sort((a, b) => {
+                      const aName = `${a.last_name}, ${a.first_name}`;
+                      const bName = `${b.last_name}, ${b.first_name}`;
+                      return aName.localeCompare(bName);
+                    })
+                    .map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.last_name}, {user.first_name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
             </Select>
               )}
             {form.formState.errors.assigned_to && (
