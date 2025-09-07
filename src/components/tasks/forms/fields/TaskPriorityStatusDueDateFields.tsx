@@ -26,7 +26,7 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
   statusOptions,
   priorityOptions
 }) => {
-  const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers();
+  const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers(true);
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
                 </SelectTrigger>
                 <SelectContent>
                   {users
-                    .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
+                    .filter(user => user.role === 'cadet' || user.role === 'command_staff')
                     .sort((a, b) => {
                       const aName = `${a.last_name}, ${a.first_name}`;
                       const bName = `${b.last_name}, ${b.first_name}`;
