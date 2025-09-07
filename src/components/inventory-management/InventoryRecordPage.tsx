@@ -339,7 +339,8 @@ export const InventoryRecordPage: React.FC = () => {
         </div>
 
         {/* Form/View Content */}
-        <Card>
+        <div className="max-w-4xl mx-auto">
+          <Card>
           <CardHeader>
             <CardTitle>
               {currentMode === 'create' ? 'Add New Inventory Item' : 'Inventory Item Details'}
@@ -835,6 +836,8 @@ export const InventoryRecordPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+
       </div>
 
       <UnsavedChangesDialog

@@ -268,7 +268,8 @@ export const AnnouncementRecordPage = () => {
       </div>
 
       {/* Form */}
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>Announcement Details</CardTitle>
         </CardHeader>
@@ -439,6 +440,7 @@ export const AnnouncementRecordPage = () => {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog

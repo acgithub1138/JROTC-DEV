@@ -282,7 +282,8 @@ export const ContactRecordPage: React.FC = () => {
         </div>
       )}
 
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
@@ -486,7 +487,8 @@ export const ContactRecordPage: React.FC = () => {
             </form>
           </Form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       <UnsavedChangesDialog
         open={showUnsavedDialog}

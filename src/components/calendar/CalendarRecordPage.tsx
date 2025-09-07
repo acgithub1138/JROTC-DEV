@@ -420,7 +420,8 @@ export const CalendarRecordPage: React.FC = () => {
         </div>
       </div>
 
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>Event Information</CardTitle>
         </CardHeader>
@@ -850,6 +851,7 @@ export const CalendarRecordPage: React.FC = () => {
           </Form>
         </CardContent>
       </Card>
+      </div>
 
       <UnsavedChangesDialog
         open={showUnsavedDialog}

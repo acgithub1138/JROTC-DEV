@@ -314,7 +314,8 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         </div>
 
         {/* Form/View Content */}
-        <Card>
+        <div className="max-w-4xl mx-auto">
+          <Card>
           <CardHeader>
             <CardTitle>
               {currentMode === 'create' ? 'Add New Income' : 'Income Details'}
@@ -569,7 +570,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
-
+        </div>
       </div>
 
       <UnsavedChangesDialog

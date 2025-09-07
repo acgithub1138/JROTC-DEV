@@ -239,7 +239,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>Job Details</CardTitle>
         </CardHeader>
@@ -348,6 +349,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           </form>
         </CardContent>
       </Card>
+      </div>
 
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog
