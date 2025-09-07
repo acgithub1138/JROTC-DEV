@@ -65,7 +65,7 @@ const JobBoardPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
           {canCreate && <Button onClick={() => navigate('/app/job-board/coc_record?mode=create')}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Job
+              Add Role
             </Button>}
         </div>
 
