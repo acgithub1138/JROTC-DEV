@@ -342,9 +342,6 @@ const DashboardOverview = () => {
               </CardContent>
             </Card>;
       })}
-      
-      {/* Quick Actions Widget - positioned in stats row */}
-      {canViewQuickActions && renderQuickActionsWidget()}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -352,7 +349,8 @@ const DashboardOverview = () => {
         <div className="space-y-6">
           {/* My Cadets Widget for parents, My Tasks for others */}
           {canViewMyCadets && userProfile?.role === 'parent' ? <MyCadetsWidget /> : canViewMyTasks && userProfile?.role !== 'admin' ? <MyTasksWidget /> : null}
-          {/* Quick Actions Widget removed from here - now shown in stats row only */}
+          {/* Quick Actions Widget - moved back below My Tasks */}
+          {canViewQuickActions && renderQuickActionsWidget()}
         </div>
 
         {/* Right Column: Mobile Features and Events */}
