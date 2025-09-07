@@ -92,7 +92,7 @@ export const MobileDashboard: React.FC = () => {
     }
 
     // Cadets Statistics
-    if (canViewStatsCadets && !isCadet && userProfile?.role !== 'parent') {
+    if (canViewStatsCadets) {
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
