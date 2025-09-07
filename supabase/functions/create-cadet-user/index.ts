@@ -12,7 +12,7 @@ interface CreateCadetRequest {
   password?: string
   first_name: string
   last_name: string
-  role?: 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent'
+  role?: string // Use string instead of hardcoded roles
   role_id?: string // Accept role_id as string (like "command staff") 
   grade?: string
   rank?: string
@@ -154,12 +154,20 @@ serve(async (req) => {
       throw new Error('Required fields missing: email, first_name, last_name, school_id')
     }
 
-    // Basic validation - ensure admin/instructor can create users and same school
-    if (actorProfile.role !== 'admin' && actorProfile.role !== 'instructor') {
-      throw new Error('Only admin and instructor users can create new users')
+    // Check permissions using database instead of hardcoded roles
+    const { data: hasCreatePermission, error: permissionError } = await supabaseAdmin
+      .rpc('check_user_permission', {
+        user_id: actorProfile.id,
+        module_name: 'users',
+        action_name: 'create'
+      })
+    
+    if (permissionError || !hasCreatePermission) {
+      console.error('Permission check error:', permissionError)
+      throw new Error('You do not have permission to create users')
     }
     
-    // Ensure same school (admins can create for any school)
+    // Non-admin users can only create users for their own school
     if (actorProfile.role !== 'admin' && actorProfile.school_id !== school_id) {
       throw new Error('You can only create users for your own school')
     }
