@@ -212,10 +212,10 @@ const DashboardOverview = () => {
         value: statsLoading ? '...' : stats?.inventory.total?.toString() || '0',
         change: statsLoading ? 'Loading...' : (
           <div className="flex items-center gap-2 text-xs mt-2">
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
+            <Badge title="In Stock" variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
               {stats?.inventory.inStock || 0}
             </Badge>
-            <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <Badge title="Out of Stock" variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
               {stats?.inventory.outOfStock || 0}
             </Badge>
           </div>
