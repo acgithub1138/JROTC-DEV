@@ -21,6 +21,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCapacitor } from '@/hooks/useCapacitor';
 import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions, useAnnouncementPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
+import { AnnouncementDialog } from '@/components/announcements/AnnouncementDialog';
+import { useCreateAnnouncement } from '@/hooks/useAnnouncements';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const {
@@ -58,6 +60,9 @@ const DashboardOverview = () => {
   const {
     canCreate: canCreateUsers
   } = useUserPermissions();
+  const {
+    canCreate: canCreateAnnouncements
+  } = useAnnouncementPermissions();
 
   // Derived permissions for UI logic (legacy - to be removed after permission migration)
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
@@ -91,6 +96,8 @@ const DashboardOverview = () => {
   const {
     createTransaction
   } = useBudgetTransactions(budgetFilters);
+  
+  const createAnnouncement = useCreateAnnouncement();
 
   // Filter and sort upcoming events
   const upcomingEvents = useMemo(() => {
@@ -117,6 +124,7 @@ const DashboardOverview = () => {
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
+  const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
 
   const handleCreateTransaction = async (data: any) => {
     try {
@@ -129,6 +137,23 @@ const DashboardOverview = () => {
       toast({
         title: "Error",
         description: `Failed to create ${data.category === 'income' ? 'income' : 'expense'}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCreateAnnouncement = async (data: any) => {
+    try {
+      await createAnnouncement.mutateAsync(data);
+      toast({
+        title: "Success",
+        description: "Announcement created successfully"
+      });
+      setIsCreateAnnouncementOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create announcement",
         variant: "destructive"
       });
     }
@@ -236,33 +261,52 @@ const DashboardOverview = () => {
               <Zap className="w-4 h-4 mr-2 text-primary" />
               <p className="text-sm font-medium text-gray-600">Quick Actions</p>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {/* Admin-specific actions */}
-              {userProfile?.role === 'admin' && <>
+            <div className="space-y-2">
+              {/* Row 1: Admin actions */}
+              {userProfile?.role === 'admin' && (
+                <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => setIsCreateSchoolOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
                   </button>
                   {canCreateUsers && <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                      <Users className="w-4 h-4 text-green-600 mr-2" />
-                      <p className="font-medium text-sm">Create User</p>
-                    </button>}
-                </>}
-              {/* Non-admin actions */}
-              {userProfile?.role !== 'admin' && canCreateTasks && <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                  <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
-                  <p className="font-medium text-sm">Create Task</p>
-                </button>}
-              {userProfile?.role !== 'admin' && canCreateEvents && <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                  <Calendar className="w-4 h-4 text-purple-600 mr-2" />
-                  <p className="font-medium text-sm">Create Event</p>
-                </button>}
-              {/* Instructor-only actions */}
-              {userProfile?.role === 'instructor' && <>
+                    <Users className="w-4 h-4 text-green-600 mr-2" />
+                    <p className="font-medium text-sm">Create User</p>
+                  </button>}
+                </div>
+              )}
+              
+              {/* Row 2: General actions + Instructor-specific */}
+              {userProfile?.role !== 'admin' && (
+                <div className="grid grid-cols-2 gap-2">
+                  {canCreateTasks && <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
+                    <p className="font-medium text-sm">Create Task</p>
+                  </button>}
+                  {canCreateEvents && <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Calendar className="w-4 h-4 text-purple-600 mr-2" />
+                    <p className="font-medium text-sm">Create Event</p>
+                  </button>}
+                </div>
+              )}
+              
+              {/* Row 3: Instructor actions */}
+              {userProfile?.role === 'instructor' && (
+                <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
+                  {canCreateAnnouncements && <button onClick={() => setIsCreateAnnouncementOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Users className="w-4 h-4 text-blue-600 mr-2" />
+                    <p className="font-medium text-sm">Create Announcement</p>
+                  </button>}
+                </div>
+              )}
+              
+              {/* Row 4: Budget actions */}
+              {userProfile?.role === 'instructor' && (
+                <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigate('/app/budget/income_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
@@ -271,7 +315,8 @@ const DashboardOverview = () => {
                     <DollarSign className="w-4 h-4 text-red-600 mr-2" />
                     <p className="font-medium text-sm">Add Expense</p>
                   </button>
-                </>}
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -403,6 +448,17 @@ const DashboardOverview = () => {
           <CreateUserDialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen} />
           <CreateSchoolDialog open={isCreateSchoolOpen} onOpenChange={setIsCreateSchoolOpen} />
         </>}
+
+      {/* Announcement Dialog */}
+      {canCreateAnnouncements && (
+        <AnnouncementDialog
+          open={isCreateAnnouncementOpen}
+          onOpenChange={setIsCreateAnnouncementOpen}
+          onSubmit={handleCreateAnnouncement}
+          mode="create"
+          announcement={null}
+        />
+      )}
     </div>;
 };
 export default DashboardOverview;
