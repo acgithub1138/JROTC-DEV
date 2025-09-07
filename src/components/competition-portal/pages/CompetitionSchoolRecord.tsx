@@ -459,10 +459,11 @@ export const CompetitionSchoolRecord = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{pageTitle}</CardTitle>
-        </CardHeader>
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>{pageTitle}</CardTitle>
+          </CardHeader>
         <CardContent>
           <Form {...form}>
             <form id="school-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -741,7 +742,8 @@ export const CompetitionSchoolRecord = () => {
             </form>
           </Form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       {/* Dialogs */}
       <UnsavedChangesDialog

@@ -256,7 +256,8 @@ export const CompetitionResourceRecord: React.FC = () => {
 
   return (
     <>
-      <div className="container mx-auto p-6">
+      <div className="p-6 space-y-6">
+        <div className="max-w-4xl mx-auto">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -554,6 +555,7 @@ export const CompetitionResourceRecord: React.FC = () => {
             </Form>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       <UnsavedChangesDialog

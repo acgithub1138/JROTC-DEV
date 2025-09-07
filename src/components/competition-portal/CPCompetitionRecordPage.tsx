@@ -349,10 +349,11 @@ export const CPCompetitionRecordPage = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Competition Details</CardTitle>
-        </CardHeader>
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Competition Details</CardTitle>
+          </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Competition Name & JROTC Program */}
@@ -679,7 +680,8 @@ export const CPCompetitionRecordPage = () => {
             )}
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       <UnsavedChangesDialog
         open={showUnsavedDialog}

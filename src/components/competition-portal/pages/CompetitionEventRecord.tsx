@@ -543,10 +543,11 @@ export const CompetitionEventRecord: React.FC = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{pageTitle}</CardTitle>
-        </CardHeader>
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>{pageTitle}</CardTitle>
+          </CardHeader>
         <CardContent>
           <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
@@ -849,7 +850,8 @@ export const CompetitionEventRecord: React.FC = () => {
 
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
