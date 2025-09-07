@@ -175,9 +175,12 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
     console.log('Source Handle:', sourceHandle);
     console.log('Target Handle:', targetHandle);
     
-    // If we have a connectionId, update the specific connection in the connections array
-    if (connectionEditModal.connectionId) {
-      console.log('🔄 Updating existing connection with ID:', connectionEditModal.connectionId);
+    // Check if this is a hierarchy-based connection (ID contains the pattern: jobId-assistant-jobId or jobId-jobId)
+    const isHierarchyConnection = connectionEditModal.connectionId?.includes('-assistant-') || 
+      (connectionEditModal.connectionId && !connectionEditModal.sourceJob.connections?.some(conn => conn.id === connectionEditModal.connectionId));
+    
+    if (connectionEditModal.connectionId && !isHierarchyConnection) {
+      console.log('🔄 Updating connection in connections array with ID:', connectionEditModal.connectionId);
       const sourceJob = connectionEditModal.sourceJob;
       const updatedConnections = (sourceJob.connections || []).map(conn => 
         conn.id === connectionEditModal.connectionId 
@@ -193,8 +196,8 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       onUpdateJob(sourceJob.id, { connections: updatedConnections });
       console.log('✅ Connection update completed');
     } else {
-      console.log('⚠️ No connectionId found, creating new connection...');
-      // Handle creating new connection or updating via reports_to/assistant fields
+      // Handle hierarchy-based connections or new connections via reports_to/assistant fields
+      console.log('🔄 Updating hierarchy-based connection via field update');
       if (connectionEditModal.connectionType === 'reports_to') {
         // Update the target job's reports_to field
         onUpdateJob(connectionEditModal.targetJob.id, { 
