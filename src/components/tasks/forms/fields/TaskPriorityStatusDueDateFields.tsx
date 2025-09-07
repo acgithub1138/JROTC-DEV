@@ -87,20 +87,12 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
-                <SelectContent>
-                  {users
-                    .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
-                    .sort((a, b) => {
-                      const aName = `${a.last_name}, ${a.first_name}`;
-                      const bName = `${b.last_name}, ${b.first_name}`;
-                      return aName.localeCompare(bName);
-                    })
-                    .map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
+			<SelectContent>
+			  <SelectItem value="unassigned">Unassigned</SelectItem>
+			  {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
+				  {user.last_name}, {user.first_name}
+				</SelectItem>)}
+			</SelectContent>
             </Select>
               )}
             {form.formState.errors.assigned_to && (
