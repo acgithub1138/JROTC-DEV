@@ -154,11 +154,20 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   }, [jobs, isChartReadOnly, permissions, hookPermissions]);
 
   const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
+    console.log('=== CONNECTION SAVE DEBUG ===');
+    console.log('Modal state:', connectionEditModal);
+    console.log('onUpdateJob exists:', !!onUpdateJob);
+    
     if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
+      console.log('Early return due to missing data:', {
+        hasSourceJob: !!connectionEditModal.sourceJob,
+        hasTargetJob: !!connectionEditModal.targetJob,
+        hasConnectionType: !!connectionEditModal.connectionType,
+        hasOnUpdateJob: !!onUpdateJob
+      });
       return;
     }
 
-    console.log('=== CONNECTION SAVE DEBUG ===');
     console.log('Source Job:', connectionEditModal.sourceJob.role);
     console.log('Target Job:', connectionEditModal.targetJob.role);
     console.log('Connection Type:', connectionEditModal.connectionType);
@@ -168,6 +177,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
     
     // If we have a connectionId, update the specific connection in the connections array
     if (connectionEditModal.connectionId) {
+      console.log('🔄 Updating existing connection with ID:', connectionEditModal.connectionId);
       const sourceJob = connectionEditModal.sourceJob;
       const updatedConnections = (sourceJob.connections || []).map(conn => 
         conn.id === connectionEditModal.connectionId 
@@ -181,10 +191,23 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
 
       console.log('🔄 Updating connections array:', { updatedConnections });
       onUpdateJob(sourceJob.id, { connections: updatedConnections });
+      console.log('✅ Connection update completed');
     } else {
-      // Legacy connections should no longer exist - this fallback should not be reached
-      console.warn('Using legacy connection fallback - this should not happen');
-      return;
+      console.log('⚠️ No connectionId found, creating new connection...');
+      // Handle creating new connection or updating via reports_to/assistant fields
+      if (connectionEditModal.connectionType === 'reports_to') {
+        // Update the target job's reports_to field
+        onUpdateJob(connectionEditModal.targetJob.id, { 
+          reports_to: connectionEditModal.sourceJob.role 
+        });
+        console.log('✅ Updated reports_to field');
+      } else if (connectionEditModal.connectionType === 'assistant') {
+        // Update the target job's assistant field  
+        onUpdateJob(connectionEditModal.targetJob.id, { 
+          assistant: connectionEditModal.sourceJob.role 
+        });
+        console.log('✅ Updated assistant field');
+      }
     }
     
     setConnectionEditModal({ 

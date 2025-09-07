@@ -30,6 +30,7 @@ const JobBoardPage = () => {
     jobs,
     isLoading,
     deleteJob,
+    updateJob,
     refetch,
     emailConfirmModal,
     setEmailConfirmModal
@@ -48,6 +49,19 @@ const JobBoardPage = () => {
   
   const handleRefresh = () => {
     refetch();
+  };
+
+  const handleUpdateJob = (jobId: string, updates: Partial<JobBoardWithCadet>) => {
+    console.log('🔄 Updating job in JobBoardPage:', { jobId, updates });
+    updateJob.mutate({ id: jobId, updates }, {
+      onSuccess: () => {
+        console.log('✅ Job updated successfully');
+        refetch(); // Refresh the data to show the changes
+      },
+      onError: (error) => {
+        console.error('❌ Failed to update job:', error);
+      }
+    });
   };
   if (isLoading) {
     return <div className="p-6">
@@ -99,7 +113,7 @@ const JobBoardPage = () => {
                 <JobBoardChart 
                   jobs={filteredJobs} 
                   onRefresh={handleRefresh} 
-                  onUpdateJob={canUpdate ? (jobId, updates) => navigate(`/app/job-board/coc_record?mode=edit&id=${jobId}`) : undefined} 
+                  onUpdateJob={canUpdate ? handleUpdateJob : undefined} 
                   readOnly={!canUpdate} 
                 />
               </TabsContent>
