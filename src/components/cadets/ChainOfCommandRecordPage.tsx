@@ -224,7 +224,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
         
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">
-            {mode === 'create' ? 'Add New Job' : 'Edit Job'}
+            {mode === 'create' ? 'Add New Role' : 'Edit Role'}
           </h1>
           
           <Button 
@@ -233,7 +233,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
             className="flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            {isLoading ? 'Saving...' : mode === 'create' ? 'Create Job' : 'Update Job'}
+            {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
           </Button>
         </div>
       </div>
@@ -242,7 +242,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <Card>
         <CardHeader>
-          <CardTitle>Job Details</CardTitle>
+          <CardTitle>Role Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
