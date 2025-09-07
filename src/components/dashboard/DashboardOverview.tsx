@@ -209,8 +209,8 @@ const DashboardOverview = () => {
     if (canViewStatsInventory) {
       baseStats.push({
         title: 'Equipment',
-        value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
-        change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
+        value: statsLoading ? '...' : `${stats?.inventory.inStock || 0} in stock`,
+        change: statsLoading ? '...' : `${stats?.inventory.outOfStock || 0} out of stock`,
         icon: Package,
         color: 'text-purple-600',
         bgColor: 'bg-purple-100'

@@ -97,6 +97,14 @@ export const useDashboardStats = () => {
       const totalIssued = inventoryResult.data?.reduce((sum, item) => 
         sum + (item.qty_issued || 0), 0
       ) || 0;
+      
+      // Calculate in-stock and out-of-stock counts
+      const inStockCount = inventoryResult.data?.filter(item => 
+        (item.qty_available || 0) > 0
+      ).length || 0;
+      const outOfStockCount = inventoryResult.data?.filter(item => 
+        (item.qty_available || 0) === 0
+      ).length || 0;
 
       // Calculate incident stats
       const activeIncidents = incidentsResult.data?.filter(incident => 
@@ -136,7 +144,9 @@ export const useDashboardStats = () => {
         },
         inventory: {
           total: totalInventory,
-          issued: totalIssued
+          issued: totalIssued,
+          inStock: inStockCount,
+          outOfStock: outOfStockCount
         },
         incidents: {
           active: activeIncidents.length,
