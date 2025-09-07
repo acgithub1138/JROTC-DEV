@@ -581,8 +581,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
         </div>
         
-        <div className="bg-card rounded-lg border p-6">
-          <TaskFormContent mode={currentMode === 'create_task' ? 'create' : currentMode} task={record} onSuccess={handleTaskSaved} onCancel={handleFormClose} onTaskCreated={() => navigate('/app/tasks')} showAttachments={true} />
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-card rounded-lg border p-6">
+            <TaskFormContent mode={currentMode === 'create_task' ? 'create' : currentMode} task={record} onSuccess={handleTaskSaved} onCancel={handleFormClose} onTaskCreated={() => navigate('/app/tasks')} showAttachments={true} />
+          </div>
         </div>
       </div>;
   }
@@ -601,8 +603,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             </p>}
         </div>
         
-        <div className="bg-card rounded-lg border p-6">
-          <SubtaskForm mode="create" open={true} onOpenChange={() => {}} parentTaskId={parentTaskId || undefined} />
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-card rounded-lg border p-6">
+            <SubtaskForm mode="create" open={true} onOpenChange={() => {}} parentTaskId={parentTaskId || undefined} />
+          </div>
         </div>
       </div>;
   }
