@@ -130,8 +130,8 @@ export const InventoryBulkUploadPage: React.FC = () => {
           sub_category: row['Sub Category']?.toString().trim() || null,
           size: row['Size']?.toString().trim() || null,
           gender: gender,
-          qty_total: Math.max(0, parseInt(row['Total Qty']?.toString()) || 0),
-          qty_issued: Math.max(0, parseInt(row['Issued Qty']?.toString()) || 0),
+          qty_total: Math.max(0, parseInt(row['Qty Total']?.toString()) || 0),
+          qty_issued: Math.max(0, parseInt(row['Qty Issues']?.toString()) || 0),
           issued_to: [],
           stock_number: row['Stock Number'] || null,
           unit_of_measure: unitOfMeasure,
@@ -347,8 +347,8 @@ export const InventoryBulkUploadPage: React.FC = () => {
                     <span>• Item ID</span>
                     <span>• Item</span>
                     <span>• Category</span>
-                    <span>• Total Qty</span>
-                    <span>• Issued Qty</span>
+                    <span>• Qty Total</span>
+                    <span>• Qty Issues</span>
                     <span>• Sub Category</span>
                     <span>• Size</span>
                     <span>• Gender</span>
