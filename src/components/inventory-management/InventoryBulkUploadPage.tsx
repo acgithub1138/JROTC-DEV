@@ -92,18 +92,22 @@ export const InventoryBulkUploadPage: React.FC = () => {
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     try {
+      console.log('Starting CSV upload for file:', uploadedFile.name);
       const csvText = await uploadedFile.text();
       const rawData = parseCSV(csvText);
+      console.log(`Parsed ${rawData.length} rows from CSV`);
+      
       const processed = rawData.map((row, index) => {
+        console.log(`Processing row ${index + 1}:`, row);
         const item: InventoryItemFormData = {
-          item_id: row['Item ID'] || '',
-          item: row['Item'] || 'Untitled Item',
-          category: row['Category'] || '',
-          sub_category: row['Sub Category'] || null,
-          size: row['Size'] || null,
-          gender: row['Gender'] || null,
-          qty_total: parseInt(row['Total Qty']) || 0,
-          qty_issued: parseInt(row['Issued Qty']) || 0,
+          item_id: row['Item ID']?.toString().trim() || null,
+          item: row['Item']?.toString().trim() || `Item ${index + 1}`,
+          category: row['Category']?.toString().trim() || null,
+          sub_category: row['Sub Category']?.toString().trim() || null,
+          size: row['Size']?.toString().trim() || null,
+          gender: row['Gender']?.toString().trim() || null,
+          qty_total: Math.max(0, parseInt(row['Total Qty']?.toString()) || 0),
+          qty_issued: Math.max(0, parseInt(row['Issued Qty']?.toString()) || 0),
           issued_to: [],
           stock_number: row['Stock Number'] || null,
           unit_of_measure: row['Unit'] || null,
@@ -122,7 +126,11 @@ export const InventoryBulkUploadPage: React.FC = () => {
             ? row['Status'] as 'available' | 'checked_out' | 'maintenance' | 'damaged' | 'lost'
             : 'available',
         };
+        console.log(`Processed item ${index + 1}:`, item);
         const errors = validateInventoryData(item);
+        if (errors.length > 0) {
+          console.error(`Validation errors for row ${index + 1}:`, errors);
+        }
         return {
           ...item,
           id: `temp-${index}`,
@@ -130,11 +138,18 @@ export const InventoryBulkUploadPage: React.FC = () => {
           isValid: errors.length === 0
         };
       });
+      
+      console.log(`Processing complete: ${processed.filter(p => p.isValid).length} valid, ${processed.filter(p => !p.isValid).length} invalid items`);
       setParsedItems(processed);
       setFile(uploadedFile);
       setStep('preview');
     } catch (error) {
       console.error('Error parsing CSV:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
     }
   }, []);
 
@@ -184,6 +199,13 @@ export const InventoryBulkUploadPage: React.FC = () => {
     setProgress(0);
     
     try {
+      const validItems = parsedItems.filter(item => item.isValid);
+      console.log(`Attempting to import ${validItems.length} valid items out of ${parsedItems.length} total items`);
+      
+      if (validItems.length === 0) {
+        throw new Error('No valid items to import. Please check your data and fix validation errors.');
+      }
+      
       const cleanItems = validItems.map(item => ({
         item_id: item.item_id,
         item: item.item,
@@ -209,17 +231,28 @@ export const InventoryBulkUploadPage: React.FC = () => {
         notes: item.notes,
         status: item.status || 'available'
       }));
+      
+      console.log('Clean items prepared for database:', cleanItems);
       await bulkCreateItems(cleanItems);
+      
+      console.log('Bulk import successful');
       setImportResults({
         success: validItems.length,
         failed: 0,
         errors: []
       });
     } catch (error) {
+      console.error('Bulk import failed with error:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
       setImportResults({
         success: 0,
         failed: validItems.length,
-        errors: ['Failed to import inventory items']
+        errors: [error instanceof Error ? error.message : 'Unknown error occurred during import']
       });
     }
     

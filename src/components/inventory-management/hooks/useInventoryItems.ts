@@ -65,20 +65,38 @@ export const useInventoryItems = () => {
     mutationFn: async (items: Omit<InventoryItemInsert, 'school_id'>[]) => {
       if (!userProfile?.school_id) throw new Error('No school ID');
 
+      console.log(`Starting bulk creation of ${items.length} items for school:`, userProfile.school_id);
+      
       // Add school_id, status, and calculate qty_available for all items
-      const itemsWithSchool = items.map(item => ({
-        ...item,
-        school_id: userProfile.school_id,
-        qty_available: (item.qty_total || 0) - (item.qty_issued || 0),
-        status: item.status || 'available'
-      }));
+      const itemsWithSchool = items.map((item, index) => {
+        const processedItem = {
+          ...item,
+          school_id: userProfile.school_id,
+          qty_available: (item.qty_total || 0) - (item.qty_issued || 0),
+          status: item.status || 'available'
+        };
+        console.log(`Item ${index + 1} processed:`, processedItem);
+        return processedItem;
+      });
 
+      console.log('Final items to insert:', itemsWithSchool);
       const { data, error } = await supabase
         .from('inventory_items')
         .insert(itemsWithSchool)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database insertion error:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+      
+      console.log('Bulk creation successful, inserted items:', data);
       return data;
     },
     onSuccess: () => {

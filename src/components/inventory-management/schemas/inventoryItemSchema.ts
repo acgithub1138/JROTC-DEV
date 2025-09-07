@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const inventoryItemSchema = z.object({
-  item_id: z.string().min(1, 'Item ID is required'),
+  item_id: z.string().optional().nullable(),
   item: z.string().min(1, 'Item name is required'),
-  category: z.string().min(1, 'Category is required'),
+  category: z.string().optional().nullable(),
   sub_category: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
   gender: z.string().nullable().optional(),
