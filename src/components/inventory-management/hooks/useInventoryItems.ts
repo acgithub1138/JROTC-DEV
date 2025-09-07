@@ -112,22 +112,8 @@ export const useInventoryItems = () => {
         throw new Error('Issued quantity cannot be negative');
       }
 
-      // If qty_total or qty_issued are being updated, we need to get current values to recalculate qty_available
-      let finalUpdates = { ...updates };
-      
-      if (updates.qty_total !== undefined || updates.qty_issued !== undefined) {
-        // Get current item to calculate new qty_available
-        const { data: currentItem } = await supabase
-          .from('inventory_items')
-          .select('qty_total, qty_issued')
-          .eq('id', id)
-          .single();
-
-        const newQtyTotal = updates.qty_total !== undefined ? updates.qty_total : (currentItem?.qty_total || 0);
-        const newQtyIssued = updates.qty_issued !== undefined ? updates.qty_issued : (currentItem?.qty_issued || 0);
-        
-        finalUpdates.qty_available = newQtyTotal - newQtyIssued;
-      }
+      // Remove qty_available from updates as it's a generated column
+      const { qty_available, ...finalUpdates } = updates;
 
       const { data, error } = await supabase
         .from('inventory_items')
