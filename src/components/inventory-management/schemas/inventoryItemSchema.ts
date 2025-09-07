@@ -6,12 +6,12 @@ export const inventoryItemSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   sub_category: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
-  gender: z.enum(['M', 'F']).nullable().optional(),
+  gender: z.string().nullable().optional(),
   qty_total: z.number().min(0, 'Total quantity must be non-negative').optional().default(0),
   qty_issued: z.number().min(0, 'Issued quantity must be non-negative').optional().default(0),
   issued_to: z.array(z.string()).optional(),
   stock_number: z.string().optional().nullable(),
-  unit_of_measure: z.enum(['EA', 'PR']).nullable().optional(),
+  unit_of_measure: z.string().nullable().optional(),
   has_serial_number: z.boolean().default(false).optional(),
   model_number: z.string().optional().nullable(),
   returnable: z.boolean().default(false).optional(),
@@ -23,6 +23,7 @@ export const inventoryItemSchema = z.object({
   condition: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  status: z.enum(['available', 'checked_out', 'maintenance', 'damaged', 'lost']).optional().default('available'),
 }).refine(
   (data) => (data.qty_issued || 0) <= (data.qty_total || 0),
   {

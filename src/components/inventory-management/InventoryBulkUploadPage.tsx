@@ -101,12 +101,12 @@ export const InventoryBulkUploadPage: React.FC = () => {
           category: row['Category'] || '',
           sub_category: row['Sub Category'] || null,
           size: row['Size'] || null,
-          gender: (row['Gender'] as 'M' | 'F') || null,
+          gender: row['Gender'] || null,
           qty_total: parseInt(row['Total Qty']) || 0,
           qty_issued: parseInt(row['Issued Qty']) || 0,
           issued_to: [],
           stock_number: row['Stock Number'] || null,
-          unit_of_measure: (row['Unit'] as 'EA' | 'PR') || null,
+          unit_of_measure: row['Unit'] || null,
           has_serial_number: row['Has Serial Number']?.toLowerCase() === 'true' || false,
           model_number: row['Model Number'] || null,
           returnable: row['Returnable']?.toLowerCase() === 'true' || false,
@@ -118,6 +118,9 @@ export const InventoryBulkUploadPage: React.FC = () => {
           condition: row['Condition'] || null,
           location: row['Location'] || null,
           notes: row['Notes'] || null,
+          status: (['available', 'checked_out', 'maintenance', 'damaged', 'lost'].includes(row['Status'])) 
+            ? row['Status'] as 'available' | 'checked_out' | 'maintenance' | 'damaged' | 'lost'
+            : 'available',
         };
         const errors = validateInventoryData(item);
         return {
@@ -203,7 +206,8 @@ export const InventoryBulkUploadPage: React.FC = () => {
         description: item.description,
         condition: item.condition,
         location: item.location,
-        notes: item.notes
+        notes: item.notes,
+        status: item.status || 'available'
       }));
       await bulkCreateItems(cleanItems);
       setImportResults({
