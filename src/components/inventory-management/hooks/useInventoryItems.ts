@@ -39,17 +39,16 @@ export const useInventoryItems = () => {
       // Validate required fields
       if (!item.item) throw new Error('Item name is required');
 
-      // Calculate qty_available and set status
-      const itemWithCalculatedQty = {
+      // Set status and school_id (qty_available is auto-calculated by database)
+      const itemWithSchoolId = {
         ...item,
         school_id: userProfile.school_id,
-        qty_available: (item.qty_total || 0) - (item.qty_issued || 0),
         status: item.status || 'available'
       };
 
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert(itemWithCalculatedQty)
+        .insert(itemWithSchoolId)
         .select()
         .single();
 
@@ -67,12 +66,11 @@ export const useInventoryItems = () => {
 
       console.log(`Starting bulk creation of ${items.length} items for school:`, userProfile.school_id);
       
-      // Add school_id, status, and calculate qty_available for all items
+      // Add school_id and status for all items (qty_available is auto-calculated by database)
       const itemsWithSchool = items.map((item, index) => {
         const processedItem = {
           ...item,
           school_id: userProfile.school_id,
-          qty_available: (item.qty_total || 0) - (item.qty_issued || 0),
           status: item.status || 'available'
         };
         console.log(`Item ${index + 1} processed:`, processedItem);

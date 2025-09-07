@@ -70,6 +70,16 @@ function validateInventoryData(item: InventoryItemFormData): string[] {
     errors.push('Issued quantity cannot exceed total quantity');
   }
 
+  // Validate gender field
+  if (item.gender && !['M', 'F'].includes(item.gender)) {
+    errors.push('Gender must be "M", "F", or empty');
+  }
+
+  // Validate unit of measure field
+  if (item.unit_of_measure && !['EA', 'PR'].includes(item.unit_of_measure)) {
+    errors.push('Unit of measure must be "EA", "PR", or empty');
+  }
+
   return errors;
 }
 
@@ -99,18 +109,32 @@ export const InventoryBulkUploadPage: React.FC = () => {
       
       const processed = rawData.map((row, index) => {
         console.log(`Processing row ${index + 1}:`, row);
+        // Clean gender value - map invalid values to null
+        const rawGender = row['Gender']?.toString().trim();
+        let gender: string | null = null;
+        if (rawGender && ['M', 'F'].includes(rawGender.toUpperCase())) {
+          gender = rawGender.toUpperCase();
+        }
+
+        // Clean unit_of_measure value - map invalid values to null
+        const rawUnit = row['Unit']?.toString().trim();
+        let unitOfMeasure: string | null = null;
+        if (rawUnit && ['EA', 'PR'].includes(rawUnit.toUpperCase())) {
+          unitOfMeasure = rawUnit.toUpperCase();
+        }
+
         const item: InventoryItemFormData = {
           item_id: row['Item ID']?.toString().trim() || null,
           item: row['Item']?.toString().trim() || `Item ${index + 1}`,
           category: row['Category']?.toString().trim() || null,
           sub_category: row['Sub Category']?.toString().trim() || null,
           size: row['Size']?.toString().trim() || null,
-          gender: row['Gender']?.toString().trim() || null,
+          gender: gender,
           qty_total: Math.max(0, parseInt(row['Total Qty']?.toString()) || 0),
           qty_issued: Math.max(0, parseInt(row['Issued Qty']?.toString()) || 0),
           issued_to: [],
           stock_number: row['Stock Number'] || null,
-          unit_of_measure: row['Unit'] || null,
+          unit_of_measure: unitOfMeasure,
           has_serial_number: row['Has Serial Number']?.toLowerCase() === 'true' || false,
           model_number: row['Model Number'] || null,
           returnable: row['Returnable']?.toLowerCase() === 'true' || false,
