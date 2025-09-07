@@ -65,10 +65,6 @@ export const MobileDashboard: React.FC = () => {
     return filtered;
   }, [events, eventsLoading]);
 
-  // Derived permissions for UI logic (legacy - to be removed after full migration)
-  const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
-  const isCadet = userProfile?.role === 'cadet';
-
   // Permission-based stats configuration for mobile
   const getStatsConfig = () => {
     const baseStats = [];
