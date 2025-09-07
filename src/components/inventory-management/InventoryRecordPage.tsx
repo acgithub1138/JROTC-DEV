@@ -263,7 +263,7 @@ export const InventoryRecordPage: React.FC = () => {
           title: "Inventory Item Updated",
           description: "Inventory item has been updated successfully."
         });
-        handleView();
+        navigate('/app/inventory');
       }
       
       resetChanges();
