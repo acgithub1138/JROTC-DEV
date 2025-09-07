@@ -33,34 +33,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   }
 })
 
-// Basic authentication validation
-async function validateAuth(req: Request) {
-  const authHeader = req.headers.get('authorization')
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Missing or invalid authorization header')
-  }
-
-  const token = authHeader.replace('Bearer ', '')
-  
-  // Verify the JWT token
-  const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
-  if (userError || !user) {
-    throw new Error('Invalid authentication token')
-  }
-
-  // Get user profile
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (profileError || !profile) {
-    throw new Error('User profile not found')
-  }
-
-  return { user, profile }
-}
+// Import shared auth utilities
+import { validateAuthentication } from '../_shared/auth-utils.ts'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -70,8 +44,8 @@ serve(async (req) => {
   try {
     console.log('Function started')
     
-    // Validate authentication
-    const { profile: actorProfile } = await validateAuth(req)
+    // Validate authentication using shared utility
+    const { profile: actorProfile } = await validateAuthentication(req)
     
     console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
