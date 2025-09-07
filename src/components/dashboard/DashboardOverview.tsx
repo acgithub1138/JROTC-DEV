@@ -96,7 +96,6 @@ const DashboardOverview = () => {
   const {
     createTransaction
   } = useBudgetTransactions(budgetFilters);
-  
   const createAnnouncement = useCreateAnnouncement();
 
   // Filter and sort upcoming events
@@ -125,7 +124,6 @@ const DashboardOverview = () => {
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
   const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
-
   const handleCreateTransaction = async (data: any) => {
     try {
       await createTransaction(data);
@@ -141,7 +139,6 @@ const DashboardOverview = () => {
       });
     }
   };
-
   const handleCreateAnnouncement = async (data: any) => {
     try {
       await createAnnouncement.mutateAsync(data);
@@ -263,8 +260,7 @@ const DashboardOverview = () => {
             </div>
             <div className="space-y-2">
               {/* Row 1: Admin actions */}
-              {userProfile?.role === 'admin' && (
-                <div className="grid grid-cols-2 gap-2">
+              {userProfile?.role === 'admin' && <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigate('/app/admin/school_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
@@ -273,12 +269,10 @@ const DashboardOverview = () => {
                     <Users className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create User</p>
                   </button>}
-                </div>
-              )}
+                </div>}
               
               {/* Row 2: General actions + Instructor-specific */}
-              {userProfile?.role !== 'admin' && (
-                <div className="grid grid-cols-2 gap-2">
+              {userProfile?.role !== 'admin' && <div className="grid grid-cols-2 gap-2">
                   {canCreateTasks && <button onClick={() => navigate('/app/tasks/task_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create Task</p>
@@ -287,26 +281,22 @@ const DashboardOverview = () => {
                     <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                     <p className="font-medium text-sm">Create Event</p>
                   </button>}
-                </div>
-              )}
+                </div>}
               
               {/* Row 3: Instructor actions */}
-              {userProfile?.role === 'instructor' && (
-                <div className="grid grid-cols-2 gap-2">
+              {userProfile?.role === 'instructor' && <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigate('/app/incidents/incident_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
-                    <p className="font-medium text-sm">Create Incident</p>
+                    <p className="font-medium text-sm">Get Help</p>
                   </button>
                   {canCreateAnnouncements && <button onClick={() => navigate('/app/announcements/announcements_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Users className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create Announcement</p>
                   </button>}
-                </div>
-              )}
+                </div>}
               
               {/* Row 4: Budget actions */}
-              {userProfile?.role === 'instructor' && (
-                <div className="grid grid-cols-2 gap-2">
+              {userProfile?.role === 'instructor' && <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigate('/app/budget/income_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
@@ -315,8 +305,7 @@ const DashboardOverview = () => {
                     <DollarSign className="w-4 h-4 text-red-600 mr-2" />
                     <p className="font-medium text-sm">Add Expense</p>
                   </button>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </CardContent>
@@ -450,15 +439,7 @@ const DashboardOverview = () => {
         </>}
 
       {/* Announcement Dialog */}
-      {canCreateAnnouncements && (
-        <AnnouncementDialog
-          open={isCreateAnnouncementOpen}
-          onOpenChange={setIsCreateAnnouncementOpen}
-          onSubmit={handleCreateAnnouncement}
-          mode="create"
-          announcement={null}
-        />
-      )}
+      {canCreateAnnouncements && <AnnouncementDialog open={isCreateAnnouncementOpen} onOpenChange={setIsCreateAnnouncementOpen} onSubmit={handleCreateAnnouncement} mode="create" announcement={null} />}
     </div>;
 };
 export default DashboardOverview;
