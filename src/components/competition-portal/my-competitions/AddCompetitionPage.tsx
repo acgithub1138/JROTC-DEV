@@ -215,10 +215,11 @@ export const AddCompetitionPage: React.FC = () => {
       </div>
 
       {/* Form Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Competition Details</CardTitle>
-        </CardHeader>
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Competition Details</CardTitle>
+          </CardHeader>
         <CardContent>
           <form id="competition-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Competition Name and JROTC Program */}
@@ -291,7 +292,8 @@ export const AddCompetitionPage: React.FC = () => {
             </div>
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog
