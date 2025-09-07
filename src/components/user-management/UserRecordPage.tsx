@@ -389,7 +389,8 @@ const UserRecordPage = () => {
         </div>
       </div>
 
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>
             {mode === 'edit' ? (
@@ -419,6 +420,7 @@ const UserRecordPage = () => {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Password Reset Confirmation Dialog */}
       {passwordResetConfirmOpen && (

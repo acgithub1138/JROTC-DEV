@@ -273,7 +273,8 @@ const TeamRecordPage = () => {
       </div>
 
       {/* Form */}
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -390,6 +391,7 @@ const TeamRecordPage = () => {
           </div>
         </CardContent>
       </Card>
+      </div>
 
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog

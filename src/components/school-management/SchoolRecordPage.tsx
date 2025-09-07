@@ -318,7 +318,8 @@ const SchoolRecordPage = () => {
         </div>
       </div>
 
-      <Card>
+      <div className="max-w-4xl mx-auto">
+        <Card>
         <CardHeader>
           <CardTitle>School Information</CardTitle>
         </CardHeader>
@@ -592,9 +593,10 @@ const SchoolRecordPage = () => {
             </div>
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
-      <UnsavedChangesDialog 
+      <UnsavedChangesDialog
         open={showUnsavedDialog} 
         onOpenChange={setShowUnsavedDialog}
         onDiscard={handleDiscardChanges}
