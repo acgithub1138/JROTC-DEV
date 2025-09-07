@@ -591,3 +591,5 @@ export const InventoryBulkUploadPage: React.FC = () => {
     </div>
   );
 };
+
+export default InventoryBulkUploadPage;
