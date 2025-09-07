@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,6 +40,7 @@ export const ConnectionEditModal = ({
   currentTargetHandle,
   onSave
 }: ConnectionEditModalProps) => {
+  const navigate = useNavigate();
   const [sourceHandle, setSourceHandle] = useState(currentSourceHandle ? currentSourceHandle.split('-')[0] : 'bottom');
   const [targetHandle, setTargetHandle] = useState(currentTargetHandle ? currentTargetHandle.split('-')[0] : 'top');
 
@@ -52,6 +54,7 @@ export const ConnectionEditModal = ({
     const newTargetHandle = `${targetHandle}-target`;
     onSave(newSourceHandle, newTargetHandle);
     onClose();
+    navigate('/app/job-board?tab=chart');
   };
   const connectionTypeLabel = connectionType === 'reports_to' ? 'Reports To' : 'Assistant';
   return <Dialog open={isOpen} onOpenChange={onClose}>
