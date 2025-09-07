@@ -64,10 +64,6 @@ const DashboardOverview = () => {
     canCreate: canCreateAnnouncements
   } = useAnnouncementPermissions();
 
-  // Derived permissions for UI logic (legacy - to be removed after permission migration)
-  const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
-  const isCadet = userProfile?.role === 'cadet';
-
   // Memoize filters to prevent infinite re-renders
   const eventFilters = useMemo(() => ({
     eventType: '',
