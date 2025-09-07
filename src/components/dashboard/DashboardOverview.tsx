@@ -265,11 +265,11 @@ const DashboardOverview = () => {
               {/* Row 1: Admin actions */}
               {userProfile?.role === 'admin' && (
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => setIsCreateSchoolOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => navigate('/app/admin/school_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
                   </button>
-                  {canCreateUsers && <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateUsers && <button onClick={() => navigate('/app/admin/user_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Users className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create User</p>
                   </button>}
@@ -279,11 +279,11 @@ const DashboardOverview = () => {
               {/* Row 2: General actions + Instructor-specific */}
               {userProfile?.role !== 'admin' && (
                 <div className="grid grid-cols-2 gap-2">
-                  {canCreateTasks && <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateTasks && <button onClick={() => navigate('/app/tasks/task_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create Task</p>
                   </button>}
-                  {canCreateEvents && <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateEvents && <button onClick={() => navigate('/app/calendar/event_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                     <p className="font-medium text-sm">Create Event</p>
                   </button>}
@@ -293,11 +293,11 @@ const DashboardOverview = () => {
               {/* Row 3: Instructor actions */}
               {userProfile?.role === 'instructor' && (
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => navigate('/app/incidents/incident_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
-                  {canCreateAnnouncements && <button onClick={() => setIsCreateAnnouncementOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateAnnouncements && <button onClick={() => navigate('/app/announcements/announcement_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Users className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create Announcement</p>
                   </button>}
