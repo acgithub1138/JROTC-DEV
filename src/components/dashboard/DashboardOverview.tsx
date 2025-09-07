@@ -209,8 +209,17 @@ const DashboardOverview = () => {
     if (canViewStatsInventory) {
       baseStats.push({
         title: 'Equipment',
-        value: statsLoading ? '...' : `${stats?.inventory.inStock || 0} in stock`,
-        change: statsLoading ? '...' : `${stats?.inventory.outOfStock || 0} out of stock`,
+        value: statsLoading ? '...' : stats?.inventory.total?.toString() || '0',
+        change: statsLoading ? 'Loading...' : (
+          <div className="flex items-center gap-2 text-xs mt-2">
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
+              In Stock: {stats?.inventory.inStock || 0}
+            </Badge>
+            <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+              Out of Stock: {stats?.inventory.outOfStock || 0}
+            </Badge>
+          </div>
+        ),
         icon: Package,
         color: 'text-purple-600',
         bgColor: 'bg-purple-100'
@@ -333,7 +342,11 @@ const DashboardOverview = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                     <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    
+                    {stat.change && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {stat.change}
+                      </div>
+                    )}
                   </div>
                   <div className={`p-3 rounded-full ${stat.bgColor}`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
