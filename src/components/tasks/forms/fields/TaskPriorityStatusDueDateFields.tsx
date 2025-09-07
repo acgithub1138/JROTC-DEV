@@ -26,6 +26,14 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
   statusOptions,
   priorityOptions
 }) => {
+
+  const {
+    users: allUsers
+  } = useSchoolUsers(); // All users for display purposes
+  const {
+    users: activeUsers
+  } = useSchoolUsers(true); // Active users only for editing dropdowns
+
   const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers();
   return (
     <div className="space-y-4">
