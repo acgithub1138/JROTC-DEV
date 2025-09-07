@@ -1,10 +1,12 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { User, UserRole } from '../types';
 import { useDynamicRoles, DynamicRole } from '@/hooks/useDynamicRoles';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 export const useUserPermissions = () => {
   const { userProfile } = useAuth();
   const { allRoles, assignableRoles } = useDynamicRoles();
+  const { hasPermission } = usePermissionContext();
 
   const getAllowedRoles = (): DynamicRole[] => {
     if (!userProfile) return [];
@@ -21,23 +23,17 @@ export const useUserPermissions = () => {
   };
 
   const canCreateUsers = () => {
-    return userProfile?.role === 'admin' || userProfile?.role === 'instructor';
+    return hasPermission('users', 'create');
   };
 
   const canEditUser = (user: User) => {
     if (!userProfile) return false;
     
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && user.school_id === userProfile.school_id) return true;
-    
-    if (userProfile.role === 'command_staff' && 
-        user.school_id === userProfile.school_id && 
-        (user.role === 'command_staff' || user.role === 'cadet')) return true;
-    
+    // Can edit yourself
     if (user.id === userProfile.id) return true;
     
-    return false;
+    // Check database permission for updating users
+    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
   };
 
   const canDisableUser = (user: User) => {
@@ -49,13 +45,8 @@ export const useUserPermissions = () => {
     // Can't disable yourself
     if (user.id === userProfile.id) return false;
     
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor') return true;
-    
-    return false;
+    // Check database permission and same school
+    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
   };
 
   const canEnableUser = (user: User) => {
@@ -64,13 +55,8 @@ export const useUserPermissions = () => {
     // Can only enable users who are currently disabled
     if (user.active) return false;
     
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor') return true;
-    
-    return false;
+    // Check database permission and same school
+    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
   };
 
   const canResetPassword = (user: User) => {
@@ -79,15 +65,8 @@ export const useUserPermissions = () => {
     // Can't reset your own password
     if (user.id === userProfile.id) return false;
     
-    // Admins can reset anyone's password except their own
-    if (userProfile.role === 'admin') return true;
-    
-    // Instructors can reset passwords for cadets, command_staff, and parents in their school
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor') return true;
-    
-    return false;
+    // Check database permission and same school
+    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
   };
 
   return {
