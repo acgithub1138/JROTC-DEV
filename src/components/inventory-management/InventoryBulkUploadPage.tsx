@@ -390,18 +390,20 @@ export const InventoryBulkUploadPage: React.FC = () => {
               </div>
 
               <div className="flex-1 overflow-auto p-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Item ID</TableHead>
-                      <TableHead>Item</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Total Qty</TableHead>
-                      <TableHead>Issued Qty</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item ID</TableHead>
+                        <TableHead>Item</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Gender</TableHead>
+                        <TableHead>Unit</TableHead>
+                        <TableHead>Total Qty</TableHead>
+                        <TableHead>Issued Qty</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {parsedItems.map(item => (
                       <TableRow key={item.id} className={!item.isValid ? 'bg-red-50' : ''}>
@@ -438,6 +440,34 @@ export const InventoryBulkUploadPage: React.FC = () => {
                               </SelectContent>
                             </Select>
                           ) : item.category}
+                        </TableCell>
+                        <TableCell>
+                          {editingRow === item.id ? (
+                            <Select value={item.gender || ''} onValueChange={value => updateItem(item.id, 'gender', value || null)}>
+                              <SelectTrigger className="h-8">
+                                <SelectValue placeholder="Select..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value="M">M</SelectItem>
+                                <SelectItem value="F">F</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : item.gender || '-'}
+                        </TableCell>
+                        <TableCell>
+                          {editingRow === item.id ? (
+                            <Select value={item.unit_of_measure || ''} onValueChange={value => updateItem(item.id, 'unit_of_measure', value || null)}>
+                              <SelectTrigger className="h-8">
+                                <SelectValue placeholder="Select..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value="EA">EA</SelectItem>
+                                <SelectItem value="PR">PR</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : item.unit_of_measure || '-'}
                         </TableCell>
                         <TableCell>
                           {editingRow === item.id ? (
