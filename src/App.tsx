@@ -21,6 +21,7 @@ import PrivacyPolicyPage from "@/components/marketing/PrivacyPolicyPage";
 import TermsConditionsPage from "@/components/marketing/TermsConditionsPage";
 import LoginPage from "@/components/marketing/LoginPage";
 import NotFound from "./pages/NotFound";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { MobileLayout } from "@/components/mobile/MobileLayout";
 import { MobileDashboard } from "@/components/mobile/pages/MobileDashboard";
 import { MobileTaskList } from "@/components/mobile/pages/MobileTaskList";
@@ -62,15 +63,16 @@ import ParentRegistrationPage from "@/components/auth/ParentRegistrationPage";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <PermissionProvider>
-          <SidebarPreferencesProvider>
-            <PortalProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <PermissionProvider>
+            <SidebarPreferencesProvider>
+              <PortalProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
             <Routes>
               {/* Public Marketing Routes */}
               <Route path="/" element={<MarketingLayout />}>
@@ -283,6 +285,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
