@@ -297,7 +297,7 @@ const DashboardOverview = () => {
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
-                  {canCreateAnnouncements && <button onClick={() => navigate('/app/announcements/announcements_record')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateAnnouncements && <button onClick={() => navigate('/app/announcements/announcements_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Users className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create Announcement</p>
                   </button>}
