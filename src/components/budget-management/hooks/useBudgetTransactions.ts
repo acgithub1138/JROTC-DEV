@@ -143,10 +143,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      toast({
-        title: 'Success',
-        description: 'Transaction updated successfully.',
-      });
+      // Toast is handled by the calling component (BudgetExpenseRecordPage/BudgetIncomeRecordPage)
     },
     onError: (error: any) => {
       toast({
