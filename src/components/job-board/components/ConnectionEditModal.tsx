@@ -104,9 +104,9 @@ export const ConnectionEditModal = ({
               <>
                 <div>
                   <h4 className="font-semibold text-sm mb-2">
-                    Subordinate: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
+                    Supervisor: {sourceJob.role} {sourceJob.cadet ? `(${sourceJob.cadet.last_name}, ${sourceJob.cadet.first_name})` : '(Unassigned)'}
                   </h4>
-                  <Select value={targetHandle} onValueChange={setTargetHandle}>
+                  <Select value={sourceHandle} onValueChange={setSourceHandle}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select connection point" />
                     </SelectTrigger>
@@ -117,11 +117,12 @@ export const ConnectionEditModal = ({
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
                   <h4 className="font-semibold text-sm mb-2">
-                    Supervisor: {sourceJob.role} {sourceJob.cadet ? `(${sourceJob.cadet.last_name}, ${sourceJob.cadet.first_name})` : '(Unassigned)'}
+                    Subordinate: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
                   </h4>
-                  <Select value={sourceHandle} onValueChange={setSourceHandle}>
+                  <Select value={targetHandle} onValueChange={setTargetHandle}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select connection point" />
                     </SelectTrigger>
@@ -139,19 +140,19 @@ export const ConnectionEditModal = ({
           {/* Visual Preview - 2/3 width */}
           <div className="w-2/3 relative bg-muted/20 rounded-lg p-4 min-h-[200px]">
             <div className="relative h-full flex items-center justify-between">
-              {/* Reversed layout: supervisor on left, subordinate/assistant on right */}
+              {/* Reversed layout: subordinate/assistant on left, supervisor on right */}
               {connectionType === 'assistant' ? (
                 <>
-                  {/* Source Job Card (Supervisor) - Left */}
+                  {/* Target Job Card (Assistant) - Left */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
-                      <div className="text-xs font-medium truncate">{sourceJob.role}</div>
+                      <div className="text-xs font-medium truncate">{targetJob.role}</div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
+                        {targetJob.cadet ? `${targetJob.cadet.last_name}` : 'Unassigned'}
                       </div>
                     </div>
-                    {/* Source Handle Indicator */}
-                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
+                    {/* Target Handle Indicator */}
+                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
                   </div>
 
                   {/* Connection Text */}
@@ -161,22 +162,7 @@ export const ConnectionEditModal = ({
                     </span>
                   </div>
 
-                  {/* Target Job Card (Assistant) - Right */}
-                  <div className="relative">
-                    <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
-                      <div className="text-xs font-medium truncate">{targetJob.role}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {targetJob.cadet ? `${targetJob.cadet.last_name}` : 'Unassigned'}
-                      </div>
-                    </div>
-                    {/* Target Handle Indicator */}
-                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* For reports_to: supervisor (sourceJob) on left, subordinate (targetJob) on right */}
-                  {/* Supervisor (sourceJob) - Left */}
+                  {/* Source Job Card (Supervisor) - Right */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
                       <div className="text-xs font-medium truncate">{sourceJob.role}</div>
@@ -187,15 +173,11 @@ export const ConnectionEditModal = ({
                     {/* Source Handle Indicator */}
                     <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
                   </div>
-
-                  {/* Connection Text */}
-                  <div className="flex-1 mx-2 flex items-center justify-center">
-                    <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
-                      <ArrowRight size={18} />
-                    </span>
-                  </div>
-
-                  {/* Subordinate (targetJob) - Right */}
+                </>
+              ) : (
+                <>
+                  {/* For reports_to: subordinate (targetJob) on left, supervisor (sourceJob) on right */}
+                  {/* Subordinate (targetJob) - Left */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
                       <div className="text-xs font-medium truncate">{targetJob.role}</div>
@@ -205,6 +187,25 @@ export const ConnectionEditModal = ({
                     </div>
                     {/* Target Handle Indicator */}
                     <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
+                  </div>
+
+                  {/* Connection Text */}
+                  <div className="flex-1 mx-2 flex items-center justify-center">
+                    <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
+                      <ArrowRight size={18} />
+                    </span>
+                  </div>
+
+                  {/* Supervisor (sourceJob) - Right */}
+                  <div className="relative">
+                    <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
+                      <div className="text-xs font-medium truncate">{sourceJob.role}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
+                      </div>
+                    </div>
+                    {/* Source Handle Indicator */}
+                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
                   </div>
                 </>
               )}
