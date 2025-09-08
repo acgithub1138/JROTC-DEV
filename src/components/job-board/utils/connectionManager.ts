@@ -69,5 +69,14 @@ export const ConnectionManager = {
    */
   getHandlePosition: (handle: string): string => {
     return handle.split('-')[0];
+  },
+
+  /**
+   * Converts handle type while maintaining position (e.g., 'left-source' -> 'left-target')
+   */
+  convertHandleType: (handle: string): string => {
+    const [position, type] = handle.split('-');
+    const newType = type === 'source' ? 'target' : 'source';
+    return `${position}-${newType}`;
   }
 };

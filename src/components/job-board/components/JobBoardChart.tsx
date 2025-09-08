@@ -227,8 +227,8 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
         id: targetConnectionId,
         type: 'assistant' as const,
         target_role: sourceJob.role,
-        source_handle: targetHandle, // Use same handle positions but reversed
-        target_handle: sourceHandle
+        source_handle: ConnectionManager.convertHandleType(targetHandle),
+        target_handle: ConnectionManager.convertHandleType(sourceHandle)
       };
       
       const updatedTargetConnections = ConnectionManager.deduplicateConnections(

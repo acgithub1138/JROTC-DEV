@@ -16,6 +16,35 @@ const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithC
   return occupiedHandles;
 };
 
+// Helper function to fix swapped handle types
+const fixHandleTypes = (sourceHandle: string, targetHandle: string, connectionType: 'reports_to' | 'assistant') => {
+  const validSourceHandles = ['top-source', 'bottom-source', 'left-source', 'right-source'];
+  const validTargetHandles = ['top-target', 'bottom-target', 'left-target', 'right-target'];
+  
+  let fixedSourceHandle = sourceHandle;
+  let fixedTargetHandle = targetHandle;
+  
+  // Fix swapped handle types if detected
+  if (!validSourceHandles.includes(sourceHandle) && validTargetHandles.includes(sourceHandle)) {
+    const position = sourceHandle.split('-')[0];
+    fixedSourceHandle = `${position}-source`;
+  }
+  
+  if (!validTargetHandles.includes(targetHandle) && validSourceHandles.includes(targetHandle)) {
+    const position = targetHandle.split('-')[0];
+    fixedTargetHandle = `${position}-target`;
+  }
+  
+  // Final validation with fallbacks
+  const isValidSourceHandle = validSourceHandles.includes(fixedSourceHandle);
+  const isValidTargetHandle = validTargetHandles.includes(fixedTargetHandle);
+  
+  return {
+    sourceHandle: isValidSourceHandle ? fixedSourceHandle : (connectionType === 'assistant' ? 'right-source' : 'bottom-source'),
+    targetHandle: isValidTargetHandle ? fixedTargetHandle : (connectionType === 'assistant' ? 'left-target' : 'top-target')
+  };
+};
+
 export const createFlowNodes = (
   jobs: JobBoardWithCadet[],
   positions: Map<string, { x: number; y: number }>
@@ -92,17 +121,10 @@ export const createFlowEdges = (
       targetHandle = customConnection.target_handle;
     }
     
-    // Validate handle values to prevent invalid edges
-    const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
-    
-    // Validate and fix handles
-    if (!validHandles.includes(sourceHandle)) {
-      sourceHandle = hierarchyEdge.type === 'assistant' ? 'right-source' : 'bottom-source';
-    }
-    
-    if (!validHandles.includes(targetHandle)) {
-      targetHandle = hierarchyEdge.type === 'assistant' ? 'left-target' : 'top-target';
-    }
+    // Fix handle types if they're swapped
+    const fixedHandles = fixHandleTypes(sourceHandle, targetHandle, hierarchyEdge.type);
+    sourceHandle = fixedHandles.sourceHandle;
+    targetHandle = fixedHandles.targetHandle;
 
     const edgeObj = {
       id: hierarchyEdge.id,
@@ -151,19 +173,13 @@ export const createFlowEdges = (
         }
 
         // This is a standalone custom connection
-        // Validate handles for standalone connections
+        // Fix handle types if they're swapped
         let sourceHandle = connection.source_handle || 'bottom-source';
         let targetHandle = connection.target_handle || 'top-target';
         
-        const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
-        
-        if (!validHandles.includes(sourceHandle)) {
-          sourceHandle = connection.type === 'assistant' ? 'right-source' : 'bottom-source';
-        }
-        
-        if (!validHandles.includes(targetHandle)) {
-          targetHandle = connection.type === 'assistant' ? 'left-target' : 'top-target';
-        }
+        const fixedHandles = fixHandleTypes(sourceHandle, targetHandle, connection.type);
+        sourceHandle = fixedHandles.sourceHandle;
+        targetHandle = fixedHandles.targetHandle;
         
         const edgeObj = {
           id: connection.id,
