@@ -31,6 +31,7 @@ export const AttachmentList: React.FC<AttachmentListProps> = ({
   );
 
   const handleDownload = async (attachment: any) => {
+    console.log('🔍 AttachmentList.handleDownload called for:', attachment.file_name);
     try {
       const url = await getFileUrl(attachment.file_path);
       if (url) {
@@ -38,6 +39,7 @@ export const AttachmentList: React.FC<AttachmentListProps> = ({
         link.href = url;
         link.download = attachment.file_name;
         document.body.appendChild(link);
+        console.log('🔍 About to trigger download click for:', attachment.file_name);
         link.click();
         document.body.removeChild(link);
       }

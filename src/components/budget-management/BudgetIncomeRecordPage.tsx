@@ -223,6 +223,9 @@ export const BudgetIncomeRecordPage: React.FC = () => {
           title: "Income Updated",
           description: "Income record has been updated successfully."
         });
+        
+        // Navigate back to budget overview
+        navigate('/app/budget');
       }
       
       resetChanges();

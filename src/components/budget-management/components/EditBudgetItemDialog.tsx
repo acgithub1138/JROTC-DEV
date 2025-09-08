@@ -109,6 +109,9 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
     });
     
     onOpenChange(false);
+    
+    // Navigate back to budget page after updating from dialog
+    window.location.href = '/app/budget';
   };
   const getTypeOptions = () => {
     if (item.category === 'expense') {
