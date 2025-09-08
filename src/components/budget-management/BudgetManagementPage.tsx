@@ -48,7 +48,6 @@ export interface BudgetFilters {
   budgetYear: string;
 }
 const BudgetManagementPage = () => {
-  console.log('🔍 BudgetManagementPage rendered/re-rendered');
   const navigate = useNavigate();
   const { canCreate, canEdit: canUpdate, canView } = useTablePermissions('budget');
   const { exportToExcel, isExporting } = useExportBudgetTransactions();

@@ -326,7 +326,11 @@ export const BudgetIncomeRecordPage: React.FC = () => {
           <CardContent>
             {isFormMode ? (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <form onSubmit={(e) => e.preventDefault()} onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                  }
+                }} className="space-y-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -516,7 +520,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={isSubmitting || isUploadingFiles}>
+                    <Button type="button" onClick={() => form.handleSubmit(handleSubmit)()} disabled={isSubmitting || isUploadingFiles}>
                      {(isSubmitting || isCreating || isUploadingFiles) ? 'Saving...' : 
                       currentMode === 'create' ? 'Add Income' : 'Update Income'}
                     </Button>
