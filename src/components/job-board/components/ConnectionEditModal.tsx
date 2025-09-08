@@ -70,9 +70,9 @@ export const ConnectionEditModal = ({
               <>
                 <div>
                   <h4 className="font-semibold text-sm mb-2">
-                    Supervisor: {sourceJob.role} {sourceJob.cadet ? `(${sourceJob.cadet.last_name}, ${sourceJob.cadet.first_name})` : '(Unassigned)'}
+                    From: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
                   </h4>
-                  <Select value={sourceHandle} onValueChange={setSourceHandle}>
+                  <Select value={targetHandle} onValueChange={setTargetHandle}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select connection point" />
                     </SelectTrigger>
@@ -83,12 +83,12 @@ export const ConnectionEditModal = ({
                     </SelectContent>
                   </Select>
                 </div>
-
+                
                 <div>
                   <h4 className="font-semibold text-sm mb-2">
-                    Assistant: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
+                    To: {sourceJob.role} {sourceJob.cadet ? `(${sourceJob.cadet.last_name}, ${sourceJob.cadet.first_name})` : '(Unassigned)'}
                   </h4>
-                  <Select value={targetHandle} onValueChange={setTargetHandle}>
+                  <Select value={sourceHandle} onValueChange={setSourceHandle}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select connection point" />
                     </SelectTrigger>
