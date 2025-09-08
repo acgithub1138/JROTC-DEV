@@ -88,7 +88,6 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
     }
   }, [item, open, form]);
   const handleSubmit = (data: EditFormData) => {
-    console.log('🔍 EditBudgetItemDialog.handleSubmit called via UPDATE BUTTON');
     const updates: Partial<BudgetTransaction> = {
       item: data.item,
       type: data.type,
@@ -101,7 +100,6 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
       updates.status = data.status as any;
     }
     
-    console.log('🔍 About to call onSubmit (updateTransaction from hook)');
     onSubmit(item.id, updates);
     
     // Show toast message for dialog updates
@@ -110,7 +108,6 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
       description: `${item.category === 'expense' ? 'Expense' : 'Income'} record has been updated successfully.`
     });
     
-    console.log('🔍 Closing dialog, NO navigation from EditBudgetItemDialog');
     onOpenChange(false);
   };
   const getTypeOptions = () => {

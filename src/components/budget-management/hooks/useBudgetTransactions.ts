@@ -218,10 +218,8 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     transactions,
     isLoading,
     createTransaction,
-    updateTransaction: (id: string, updates: Partial<BudgetTransaction>) => {
-      console.log('🔍 Hook updateTransaction called with id:', id);
-      return updateMutation.mutate({ id, updates });
-    },
+    updateTransaction: (id: string, updates: Partial<BudgetTransaction>) =>
+      updateMutation.mutate({ id, updates }),
     deleteTransaction: deleteMutation.mutate,
     archiveAllTransactions: archiveAllMutation.mutate,
     isCreating: createMutation.isPending,
