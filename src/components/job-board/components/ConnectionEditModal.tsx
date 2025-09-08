@@ -143,26 +143,7 @@ export const ConnectionEditModal = ({
               {/* Reversed layout: subordinate/assistant on left, supervisor on right */}
               {connectionType === 'assistant' ? (
                 <>
-                  {/* Source Job Card (Supervisor) - Left */}
-                  <div className="relative">
-                    <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
-                      <div className="text-xs font-medium truncate">{sourceJob.role}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
-                      </div>
-                    </div>
-                    {/* Source Handle Indicator */}
-                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
-                  </div>
-
-                  {/* Connection Text */}
-                  <div className="flex-1 mx-2 flex items-center justify-center">
-                    <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
-                      {connectionTypeLabel}
-                    </span>
-                  </div>
-
-                  {/* Target Job Card (Assistant) - Right */}
+                  {/* Target Job Card (Assistant) - Left */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
                       <div className="text-xs font-medium truncate">{targetJob.role}</div>
@@ -172,6 +153,25 @@ export const ConnectionEditModal = ({
                     </div>
                     {/* Target Handle Indicator */}
                     <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
+                  </div>
+
+                  {/* Connection Text */}
+                  <div className="flex-1 mx-2 flex items-center justify-center">
+                    <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
+                      {connectionTypeLabel}
+                    </span>
+                  </div>
+
+                  {/* Source Job Card (Supervisor) - Right */}
+                  <div className="relative">
+                    <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
+                      <div className="text-xs font-medium truncate">{sourceJob.role}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
+                      </div>
+                    </div>
+                    {/* Source Handle Indicator */}
+                    <div className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' : sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' : sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' : '-right-1 top-1/2 -translate-y-1/2'}`} />
                   </div>
                 </>
               ) : (
