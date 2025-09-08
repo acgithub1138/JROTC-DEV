@@ -126,16 +126,15 @@ export const EmailQueueTab: React.FC = () => {
               error: error.message || 'Unknown error'
             });
             failed++;
-          } else if (data?.success) {
-            console.log(`✅ Successfully processed email ${email.id}:`, data);
-            processed++;
-            details.push({
-              emailId: email.id,
-              recipient: email.recipient_email,
-              status: 'sent',
-              processingTime: data.processingTime,
-              emailDetails: data.emailDetails
-            });
+            } else if (data?.success) {
+              processed++;
+              details.push({
+                emailId: email.id,
+                recipient: email.recipient_email,
+                status: 'sent',
+                processingTime: data.processingTime,
+                emailDetails: data.emailDetails
+              });
           } else {
             // Handle retry scenarios or other non-success responses
             const isRetryScheduled = data?.emailDetails?.retryScheduled;

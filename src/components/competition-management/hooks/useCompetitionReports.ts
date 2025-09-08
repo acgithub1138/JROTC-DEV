@@ -38,7 +38,6 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       if (error) throw error;
 
       const uniqueEvents = [...new Set(data.map(item => item.event))];
-      console.log('Available events:', uniqueEvents);
       setAvailableEvents(uniqueEvents);
     } catch (error) {
       console.error('Error fetching available events:', error);
@@ -75,7 +74,6 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
   const fetchReportData = async () => {
     if (!userProfile?.school_id || !selectedEvent) {
-      console.log('Missing data for fetch:', { school_id: userProfile?.school_id, selectedEvent });
       setReportData([]);
       setScoringCriteria([]);
       return;
@@ -83,7 +81,6 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
     // If no competitions are selected (empty array), don't fetch any data
     if (selectedCompetitions !== null && selectedCompetitions.length === 0) {
-      console.log('No competitions selected, clearing data');
       setReportData([]);
       setScoringCriteria([]);
       setIsLoading(false);
@@ -92,7 +89,6 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
     try {
       setIsLoading(true);
-      console.log('Fetching report data for event:', selectedEvent);
       
       let query = supabase
         .from('competition_events')
@@ -125,10 +121,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
         console.log('Sample score sheet structure:', data[0]?.score_sheet);
       }
 
-      // Process the data to extract scoring criteria and calculate individual criteria performance
-const { processedData, criteria } = processCompetitionData(data as any);
-      console.log('Processed criteria:', criteria);
-      console.log('Processed data points:', processedData.length);
+    const { processedData, criteria } = processCompetitionData(data as any);
       
       setReportData(processedData);
       setScoringCriteria(criteria);
@@ -141,8 +134,6 @@ const { processedData, criteria } = processCompetitionData(data as any);
   };
 
   const formatCriteriaName = (rawName: string): string => {
-    console.log('Formatting criteria name:', rawName);
-    
     // Handle numbered criteria: field_X_Y._description
     const numberedMatch = rawName.match(/^field_(\d+)_\d+\.(.*)/);
     
@@ -159,7 +150,6 @@ const { processedData, criteria } = processCompetitionData(data as any);
         .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize words
       
       const formatted = `${displayNumber}. ${cleanDescription}`;
-      console.log('Formatted numbered criteria:', formatted);
       return formatted;
     }
     
@@ -177,21 +167,16 @@ const { processedData, criteria } = processCompetitionData(data as any);
         .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize words
       
       const formatted = cleanDescription;
-      console.log('Formatted penalty criteria:', formatted);
       return formatted;
     }
     
     // Fallback for unexpected format
     const formatted = rawName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    console.log('Formatted criteria name (fallback):', formatted);
     return formatted;
   };
 
   const processCompetitionData = (data: any[]): { processedData: PerformanceData[], criteria: string[] } => {
-    console.log('Processing competition data:', data);
-    
     if (!data || data.length === 0) {
-      console.log('No data to process');
       return { processedData: [], criteria: [] };
     }
     
@@ -200,15 +185,10 @@ const { processedData, criteria } = processCompetitionData(data as any);
     const allFormattedCriteria = new Set<string>();
     
     data.forEach((item, index) => {
-      console.log(`Processing item ${index}:`, item);
-      
       // Check if score_sheet exists and has the expected structure
       if (!item.score_sheet) {
-        console.log(`Item ${index} has no score_sheet`);
         return;
       }
-      
-      console.log(`Score sheet for item ${index}:`, item.score_sheet);
       
       // Handle different possible structures of score_sheet
       let scoresData = null;
@@ -220,22 +200,15 @@ const { processedData, criteria } = processCompetitionData(data as any);
       }
       
       if (scoresData) {
-        console.log(`Found scores data for item ${index}:`, scoresData);
-        
         const extractCriteriaKeys = (obj: any, prefix = ''): void => {
-          console.log(`Extracting from object at prefix "${prefix}":`, obj);
-          
           if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
             Object.keys(obj).forEach(key => {
               const fullKey = prefix ? `${prefix}.${key}` : key;
               const value = obj[key];
               
-              console.log(`Checking key "${fullKey}" with value:`, value, `(type: ${typeof value})`);
-              
               // Accept both numbers and numeric strings
               if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '')) {
                 const formattedName = formatCriteriaName(fullKey);
-                console.log(`Found criteria: ${fullKey} -> ${formattedName} (value: ${value}, type: ${typeof value})`);
                 rawToFormattedCriteriaMap.set(fullKey, formattedName);
                 allFormattedCriteria.add(formattedName);
               } else if (typeof value === 'object' && value !== null) {
@@ -246,16 +219,12 @@ const { processedData, criteria } = processCompetitionData(data as any);
         };
         
         extractCriteriaKeys(scoresData);
-      } else {
-        console.log(`No scores data found in item ${index}`);
       }
     });
 
     // Apply criteria mappings if provided
     let finalCriteriaMap = rawToFormattedCriteriaMap;
     if (criteriaMapping && criteriaMapping.length > 0) {
-      console.log('Applying criteria mappings:', criteriaMapping);
-      
       // Create reverse mapping from original criteria to display names
       const originalToDisplay = new Map<string, string>();
       criteriaMapping.forEach(mapping => {
@@ -285,8 +254,6 @@ const { processedData, criteria } = processCompetitionData(data as any);
     }
 
     const criteriaList = Array.from(allFormattedCriteria).sort();
-    console.log('Final criteria (after mapping):', criteriaList);
-    console.log('Final criteria mapping:', finalCriteriaMap);
     
     // Group data by date and extract individual scores for each criteria
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};

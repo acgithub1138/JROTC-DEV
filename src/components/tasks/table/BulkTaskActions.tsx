@@ -81,12 +81,10 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
       
       // Update subtasks  
       for (const id of subtaskIdsToUpdate) {
-        console.log(`🔸 Updating subtask: ${id}`);
         updatePromises.push(updateSubtask({ id, ...updateData }));
       }
       
       await Promise.all(updatePromises);
-      console.log('✅ All updates completed successfully');
       
       toast({
         title: "Items Updated",
@@ -144,12 +142,10 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
       
       // Cancel subtasks  
       for (const id of subtaskIdsToUpdate) {
-        console.log(`🔸 Canceling subtask: ${id}`);
         updatePromises.push(updateSubtask({ id, ...updateData }));
       }
       
       await Promise.all(updatePromises);
-      console.log('✅ All cancellations completed successfully');
       
       toast({
         title: "Items Canceled",

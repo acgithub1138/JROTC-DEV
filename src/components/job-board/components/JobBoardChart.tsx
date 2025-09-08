@@ -154,33 +154,15 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   }, [jobs, isChartReadOnly, permissions, hookPermissions]);
 
   const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
-    console.log('=== CONNECTION SAVE DEBUG ===');
-    console.log('Modal state:', connectionEditModal);
-    console.log('onUpdateJob exists:', !!onUpdateJob);
-    
     if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
-      console.log('Early return due to missing data:', {
-        hasSourceJob: !!connectionEditModal.sourceJob,
-        hasTargetJob: !!connectionEditModal.targetJob,
-        hasConnectionType: !!connectionEditModal.connectionType,
-        hasOnUpdateJob: !!onUpdateJob
-      });
       return;
     }
-
-    console.log('Source Job:', connectionEditModal.sourceJob.role);
-    console.log('Target Job:', connectionEditModal.targetJob.role);
-    console.log('Connection Type:', connectionEditModal.connectionType);
-    console.log('Connection ID:', connectionEditModal.connectionId);
-    console.log('Source Handle:', sourceHandle);
-    console.log('Target Handle:', targetHandle);
     
     // Check if this is a hierarchy-based connection (ID contains the pattern: jobId-assistant-jobId or jobId-jobId)
     const isHierarchyConnection = connectionEditModal.connectionId?.includes('-assistant-') || 
       (connectionEditModal.connectionId && !connectionEditModal.sourceJob.connections?.some(conn => conn.id === connectionEditModal.connectionId));
     
     if (connectionEditModal.connectionId && !isHierarchyConnection) {
-      console.log('🔄 Updating connection in connections array with ID:', connectionEditModal.connectionId);
       const sourceJob = connectionEditModal.sourceJob;
       const updatedConnections = (sourceJob.connections || []).map(conn => 
         conn.id === connectionEditModal.connectionId 
@@ -192,19 +174,15 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           : conn
       );
 
-      console.log('🔄 Updating connections array:', { updatedConnections });
       onUpdateJob(sourceJob.id, { connections: updatedConnections });
-      console.log('✅ Connection update completed');
     } else {
       // Handle hierarchy-based connections - update both the field AND the connections array
-      console.log('🔄 Updating hierarchy-based connection via field update');
       
       if (connectionEditModal.connectionType === 'reports_to') {
         // Update the target job's reports_to field
         onUpdateJob(connectionEditModal.targetJob.id, { 
           reports_to: connectionEditModal.sourceJob.role 
         });
-        console.log('✅ Updated reports_to field');
         
         // Also update/create the connection in the source job's connections array
         const sourceJob = connectionEditModal.sourceJob;
@@ -228,14 +206,12 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
         }
         
         onUpdateJob(sourceJob.id, { connections: updatedConnections });
-        console.log('✅ Updated connections array for reports_to');
         
       } else if (connectionEditModal.connectionType === 'assistant') {
         // Update the target job's assistant field  
         onUpdateJob(connectionEditModal.targetJob.id, { 
           assistant: connectionEditModal.sourceJob.role 
         });
-        console.log('✅ Updated assistant field');
         
         // Update/create the connection in the source job's connections array
         const sourceJob = connectionEditModal.sourceJob;
@@ -259,7 +235,6 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
         }
         
         onUpdateJob(sourceJob.id, { connections: updatedSourceConnections });
-        console.log('✅ Updated source connections array for assistant');
         
         // Also update/create the reverse connection in the target job's connections array
         const targetJob = connectionEditModal.targetJob;
@@ -286,7 +261,6 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
         }
         
         onUpdateJob(targetJob.id, { connections: updatedTargetConnections });
-        console.log('✅ Updated target connections array for assistant');
       }
     }
     

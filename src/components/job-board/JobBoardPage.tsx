@@ -52,14 +52,12 @@ const JobBoardPage = () => {
   };
 
   const handleUpdateJob = (jobId: string, updates: Partial<JobBoardWithCadet>) => {
-    console.log('🔄 Updating job in JobBoardPage:', { jobId, updates });
     updateJob.mutate({ id: jobId, updates }, {
       onSuccess: () => {
-        console.log('✅ Job updated successfully');
         refetch(); // Refresh the data to show the changes
       },
       onError: (error) => {
-        console.error('❌ Failed to update job:', error);
+        console.error('Failed to update job:', error);
       }
     });
   };

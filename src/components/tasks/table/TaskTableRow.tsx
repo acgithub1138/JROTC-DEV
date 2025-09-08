@@ -123,9 +123,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           status: pendingStatusChange,
           completed_at: now
         });
-        console.log('✅ Cancellation update completed');
       } else if (isCompletionStatus(pendingStatusChange, statusOptions)) {
-        console.log('✅ Handling completion status:', pendingStatusChange);
         // For completion status, update main task and subtasks if requested
         await updateTask({
           id: task.id,
@@ -150,9 +148,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           ? 'Task and all subtasks completed' 
           : 'Task completed';
         handleSystemComment(task.id, commentText);
-        console.log('✅ Completion update finished');
       } else {
-        console.log('ℹ️ Handling other status change:', pendingStatusChange);
         // For other statuses that require comments (like need_information)
         await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
       }
