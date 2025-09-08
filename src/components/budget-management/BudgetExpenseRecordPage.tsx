@@ -232,7 +232,9 @@ export const BudgetExpenseRecordPage: React.FC = () => {
           title: "Expense Updated",
           description: "Expense record has been updated successfully."
         });
-        handleView();
+        
+        // Navigate back to budget overview
+        navigate('/app/budget');
       }
       
       resetChanges();
