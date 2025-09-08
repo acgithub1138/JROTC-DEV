@@ -50,8 +50,8 @@ const CompetitionDashboard = () => {
         awardsGiven: awards
       };
     },
-    refetchOnWindowFocus: true,
-    refetchInterval: 15000
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    refetchOnWindowFocus: false,
   });
   const dashboardStats = [{
     title: 'Active Competitions',

@@ -109,6 +109,8 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-subtasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity-optimized'] });
       toast({
         title: "Task updated",
         description: "The task has been updated successfully.",

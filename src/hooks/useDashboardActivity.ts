@@ -72,7 +72,8 @@ export const useDashboardActivity = () => {
         .slice(0, 5)
         .map(({ created_at, ...activity }) => activity);
     },
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
 };
 

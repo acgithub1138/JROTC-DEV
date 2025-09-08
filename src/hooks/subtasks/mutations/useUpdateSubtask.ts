@@ -66,6 +66,8 @@ export const useUpdateSubtask = () => {
       queryClient.invalidateQueries({ queryKey: ['subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity-optimized'] });
       
       // Force refetch to ensure UI updates immediately
       queryClient.refetchQueries({ queryKey: ['subtasks'] });

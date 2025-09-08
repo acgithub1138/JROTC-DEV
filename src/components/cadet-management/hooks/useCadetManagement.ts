@@ -4,12 +4,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Profile, NewCadet } from '../types';
 
 export const useCadetManagement = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const { hasPermission } = usePermissionContext();
+  const queryClient = useQueryClient();
   
   // Determine the first accessible tab as default
   const getDefaultTab = () => {
@@ -174,6 +176,10 @@ export const useCadetManagement = () => {
         duration: 8000
       });
 
+      // Invalidate dashboard activity queries for new cadet enrollment
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activity-optimized'] });
+
       setNewCadet({
         first_name: '',
         last_name: '',
@@ -283,6 +289,11 @@ export const useCadetManagement = () => {
           description: `Successfully created ${successCount} cadets${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
           duration: 8000
         });
+
+        // Invalidate dashboard activity queries for new cadet enrollments
+        queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard-activity-optimized'] });
+
         fetchProfiles();
       }
 

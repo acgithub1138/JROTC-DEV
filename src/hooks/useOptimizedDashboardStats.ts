@@ -110,8 +110,7 @@ export const useOptimizedDashboardStats = () => {
         }
       };
     },
-    refetchInterval: 10 * 60 * 1000, // Reduced from 5 minutes to 10 minutes
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
 
