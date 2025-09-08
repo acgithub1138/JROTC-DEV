@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, FileDown, BarChart3 } from 'lucide-react';
+import { Plus, FileDown, BarChart3, Archive, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { BudgetSummaryCards } from './components/BudgetSummaryCards';
 import { BudgetTable } from './components/BudgetTable';
@@ -120,27 +127,6 @@ const BudgetManagementPage = () => {
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
-          {canView && (
-            <Button 
-              onClick={handleBudgetReport} 
-              variant="outline" 
-              className="flex items-center"
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Budget Report
-            </Button>
-          )}
-          {!isMobile && canView && (
-            <Button 
-              onClick={exportToExcel} 
-              variant="outline" 
-              disabled={isExporting}
-              className="flex items-center"
-            >
-              <FileDown className="w-4 h-4 mr-2" />
-              {isExporting ? 'Exporting...' : 'Export to Excel'}
-            </Button>
-          )}
           {canCreate && (
             <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
@@ -153,9 +139,43 @@ const BudgetManagementPage = () => {
               Add Expense
             </Button>
           )}
-          {canUpdate && (
-            <Button onClick={handleArchiveAll} variant="outline" className="hidden md:flex">Archive Expenses</Button>
-          )}
+          
+          {/* Actions Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center">
+                <MoreHorizontal className="w-4 h-4 mr-2" />
+                Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
+              {canView && (
+                <DropdownMenuItem onClick={handleBudgetReport} className="flex items-center cursor-pointer">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Budget Report
+                </DropdownMenuItem>
+              )}
+              {!isMobile && canView && (
+                <DropdownMenuItem 
+                  onClick={exportToExcel} 
+                  disabled={isExporting}
+                  className="flex items-center cursor-pointer"
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
+                  {isExporting ? 'Exporting...' : 'Export to Excel'}
+                </DropdownMenuItem>
+              )}
+              {canUpdate && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleArchiveAll} className="flex items-center cursor-pointer">
+                    <Archive className="w-4 h-4 mr-2" />
+                    Archive Expenses
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
