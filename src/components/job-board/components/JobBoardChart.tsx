@@ -11,6 +11,7 @@ import { JobBoardToolbar } from './JobBoardToolbar';
 import { ConnectionEditModal } from './ConnectionEditModal';
 import { ExportModal } from './ExportModal';
 import { useJobBoardExport } from '../hooks/useJobBoardExport';
+import { ConnectionManager } from '../utils/connectionManager';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -159,117 +160,67 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       return;
     }
     
+    const sourceJob = connectionEditModal.sourceJob;
+    const targetJob = connectionEditModal.targetJob;
+    const connectionType = connectionEditModal.connectionType;
+    
+    // Validate handle positions
+    if (!ConnectionManager.validateHandles(sourceHandle, targetHandle)) {
+      console.warn('Invalid handle positions:', { sourceHandle, targetHandle });
+      return;
+    }
+    
     // Batch all updates to avoid multiple toast notifications
     const updates: Array<{ jobId: string; updates: Partial<JobBoardWithCadet> }> = [];
     
-    // Check if this is a hierarchy-based connection (ID contains the pattern: jobId-assistant-jobId or jobId-jobId)
-    const isHierarchyConnection = connectionEditModal.connectionId?.includes('-assistant-') || 
-      (connectionEditModal.connectionId && !connectionEditModal.sourceJob.connections?.some(conn => conn.id === connectionEditModal.connectionId));
-    
-    if (connectionEditModal.connectionId && !isHierarchyConnection) {
-      const sourceJob = connectionEditModal.sourceJob;
-      const updatedConnections = (sourceJob.connections || []).map(conn => 
-        conn.id === connectionEditModal.connectionId 
-          ? { 
-              ...conn, 
-              source_handle: sourceHandle, 
-              target_handle: targetHandle 
-            }
-          : conn
-      );
-
-      updates.push({ jobId: sourceJob.id, updates: { connections: updatedConnections } });
-    } else {
-      // Handle hierarchy-based connections - batch all updates
+    if (connectionType === 'reports_to') {
+      // Update the target job's reports_to field
+      updates.push({ 
+        jobId: targetJob.id, 
+        updates: { reports_to: sourceJob.role }
+      });
       
-      if (connectionEditModal.connectionType === 'reports_to') {
-        // Update the target job's reports_to field
-        updates.push({ 
-          jobId: connectionEditModal.targetJob.id, 
-          updates: { reports_to: connectionEditModal.sourceJob.role }
-        });
-        
-        // Also update/create the connection in the source job's connections array
-        const sourceJob = connectionEditModal.sourceJob;
-        const connectionId = `${sourceJob.id}-${connectionEditModal.targetJob.id}`;
-        const updatedConnections = [...(sourceJob.connections || [])];
-        
-        // Find existing connection or create new one
-        const existingIndex = updatedConnections.findIndex(conn => conn.id === connectionId);
-        const connectionEntry = {
-          id: connectionId,
-          type: 'reports_to' as const,
-          target_role: connectionEditModal.targetJob.role,
-          source_handle: sourceHandle,
-          target_handle: targetHandle
-        };
-        
-        if (existingIndex >= 0) {
-          updatedConnections[existingIndex] = connectionEntry;
-        } else {
-          updatedConnections.push(connectionEntry);
-        }
-        
-        updates.push({ jobId: sourceJob.id, updates: { connections: updatedConnections } });
-        
-      } else if (connectionEditModal.connectionType === 'assistant') {
-        // Update the target job's assistant field  
-        updates.push({
-          jobId: connectionEditModal.targetJob.id,
-          updates: { assistant: connectionEditModal.sourceJob.role }
-        });
-        
-        // Update/create the connection in the source job's connections array
-        const sourceJob = connectionEditModal.sourceJob;
-        const sourceConnectionId = `${sourceJob.id}-assistant-${connectionEditModal.targetJob.id}`;
-        const updatedSourceConnections = [...(sourceJob.connections || [])];
-        
-        // Find existing connection or create new one for source
-        const existingSourceIndex = updatedSourceConnections.findIndex(conn => conn.id === sourceConnectionId);
-        const sourceConnectionEntry = {
-          id: sourceConnectionId,
-          type: 'assistant' as const,
-          target_role: connectionEditModal.targetJob.role,
-          source_handle: sourceHandle,
-          target_handle: targetHandle
-        };
-        
-        if (existingSourceIndex >= 0) {
-          updatedSourceConnections[existingSourceIndex] = sourceConnectionEntry;
-        } else {
-          updatedSourceConnections.push(sourceConnectionEntry);
-        }
-        
-        updates.push({ jobId: sourceJob.id, updates: { connections: updatedSourceConnections } });
-        
-        // Also update/create the reverse connection in the target job's connections array
-        const targetJob = connectionEditModal.targetJob;
-        const targetConnectionId = `${targetJob.id}-assistant-reverse-${sourceJob.id}`;
-        const updatedTargetConnections = [...(targetJob.connections || [])];
-        
-        // Find existing reverse connection or create new one for target
-        const existingTargetIndex = updatedTargetConnections.findIndex(conn => 
-          conn.id === targetConnectionId || 
-          (conn.type === 'assistant' && conn.target_role === sourceJob.role)
-        );
-        // For reverse connections, we need to find the corresponding handles on the target job
-        // The connection goes from target job back to source job
-        const targetConnectionEntry = {
-          id: targetConnectionId,
-          type: 'assistant' as const,
-          target_role: sourceJob.role,
-          source_handle: 'left-source', // Target job acts as source in reverse connection
-          target_handle: 'right-target'  // Source job acts as target in reverse connection
-        };
-        
-        if (existingTargetIndex >= 0) {
-          updatedTargetConnections[existingTargetIndex] = targetConnectionEntry;
-        } else {
-          updatedTargetConnections.push(targetConnectionEntry);
-        }
-        
-        updates.push({ jobId: targetJob.id, updates: { connections: updatedTargetConnections } });
-      }
+      // Create/update connection in source job
+      const connectionEntry = ConnectionManager.createConnection(
+        sourceJob, targetJob, connectionType, sourceHandle, targetHandle
+      );
+      
+      const updatedConnections = ConnectionManager.deduplicateConnections(
+        sourceJob.connections || [], connectionEntry
+      );
+      updates.push({ jobId: sourceJob.id, updates: { connections: updatedConnections } });
+      
+    } else if (connectionType === 'assistant') {
+      // Update the target job's assistant field  
+      updates.push({
+        jobId: targetJob.id,
+        updates: { assistant: sourceJob.role }
+      });
+      
+      // Create/update connection in source job
+      const sourceConnectionEntry = ConnectionManager.createConnection(
+        sourceJob, targetJob, connectionType, sourceHandle, targetHandle
+      );
+      
+      const updatedSourceConnections = ConnectionManager.deduplicateConnections(
+        sourceJob.connections || [], sourceConnectionEntry
+      );
+      updates.push({ jobId: sourceJob.id, updates: { connections: updatedSourceConnections } });
+      
+      // Create/update reverse connection in target job
+      const targetConnectionId = `${targetJob.id}-assistant-reverse-${sourceJob.id}`;
+      const targetConnectionEntry = {
+        id: targetConnectionId,
+        type: 'assistant' as const,
+        target_role: sourceJob.role,
+        source_handle: targetHandle, // Use same handle positions but reversed
+        target_handle: sourceHandle
+      };
+      
+      const updatedTargetConnections = ConnectionManager.deduplicateConnections(
+        targetJob.connections || [], targetConnectionEntry
+      );
+      updates.push({ jobId: targetJob.id, updates: { connections: updatedTargetConnections } });
     }
     
     // Execute all updates with toast suppression for all but the last one
@@ -297,7 +248,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       currentSourceHandle: null,
       currentTargetHandle: null
     });
-  }, [connectionEditModal, onUpdateJob]);
+  }, [connectionEditModal, onUpdateJob, onRefresh]);
 
   const chartContent = (
     <div 
