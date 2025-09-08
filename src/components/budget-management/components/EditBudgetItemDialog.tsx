@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useToast } from '@/hooks/use-toast';
 import { BudgetTransaction } from '../BudgetManagementPage';
 const editSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -50,6 +51,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
   } = useTablePermissions('budget');
   const isReadOnly = viewOnly || !canUpdate;
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const { toast } = useToast(); // Add toast hook
   const [initialFormData, setInitialFormData] = useState<EditFormData>({
     item: '',
     type: '',
@@ -86,6 +88,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
     }
   }, [item, open, form]);
   const handleSubmit = (data: EditFormData) => {
+    console.log('🔍 EditBudgetItemDialog.handleSubmit called via UPDATE BUTTON');
     const updates: Partial<BudgetTransaction> = {
       item: data.item,
       type: data.type,
@@ -97,7 +100,17 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
       updates.payment_method = data.payment_method as any;
       updates.status = data.status as any;
     }
+    
+    console.log('🔍 About to call onSubmit (updateTransaction from hook)');
     onSubmit(item.id, updates);
+    
+    // Show toast message for dialog updates
+    toast({
+      title: item.category === 'expense' ? "Expense Updated" : "Income Updated", 
+      description: `${item.category === 'expense' ? 'Expense' : 'Income'} record has been updated successfully.`
+    });
+    
+    console.log('🔍 Closing dialog, NO navigation from EditBudgetItemDialog');
     onOpenChange(false);
   };
   const getTypeOptions = () => {

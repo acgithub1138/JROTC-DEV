@@ -193,6 +193,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async (data: ExpenseFormData) => {
+    console.log('🔍 BudgetExpenseRecordPage.handleSubmit called via KEYBOARD ENTER');
     if (isSubmitting || isCreating || isUploadingFiles) return;
     
     try {
@@ -227,12 +228,14 @@ export const BudgetExpenseRecordPage: React.FC = () => {
         // Navigate back to budget overview
         navigate('/app/budget');
       } else if (currentMode === 'edit' && recordId) {
+        console.log('🔍 About to call updateTransaction for EDIT mode');
         updateTransaction(recordId, budgetData);
         toast({
           title: "Expense Updated",
           description: "Expense record has been updated successfully."
         });
         
+        console.log('🔍 Navigating to /app/budget after EDIT');
         // Navigate back to budget overview
         navigate('/app/budget');
       }
