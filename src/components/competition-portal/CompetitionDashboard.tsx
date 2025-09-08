@@ -77,18 +77,6 @@ const CompetitionDashboard = () => {
     description: 'Event registrations',
     icon: Target,
     color: 'text-purple-500'
-  }, {
-    title: 'Average Score',
-    value: (stats?.averageScore ?? 0).toFixed(1),
-    description: 'All results',
-    icon: TrendingUp,
-    color: 'text-emerald-500'
-  }, {
-    title: 'Awards Given',
-    value: String(stats?.awardsGiven ?? 0),
-    description: 'Total placements',
-    icon: Award,
-    color: 'text-orange-500'
   }];
   return <div className="p-6 space-y-6">
       <div>
