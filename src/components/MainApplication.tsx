@@ -49,6 +49,7 @@ import { InventoryBulkUploadPage } from '@/components/inventory-management/Inven
 import BudgetManagementPage from '@/components/budget-management/BudgetManagementPage';
 import { BudgetIncomeRecordPage } from '@/components/budget-management/BudgetIncomeRecordPage';
 import { BudgetExpenseRecordPage } from '@/components/budget-management/BudgetExpenseRecordPage';
+import BudgetReportPage from '@/components/budget-management/BudgetReportPage';
 import ContactManagementPage from '@/components/contact-management/ContactManagementPage';
 import { ContactRecordPage } from '@/components/contact-management/ContactRecordPage';
 import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
@@ -242,6 +243,7 @@ const MainApplication = () => {
             <Route path="budget" element={<BudgetManagementPage />} />
             <Route path="budget/income_record" element={<BudgetIncomeRecordPage />} />
             <Route path="budget/expense_record" element={<BudgetExpenseRecordPage />} />
+            <Route path="budget/budget_report" element={<BudgetReportPage />} />
             <Route path="contacts" element={<ContactManagementPage />} />
             <Route path="contacts/contact_record" element={<ContactRecordPage />} />
             <Route path="calendar" element={<CalendarManagementPage />} />

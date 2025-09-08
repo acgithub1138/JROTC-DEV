@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, FileDown } from 'lucide-react';
+import { Plus, FileDown, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
@@ -90,6 +90,10 @@ const BudgetManagementPage = () => {
     navigate('/app/budget/expense_record?mode=create');
   };
 
+  const handleBudgetReport = () => {
+    navigate('/app/budget/budget_report');
+  };
+
   // Handle edit navigation
   const handleEditTransaction = (transaction: BudgetTransaction) => {
     if (transaction.category === 'income') {
@@ -116,6 +120,16 @@ const BudgetManagementPage = () => {
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
+          {canView && (
+            <Button 
+              onClick={handleBudgetReport} 
+              variant="outline" 
+              className="flex items-center"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Budget Report
+            </Button>
+          )}
           {!isMobile && canView && (
             <Button 
               onClick={exportToExcel} 
