@@ -210,12 +210,16 @@ export const ConnectionEditModal = ({
                     <svg className="absolute inset-0 w-full h-full pointer-events-none">
                       <path
                         d={(() => {
-                          // Create smoothstep path like ReactFlow
+                          // Create smoothstep path that properly connects to handles
                           const dx = targetPoint.x - sourcePoint.x;
                           const dy = targetPoint.y - sourcePoint.y;
-                          const centerX = sourcePoint.x + dx * 0.5;
                           
-                          return `M ${sourcePoint.x} ${sourcePoint.y} C ${centerX} ${sourcePoint.y}, ${centerX} ${targetPoint.y}, ${targetPoint.x} ${targetPoint.y}`;
+                          // Calculate control points for smooth connection
+                          const stepSize = Math.abs(dx) * 0.5;
+                          const cp1x = sourcePoint.x + (dx > 0 ? stepSize : -stepSize);
+                          const cp2x = targetPoint.x - (dx > 0 ? stepSize : -stepSize);
+                          
+                          return `M ${sourcePoint.x} ${sourcePoint.y} C ${cp1x} ${sourcePoint.y}, ${cp2x} ${targetPoint.y}, ${targetPoint.x} ${targetPoint.y}`;
                         })()}
                         stroke={connectionType === 'assistant' ? '#10b981' : '#6366f1'}
                         strokeWidth="2"
