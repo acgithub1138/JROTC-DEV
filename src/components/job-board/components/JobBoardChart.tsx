@@ -117,6 +117,14 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
     setShowExportModal(true);
   };
 
+  const handleRefresh = () => {
+    // Force chart re-render and call parent refresh
+    setChartVersion(prev => prev + 1);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
     console.log('Edge double click - readonly:', isChartReadOnly, 'canUpdate:', (permissions || hookPermissions).canUpdate);
     
@@ -256,7 +264,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       data-testid="job-board-chart"
     >
       <JobBoardToolbar
-        onRefresh={onRefresh}
+        onRefresh={handleRefresh}
         onResetLayout={handleResetLayoutClick}
         onToggleFullscreen={handleToggleFullscreen}
         onExport={handleExport}
