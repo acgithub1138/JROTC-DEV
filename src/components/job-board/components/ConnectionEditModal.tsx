@@ -215,34 +215,6 @@ export const ConnectionEditModal = ({
                         y2={targetPoint.y}
                         stroke="hsl(var(--primary))"
                         strokeWidth="2"
-                        strokeDasharray="4,4"
-                        className="transition-all duration-300"
-                      />
-                      {/* Arrow marker */}
-                      <defs>
-                        <marker
-                          id="arrowhead"
-                          markerWidth="10"
-                          markerHeight="7"
-                          refX="9"
-                          refY="3.5"
-                          orient="auto"
-                        >
-                          <polygon
-                            points="0 0, 10 3.5, 0 7"
-                            fill="hsl(var(--primary))"
-                          />
-                        </marker>
-                      </defs>
-                      <line
-                        x1={sourcePoint.x}
-                        y1={sourcePoint.y}
-                        x2={targetPoint.x}
-                        y2={targetPoint.y}
-                        stroke="hsl(var(--primary))"
-                        strokeWidth="2"
-                        strokeDasharray="4,4"
-                        markerEnd="url(#arrowhead)"
                         className="transition-all duration-300"
                       />
                     </svg>
