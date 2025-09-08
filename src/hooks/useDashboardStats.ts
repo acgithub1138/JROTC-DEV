@@ -161,6 +161,7 @@ export const useDashboardStats = () => {
       };
     },
     enabled: !!userProfile?.id, // Only run query when user profile is loaded
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
 };

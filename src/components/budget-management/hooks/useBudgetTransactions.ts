@@ -109,6 +109,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast({
         title: 'Success',
         description: 'Transaction created successfully.',
@@ -141,6 +142,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast({
         title: 'Success',
         description: 'Transaction updated successfully.',
@@ -166,6 +168,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast({
         title: 'Success',
         description: 'Transaction deleted successfully.',
@@ -199,6 +202,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast({
         title: 'Success',
         description: 'All transactions archived successfully.',
