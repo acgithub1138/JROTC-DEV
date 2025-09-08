@@ -96,9 +96,16 @@ export const createFlowEdges = (
     
     // Validate handle values to prevent invalid edges
     const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
-    if (!validHandles.includes(sourceHandle) || !validHandles.includes(targetHandle)) {
-      console.warn(`Invalid handles detected for edge ${hierarchyEdge.id}:`, { sourceHandle, targetHandle });
+    
+    // Validate and fix source handle
+    if (!validHandles.includes(sourceHandle)) {
+      console.warn(`🚨 Invalid source handle detected for edge ${hierarchyEdge.id}: ${sourceHandle}`);
       sourceHandle = hierarchyEdge.type === 'assistant' ? 'right-source' : 'bottom-source';
+    }
+    
+    // Validate and fix target handle
+    if (!validHandles.includes(targetHandle)) {
+      console.warn(`🚨 Invalid target handle detected for edge ${hierarchyEdge.id}: ${targetHandle}`);
       targetHandle = hierarchyEdge.type === 'assistant' ? 'left-target' : 'top-target';
     }
 
@@ -150,12 +157,31 @@ export const createFlowEdges = (
         }
 
         // This is a standalone custom connection
+        // Validate handles for standalone connections
+        let sourceHandle = connection.source_handle || 'bottom-source';
+        let targetHandle = connection.target_handle || 'top-target';
+        
+        const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
+        
+        if (!validHandles.includes(sourceHandle)) {
+          console.warn(`🚨 Invalid source handle in standalone connection: ${sourceHandle}, using default`);
+          sourceHandle = connection.type === 'assistant' ? 'right-source' : 'bottom-source';
+        }
+        
+        if (!validHandles.includes(targetHandle)) {
+          console.warn(`🚨 Invalid target handle in standalone connection: ${targetHandle}, using default`);
+          targetHandle = connection.type === 'assistant' ? 'left-target' : 'top-target';
+        }
+        
+        console.log(`🔗 Creating standalone edge: ${job.role} -> ${targetJob.role} (${connection.type})`);
+        console.log(`🎯 Validated handles: ${sourceHandle} -> ${targetHandle}`);
+        
         const edgeObj = {
           id: connection.id,
           source: job.id,
           target: targetJob.id,
-          sourceHandle: connection.source_handle,
-          targetHandle: connection.target_handle,
+          sourceHandle,
+          targetHandle,
           type: 'smoothstep' as const,
           animated: false,
           style: { 

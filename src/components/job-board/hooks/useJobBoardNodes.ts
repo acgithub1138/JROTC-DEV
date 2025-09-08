@@ -32,6 +32,33 @@ export const useJobBoardNodes = ({
     handleNodesChange(changes, nodes);
   }, [onNodesChange, handleNodesChange, nodes]);
 
+  // Helper function to compare connections deeply
+  const compareConnections = useCallback((current: any[], previous: any[]) => {
+    if (current.length !== previous.length) return false;
+    
+    // Sort both arrays by id to ensure consistent comparison
+    const sortedCurrent = [...current].sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+    const sortedPrevious = [...previous].sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+    
+    for (let i = 0; i < sortedCurrent.length; i++) {
+      const curr = sortedCurrent[i];
+      const prev = sortedPrevious[i];
+      
+      // Compare key properties that affect visual representation
+      if (
+        curr.id !== prev.id ||
+        curr.type !== prev.type ||
+        curr.target_role !== prev.target_role ||
+        curr.source_handle !== prev.source_handle ||
+        curr.target_handle !== prev.target_handle
+      ) {
+        return false;
+      }
+    }
+    
+    return true;
+  }, []);
+
   // Helper function to identify changed jobs using ID-based comparison
   const getChangedJobs = useCallback((currentJobs: JobBoardWithCadet[], previousJobs: JobBoardWithCadet[]) => {
     const changedJobIds = new Set<string>();
@@ -44,11 +71,15 @@ export const useJobBoardNodes = ({
     currentJobsMap.forEach((job, id) => {
       if (!previousJobsMap.has(id)) {
         changedJobIds.add(id);
+        console.log(`🔄 New job detected: ${job.role} (${id})`);
       }
     });
     
     // Check for removed jobs (not needed for updates, but track length change)
     const hasRemovedJobs = previousJobsMap.size > currentJobsMap.size;
+    if (hasRemovedJobs) {
+      console.log(`🔄 Jobs removed, previous: ${previousJobsMap.size}, current: ${currentJobsMap.size}`);
+    }
     
     // Check for modified jobs by comparing specific fields
     currentJobsMap.forEach((currentJob, id) => {
@@ -63,13 +94,19 @@ export const useJobBoardNodes = ({
           currentJob[field] !== previousJob[field]
         );
         
-        // Compare connections array length (avoid deep comparison to prevent infinite loops)
+        // Deep compare connections arrays
         const currentConnections = currentJob.connections || [];
         const previousConnections = previousJob.connections || [];
-        if (currentConnections.length !== previousConnections.length) {
+        const connectionsChanged = !compareConnections(currentConnections, previousConnections);
+        
+        if (connectionsChanged) {
           changedJobIds.add(id);
+          console.log(`🔄 Connection changes detected for job: ${currentJob.role} (${id})`);
+          console.log('Previous connections:', previousConnections);
+          console.log('Current connections:', currentConnections);
         } else if (hasChanges) {
           changedJobIds.add(id);
+          console.log(`🔄 Field changes detected for job: ${currentJob.role} (${id})`);
         }
       }
     });
@@ -79,8 +116,9 @@ export const useJobBoardNodes = ({
       currentJobs.forEach(job => changedJobIds.add(job.id));
     }
 
+    console.log(`🔄 Total changed jobs: ${changedJobIds.size}`);
     return changedJobIds;
-  }, []);
+  }, [compareConnections]);
 
   // Helper function to update specific nodes efficiently
   const updateSpecificNodes = useCallback((changedJobIds: Set<string>, allJobs: JobBoardWithCadet[], positions: Map<string, { x: number; y: number }>) => {
@@ -141,7 +179,7 @@ export const useJobBoardNodes = ({
       (hasPositionChanges && savedPositionsMap.size === 0); // Only recalculate if positions were cleared
 
     if (needsLayoutRecalculation) {
-      console.log('Layout recalculation needed due to changes');
+      console.log('🔄 Layout recalculation needed due to changes');
       
       const hierarchyResult = buildJobHierarchy(jobs);
       const positions = calculateNodePositions(
