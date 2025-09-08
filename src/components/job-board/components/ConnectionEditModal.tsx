@@ -208,13 +208,18 @@ export const ConnectionEditModal = ({
                   <>
                     {/* Connection Line */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                      <line
-                        x1={sourcePoint.x}
-                        y1={sourcePoint.y}
-                        x2={targetPoint.x}
-                        y2={targetPoint.y}
-                        stroke="hsl(var(--primary))"
+                      <path
+                        d={(() => {
+                          // Create smoothstep path like ReactFlow
+                          const dx = targetPoint.x - sourcePoint.x;
+                          const dy = targetPoint.y - sourcePoint.y;
+                          const centerX = sourcePoint.x + dx * 0.5;
+                          
+                          return `M ${sourcePoint.x} ${sourcePoint.y} C ${centerX} ${sourcePoint.y}, ${centerX} ${targetPoint.y}, ${targetPoint.x} ${targetPoint.y}`;
+                        })()}
+                        stroke={connectionType === 'assistant' ? '#10b981' : '#6366f1'}
                         strokeWidth="2"
+                        fill="none"
                         className="transition-all duration-300"
                       />
                     </svg>
