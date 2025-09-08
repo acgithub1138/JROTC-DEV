@@ -59,13 +59,26 @@ export const createFlowEdges = (
       return;
     }
 
-    // Determine handles based on relationship type
+    // Check for custom handles in source job's connections array first
     let sourceHandle = 'bottom-source';
     let targetHandle = 'top-target';
     
     if (hierarchyEdge.type === 'assistant') {
       sourceHandle = 'right-source';
       targetHandle = 'left-target';
+    }
+    
+    // Look for custom handles in the source job's connections array
+    if (sourceJob.connections && sourceJob.connections.length > 0) {
+      const matchingConnection = sourceJob.connections.find(conn => 
+        conn.target_role === targetJob.role && conn.type === hierarchyEdge.type
+      );
+      
+      if (matchingConnection && matchingConnection.source_handle && matchingConnection.target_handle) {
+        sourceHandle = matchingConnection.source_handle;
+        targetHandle = matchingConnection.target_handle;
+        console.log(`Using custom handles for ${hierarchyEdge.type} connection:`, { sourceHandle, targetHandle });
+      }
     }
 
     const edgeObj = {

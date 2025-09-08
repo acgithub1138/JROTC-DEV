@@ -196,20 +196,70 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       onUpdateJob(sourceJob.id, { connections: updatedConnections });
       console.log('✅ Connection update completed');
     } else {
-      // Handle hierarchy-based connections or new connections via reports_to/assistant fields
+      // Handle hierarchy-based connections - update both the field AND the connections array
       console.log('🔄 Updating hierarchy-based connection via field update');
+      
       if (connectionEditModal.connectionType === 'reports_to') {
         // Update the target job's reports_to field
         onUpdateJob(connectionEditModal.targetJob.id, { 
           reports_to: connectionEditModal.sourceJob.role 
         });
         console.log('✅ Updated reports_to field');
+        
+        // Also update/create the connection in the source job's connections array
+        const sourceJob = connectionEditModal.sourceJob;
+        const connectionId = `${sourceJob.id}-${connectionEditModal.targetJob.id}`;
+        const updatedConnections = [...(sourceJob.connections || [])];
+        
+        // Find existing connection or create new one
+        const existingIndex = updatedConnections.findIndex(conn => conn.id === connectionId);
+        const connectionEntry = {
+          id: connectionId,
+          type: 'reports_to' as const,
+          target_role: connectionEditModal.targetJob.role,
+          source_handle: sourceHandle,
+          target_handle: targetHandle
+        };
+        
+        if (existingIndex >= 0) {
+          updatedConnections[existingIndex] = connectionEntry;
+        } else {
+          updatedConnections.push(connectionEntry);
+        }
+        
+        onUpdateJob(sourceJob.id, { connections: updatedConnections });
+        console.log('✅ Updated connections array for reports_to');
+        
       } else if (connectionEditModal.connectionType === 'assistant') {
         // Update the target job's assistant field  
         onUpdateJob(connectionEditModal.targetJob.id, { 
           assistant: connectionEditModal.sourceJob.role 
         });
         console.log('✅ Updated assistant field');
+        
+        // Also update/create the connection in the source job's connections array
+        const sourceJob = connectionEditModal.sourceJob;
+        const connectionId = `${sourceJob.id}-assistant-${connectionEditModal.targetJob.id}`;
+        const updatedConnections = [...(sourceJob.connections || [])];
+        
+        // Find existing connection or create new one
+        const existingIndex = updatedConnections.findIndex(conn => conn.id === connectionId);
+        const connectionEntry = {
+          id: connectionId,
+          type: 'assistant' as const,
+          target_role: connectionEditModal.targetJob.role,
+          source_handle: sourceHandle,
+          target_handle: targetHandle
+        };
+        
+        if (existingIndex >= 0) {
+          updatedConnections[existingIndex] = connectionEntry;
+        } else {
+          updatedConnections.push(connectionEntry);
+        }
+        
+        onUpdateJob(sourceJob.id, { connections: updatedConnections });
+        console.log('✅ Updated connections array for assistant');
       }
     }
     
