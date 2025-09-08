@@ -264,6 +264,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       }
     }
     
+    // Close the modal
     setConnectionEditModal({ 
       isOpen: false, 
       sourceJob: null, 
@@ -273,7 +274,14 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       currentSourceHandle: null,
       currentTargetHandle: null
     });
-  }, [connectionEditModal, onUpdateJob]);
+
+    // Refresh the chart to display updated connections
+    if (onRefresh) {
+      setTimeout(() => {
+        onRefresh();
+      }, 100); // Small delay to ensure updates are processed
+    }
+  }, [connectionEditModal, onUpdateJob, onRefresh]);
 
   const chartContent = (
     <div 
