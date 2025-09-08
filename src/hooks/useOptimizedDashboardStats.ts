@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
 
 export const useOptimizedDashboardStats = () => {
+  const { userProfile } = useAuth();
   const query = useQuery({
-    queryKey: ['dashboard-stats-optimized'],
+    queryKey: ['dashboard-stats-optimized', userProfile?.id],
     queryFn: async () => {
       // Use Promise.allSettled to handle partial failures gracefully
       const results = await Promise.allSettled([
@@ -21,11 +23,12 @@ export const useOptimizedDashboardStats = () => {
           .select('id, status, due_date', { count: 'exact' })
           .neq('status', 'completed'),
         
-        // Budget transactions with minimal data
+        // Budget transactions with minimal data for current user's school
         supabase
           .from('budget_transactions')
           .select('amount, category')
-          .eq('archive', false),
+          .eq('archive', false)
+          .eq('school_id', userProfile?.school_id || ''),
         
         // Inventory with only needed fields
         supabase
@@ -110,6 +113,7 @@ export const useOptimizedDashboardStats = () => {
         }
       };
     },
+    enabled: !!userProfile?.id, // Only run query when user profile is loaded
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
