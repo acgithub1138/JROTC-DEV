@@ -46,11 +46,12 @@ export const useDashboardStats = () => {
           .select('id, status, due_date', { count: 'exact' })
           .neq('status', 'completed'),
         
-        // Budget transactions (non-archived only) for current user's school
+        // Budget transactions (active, non-archived only) for current user's school
         supabase
           .from('budget_transactions')
           .select('amount, category')
           .eq('archive', false)
+          .eq('active', true)
           .eq('school_id', userProfile?.school_id || ''),
         
         // Inventory items count and issued count
