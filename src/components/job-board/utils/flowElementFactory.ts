@@ -68,6 +68,14 @@ export const createFlowEdges = (
       targetHandle = 'left-target';
     }
     
+    // Validate handle values to prevent invalid edges
+    const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
+    if (!validHandles.includes(sourceHandle) || !validHandles.includes(targetHandle)) {
+      console.warn(`Invalid handles detected for edge ${hierarchyEdge.id}:`, { sourceHandle, targetHandle });
+      sourceHandle = hierarchyEdge.type === 'assistant' ? 'right-source' : 'bottom-source';
+      targetHandle = hierarchyEdge.type === 'assistant' ? 'left-target' : 'top-target';
+    }
+    
     // Look for custom handles in the source job's connections array
     if (sourceJob.connections && sourceJob.connections.length > 0) {
       const matchingConnection = sourceJob.connections.find(conn => 

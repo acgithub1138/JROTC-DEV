@@ -36,6 +36,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   const { canAssign, canUpdate } = permissions || hookPermissions;
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canAssign);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [chartVersion, setChartVersion] = useState(0); // Add version state to force re-renders
   
   // Chart is interactive if user can update jobs or assign roles
   const isChartReadOnly = readOnly || (!canUpdate && !canAssign);
@@ -251,12 +252,14 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           conn.id === targetConnectionId || 
           (conn.type === 'assistant' && conn.target_role === sourceJob.role)
         );
+        // For reverse connections, we need to find the corresponding handles on the target job
+        // The connection goes from target job back to source job
         const targetConnectionEntry = {
           id: targetConnectionId,
           type: 'assistant' as const,
           target_role: sourceJob.role,
-          source_handle: targetHandle, // Reverse the handles
-          target_handle: sourceHandle
+          source_handle: 'left-source', // Target job acts as source in reverse connection
+          target_handle: 'right-target'  // Source job acts as target in reverse connection
         };
         
         if (existingTargetIndex >= 0) {
@@ -274,6 +277,15 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       const isLastUpdate = index === updates.length - 1;
       onUpdateJob(jobId, jobUpdates, !isLastUpdate); // Suppress toast for all but last update
     });
+    
+    // Force React Flow to re-render by triggering a layout recalculation
+    // This ensures connection changes are immediately visible
+    setTimeout(() => {
+      setChartVersion(prev => prev + 1); // Force React Flow re-render
+      if (onRefresh) {
+        onRefresh();
+      }
+    }, 100);
     
     // Close the modal
     setConnectionEditModal({ 
@@ -305,6 +317,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       />
       
       <ReactFlow
+        key={chartVersion} // Force remount when version changes
         nodes={nodes}
         edges={edges}
         onNodesChange={isChartReadOnly ? undefined : handleNodeChange}
