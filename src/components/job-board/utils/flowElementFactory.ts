@@ -49,7 +49,23 @@ export const createFlowEdges = (
   
   const flowEdges: Edge[] = [];
   
-  // Create edges from hierarchy edges (built from reports_to and assistant fields)
+  // Build a map of custom connections for quick lookup
+  const customConnectionsMap = new Map<string, Connection>();
+  jobs.forEach(job => {
+    if (job.connections && job.connections.length > 0) {
+      job.connections.forEach(connection => {
+        if (connection.target_role !== 'NA') {
+          const targetJob = jobs.find(j => j.role === connection.target_role);
+          if (targetJob) {
+            const key = `${job.id}-${targetJob.id}-${connection.type}`;
+            customConnectionsMap.set(key, connection);
+          }
+        }
+      });
+    }
+  });
+  
+  // Create edges from hierarchy edges, checking for custom overrides
   hierarchyResult.edges.forEach((hierarchyEdge) => {
     const sourceJob = jobs.find(j => j.id === hierarchyEdge.source);
     const targetJob = jobs.find(j => j.id === hierarchyEdge.target);
@@ -59,7 +75,10 @@ export const createFlowEdges = (
       return;
     }
 
-    // Check for custom handles in source job's connections array first
+    // Check if there's a custom connection that overrides this hierarchy edge
+    const customKey = `${hierarchyEdge.source}-${hierarchyEdge.target}-${hierarchyEdge.type}`;
+    const customConnection = customConnectionsMap.get(customKey);
+    
     let sourceHandle = 'bottom-source';
     let targetHandle = 'top-target';
     
@@ -68,25 +87,19 @@ export const createFlowEdges = (
       targetHandle = 'left-target';
     }
     
+    // Use custom handles if available
+    if (customConnection && customConnection.source_handle && customConnection.target_handle) {
+      sourceHandle = customConnection.source_handle;
+      targetHandle = customConnection.target_handle;
+      console.log(`Using custom handles for ${hierarchyEdge.type} connection:`, { sourceHandle, targetHandle });
+    }
+    
     // Validate handle values to prevent invalid edges
     const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
     if (!validHandles.includes(sourceHandle) || !validHandles.includes(targetHandle)) {
       console.warn(`Invalid handles detected for edge ${hierarchyEdge.id}:`, { sourceHandle, targetHandle });
       sourceHandle = hierarchyEdge.type === 'assistant' ? 'right-source' : 'bottom-source';
       targetHandle = hierarchyEdge.type === 'assistant' ? 'left-target' : 'top-target';
-    }
-    
-    // Look for custom handles in the source job's connections array
-    if (sourceJob.connections && sourceJob.connections.length > 0) {
-      const matchingConnection = sourceJob.connections.find(conn => 
-        conn.target_role === targetJob.role && conn.type === hierarchyEdge.type
-      );
-      
-      if (matchingConnection && matchingConnection.source_handle && matchingConnection.target_handle) {
-        sourceHandle = matchingConnection.source_handle;
-        targetHandle = matchingConnection.target_handle;
-        console.log(`Using custom handles for ${hierarchyEdge.type} connection:`, { sourceHandle, targetHandle });
-      }
     }
 
     const edgeObj = {
@@ -104,14 +117,14 @@ export const createFlowEdges = (
       },
       data: { 
         connectionType: hierarchyEdge.type,
-        connectionId: hierarchyEdge.id
+        connectionId: customConnection ? customConnection.id : hierarchyEdge.id
       }
     };
     
     flowEdges.push(edgeObj);
   });
 
-  // Also create edges from connections array for backward compatibility
+  // Add any custom connections that don't have corresponding hierarchy edges
   jobs.forEach(job => {
     if (job.connections && job.connections.length > 0) {
       job.connections.forEach(connection => {
@@ -127,15 +140,16 @@ export const createFlowEdges = (
           return;
         }
 
-        // Check if this edge already exists from hierarchy
-        const existingEdge = flowEdges.find(edge => 
-          edge.source === job.id && edge.target === targetJob.id
+        // Check if this connection was already handled by hierarchy edges
+        const hierarchyEdgeExists = hierarchyResult.edges.some(hEdge => 
+          hEdge.source === job.id && hEdge.target === targetJob.id && hEdge.type === connection.type
         );
         
-        if (existingEdge) {
-          return; // Skip duplicate
+        if (hierarchyEdgeExists) {
+          return; // Skip - already handled above with custom handles
         }
 
+        // This is a standalone custom connection
         const edgeObj = {
           id: connection.id,
           source: job.id,
@@ -144,7 +158,11 @@ export const createFlowEdges = (
           targetHandle: connection.target_handle,
           type: 'smoothstep' as const,
           animated: false,
-          style: { pointerEvents: 'all' as const },
+          style: { 
+            pointerEvents: 'all' as const,
+            stroke: connection.type === 'assistant' ? '#10b981' : '#6366f1',
+            strokeWidth: 2
+          },
           data: { 
             connectionType: connection.type,
             connectionId: connection.id
