@@ -333,6 +333,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           currentSourceHandle={connectionEditModal.currentSourceHandle}
           currentTargetHandle={connectionEditModal.currentTargetHandle}
           onSave={handleConnectionSave}
+          savedPositions={savedPositionsMap}
         />
       )}
       
