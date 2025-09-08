@@ -80,14 +80,20 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
     }
   }, [isReactFlowInitialized, nodes.length, fitView]);
 
-  // Trigger fitView only when ReactFlow is first initialized and when jobs change
+  // Trigger fitView when ReactFlow is initialized and when jobs/nodes change
   const hasTriggeredInitialFitView = useRef(false);
   useEffect(() => {
-    if (isReactFlowInitialized && nodes.length > 0 && !hasTriggeredInitialFitView.current) {
-      triggerFitView();
-      hasTriggeredInitialFitView.current = true;
+    if (isReactFlowInitialized && nodes.length > 0) {
+      // Always trigger fitView when nodes change or on first load
+      setTimeout(() => {
+        fitView({ padding: 0.2, duration: 300 });
+      }, 150);
+      
+      if (!hasTriggeredInitialFitView.current) {
+        hasTriggeredInitialFitView.current = true;
+      }
     }
-  }, [isReactFlowInitialized, nodes.length, triggerFitView]);
+  }, [isReactFlowInitialized, nodes.length, fitView, jobs.length]);
 
   // Trigger fitView when exiting fullscreen (but not when entering)
   const previousFullscreenState = useRef(isFullscreen);
