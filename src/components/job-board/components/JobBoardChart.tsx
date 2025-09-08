@@ -18,7 +18,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
   onRefresh?: () => void;
-  onUpdateJob?: (jobId: string, updates: Partial<JobBoardWithCadet>) => void;
+  onUpdateJob?: (jobId: string, updates: Partial<JobBoardWithCadet>, suppressToast?: boolean) => void;
   readOnly?: boolean;
   permissions?: {
     canAssign: boolean;
@@ -158,6 +158,9 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       return;
     }
     
+    // Batch all updates to avoid multiple toast notifications
+    const updates: Array<{ jobId: string; updates: Partial<JobBoardWithCadet> }> = [];
+    
     // Check if this is a hierarchy-based connection (ID contains the pattern: jobId-assistant-jobId or jobId-jobId)
     const isHierarchyConnection = connectionEditModal.connectionId?.includes('-assistant-') || 
       (connectionEditModal.connectionId && !connectionEditModal.sourceJob.connections?.some(conn => conn.id === connectionEditModal.connectionId));
@@ -174,14 +177,15 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           : conn
       );
 
-      onUpdateJob(sourceJob.id, { connections: updatedConnections });
+      updates.push({ jobId: sourceJob.id, updates: { connections: updatedConnections } });
     } else {
-      // Handle hierarchy-based connections - update both the field AND the connections array
+      // Handle hierarchy-based connections - batch all updates
       
       if (connectionEditModal.connectionType === 'reports_to') {
         // Update the target job's reports_to field
-        onUpdateJob(connectionEditModal.targetJob.id, { 
-          reports_to: connectionEditModal.sourceJob.role 
+        updates.push({ 
+          jobId: connectionEditModal.targetJob.id, 
+          updates: { reports_to: connectionEditModal.sourceJob.role }
         });
         
         // Also update/create the connection in the source job's connections array
@@ -205,12 +209,13 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           updatedConnections.push(connectionEntry);
         }
         
-        onUpdateJob(sourceJob.id, { connections: updatedConnections });
+        updates.push({ jobId: sourceJob.id, updates: { connections: updatedConnections } });
         
       } else if (connectionEditModal.connectionType === 'assistant') {
         // Update the target job's assistant field  
-        onUpdateJob(connectionEditModal.targetJob.id, { 
-          assistant: connectionEditModal.sourceJob.role 
+        updates.push({
+          jobId: connectionEditModal.targetJob.id,
+          updates: { assistant: connectionEditModal.sourceJob.role }
         });
         
         // Update/create the connection in the source job's connections array
@@ -234,7 +239,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           updatedSourceConnections.push(sourceConnectionEntry);
         }
         
-        onUpdateJob(sourceJob.id, { connections: updatedSourceConnections });
+        updates.push({ jobId: sourceJob.id, updates: { connections: updatedSourceConnections } });
         
         // Also update/create the reverse connection in the target job's connections array
         const targetJob = connectionEditModal.targetJob;
@@ -260,9 +265,15 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
           updatedTargetConnections.push(targetConnectionEntry);
         }
         
-        onUpdateJob(targetJob.id, { connections: updatedTargetConnections });
+        updates.push({ jobId: targetJob.id, updates: { connections: updatedTargetConnections } });
       }
     }
+    
+    // Execute all updates with toast suppression for all but the last one
+    updates.forEach(({ jobId, updates: jobUpdates }, index) => {
+      const isLastUpdate = index === updates.length - 1;
+      onUpdateJob(jobId, jobUpdates, !isLastUpdate); // Suppress toast for all but last update
+    });
     
     // Close the modal
     setConnectionEditModal({ 
@@ -274,14 +285,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       currentSourceHandle: null,
       currentTargetHandle: null
     });
-
-    // Refresh the chart to display updated connections
-    if (onRefresh) {
-      setTimeout(() => {
-        onRefresh();
-      }, 100); // Small delay to ensure updates are processed
-    }
-  }, [connectionEditModal, onUpdateJob, onRefresh]);
+  }, [connectionEditModal, onUpdateJob]);
 
   const chartContent = (
     <div 

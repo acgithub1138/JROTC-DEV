@@ -148,7 +148,7 @@ export const useJobBoard = () => {
   });
 
   const updateJob = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<NewJobBoard> }) => {
+    mutationFn: async ({ id, updates, suppressToast }: { id: string; updates: Partial<NewJobBoard>; suppressToast?: boolean }) => {
       // Get the current job data before updating
       const { data: currentJob } = await supabase
         .from('job_board')
@@ -268,14 +268,20 @@ export const useJobBoard = () => {
         }
       }
 
+      // Store suppressToast flag for use in onSuccess
+      (data as any).__suppressToast = suppressToast;
+
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['job-board'] });
-      toast({
-        title: "Success",
-        description: "Job updated successfully",
-      });
+      // Only show toast if not suppressed
+      if (!(data as any).__suppressToast) {
+        toast({
+          title: "Success",
+          description: "Job updated successfully",
+        });
+      }
     },
     onError: (error) => {
       console.error('Error updating job:', error);

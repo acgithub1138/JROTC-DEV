@@ -51,11 +51,8 @@ const JobBoardPage = () => {
     refetch();
   };
 
-  const handleUpdateJob = (jobId: string, updates: Partial<JobBoardWithCadet>) => {
-    updateJob.mutate({ id: jobId, updates }, {
-      onSuccess: () => {
-        refetch(); // Refresh the data to show the changes
-      },
+  const handleUpdateJob = (jobId: string, updates: Partial<JobBoardWithCadet>, suppressToast = false) => {
+    updateJob.mutate({ id: jobId, updates, suppressToast }, {
       onError: (error) => {
         console.error('Failed to update job:', error);
       }
