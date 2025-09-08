@@ -178,8 +178,75 @@ export const ConnectionEditModal = ({
                   }
                 }
                 
+                // Calculate connection line coordinates
+                const getHandlePosition = (cardClass: string, handle: string) => {
+                  const cardWidth = 96; // w-24
+                  const cardHeight = 64; // h-16
+                  
+                  // Parse position from class
+                  let baseX = 0, baseY = 0;
+                  if (cardClass.includes('left-8')) baseX = 32;
+                  if (cardClass.includes('right-8')) baseX = 320 - 32 - cardWidth;
+                  if (cardClass.includes('top-4')) baseY = 16;
+                  if (cardClass.includes('bottom-4')) baseY = 160 - 16 - cardHeight;
+                  if (cardClass.includes('top-1/2')) baseY = 80 - cardHeight/2;
+                  
+                  // Add handle offset
+                  switch (handle) {
+                    case 'top': return { x: baseX + cardWidth/2, y: baseY };
+                    case 'bottom': return { x: baseX + cardWidth/2, y: baseY + cardHeight };
+                    case 'left': return { x: baseX, y: baseY + cardHeight/2 };
+                    case 'right': return { x: baseX + cardWidth, y: baseY + cardHeight/2 };
+                    default: return { x: baseX + cardWidth/2, y: baseY + cardHeight };
+                  }
+                };
+                
+                const sourcePoint = getHandlePosition(sourceCardClass, sourceHandle);
+                const targetPoint = getHandlePosition(targetCardClass, targetHandle);
+                
                 return (
                   <>
+                    {/* Connection Line */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                      <line
+                        x1={sourcePoint.x}
+                        y1={sourcePoint.y}
+                        x2={targetPoint.x}
+                        y2={targetPoint.y}
+                        stroke="hsl(var(--primary))"
+                        strokeWidth="2"
+                        strokeDasharray="4,4"
+                        className="transition-all duration-300"
+                      />
+                      {/* Arrow marker */}
+                      <defs>
+                        <marker
+                          id="arrowhead"
+                          markerWidth="10"
+                          markerHeight="7"
+                          refX="9"
+                          refY="3.5"
+                          orient="auto"
+                        >
+                          <polygon
+                            points="0 0, 10 3.5, 0 7"
+                            fill="hsl(var(--primary))"
+                          />
+                        </marker>
+                      </defs>
+                      <line
+                        x1={sourcePoint.x}
+                        y1={sourcePoint.y}
+                        x2={targetPoint.x}
+                        y2={targetPoint.y}
+                        stroke="hsl(var(--primary))"
+                        strokeWidth="2"
+                        strokeDasharray="4,4"
+                        markerEnd="url(#arrowhead)"
+                        className="transition-all duration-300"
+                      />
+                    </svg>
+                    
                     {/* Target Job Card */}
                     <div className={`absolute w-24 h-16 transition-all duration-300 ${targetCardClass}`}>
                       <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
