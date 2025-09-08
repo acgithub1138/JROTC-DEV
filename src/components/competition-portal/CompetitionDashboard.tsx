@@ -60,18 +60,6 @@ const CompetitionDashboard = () => {
     icon: Trophy,
     color: 'text-yellow-500'
   }, {
-    title: 'Upcoming Events',
-    value: String(stats?.upcomingEvents ?? 0),
-    description: 'Next 30 days',
-    icon: Calendar,
-    color: 'text-blue-500'
-  }, {
-    title: 'Participating Teams',
-    value: String(stats?.participatingTeams ?? 0),
-    description: 'Across hosted competitions',
-    icon: Users,
-    color: 'text-green-500'
-  }, {
     title: 'Total Participants',
     value: String(stats?.totalParticipants ?? 0),
     description: 'Event registrations',
