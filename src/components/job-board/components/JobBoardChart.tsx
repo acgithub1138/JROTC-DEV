@@ -237,29 +237,56 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
         });
         console.log('✅ Updated assistant field');
         
-        // Also update/create the connection in the source job's connections array
+        // Update/create the connection in the source job's connections array
         const sourceJob = connectionEditModal.sourceJob;
-        const connectionId = `${sourceJob.id}-assistant-${connectionEditModal.targetJob.id}`;
-        const updatedConnections = [...(sourceJob.connections || [])];
+        const sourceConnectionId = `${sourceJob.id}-assistant-${connectionEditModal.targetJob.id}`;
+        const updatedSourceConnections = [...(sourceJob.connections || [])];
         
-        // Find existing connection or create new one
-        const existingIndex = updatedConnections.findIndex(conn => conn.id === connectionId);
-        const connectionEntry = {
-          id: connectionId,
+        // Find existing connection or create new one for source
+        const existingSourceIndex = updatedSourceConnections.findIndex(conn => conn.id === sourceConnectionId);
+        const sourceConnectionEntry = {
+          id: sourceConnectionId,
           type: 'assistant' as const,
           target_role: connectionEditModal.targetJob.role,
           source_handle: sourceHandle,
           target_handle: targetHandle
         };
         
-        if (existingIndex >= 0) {
-          updatedConnections[existingIndex] = connectionEntry;
+        if (existingSourceIndex >= 0) {
+          updatedSourceConnections[existingSourceIndex] = sourceConnectionEntry;
         } else {
-          updatedConnections.push(connectionEntry);
+          updatedSourceConnections.push(sourceConnectionEntry);
         }
         
-        onUpdateJob(sourceJob.id, { connections: updatedConnections });
-        console.log('✅ Updated connections array for assistant');
+        onUpdateJob(sourceJob.id, { connections: updatedSourceConnections });
+        console.log('✅ Updated source connections array for assistant');
+        
+        // Also update/create the reverse connection in the target job's connections array
+        const targetJob = connectionEditModal.targetJob;
+        const targetConnectionId = `${targetJob.id}-assistant-reverse-${sourceJob.id}`;
+        const updatedTargetConnections = [...(targetJob.connections || [])];
+        
+        // Find existing reverse connection or create new one for target
+        const existingTargetIndex = updatedTargetConnections.findIndex(conn => 
+          conn.id === targetConnectionId || 
+          (conn.type === 'assistant' && conn.target_role === sourceJob.role)
+        );
+        const targetConnectionEntry = {
+          id: targetConnectionId,
+          type: 'assistant' as const,
+          target_role: sourceJob.role,
+          source_handle: targetHandle, // Reverse the handles
+          target_handle: sourceHandle
+        };
+        
+        if (existingTargetIndex >= 0) {
+          updatedTargetConnections[existingTargetIndex] = targetConnectionEntry;
+        } else {
+          updatedTargetConnections.push(targetConnectionEntry);
+        }
+        
+        onUpdateJob(targetJob.id, { connections: updatedTargetConnections });
+        console.log('✅ Updated target connections array for assistant');
       }
     }
     
