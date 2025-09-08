@@ -71,15 +71,11 @@ export const useJobBoardNodes = ({
     currentJobsMap.forEach((job, id) => {
       if (!previousJobsMap.has(id)) {
         changedJobIds.add(id);
-        console.log(`🔄 New job detected: ${job.role} (${id})`);
       }
     });
     
     // Check for removed jobs (not needed for updates, but track length change)
     const hasRemovedJobs = previousJobsMap.size > currentJobsMap.size;
-    if (hasRemovedJobs) {
-      console.log(`🔄 Jobs removed, previous: ${previousJobsMap.size}, current: ${currentJobsMap.size}`);
-    }
     
     // Check for modified jobs by comparing specific fields
     currentJobsMap.forEach((currentJob, id) => {
@@ -101,12 +97,8 @@ export const useJobBoardNodes = ({
         
         if (connectionsChanged) {
           changedJobIds.add(id);
-          console.log(`🔄 Connection changes detected for job: ${currentJob.role} (${id})`);
-          console.log('Previous connections:', previousConnections);
-          console.log('Current connections:', currentConnections);
         } else if (hasChanges) {
           changedJobIds.add(id);
-          console.log(`🔄 Field changes detected for job: ${currentJob.role} (${id})`);
         }
       }
     });
@@ -116,7 +108,6 @@ export const useJobBoardNodes = ({
       currentJobs.forEach(job => changedJobIds.add(job.id));
     }
 
-    console.log(`🔄 Total changed jobs: ${changedJobIds.size}`);
     return changedJobIds;
   }, [compareConnections]);
 
@@ -128,7 +119,6 @@ export const useJobBoardNodes = ({
       // If we have no nodes or need to add/remove nodes, recreate all
       if (currentNodes.length !== allJobs.length) {
         const flowNodes = createFlowNodes(allJobs, positions);
-        console.log(`🔄 Recreated all ${flowNodes.length} nodes due to count change`);
         return flowNodes;
       }
 
@@ -179,8 +169,6 @@ export const useJobBoardNodes = ({
       (hasPositionChanges && savedPositionsMap.size === 0); // Only recalculate if positions were cleared
 
     if (needsLayoutRecalculation) {
-      console.log('🔄 Layout recalculation needed due to changes');
-      
       const hierarchyResult = buildJobHierarchy(jobs);
       const positions = calculateNodePositions(
         jobs, 
@@ -196,7 +184,6 @@ export const useJobBoardNodes = ({
         
         setNodes(flowNodes);
         setEdges(flowEdges);
-        console.log(`Layout recalculated with ${flowNodes.length} nodes`);
         
         isInitializedRef.current = true;
       } else {
@@ -209,7 +196,6 @@ export const useJobBoardNodes = ({
       }
     } else if (hasPositionChanges) {
       // Only position changes, update existing nodes
-      console.log('Updating node positions from saved preferences');
       setNodes(currentNodes => 
         currentNodes.map(node => {
           const savedPosition = savedPositionsMap.get(node.id);

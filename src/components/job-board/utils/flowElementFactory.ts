@@ -45,7 +45,6 @@ export const createFlowEdges = (
   hierarchyResult: HierarchyResult,
   jobs: JobBoardWithCadet[]
 ): Edge[] => {
-  console.log('Creating flow edges - hierarchy edges:', hierarchyResult.edges.length);
   
   const flowEdges: Edge[] = [];
   
@@ -91,21 +90,17 @@ export const createFlowEdges = (
     if (customConnection && customConnection.source_handle && customConnection.target_handle) {
       sourceHandle = customConnection.source_handle;
       targetHandle = customConnection.target_handle;
-      console.log(`Using custom handles for ${hierarchyEdge.type} connection:`, { sourceHandle, targetHandle });
     }
     
     // Validate handle values to prevent invalid edges
     const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
     
-    // Validate and fix source handle
+    // Validate and fix handles
     if (!validHandles.includes(sourceHandle)) {
-      console.warn(`🚨 Invalid source handle detected for edge ${hierarchyEdge.id}: ${sourceHandle}`);
       sourceHandle = hierarchyEdge.type === 'assistant' ? 'right-source' : 'bottom-source';
     }
     
-    // Validate and fix target handle
     if (!validHandles.includes(targetHandle)) {
-      console.warn(`🚨 Invalid target handle detected for edge ${hierarchyEdge.id}: ${targetHandle}`);
       targetHandle = hierarchyEdge.type === 'assistant' ? 'left-target' : 'top-target';
     }
 
@@ -143,7 +138,6 @@ export const createFlowEdges = (
         // Find the target job by role
         const targetJob = jobs.find(j => j.role === connection.target_role);
         if (!targetJob) {
-          console.warn(`Target job not found for role: ${connection.target_role}`);
           return;
         }
 
@@ -164,17 +158,12 @@ export const createFlowEdges = (
         const validHandles = ['top-source', 'bottom-source', 'left-source', 'right-source', 'top-target', 'bottom-target', 'left-target', 'right-target'];
         
         if (!validHandles.includes(sourceHandle)) {
-          console.warn(`🚨 Invalid source handle in standalone connection: ${sourceHandle}, using default`);
           sourceHandle = connection.type === 'assistant' ? 'right-source' : 'bottom-source';
         }
         
         if (!validHandles.includes(targetHandle)) {
-          console.warn(`🚨 Invalid target handle in standalone connection: ${targetHandle}, using default`);
           targetHandle = connection.type === 'assistant' ? 'left-target' : 'top-target';
         }
-        
-        console.log(`🔗 Creating standalone edge: ${job.role} -> ${targetJob.role} (${connection.type})`);
-        console.log(`🎯 Validated handles: ${sourceHandle} -> ${targetHandle}`);
         
         const edgeObj = {
           id: connection.id,
@@ -200,6 +189,5 @@ export const createFlowEdges = (
     }
   });
 
-  console.log('Flow edges created:', flowEdges.length);
   return flowEdges;
 };
