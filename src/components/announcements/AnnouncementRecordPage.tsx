@@ -498,12 +498,28 @@ export const AnnouncementRecordPage = () => {
                   )}
                 </div>
               ) : currentAnnouncement ? (
-                <AttachmentSection 
-                  recordType="announcement" 
-                  recordId={currentAnnouncement.id} 
-                  canEdit={mode === 'edit'} 
-                  defaultOpen={false} 
-                />
+                <Card>
+                  <CardHeader className="py-[8px]">
+                    <CardTitle className="flex items-center justify-between">
+                      <AttachmentSection 
+                        recordType="announcement" 
+                        recordId={currentAnnouncement.id} 
+                        canEdit={mode === 'edit'} 
+                        defaultOpen={true} 
+                        showTitleWithCount={true} 
+                      />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <AttachmentSection 
+                      recordType="announcement" 
+                      recordId={currentAnnouncement.id} 
+                      canEdit={mode === 'edit'} 
+                      defaultOpen={true} 
+                      showContentOnly={true} 
+                    />
+                  </CardContent>
+                </Card>
               ) : null}
             </div>
           </div>
