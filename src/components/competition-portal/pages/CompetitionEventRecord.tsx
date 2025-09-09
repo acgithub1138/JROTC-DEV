@@ -159,10 +159,10 @@ export const CompetitionEventRecord: React.FC = () => {
   // Fetch judges and competition date on component mount
   useEffect(() => {
     fetchJudges();
-    if (isCreateMode && competitionId) {
+    if (isCreateMode && competitionId && !timezoneLoading) {
       fetchCompetitionDate();
     }
-  }, [isCreateMode, competitionId]);
+  }, [isCreateMode, competitionId, timezoneLoading]);
 
   // Fetch filtered score sheets when event changes
   useEffect(() => {
