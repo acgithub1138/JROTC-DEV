@@ -67,7 +67,7 @@ export const ExternalCompetitions = () => {
         .from('cp_competitions')
         .select('*')
         .eq('is_public', true)
-        .eq('status', 'published')
+        .eq('status', 'open')
         .gte('end_date', new Date().toISOString())
         .order('start_date', { ascending: true });
 
