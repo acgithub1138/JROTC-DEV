@@ -30,6 +30,12 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
 
   return (
     <>
+      {(canCreate || isLoading) && (
+        <Button onClick={onAddItem} disabled={isLoading}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
+        </Button>
+      )}
       {/* Actions Dropdown */}
       {!isMobile && (canBulkImport || isLoading) && (
         <DropdownMenu>
@@ -50,12 +56,6 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )}
-      {(canCreate || isLoading) && (
-        <Button onClick={onAddItem} disabled={isLoading}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
       )}
     </>
   );
