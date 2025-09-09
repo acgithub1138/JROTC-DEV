@@ -476,25 +476,31 @@ export const CompetitionSchoolRecord = () => {
                     name="school_id"
                     render={({ field }) => (
                       <FormItem>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value} 
-                          disabled={isLoadingSchools || isViewMode || isEditMode}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {schools.map((school) => (
-                              <SelectItem key={school.id} value={school.id}>
-                                {school.name}
-                              </SelectItem>
-                            ))}
-                            {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
-                          </SelectContent>
-                        </Select>
+                        {(isEditMode || isViewMode) ? (
+                          <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                            {schoolRegistration?.school_name || schools.find(s => s.id === field.value)?.name || 'Loading...'}
+                          </div>
+                        ) : (
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value} 
+                            disabled={isLoadingSchools}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {schools.map((school) => (
+                                <SelectItem key={school.id} value={school.id}>
+                                  {school.name}
+                                </SelectItem>
+                              ))}
+                              {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
+                            </SelectContent>
+                          </Select>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
