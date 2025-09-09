@@ -177,54 +177,56 @@ export const AnnouncementsWidget: React.FC = () => {
             </div>
           ) : (
             // Multiple announcements - use carousel
-            <div className="relative px-12">
+            <div className="relative">
               <Carousel setApi={setApi} className="w-full">
-                <CarouselContent>
-                  {announcements.map(announcement => {
-                    const isExpanded = expandedAnnouncements.has(announcement.id);
-                    const hasLongContent = announcement.content.length > 200;
-                    return (
-                      <CarouselItem key={announcement.id}>
-                        <div className={cn("border rounded-lg p-4 space-y-3 transition-all", announcement.priority >= 8 && "border-red-200 bg-red-50/50", announcement.priority >= 5 && announcement.priority < 8 && "border-yellow-200 bg-yellow-50/50", announcement.priority < 5 && "border-border")}>
-                          {/* Header */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <h3 
-                                className="font-medium text-sm leading-tight mb-1 cursor-pointer hover:text-primary transition-colors" 
-                                onClick={() => setViewingAnnouncement(announcement)}
-                              >
-                                {announcement.title}
-                              </h3>
+                <div className="px-12">
+                  <CarouselContent>
+                    {announcements.map(announcement => {
+                      const isExpanded = expandedAnnouncements.has(announcement.id);
+                      const hasLongContent = announcement.content.length > 200;
+                      return (
+                        <CarouselItem key={announcement.id}>
+                          <div className={cn("border rounded-lg p-4 space-y-3 transition-all", announcement.priority >= 8 && "border-red-200 bg-red-50/50", announcement.priority >= 5 && announcement.priority < 8 && "border-yellow-200 bg-yellow-50/50", announcement.priority < 5 && "border-border")}>
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 
+                                  className="font-medium text-sm leading-tight mb-1 cursor-pointer hover:text-primary transition-colors" 
+                                  onClick={() => setViewingAnnouncement(announcement)}
+                                >
+                                  {announcement.title}
+                                </h3>
+                              </div>
+                              <Badge variant="secondary" className={cn("text-xs", getPriorityColor(announcement.priority))}>
+                                {getPriorityLabel(announcement.priority)}
+                              </Badge>
                             </div>
-                            <Badge variant="secondary" className={cn("text-xs", getPriorityColor(announcement.priority))}>
-                              {getPriorityLabel(announcement.priority)}
-                            </Badge>
-                          </div>
 
-                          {/* Content */}
-                          <div className="space-y-2">
-                            <div className={cn("transition-all duration-200", !isExpanded && hasLongContent && "max-h-20 overflow-hidden relative")}>
-                              <AnnouncementViewer content={announcement.content} className="text-sm prose prose-sm max-w-none" />
-                              {!isExpanded && hasLongContent && <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" />}
+                            {/* Content */}
+                            <div className="space-y-2">
+                              <div className={cn("transition-all duration-200", !isExpanded && hasLongContent && "max-h-20 overflow-hidden relative")}>
+                                <AnnouncementViewer content={announcement.content} className="text-sm prose prose-sm max-w-none" />
+                                {!isExpanded && hasLongContent && <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" />}
+                              </div>
+                              
+                              {hasLongContent && <Button variant="ghost" size="sm" onClick={() => toggleExpanded(announcement.id)} className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground">
+                                  {isExpanded ? <>
+                                      <ChevronUp className="w-3 h-3 mr-1" />
+                                      Show less
+                                    </> : <>
+                                      <ChevronDown className="w-3 h-3 mr-1" />
+                                      Show more
+                                    </>}
+                                </Button>}
+                              
+                              <AnnouncementAttachments announcementId={announcement.id} />
                             </div>
-                            
-                            {hasLongContent && <Button variant="ghost" size="sm" onClick={() => toggleExpanded(announcement.id)} className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground">
-                                {isExpanded ? <>
-                                    <ChevronUp className="w-3 h-3 mr-1" />
-                                    Show less
-                                  </> : <>
-                                    <ChevronDown className="w-3 h-3 mr-1" />
-                                    Show more
-                                  </>}
-                              </Button>}
-                            
-                            <AnnouncementAttachments announcementId={announcement.id} />
                           </div>
-                        </div>
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                </div>
                 <CarouselPrevious className="left-2" />
                 <CarouselNext className="right-2" />
               </Carousel>
