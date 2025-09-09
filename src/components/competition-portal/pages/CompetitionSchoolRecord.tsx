@@ -21,7 +21,6 @@ import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetition
 import { useCompetitionSchoolsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 const formSchema = z.object({
   school_id: z.string().min(1, 'School is required'),
   status: z.string().default('registered'),
@@ -32,7 +31,7 @@ const formSchema = z.object({
   new_school_initials: z.string().optional(),
   new_school_contact: z.string().optional(),
   new_school_email: z.string().optional()
-}).refine((data) => {
+}).refine(data => {
   if (data.school_id === 'not_listed') {
     return data.new_school_name && data.new_school_name.trim().length > 0;
   }
@@ -41,19 +40,18 @@ const formSchema = z.object({
   message: "School name is required when adding a new school",
   path: ["new_school_name"]
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 interface EventOption {
   id: string;
   name: string;
   location?: string;
   fee?: number;
 }
-
 export const CompetitionSchoolRecord = () => {
   const navigate = useNavigate();
-  const { '*': splat } = useParams();
+  const {
+    '*': splat
+  } = useParams();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -61,23 +59,26 @@ export const CompetitionSchoolRecord = () => {
   const competitionId = splat?.split('/')[2]; // competition-details/{competitionId}/school_record
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || 'create';
   const schoolId = searchParams.get('id');
-
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [schools, setSchools] = useState<Array<{id: string, name: string}>>([]);
+  const [schools, setSchools] = useState<Array<{
+    id: string;
+    name: string;
+  }>>([]);
   const [isLoadingSchools, setIsLoadingSchools] = useState(true);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [totalFee, setTotalFee] = useState<number>(0);
-
   console.log('CompetitionSchoolRecord - competitionId:', competitionId);
   console.log('CompetitionSchoolRecord - mode:', mode);
   console.log('CompetitionSchoolRecord - schoolId:', schoolId);
-
   const permissions = useCompetitionSchoolsPermissions();
-  const { createSchoolRegistration, updateSchoolRegistration, deleteSchoolRegistration } = useCompetitionSchools(competitionId);
-
+  const {
+    createSchoolRegistration,
+    updateSchoolRegistration,
+    deleteSchoolRegistration
+  } = useCompetitionSchools(competitionId);
   const isEditMode = mode === 'edit';
   const isViewMode = mode === 'view';
   const isCreateMode = mode === 'create';
@@ -85,7 +86,6 @@ export const CompetitionSchoolRecord = () => {
   // Permission checks
   const canEdit = isCreateMode ? permissions.canCreate : permissions.canUpdate;
   const canDelete = permissions.canDelete && !isCreateMode;
-
   const defaultValues: FormData = {
     school_id: '',
     status: 'registered',
@@ -97,22 +97,23 @@ export const CompetitionSchoolRecord = () => {
     new_school_contact: '',
     new_school_email: ''
   };
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
 
   // Get school registration details for edit mode
-  const { data: schoolRegistration, isLoading: isLoadingSchool } = useQuery({
+  const {
+    data: schoolRegistration,
+    isLoading: isLoadingSchool
+  } = useQuery({
     queryKey: ['school-registration', schoolId],
     queryFn: async () => {
       if (!schoolId) return null;
-      const { data, error } = await supabase
-        .from('cp_comp_schools')
-        .select('id, school_id, school_name, status, paid, color, notes')
-        .eq('id', schoolId)
-        .single();
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_schools').select('id, school_id, school_name, status, paid, color, notes').eq('id', schoolId).single();
       if (error) throw error;
       return data;
     },
@@ -120,15 +121,16 @@ export const CompetitionSchoolRecord = () => {
   });
 
   // Get competition details
-  const { data: competition } = useQuery({
+  const {
+    data: competition
+  } = useQuery({
     queryKey: ['competition', competitionId],
     queryFn: async () => {
       if (!competitionId) return null;
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('id, name, fee')
-        .eq('id', competitionId)
-        .single();
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('id, name, fee').eq('id', competitionId).single();
       if (error) throw error;
       return data;
     },
@@ -136,13 +138,16 @@ export const CompetitionSchoolRecord = () => {
   });
 
   // Get available events
-  const { data: availableEvents } = useQuery({
+  const {
+    data: availableEvents
+  } = useQuery({
     queryKey: ['competition-events', competitionId],
     queryFn: async () => {
       if (!competitionId) return [];
-      const { data, error } = await supabase
-        .from('cp_comp_events')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_events').select(`
           id,
           location,
           fee,
@@ -150,8 +155,7 @@ export const CompetitionSchoolRecord = () => {
             id,
             name
           )
-        `)
-        .eq('competition_id', competitionId);
+        `).eq('competition_id', competitionId);
       if (error) throw error;
       return data.map(event => ({
         id: event.id,
@@ -164,23 +168,26 @@ export const CompetitionSchoolRecord = () => {
   });
 
   // Get current event registrations for edit mode
-  const { data: currentEventRegistrations } = useQuery({
+  const {
+    data: currentEventRegistrations
+  } = useQuery({
     queryKey: ['school-event-registrations', competitionId, schoolRegistration?.school_id],
     queryFn: async () => {
       if (!schoolRegistration?.school_id || !competitionId) return [];
-      const { data, error } = await supabase
-        .from('cp_event_registrations')
-        .select('event_id')
-        .eq('competition_id', competitionId)
-        .eq('school_id', schoolRegistration.school_id);
+      const {
+        data,
+        error
+      } = await supabase.from('cp_event_registrations').select('event_id').eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
       if (error) throw error;
       return data.map(reg => reg.event_id);
     },
     enabled: (isEditMode || isViewMode) && !!schoolRegistration?.school_id && !!competitionId
   });
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData: isCreateMode ? defaultValues : (schoolRegistration ? {
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
+    initialData: isCreateMode ? defaultValues : schoolRegistration ? {
       school_id: schoolRegistration.school_id,
       status: schoolRegistration.status || 'registered',
       notes: schoolRegistration.notes || '',
@@ -190,7 +197,7 @@ export const CompetitionSchoolRecord = () => {
       new_school_initials: '',
       new_school_contact: '',
       new_school_email: ''
-    } : defaultValues),
+    } : defaultValues,
     currentData: form.watch(),
     enabled: !isViewMode
   });
@@ -235,15 +242,13 @@ export const CompetitionSchoolRecord = () => {
       setTotalFee((competition.fee || 0) + eventFees);
     }
   }, [selectedEvents, availableEvents, competition]);
-
   const fetchSchools = async () => {
     setIsLoadingSchools(true);
     try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('id, name')
-        .order('name');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('schools').select('id, name').order('name');
       if (error) throw error;
       setSchools(data || []);
     } catch (error) {
@@ -252,30 +257,26 @@ export const CompetitionSchoolRecord = () => {
       setIsLoadingSchools(false);
     }
   };
-
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
       let schoolId = data.school_id;
-      
+
       // If "not_listed" is selected, create a new school first
       if (data.school_id === 'not_listed') {
-        const { data: newSchool, error: schoolError } = await supabase
-          .from('schools')
-          .insert({
-            name: data.new_school_name!,
-            initials: data.new_school_initials || null,
-            contact: data.new_school_contact || null,
-            email: data.new_school_email || null,
-          })
-          .select()
-          .single();
-          
+        const {
+          data: newSchool,
+          error: schoolError
+        } = await supabase.from('schools').insert({
+          name: data.new_school_name!,
+          initials: data.new_school_initials || null,
+          contact: data.new_school_contact || null,
+          email: data.new_school_email || null
+        }).select().single();
         if (schoolError) throw schoolError;
         schoolId = newSchool.id;
         await fetchSchools();
       }
-
       if (isCreateMode) {
         await createSchoolRegistration({
           school_id: schoolId,
@@ -304,24 +305,17 @@ export const CompetitionSchoolRecord = () => {
 
         // Remove events
         if (eventsToRemove.length > 0) {
-          await supabase
-            .from('cp_event_schedules')
-            .delete()
-            .eq('competition_id', competitionId)
-            .eq('school_id', schoolRegistration.school_id)
-            .in('event_id', eventsToRemove);
-
-          await supabase
-            .from('cp_event_registrations')
-            .delete()
-            .eq('competition_id', competitionId)
-            .eq('school_id', schoolRegistration.school_id)
-            .in('event_id', eventsToRemove);
+          await supabase.from('cp_event_schedules').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id).in('event_id', eventsToRemove);
+          await supabase.from('cp_event_registrations').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id).in('event_id', eventsToRemove);
         }
 
         // Add events
         if (eventsToAdd.length > 0) {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: {
+              user
+            }
+          } = await supabase.auth.getUser();
           const eventRegistrations = eventsToAdd.map(eventId => ({
             competition_id: competitionId!,
             school_id: schoolRegistration.school_id,
@@ -331,12 +325,14 @@ export const CompetitionSchoolRecord = () => {
           }));
           await supabase.from('cp_event_registrations').insert(eventRegistrations);
         }
-
-        queryClient.invalidateQueries({ queryKey: ['competition-schools'] });
-        queryClient.invalidateQueries({ queryKey: ['school-event-registrations'] });
+        queryClient.invalidateQueries({
+          queryKey: ['competition-schools']
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['school-event-registrations']
+        });
         toast.success('School updated successfully');
       }
-
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     } catch (error) {
@@ -346,10 +342,8 @@ export const CompetitionSchoolRecord = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleDelete = async () => {
     if (!schoolRegistration) return;
-    
     setIsDeleting(true);
     try {
       await deleteSchoolRegistration(schoolRegistration.id);
@@ -363,7 +357,6 @@ export const CompetitionSchoolRecord = () => {
       setShowDeleteDialog(false);
     }
   };
-
   const handleBack = () => {
     if (hasUnsavedChanges && !isViewMode) {
       setShowUnsavedDialog(true);
@@ -371,16 +364,13 @@ export const CompetitionSchoolRecord = () => {
       navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     }
   };
-
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
     navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
   const handleEventToggle = (eventId: string, checked: boolean) => {
     const newSelectedEvents = new Set(selectedEvents);
     if (checked) {
@@ -390,45 +380,33 @@ export const CompetitionSchoolRecord = () => {
     }
     setSelectedEvents(newSelectedEvents);
   };
-
   if (!competitionId) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-destructive">Invalid Competition</h1>
           <p className="text-muted-foreground">Competition ID is missing</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if ((isEditMode || isViewMode) && schoolId && isLoadingSchool) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-lg font-semibold">Loading school details...</h2>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if ((isEditMode || isViewMode) && schoolId && !schoolRegistration && !isLoadingSchool) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-destructive">School Not Found</h1>
           <p className="text-muted-foreground">The requested school registration could not be found</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const pageTitle = isCreateMode ? 'Register School' : isEditMode ? 'Edit School Registration' : 'View School Registration';
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Header with Action Buttons */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -436,26 +414,22 @@ export const CompetitionSchoolRecord = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Schools
           </Button>
-          <h1 className="text-2xl font-bold">{pageTitle}</h1>
+          
         </div>
         <div className="flex items-center gap-2">
-          {canEdit && !isViewMode && (
-            <>
+          {canEdit && !isViewMode && <>
               <Button type="button" variant="outline" onClick={handleBack}>
                 Cancel
               </Button>
-              {canDelete && !isCreateMode && (
-                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+              {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="h-4 w-4" />
                   Delete
-                </Button>
-              )}
+                </Button>}
               <Button type="submit" form="school-form" disabled={isSubmitting}>
                 <Save className="h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
-            </>
-          )}
+            </>}
         </div>
       </div>
 
@@ -471,49 +445,31 @@ export const CompetitionSchoolRecord = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                   <Label className="text-right">School *</Label>
-                  <FormField
-                    control={form.control}
-                    name="school_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        {(isEditMode || isViewMode) ? (
-                          <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                            {schoolRegistration?.school_name || schools.find(s => s.id === field.value)?.name || 'Loading...'}
-                          </div>
-                        ) : (
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value} 
-                            disabled={isLoadingSchools}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {schools.map((school) => (
-                                <SelectItem key={school.id} value={school.id}>
-                                  {school.name}
-                                </SelectItem>
-                              ))}
-                              {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
-                            </SelectContent>
-                          </Select>
-                        )}
+                  <FormField control={form.control} name="school_id" render={({
+                    field
+                  }) => <FormItem>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingSchools || isViewMode || isEditMode}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {schools.map(school => <SelectItem key={school.id} value={school.id}>
+                                {school.name}
+                              </SelectItem>)}
+                            {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                   <Label className="text-right">Status</Label>
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="status" render={({
+                    field
+                  }) => <FormItem>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
@@ -527,172 +483,112 @@ export const CompetitionSchoolRecord = () => {
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
               </div>
 
               {/* New School Fields - Row 2 & 3: School Name/Initials, Contact Person/Email */}
-              {form.watch('school_id') === 'not_listed' && isCreateMode && (
-                <>
+              {form.watch('school_id') === 'not_listed' && isCreateMode && <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                       <Label className="text-right">School Name *</Label>
-                      <FormField
-                        control={form.control}
-                        name="new_school_name"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="new_school_name" render={({
+                      field
+                    }) => <FormItem>
                             <FormControl>
                               <Input placeholder="Enter school name" {...field} disabled={isViewMode} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                       <Label className="text-right">Initials</Label>
-                      <FormField
-                        control={form.control}
-                        name="new_school_initials"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="new_school_initials" render={({
+                      field
+                    }) => <FormItem>
                             <FormControl>
                               <Input placeholder="Enter school initials" {...field} disabled={isViewMode} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                       <Label className="text-right">Contact Person</Label>
-                      <FormField
-                        control={form.control}
-                        name="new_school_contact"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="new_school_contact" render={({
+                      field
+                    }) => <FormItem>
                             <FormControl>
                               <Input placeholder="Enter contact person" {...field} disabled={isViewMode} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                       <Label className="text-right">Email</Label>
-                      <FormField
-                        control={form.control}
-                        name="new_school_email"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="new_school_email" render={({
+                      field
+                    }) => <FormItem>
                             <FormControl>
                               <Input type="email" placeholder="Enter contact email" {...field} disabled={isViewMode} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                   </div>
-                </>
-              )}
+                </>}
 
               {/* Payment Status and Color - only for edit mode */}
-              {(isEditMode || isViewMode) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-center">
                     <Label className="text-right">Payment Status</Label>
-                    <FormField
-                      control={form.control}
-                      name="paid"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="paid" render={({
+                    field
+                  }) => <FormItem>
                           <div className="flex items-center space-x-2">
-                            <Switch 
-                              id="paid" 
-                              checked={field.value} 
-                              onCheckedChange={field.onChange} 
-                              disabled={isViewMode}
-                            />
+                            <Switch id="paid" checked={field.value} onCheckedChange={field.onChange} disabled={isViewMode} />
                             <Label htmlFor="paid">Payment Received</Label>
                           </div>
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                     <Label className="text-right">Color</Label>
-                    <FormField
-                      control={form.control}
-                      name="color"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="color" render={({
+                    field
+                  }) => <FormItem>
                           <div className="flex items-center space-x-2">
-                            <input 
-                              type="color" 
-                              value={field.value} 
-                              onChange={(e) => field.onChange(e.target.value)} 
-                              className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
-                              disabled={isViewMode}
-                            />
-                            <Input 
-                              type="text" 
-                              value={field.value} 
-                              onChange={(e) => field.onChange(e.target.value)} 
-                              placeholder="#3B82F6" 
-                              className="w-32"
-                              disabled={isViewMode}
-                            />
+                            <input type="color" value={field.value} onChange={e => field.onChange(e.target.value)} className="w-10 h-6 p-0 rounded border-0 cursor-pointer" disabled={isViewMode} />
+                            <Input type="text" value={field.value} onChange={e => field.onChange(e.target.value)} placeholder="#3B82F6" className="w-32" disabled={isViewMode} />
                           </div>
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
-                </div>
-              )}
+                </div>}
 
               {/* Event Selection - only for edit/view mode */}
-              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && (
-                <div className="space-y-4">
+              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && <div className="space-y-4">
                   <Label className="text-base font-medium">Registered Events</Label>
                   <div className="max-h-[300px] overflow-y-auto space-y-2 border rounded-md p-4">
-                    {availableEvents.map(event => (
-                      <div key={event.id} className="flex items-center space-x-3">
-                        <Checkbox 
-                          id={event.id} 
-                          checked={selectedEvents.has(event.id)} 
-                          onCheckedChange={(checked) => handleEventToggle(event.id, checked as boolean)}
-                          disabled={isViewMode}
-                        />
+                    {availableEvents.map(event => <div key={event.id} className="flex items-center space-x-3">
+                        <Checkbox id={event.id} checked={selectedEvents.has(event.id)} onCheckedChange={checked => handleEventToggle(event.id, checked as boolean)} disabled={isViewMode} />
                         <Label htmlFor={event.id} className="flex-1 cursor-pointer">
                           <div className="flex justify-between items-center">
                             <span>
                               {event.name}
-                              {event.location && (
-                                <span className="text-sm text-muted-foreground ml-2">
+                              {event.location && <span className="text-sm text-muted-foreground ml-2">
                                   @ {event.location}
-                                </span>
-                              )}
+                                </span>}
                             </span>
-                            {event.fee && event.fee > 0 && (
-                              <span className="text-sm font-medium text-primary">
+                            {event.fee && event.fee > 0 && <span className="text-sm font-medium text-primary">
                                 ${event.fee}
-                              </span>
-                            )}
+                              </span>}
                           </div>
                         </Label>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
 
                   {/* Total Fee Display */}
@@ -704,16 +600,12 @@ export const CompetitionSchoolRecord = () => {
                           <span>Base Competition Fee:</span>
                           <span>${competition?.fee || 0}</span>
                         </div>
-                        {selectedEvents.size > 0 && (
-                          <div className="flex justify-between">
+                        {selectedEvents.size > 0 && <div className="flex justify-between">
                             <span>Event Fees ({selectedEvents.size} events):</span>
                             <span>
-                              ${availableEvents
-                                .filter(event => selectedEvents.has(event.id))
-                                .reduce((total, event) => total + (event.fee || 0), 0)}
+                              ${availableEvents.filter(event => selectedEvents.has(event.id)).reduce((total, event) => total + (event.fee || 0), 0)}
                             </span>
-                          </div>
-                        )}
+                          </div>}
                         <div className="flex justify-between font-semibold text-base pt-2 border-t">
                           <span>Total Fee:</span>
                           <span className="text-primary">${totalFee}</span>
@@ -721,29 +613,19 @@ export const CompetitionSchoolRecord = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                </div>}
 
               {/* Notes (full width) - moved to bottom */}
               <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start">
                 <Label className="text-right pt-2">Notes</Label>
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="notes" render={({
+                  field
+                }) => <FormItem>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter any notes" 
-                          {...field} 
-                          disabled={isViewMode}
-                          className="min-h-[100px]"
-                        />
+                        <Textarea placeholder="Enter any notes" {...field} disabled={isViewMode} className="min-h-[100px]" />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
             </form>
           </Form>
@@ -752,12 +634,7 @@ export const CompetitionSchoolRecord = () => {
       </div>
 
       {/* Dialogs */}
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleContinueEditing}
-      />
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -769,16 +646,11 @@ export const CompetitionSchoolRecord = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
-              className="bg-destructive hover:bg-destructive/90"
-              disabled={isDeleting}
-            >
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
