@@ -68,6 +68,7 @@ export const CompetitionEventRecord: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [competitionSchoolId, setCompetitionSchoolId] = useState<string | null>(null);
   const [judges, setJudges] = useState<Array<{
     id: string;
     name: string;
@@ -276,8 +277,12 @@ export const CompetitionEventRecord: React.FC = () => {
       const {
         data,
         error
-      } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
+      } = await supabase.from('cp_competitions').select('start_date, end_date, school_id').eq('id', competitionId).single();
       if (error) throw error;
+      
+      // Store the competition's school_id
+      setCompetitionSchoolId(data?.school_id || null);
+      
       if (data?.start_date && !timezoneLoading) {
         const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
         const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
@@ -419,8 +424,7 @@ export const CompetitionEventRecord: React.FC = () => {
           error
         } = await supabase.from('cp_comp_events').insert({
           ...eventData,
-          school_id: undefined,
-          // Let database handle this via auth context
+          school_id: competitionSchoolId,
           created_by: undefined // Let database handle this via auth context
         });
         if (error) throw error;
