@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckSquare, Clock, AlertTriangle } from 'lucide-react';
 import { useMyTasks } from '@/hooks/useMyTasks';
@@ -6,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { getStatusColorClass, getPriorityColorClass, getStatusLabel } from '@/utils/taskStatusUtils';
 export const MyTasksWidget = () => {
+  const navigate = useNavigate();
   const {
     userProfile
   } = useAuth();
@@ -20,6 +22,10 @@ export const MyTasksWidget = () => {
   const {
     priorityOptions
   } = useTaskPriorityOptions();
+
+  const handleTaskClick = (taskId: string) => {
+    navigate(`/app/tasks/task_record?id=${taskId}`);
+  };
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -59,7 +65,11 @@ export const MyTasksWidget = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {tasks.length > 0 ? tasks.map(task => <div key={task.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors rounded-lg py-[4px]">
+          {tasks.length > 0 ? tasks.map(task => <div 
+              key={task.id} 
+              className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors rounded-lg py-[4px] cursor-pointer"
+              onClick={() => handleTaskClick(task.id)}
+            >
                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${getStatusColorClass(task.status, statusOptions).includes('bg-green') ? 'bg-green-500' : getStatusColorClass(task.status, statusOptions).includes('bg-blue') ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
