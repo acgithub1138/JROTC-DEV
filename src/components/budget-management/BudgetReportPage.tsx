@@ -10,10 +10,9 @@ import { BudgetFilters } from './BudgetManagementPage';
 // Color palette for pie charts
 const INCOME_COLORS = ['#10B981', '#059669', '#047857', '#065F46', '#064E3B', '#022C22'];
 const EXPENSE_COLORS = ['#EF4444', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#450A0A'];
-
 const BudgetReportPage = () => {
   const navigate = useNavigate();
-  
+
   // Fetch only active, non-archived transactions
   const filters: BudgetFilters = {
     search: '',
@@ -21,11 +20,14 @@ const BudgetReportPage = () => {
     type: '',
     paymentMethod: '',
     status: '',
-    showArchived: false, // Only show non-archived
+    showArchived: false,
+    // Only show non-archived
     budgetYear: ''
   };
-
-  const { transactions, isLoading } = useBudgetTransactions(filters);
+  const {
+    transactions,
+    isLoading
+  } = useBudgetTransactions(filters);
 
   // Filter for active transactions only
   const activeTransactions = useMemo(() => {
@@ -40,14 +42,11 @@ const BudgetReportPage = () => {
       acc[type] = (acc[type] || 0) + Number(transaction.amount);
       return acc;
     }, {} as Record<string, number>);
-
-    return Object.entries(incomeByType)
-      .map(([type, amount]) => ({
-        name: type,
-        value: amount,
-        formatted: `$${amount.toFixed(2)}`
-      }))
-      .sort((a, b) => b.value - a.value);
+    return Object.entries(incomeByType).map(([type, amount]) => ({
+      name: type,
+      value: amount,
+      formatted: `$${amount.toFixed(2)}`
+    })).sort((a, b) => b.value - a.value);
   }, [activeTransactions]);
 
   // Prepare data for expense pie chart
@@ -58,40 +57,35 @@ const BudgetReportPage = () => {
       acc[type] = (acc[type] || 0) + Number(transaction.amount);
       return acc;
     }, {} as Record<string, number>);
-
-    return Object.entries(expenseByType)
-      .map(([type, amount]) => ({
-        name: type,
-        value: amount,
-        formatted: `$${amount.toFixed(2)}`
-      }))
-      .sort((a, b) => b.value - a.value);
+    return Object.entries(expenseByType).map(([type, amount]) => ({
+      name: type,
+      value: amount,
+      formatted: `$${amount.toFixed(2)}`
+    })).sort((a, b) => b.value - a.value);
   }, [activeTransactions]);
 
   // Calculate totals
   const totalIncome = incomeData.reduce((sum, item) => sum + item.value, 0);
   const totalExpenses = expenseData.reduce((sum, item) => sum + item.value, 0);
   const netBudget = totalIncome - totalExpenses;
-
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload
+  }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
+      return <div className="bg-background border rounded-lg p-3 shadow-lg">
           <p className="font-medium">{data.name}</p>
           <p className="text-primary">{data.formatted}</p>
           <p className="text-sm text-muted-foreground">
-            {((data.value / (payload[0].payload.category === 'income' ? totalIncome : totalExpenses)) * 100).toFixed(1)}%
+            {(data.value / (payload[0].payload.category === 'income' ? totalIncome : totalExpenses) * 100).toFixed(1)}%
           </p>
-        </div>
-      );
+        </div>;
     }
     return null;
   };
-
   if (isLoading) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/budget')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -101,12 +95,9 @@ const BudgetReportPage = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Loading budget report...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate('/app/budget')}>
@@ -120,48 +111,7 @@ const BudgetReportPage = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">${totalIncome.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              From {incomeData.length} income categories
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              From {expenseData.length} expense categories
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Budget</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${netBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ${netBudget.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {netBudget >= 0 ? 'Surplus' : 'Deficit'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -177,36 +127,19 @@ const BudgetReportPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {incomeData.length > 0 ? (
-              <div className="h-80">
+            {incomeData.length > 0 ? <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={incomeData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {incomeData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={INCOME_COLORS[index % INCOME_COLORS.length]} 
-                        />
-                      ))}
+                    <Pie data={incomeData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} paddingAngle={2} dataKey="value">
+                      {incomeData.map((entry, index) => <Cell key={`cell-${index}`} fill={INCOME_COLORS[index % INCOME_COLORS.length]} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
+              </div> : <div className="h-80 flex items-center justify-center text-muted-foreground">
                 No income data available
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
 
@@ -222,36 +155,19 @@ const BudgetReportPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {expenseData.length > 0 ? (
-              <div className="h-80">
+            {expenseData.length > 0 ? <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={expenseData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {expenseData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={EXPENSE_COLORS[index % EXPENSE_COLORS.length]} 
-                        />
-                      ))}
+                    <Pie data={expenseData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} paddingAngle={2} dataKey="value">
+                      {expenseData.map((entry, index) => <Cell key={`cell-${index}`} fill={EXPENSE_COLORS[index % EXPENSE_COLORS.length]} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
+              </div> : <div className="h-80 flex items-center justify-center text-muted-foreground">
                 No expense data available
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
       </div>
@@ -265,23 +181,20 @@ const BudgetReportPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {incomeData.map((item, index) => (
-                <div key={item.name} className="flex justify-between items-center py-2 border-b last:border-b-0">
+              {incomeData.map((item, index) => <div key={item.name} className="flex justify-between items-center py-2 border-b last:border-b-0">
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: INCOME_COLORS[index % INCOME_COLORS.length] }}
-                    />
+                    <div className="w-3 h-3 rounded-full" style={{
+                  backgroundColor: INCOME_COLORS[index % INCOME_COLORS.length]
+                }} />
                     <span className="font-medium">{item.name}</span>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold">{item.formatted}</div>
                     <div className="text-sm text-muted-foreground">
-                      {((item.value / totalIncome) * 100).toFixed(1)}%
+                      {(item.value / totalIncome * 100).toFixed(1)}%
                     </div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
@@ -293,29 +206,24 @@ const BudgetReportPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {expenseData.map((item, index) => (
-                <div key={item.name} className="flex justify-between items-center py-2 border-b last:border-b-0">
+              {expenseData.map((item, index) => <div key={item.name} className="flex justify-between items-center py-2 border-b last:border-b-0">
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: EXPENSE_COLORS[index % EXPENSE_COLORS.length] }}
-                    />
+                    <div className="w-3 h-3 rounded-full" style={{
+                  backgroundColor: EXPENSE_COLORS[index % EXPENSE_COLORS.length]
+                }} />
                     <span className="font-medium">{item.name}</span>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold">{item.formatted}</div>
                     <div className="text-sm text-muted-foreground">
-                      {((item.value / totalExpenses) * 100).toFixed(1)}%
+                      {(item.value / totalExpenses * 100).toFixed(1)}%
                     </div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default BudgetReportPage;
