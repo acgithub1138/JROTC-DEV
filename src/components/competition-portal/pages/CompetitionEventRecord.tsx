@@ -523,7 +523,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
-          <h1 className="text-2xl font-bold">{pageTitle}</h1>
+          
         </div>
         <div className="flex items-center gap-2">
           {canEditForm && <>
