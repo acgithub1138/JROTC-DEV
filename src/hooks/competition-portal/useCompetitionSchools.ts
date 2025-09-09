@@ -4,10 +4,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
-// Extend types to include the paid, color, and total_fee fields since they exist in DB but not in generated types yet
-type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'] & { paid: boolean; color: string; total_fee: number };
-type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'] & { paid?: boolean; color?: string; total_fee?: number };
-type CompSchoolUpdate = Database['public']['Tables']['cp_comp_schools']['Update'] & { paid?: boolean; color?: string; total_fee?: number };
+// Extend types to include the paid, color, total_fee, and registration_source fields since they exist in DB but not in generated types yet
+type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'] & { 
+  paid: boolean; 
+  color: string; 
+  total_fee: number;
+  registration_source: string;
+};
+type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'] & { 
+  paid?: boolean; 
+  color?: string; 
+  total_fee?: number;
+  registration_source?: string;
+};
+type CompSchoolUpdate = Database['public']['Tables']['cp_comp_schools']['Update'] & { 
+  paid?: boolean; 
+  color?: string; 
+  total_fee?: number;
+  registration_source?: string;
+};
 
 export const useCompetitionSchools = (competitionId?: string) => {
   const { userProfile } = useAuth();

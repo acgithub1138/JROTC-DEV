@@ -197,6 +197,15 @@ const AuthPage = () => {
                 New Parent Login
               </Button>
               
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                onClick={() => navigate('/external/register')}
+              >
+                Register for Competition
+              </Button>
+              
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800 text-center">
                   <strong>New Staff or Cadet?</strong><br />

@@ -931,6 +931,7 @@ export type Database = {
           id: string
           notes: string | null
           paid: boolean
+          registration_source: string
           resource: string | null
           school_id: string | null
           school_initials: string | null
@@ -949,6 +950,7 @@ export type Database = {
           id?: string
           notes?: string | null
           paid?: boolean
+          registration_source?: string
           resource?: string | null
           school_id?: string | null
           school_initials?: string | null
@@ -967,6 +969,7 @@ export type Database = {
           id?: string
           notes?: string | null
           paid?: boolean
+          registration_source?: string
           resource?: string | null
           school_id?: string | null
           school_initials?: string | null
