@@ -4,10 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from 'lucide-react';
+import { JROTC_PROGRAM_OPTIONS } from '@/components/competition-portal/my-competitions/utils/constants';
 
 interface SchoolFormData {
   name: string;
@@ -16,7 +18,7 @@ interface SchoolFormData {
   contact_email: string;
   contact_phone: string;
   notes: string;
-  color: string;
+  jrotc_program: string;
 }
 
 export const ExternalSchoolRegistration = () => {
@@ -30,7 +32,7 @@ export const ExternalSchoolRegistration = () => {
     contact_email: '',
     contact_phone: '',
     notes: '',
-    color: '#3B82F6'
+    jrotc_program: 'army'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,23 +162,22 @@ export const ExternalSchoolRegistration = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="color">School Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="color"
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => handleInputChange('color', e.target.value)}
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={formData.color}
-                    onChange={(e) => handleInputChange('color', e.target.value)}
-                    placeholder="#3B82F6"
-                    className="flex-1"
-                  />
-                </div>
+                <Label htmlFor="jrotc_program">JROTC Program *</Label>
+                <Select
+                  value={formData.jrotc_program}
+                  onValueChange={(value) => handleInputChange('jrotc_program', value)}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select JROTC Program" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {JROTC_PROGRAM_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

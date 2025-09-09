@@ -13,7 +13,7 @@ interface SchoolRegistrationData {
   contact_email: string;
   contact_phone?: string;
   notes?: string;
-  color: string;
+  jrotc_program: string;
 }
 
 serve(async (req) => {
@@ -80,7 +80,7 @@ serve(async (req) => {
         email: schoolData.contact_email,
         phone: schoolData.contact_phone || null,
         notes: schoolData.notes || null,
-        jrotc_program: 'army' // Default program for external schools
+        jrotc_program: schoolData.jrotc_program
       })
       .select()
       .single();
