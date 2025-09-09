@@ -1,7 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, Upload } from 'lucide-react';
+import { Plus, Download, Upload, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useInventoryActionsPermissions } from '@/hooks/useOptimizedInventoryPermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -24,17 +30,26 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
 
   return (
     <>
+      {/* Actions Dropdown */}
       {!isMobile && (canBulkImport || isLoading) && (
-        <Button variant="outline" onClick={onExport}>
-          <Download className="w-4 h-4 mr-2" />
-          Export CSV
-        </Button>
-      )}
-      {!isMobile && (canBulkImport || isLoading) && (
-        <Button variant="outline" onClick={handleBulkOperations} disabled={isLoading}>
-          <Upload className="w-4 h-4 mr-2" />
-          Bulk Operations
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center">
+              <MoreHorizontal className="w-4 h-4 mr-2" />
+              Actions
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
+            <DropdownMenuItem onClick={onExport} className="flex items-center cursor-pointer">
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleBulkOperations} disabled={isLoading} className="flex items-center cursor-pointer">
+              <Upload className="w-4 h-4 mr-2" />
+              Bulk Import
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
       {(canCreate || isLoading) && (
         <Button onClick={onAddItem} disabled={isLoading}>
