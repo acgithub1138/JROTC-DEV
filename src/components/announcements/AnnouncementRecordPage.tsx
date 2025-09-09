@@ -19,7 +19,6 @@ import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { AnnouncementViewer } from './components/AnnouncementViewer';
 import { useToast } from '@/hooks/use-toast';
-import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 type AnnouncementRecordMode = 'create' | 'edit' | 'view';
 
@@ -40,9 +39,6 @@ export const AnnouncementRecordPage = () => {
   // Find the current announcement if editing/viewing
   const currentAnnouncement = recordId ? announcements?.find(a => a.id === recordId) : null;
 
-  // Initialize attachment hooks for file upload
-  const { uploadFile } = useAttachments('announcement', currentAnnouncement?.id || 'temp');
-
   // Form state
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -54,8 +50,6 @@ export const AnnouncementRecordPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   // Priority mapping helpers
   const getPriorityLabel = (value: number) => {
@@ -97,7 +91,6 @@ export const AnnouncementRecordPage = () => {
       setPublishDate(new Date());
       setExpireDate(undefined);
       setHasExpiration(false);
-      setPendingFiles([]);
     }
   }, [currentAnnouncement, mode]);
 
@@ -106,7 +99,7 @@ export const AnnouncementRecordPage = () => {
     if (mode === 'view') return;
     
     const hasChanges: boolean = mode === 'create' ? 
-      (!!title || !!content || priority[0] !== 0 || !isActive || hasExpiration || pendingFiles.length > 0) :
+      (!!title || !!content || priority[0] !== 0 || !isActive || hasExpiration) :
       (currentAnnouncement ? (
         title !== currentAnnouncement.title ||
         content !== currentAnnouncement.content ||
@@ -117,34 +110,13 @@ export const AnnouncementRecordPage = () => {
       ) : false);
     
     setHasUnsavedChanges(hasChanges);
-  }, [title, content, priority, isActive, publishDate, expireDate, hasExpiration, currentAnnouncement, mode, pendingFiles]);
+  }, [title, content, priority, isActive, publishDate, expireDate, hasExpiration, currentAnnouncement, mode]);
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
       navigate('/app/announcements');
-    }
-  };
-
-  const uploadPendingFiles = async (announcementId: string) => {
-    if (pendingFiles.length === 0) return;
-    
-    setIsUploadingFiles(true);
-    try {
-      // Upload files one by one and wait for completion
-      for (const file of pendingFiles) {
-        await uploadFile({
-          record_type: 'announcement',
-          record_id: announcementId,
-          file
-        });
-      }
-      setPendingFiles([]);
-    } catch (error) {
-      console.error('Error uploading files:', error);
-    } finally {
-      setIsUploadingFiles(false);
     }
   };
 
@@ -173,12 +145,6 @@ export const AnnouncementRecordPage = () => {
 
       if (mode === 'create') {
         const newAnnouncement = await createMutation.mutateAsync(data);
-        
-        // Upload pending files if any
-        if (pendingFiles.length > 0) {
-          await uploadPendingFiles(newAnnouncement.id);
-        }
-        
         toast({ title: "Success", description: "Announcement created successfully" });
       } else if (mode === 'edit' && currentAnnouncement) {
         await updateMutation.mutateAsync({ ...data, id: currentAnnouncement.id });
@@ -459,70 +425,28 @@ export const AnnouncementRecordPage = () => {
           </div>
 
           {/* Attachments */}
-          <div className="flex items-start space-x-4">
-            <Label className="w-24 text-right mt-2">Attachments</Label>
-            <div className="flex-1">
-              {mode === 'create' ? (
-                <div className="space-y-4">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        setPendingFiles(prev => [...prev, ...Array.from(e.target.files!)]);
-                      }
-                    }}
-                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                  />
-                  {pendingFiles.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Files to upload:</p>
-                      {pendingFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <span className="text-sm">{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
-                            className="text-red-500 hover:text-red-700 ml-2"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      {isUploadingFiles && (
-                        <div className="text-sm text-blue-600 font-medium">
-                          Uploading files...
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : currentAnnouncement ? (
-                <Card>
-                  <CardHeader className="py-[8px]">
-                    <CardTitle className="flex items-center justify-between">
-                      <AttachmentSection 
-                        recordType="announcement" 
-                        recordId={currentAnnouncement.id} 
-                        canEdit={mode === 'edit'} 
-                        defaultOpen={true} 
-                        showTitleWithCount={true} 
-                      />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <AttachmentSection 
-                      recordType="announcement" 
-                      recordId={currentAnnouncement.id} 
-                      canEdit={mode === 'edit'} 
-                      defaultOpen={true} 
-                      showContentOnly={true} 
-                    />
-                  </CardContent>
-                </Card>
-              ) : null}
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="py-[8px]">
+              <CardTitle className="flex items-center justify-between">
+                <AttachmentSection 
+                  recordType="announcement" 
+                  recordId={currentAnnouncement?.id || 'temp'} 
+                  canEdit={mode !== 'view'} 
+                  defaultOpen={true} 
+                  showTitleWithCount={true} 
+                />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AttachmentSection 
+                recordType="announcement" 
+                recordId={currentAnnouncement?.id || 'temp'} 
+                canEdit={mode !== 'view'} 
+                defaultOpen={true} 
+                showContentOnly={true} 
+              />
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
       </div>
