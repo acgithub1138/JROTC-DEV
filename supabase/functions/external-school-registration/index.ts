@@ -76,13 +76,11 @@ serve(async (req) => {
       .insert({
         name: schoolData.name,
         initials: schoolData.initials || null,
-        contact_person: schoolData.contact_person,
-        contact_email: schoolData.contact_email,
-        contact_phone: schoolData.contact_phone || null,
+        contact: schoolData.contact_person,
+        email: schoolData.contact_email,
+        phone: schoolData.contact_phone || null,
         notes: schoolData.notes || null,
-        color: schoolData.color,
-        jrotc_program: 'army', // Default program for external schools
-        active: true
+        jrotc_program: 'army' // Default program for external schools
       })
       .select()
       .single();
