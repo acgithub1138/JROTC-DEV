@@ -27,6 +27,8 @@ interface TaskTabsProps {
   overdueFilter: boolean;
   onOverdueFilterChange: (checked: boolean) => void;
   onRefresh?: () => void;
+  activeTab?: string;
+  onTabChange?: (value: string) => void;
 }
 
 export const TaskTabs: React.FC<TaskTabsProps> = ({
@@ -46,7 +48,9 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onPageChangeCompleted,
   overdueFilter,
   onOverdueFilterChange,
-  onRefresh
+  onRefresh,
+  activeTab = 'mytasks',
+  onTabChange
 }) => {
   const isMobile = useIsMobile();
   const { isNative } = useCapacitor();
@@ -79,7 +83,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   }, [isMobile, isNative, onTaskSelect, onEditTask, overdueFilter, onOverdueFilterChange, onRefresh]);
 
   return (
-    <Tabs defaultValue="mytasks" className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="mytasks">My Tasks</TabsTrigger>
         <TabsTrigger value="alltasks">All Tasks</TabsTrigger>
