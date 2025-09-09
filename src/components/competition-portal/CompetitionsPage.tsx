@@ -21,15 +21,25 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useCPCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
-
-const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'open', label: 'Open' },
-  { value: 'registration_closed', label: 'Registration Closed' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' }
-];
+const STATUS_OPTIONS = [{
+  value: 'draft',
+  label: 'Draft'
+}, {
+  value: 'open',
+  label: 'Open'
+}, {
+  value: 'registration_closed',
+  label: 'Registration Closed'
+}, {
+  value: 'in_progress',
+  label: 'In Progress'
+}, {
+  value: 'completed',
+  label: 'Completed'
+}, {
+  value: 'cancelled',
+  label: 'Cancelled'
+}];
 interface Competition {
   id: string;
   name: string;
@@ -51,12 +61,27 @@ interface School {
 }
 const CompetitionsPage = () => {
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const {
+    userProfile
+  } = useAuth();
   const isMobile = useIsMobile();
-  const { canCreate } = useTablePermissions('cp_competitions');
-  const { canViewDetails, canEdit, canDelete, canManage } = useCPCompetitionPermissions();
-  const { copyCompetition } = useCompetitions();
-  const { competitions, isLoading: loading, refetch: refetchCompetitions } = useHostedCompetitions();
+  const {
+    canCreate
+  } = useTablePermissions('cp_competitions');
+  const {
+    canViewDetails,
+    canEdit,
+    canDelete,
+    canManage
+  } = useCPCompetitionPermissions();
+  const {
+    copyCompetition
+  } = useCompetitions();
+  const {
+    competitions,
+    isLoading: loading,
+    refetch: refetchCompetitions
+  } = useHostedCompetitions();
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,13 +111,12 @@ const CompetitionsPage = () => {
       console.error('Error fetching schools:', error);
     }
   };
-
   const fetchRegistrationCounts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cp_comp_schools')
-        .select('competition_id');
-
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_schools').select('competition_id');
       if (error) throw error;
 
       // Count registrations per competition
@@ -100,7 +124,6 @@ const CompetitionsPage = () => {
       data?.forEach(registration => {
         counts[registration.competition_id] = (counts[registration.competition_id] || 0) + 1;
       });
-      
       setRegistrationCounts(counts);
     } catch (error) {
       console.error('Error fetching registration counts:', error);
@@ -136,89 +159,75 @@ const CompetitionsPage = () => {
       setSortDirection('asc');
     }
   };
-
   const getSortIcon = (field: string) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
     return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
+  const filteredAndSortedCompetitions = competitions.filter(competition => {
+    const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
 
-  const filteredAndSortedCompetitions = competitions
-    .filter(competition => {
-      const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
-      
-      // Filter by active/non-active tab
-      const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
-      const matchesTab = activeTab === 'active' ? isActive : !isActive;
-      
-      return matchesSearch && matchesStatus && matchesTab;
-    })
-    .sort((a, b) => {
-      if (!sortField) return 0;
-      
-      let aValue: any = '';
-      let bValue: any = '';
-      
-      switch (sortField) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'description':
-          aValue = (a.description || '').toLowerCase();
-          bValue = (b.description || '').toLowerCase();
-          break;
-        case 'date':
-          aValue = new Date(a.start_date);
-          bValue = new Date(b.start_date);
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'registrations':
-          aValue = registrationCounts[a.id] || 0;
-          bValue = registrationCounts[b.id] || 0;
-          break;
-        default:
-          return 0;
-      }
-      
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
+    // Filter by active/non-active tab
+    const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
+    const matchesTab = activeTab === 'active' ? isActive : !isActive;
+    return matchesSearch && matchesStatus && matchesTab;
+  }).sort((a, b) => {
+    if (!sortField) return 0;
+    let aValue: any = '';
+    let bValue: any = '';
+    switch (sortField) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'description':
+        aValue = (a.description || '').toLowerCase();
+        bValue = (b.description || '').toLowerCase();
+        break;
+      case 'date':
+        aValue = new Date(a.start_date);
+        bValue = new Date(b.start_date);
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'registrations':
+        aValue = registrationCounts[a.id] || 0;
+        bValue = registrationCounts[b.id] || 0;
+        break;
+      default:
+        return 0;
+    }
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
   // Remove unused modal functions and state
   const canCreateCompetition = canCreate;
-const handleViewCompetition = (competition: Competition) => {
-  navigate(`/app/competition-portal/competition-details/${competition.id}`);
-};
-
-const handleOpenEdit = (competition: Competition) => {
-  navigate(`/app/competition-portal/competitions/competition_record?mode=edit&id=${competition.id}`);
-};
-
-const handleEditSubmit = async (data: any) => {
-  // This function is no longer needed since we navigate to the page
-  refetchCompetitions();
-};
-
+  const handleViewCompetition = (competition: Competition) => {
+    navigate(`/app/competition-portal/competition-details/${competition.id}`);
+  };
+  const handleOpenEdit = (competition: Competition) => {
+    navigate(`/app/competition-portal/competitions/competition_record?mode=edit&id=${competition.id}`);
+  };
+  const handleEditSubmit = async (data: any) => {
+    // This function is no longer needed since we navigate to the page
+    refetchCompetitions();
+  };
   const handleCancelCompetitionClick = (competition: Competition) => {
     setCompetitionToCancel(competition);
     setShowCancelDialog(true);
   };
-
   const handleCancelCompetition = async () => {
     if (!competitionToCancel) return;
-
     try {
-      const { error } = await supabase
-        .from('cp_competitions')
-        .update({ status: 'cancelled' })
-        .eq('id', competitionToCancel.id);
-
+      const {
+        error
+      } = await supabase.from('cp_competitions').update({
+        status: 'cancelled'
+      }).eq('id', competitionToCancel.id);
       if (error) throw error;
-
       toast.success('Competition cancelled successfully');
       refetchCompetitions();
       setShowCancelDialog(false);
@@ -228,15 +237,12 @@ const handleEditSubmit = async (data: any) => {
       toast.error('Failed to cancel competition');
     }
   };
-
   const handleCopyCompetition = (competition: Competition) => {
     setSelectedCompetition(competition);
     setShowCopyModal(true);
   };
-
   const handleCopySubmit = async (name: string, startDate: Date, endDate: Date) => {
     if (!selectedCompetition) return;
-
     try {
       setIsCopying(true);
       await copyCompetition(selectedCompetition.id, name, startDate, endDate);
@@ -249,17 +255,15 @@ const handleEditSubmit = async (data: any) => {
       setIsCopying(false);
     }
   };
-
   const handleStatusChange = async (competitionId: string, newStatus: string) => {
     try {
       setUpdatingStatus(competitionId);
-      const { error } = await supabase
-        .from('cp_competitions')
-        .update({ status: newStatus })
-        .eq('id', competitionId);
-
+      const {
+        error
+      } = await supabase.from('cp_competitions').update({
+        status: newStatus
+      }).eq('id', competitionId);
       if (error) throw error;
-
       toast.success('Competition status updated successfully');
       refetchCompetitions();
     } catch (error) {
@@ -291,7 +295,7 @@ const handleEditSubmit = async (data: any) => {
       </div>
 
       {/* Active/Non-Active Tabs */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'non-active')}>
+      <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'active' | 'non-active')}>
         <TabsList>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="non-active">Non-Active</TabsTrigger>
@@ -331,71 +335,40 @@ const handleEditSubmit = async (data: any) => {
       </Card>
 
       {/* Competitions Table/Cards */}
-      {filteredAndSortedCompetitions.length === 0 ? (
-        <Card>
+      {filteredAndSortedCompetitions.length === 0 ? <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
               {competitions.length === 0 ? 'No competitions found.' : 'No competitions match your search criteria.'}
             </div>
           </CardContent>
-        </Card>
-      ) : isMobile ? (
-        <CompetitionCards
-          competitions={filteredAndSortedCompetitions}
-          registrationCounts={registrationCounts}
-          userProfile={userProfile}
-          getStatusBadgeVariant={getStatusBadgeVariant}
-          handleViewCompetition={handleViewCompetition}
-          handleEditCompetition={handleOpenEdit}
-          handleCancelCompetitionClick={handleCancelCompetitionClick}
-          handleStatusChange={handleStatusChange}
-          updatingStatus={updatingStatus}
-          getSchoolName={getSchoolName}
-        />
-      ) : (
-        <Card>
+        </Card> : isMobile ? <CompetitionCards competitions={filteredAndSortedCompetitions} registrationCounts={registrationCounts} userProfile={userProfile} getStatusBadgeVariant={getStatusBadgeVariant} handleViewCompetition={handleViewCompetition} handleEditCompetition={handleOpenEdit} handleCancelCompetitionClick={handleCancelCompetitionClick} handleStatusChange={handleStatusChange} updatingStatus={updatingStatus} getSchoolName={getSchoolName} /> : <Card>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>
-                      <button 
-                        onClick={() => handleSort('name')}
-                        className="flex items-center gap-2 hover:text-foreground font-medium"
-                      >
+                      <button onClick={() => handleSort('name')} className="flex items-center gap-2 hover:text-foreground font-medium">
                         Name {getSortIcon('name')}
                       </button>
                     </TableHead>
                     <TableHead>
-                      <button 
-                        onClick={() => handleSort('description')}
-                        className="flex items-center gap-2 hover:text-foreground font-medium"
-                      >
+                      <button onClick={() => handleSort('description')} className="flex items-center gap-2 hover:text-foreground font-medium">
                         Description {getSortIcon('description')}
                       </button>
                     </TableHead>
                     <TableHead>
-                      <button 
-                        onClick={() => handleSort('date')}
-                        className="flex items-center gap-2 hover:text-foreground font-medium"
-                      >
+                      <button onClick={() => handleSort('date')} className="flex items-center gap-2 hover:text-foreground font-medium">
                         Date {getSortIcon('date')}
                       </button>
                     </TableHead>
                     <TableHead>
-                      <button 
-                        onClick={() => handleSort('status')}
-                        className="flex items-center gap-2 hover:text-foreground font-medium"
-                      >
+                      <button onClick={() => handleSort('status')} className="flex items-center gap-2 hover:text-foreground font-medium">
                         Status {getSortIcon('status')}
                       </button>
                     </TableHead>
                     <TableHead>
-                      <button 
-                        onClick={() => handleSort('registrations')}
-                        className="flex items-center gap-2 hover:text-foreground font-medium"
-                      >
+                      <button onClick={() => handleSort('registrations')} className="flex items-center gap-2 hover:text-foreground font-medium">
                         Registered Schools {getSortIcon('registrations')}
                       </button>
                     </TableHead>
@@ -403,16 +376,11 @@ const handleEditSubmit = async (data: any) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAndSortedCompetitions.map(competition => (
-                    <TableRow key={competition.id}>
+                  {filteredAndSortedCompetitions.map(competition => <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
-                        {canManage ? (
-                          <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+                        {canManage ? <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                             {competition.name}
-                          </button>
-                        ) : (
-                          <span className="font-medium">{competition.name}</span>
-                        )}
+                          </button> : <span className="font-medium">{competition.name}</span>}
                       </TableCell>
                       <TableCell>
                         <div className="max-w-xs">
@@ -431,30 +399,20 @@ const handleEditSubmit = async (data: any) => {
                         </div>
                       </TableCell>
                        <TableCell>
-                         {canManage ? (
-                           <Select
-                             value={competition.status}
-                             onValueChange={(value) => handleStatusChange(competition.id, value)}
-                             disabled={updatingStatus === competition.id}
-                           >
+                         {canManage ? <Select value={competition.status} onValueChange={value => handleStatusChange(competition.id, value)} disabled={updatingStatus === competition.id}>
                              <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
                                <Badge variant={getStatusBadgeVariant(competition.status)} className="cursor-pointer">
                                  {competition.status.replace('_', ' ').toUpperCase()}
                                </Badge>
                              </SelectTrigger>
                              <SelectContent className="bg-background border shadow-md z-50">
-                               {STATUS_OPTIONS.map((option) => (
-                                 <SelectItem key={option.value} value={option.value}>
+                               {STATUS_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
                                    {option.label}
-                                 </SelectItem>
-                               ))}
+                                 </SelectItem>)}
                              </SelectContent>
-                           </Select>
-                         ) : (
-                           <Badge variant={getStatusBadgeVariant(competition.status)}>
+                           </Select> : <Badge variant={getStatusBadgeVariant(competition.status)}>
                              {competition.status.replace('_', ' ').toUpperCase()}
-                           </Badge>
-                         )}
+                           </Badge>}
                        </TableCell>
                        <TableCell>
                          <div className="flex items-center">
@@ -463,25 +421,20 @@ const handleEditSubmit = async (data: any) => {
                            {competition.max_participants && ` / ${competition.max_participants}`}
                          </div>
                        </TableCell>
-<TableCell>
+                      <TableCell>
   <div className="flex items-center justify-center gap-2">
     {/* View Competition */}
-    {canViewDetails && (
-      <Tooltip>
+    {canViewDetails && <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewCompetition(competition)}>
-            <Eye className="w-3 h-3" />
-          </Button>
+          
         </TooltipTrigger>
         <TooltipContent>
           <p>View</p>
         </TooltipContent>
-      </Tooltip>
-    )}
+      </Tooltip>}
 
     {/* Edit Competition */}
-    {canEdit && (
-      <Tooltip>
+    {canEdit && <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
             <Edit className="w-3 h-3" />
@@ -490,12 +443,10 @@ const handleEditSubmit = async (data: any) => {
         <TooltipContent>
           <p>Edit</p>
         </TooltipContent>
-      </Tooltip>
-    )}
+      </Tooltip>}
 
     {/* Copy Competition */}
-    {canCreate && (
-      <Tooltip>
+    {canCreate && <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleCopyCompetition(competition)}>
             <Copy className="w-3 h-3" />
@@ -504,11 +455,9 @@ const handleEditSubmit = async (data: any) => {
         <TooltipContent>
           <p>Copy</p>
         </TooltipContent>
-      </Tooltip>
-    )}
+      </Tooltip>}
 
-    {canManage && (
-      <>
+    {canManage && <>
         {/* Manage Competition */}
 
         <Tooltip>
@@ -521,49 +470,33 @@ const handleEditSubmit = async (data: any) => {
             <p>Manage Competition</p>
           </TooltipContent>
         </Tooltip>
-      </>
-    )}
+      </>}
                                 
     {/* Cancel Competition */}
-    {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
-      <Tooltip>
+    {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && <Tooltip>
         <TooltipTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" 
-            onClick={() => handleCancelCompetitionClick(competition)}
-          >
+          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleCancelCompetitionClick(competition)}>
             <X className="w-3 h-3" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
           <p>Cancel Competition</p>
         </TooltipContent>
-      </Tooltip>
-    )}
+      </Tooltip>}
                           </div>
                        </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
         </TabsContent>
       </Tabs>
 
-{/* Copy Competition Modal */}
-<CopyCompetitionModal 
-  isOpen={showCopyModal}
-  onClose={() => setShowCopyModal(false)}
-  onConfirm={handleCopySubmit}
-  originalCompetitionName={selectedCompetition?.name || ''}
-  isLoading={isCopying}
-/>
+      {/* Copy Competition Modal */}
+      <CopyCompetitionModal isOpen={showCopyModal} onClose={() => setShowCopyModal(false)} onConfirm={handleCopySubmit} originalCompetitionName={selectedCompetition?.name || ''} isLoading={isCopying} />
 
       {/* Cancel Competition Confirmation Dialog */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
