@@ -248,7 +248,7 @@ export const CompetitionSchoolRecord = () => {
       const {
         data,
         error
-      } = await supabase.from('schools').select('id, name').order('name');
+      } = await supabase.from('schools').select('id, name').not('jrotc_program', 'is', null).order('name');
       if (error) throw error;
       setSchools(data || []);
     } catch (error) {
