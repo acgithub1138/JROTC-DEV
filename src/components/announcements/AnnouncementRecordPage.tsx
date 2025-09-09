@@ -19,6 +19,7 @@ import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { AnnouncementViewer } from './components/AnnouncementViewer';
 import { useToast } from '@/hooks/use-toast';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 type AnnouncementRecordMode = 'create' | 'edit' | 'view';
 
@@ -38,6 +39,9 @@ export const AnnouncementRecordPage = () => {
 
   // Find the current announcement if editing/viewing
   const currentAnnouncement = recordId ? announcements?.find(a => a.id === recordId) : null;
+  
+  // Initialize attachment hooks for file upload (with dummy ID for create mode)
+  const { uploadFile } = useAttachments('announcement', currentAnnouncement?.id || 'temp');
 
   // Form state
   const [title, setTitle] = useState('');
@@ -50,6 +54,8 @@ export const AnnouncementRecordPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   // Priority mapping helpers
   const getPriorityLabel = (value: number) => {
@@ -65,6 +71,27 @@ export const AnnouncementRecordPage = () => {
     if (numericPriority >= 7) return 2; // High
     if (numericPriority >= 4) return 1; // Medium
     return 0; // Low
+  };
+
+  const uploadPendingFiles = async (announcementId: string) => {
+    if (pendingFiles.length === 0) return;
+    
+    setIsUploadingFiles(true);
+    try {
+      // Upload files one by one and wait for completion
+      for (const file of pendingFiles) {
+        await uploadFile({
+          record_type: 'announcement',
+          record_id: announcementId,
+          file
+        });
+      }
+      setPendingFiles([]);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    } finally {
+      setIsUploadingFiles(false);
+    }
   };
 
   // Initialize form data
@@ -145,6 +172,12 @@ export const AnnouncementRecordPage = () => {
 
       if (mode === 'create') {
         const newAnnouncement = await createMutation.mutateAsync(data);
+        
+        // Upload pending files if any
+        if (pendingFiles.length > 0) {
+          await uploadPendingFiles(newAnnouncement.id);
+        }
+        
         toast({ title: "Success", description: "Announcement created successfully" });
       } else if (mode === 'edit' && currentAnnouncement) {
         await updateMutation.mutateAsync({ ...data, id: currentAnnouncement.id });
@@ -425,28 +458,55 @@ export const AnnouncementRecordPage = () => {
           </div>
 
           {/* Attachments */}
-          <Card>
-            <CardHeader className="py-[8px]">
-              <CardTitle className="flex items-center justify-between">
-                <AttachmentSection 
-                  recordType="announcement" 
-                  recordId={currentAnnouncement?.id || 'temp'} 
-                  canEdit={mode !== 'view'} 
-                  defaultOpen={true} 
-                  showTitleWithCount={true} 
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AttachmentSection 
-                recordType="announcement" 
-                recordId={currentAnnouncement?.id || 'temp'} 
-                canEdit={mode !== 'view'} 
-                defaultOpen={true} 
-                showContentOnly={true} 
-              />
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <div className="flex items-center gap-4">
+              <Label className="w-32 text-right text-sm font-medium">Attachments</Label>
+              <div className="flex-1">
+                {mode === 'create' ? (
+                  <>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setPendingFiles(prev => [...prev, ...files]);
+                      }}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                    />
+                    {pendingFiles.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-muted-foreground">Files to upload after announcement creation:</p>
+                        {pendingFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                            <span>{file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {isUploadingFiles && (
+                          <div className="text-sm text-blue-600 font-medium">
+                            Uploading files...
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <AttachmentSection
+                    recordType="announcement"
+                    recordId={currentAnnouncement?.id || ''}
+                    canEdit={mode !== 'view'}
+                    defaultOpen={false}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
       </div>
