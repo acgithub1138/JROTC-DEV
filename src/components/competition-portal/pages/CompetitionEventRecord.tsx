@@ -68,7 +68,6 @@ export const CompetitionEventRecord: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [competitionSchoolId, setCompetitionSchoolId] = useState<string | null>(null);
   const [judges, setJudges] = useState<Array<{
     id: string;
     name: string;
@@ -160,10 +159,10 @@ export const CompetitionEventRecord: React.FC = () => {
   // Fetch judges and competition date on component mount
   useEffect(() => {
     fetchJudges();
-    if (isCreateMode && competitionId && !timezoneLoading) {
+    if (isCreateMode && competitionId) {
       fetchCompetitionDate();
     }
-  }, [isCreateMode, competitionId, timezoneLoading]);
+  }, [isCreateMode, competitionId]);
 
   // Fetch filtered score sheets when event changes
   useEffect(() => {
@@ -277,12 +276,8 @@ export const CompetitionEventRecord: React.FC = () => {
       const {
         data,
         error
-      } = await supabase.from('cp_competitions').select('start_date, end_date, school_id').eq('id', competitionId).single();
+      } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
       if (error) throw error;
-      
-      // Store the competition's school_id
-      setCompetitionSchoolId(data?.school_id || null);
-      
       if (data?.start_date && !timezoneLoading) {
         const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
         const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
@@ -424,7 +419,8 @@ export const CompetitionEventRecord: React.FC = () => {
           error
         } = await supabase.from('cp_comp_events').insert({
           ...eventData,
-          school_id: competitionSchoolId,
+          school_id: undefined,
+          // Let database handle this via auth context
           created_by: undefined // Let database handle this via auth context
         });
         if (error) throw error;
@@ -531,9 +527,7 @@ export const CompetitionEventRecord: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           {canEditForm && <>
-              <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
-                Cancel
-              </Button>
+              
               {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
                   <Trash2 className="h-4 w-4" />
                   Delete
@@ -559,9 +553,9 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="event" className="text-right">Event *</Label>
                 <Select value={formData.event} onValueChange={value => setFormData(prev => ({
-                ...prev,
-                event: value
-              }))} disabled={isViewMode}>
+                  ...prev,
+                  event: value
+                }))} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
@@ -575,9 +569,9 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
                 <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
-                ...prev,
-                score_sheet: value
-              }))} disabled={isViewMode}>
+                  ...prev,
+                  score_sheet: value
+                }))} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a score template" />
                   </SelectTrigger>
@@ -595,16 +589,16 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="fee" className="text-right">Fee *</Label>
                 <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
-                ...prev,
-                fee: e.target.value
-              }))} placeholder="Event fee" disabled={isViewMode} required />
+                  ...prev,
+                  fee: e.target.value
+                }))} placeholder="Event fee" disabled={isViewMode} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="location" className="text-right">Location *</Label>
                 <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
-                ...prev,
-                location: e.target.value
-              }))} placeholder="Event location" disabled={isViewMode} required />
+                  ...prev,
+                  location: e.target.value
+                }))} placeholder="Event location" disabled={isViewMode} required />
               </div>
             </div>
 
@@ -613,16 +607,16 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label className="text-right">Judges</Label>
                 <MultiSelectJudges judges={judges} selectedJudgeIds={formData.judges} onChange={judgeIds => setFormData(prev => ({
-                ...prev,
-                judges: judgeIds
-              }))} disabled={isViewMode} />
+                  ...prev,
+                  judges: judgeIds
+                }))} disabled={isViewMode} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label className="text-right">Resources</Label>
                 <MultiSelectResources resources={schoolUsers} selectedResourceIds={formData.resources} onChange={resourceIds => setFormData(prev => ({
-                ...prev,
-                resources: resourceIds
-              }))} disabled={isViewMode} />
+                  ...prev,
+                  resources: resourceIds
+                }))} disabled={isViewMode} />
               </div>
             </div>
 
@@ -631,16 +625,16 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
                 <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
-                ...prev,
-                interval: e.target.value
-              }))} placeholder="Interval in minutes" disabled={isViewMode} required />
+                  ...prev,
+                  interval: e.target.value
+                }))} placeholder="Interval in minutes" disabled={isViewMode} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
                 <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
-                ...prev,
-                max_participants: e.target.value
-              }))} placeholder="Maximum participants" disabled={isViewMode} required />
+                  ...prev,
+                  max_participants: e.target.value
+                }))} placeholder="Maximum participants" disabled={isViewMode} required />
               </div>
             </div>
 
@@ -650,39 +644,39 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
                   <Input type="date" value={formData.start_date} onChange={e => {
-                  setFormData(prev => ({
-                    ...prev,
-                    start_date: e.target.value
-                  }));
-                  if (e.target.value && !formData.end_date) {
                     setFormData(prev => ({
                       ...prev,
-                      end_date: e.target.value
+                      start_date: e.target.value
                     }));
-                  }
-                }} disabled={isViewMode} required />
+                    if (e.target.value && !formData.end_date) {
+                      setFormData(prev => ({
+                        ...prev,
+                        end_date: e.target.value
+                      }));
+                    }
+                  }} disabled={isViewMode} required />
                 </div>
                 <div>
                   <Select value={formData.start_hour} onValueChange={value => {
-                  setFormData(prev => ({
-                    ...prev,
-                    start_hour: value
-                  }));
-                  if (value && !formData.end_hour) {
-                    const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
                     setFormData(prev => ({
                       ...prev,
-                      end_hour: nextHour > '23' ? '23' : nextHour
+                      start_hour: value
                     }));
-                  }
-                }} disabled={isViewMode}>
+                    if (value && !formData.end_hour) {
+                      const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                      setFormData(prev => ({
+                        ...prev,
+                        end_hour: nextHour > '23' ? '23' : nextHour
+                      }));
+                    }
+                  }} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
                         </SelectItem>)}
                     </SelectContent>
@@ -690,9 +684,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  start_minute: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    start_minute: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -716,16 +710,16 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  lunch_start_hour: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    lunch_start_hour: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                         {i.toString().padStart(2, '0')}
                       </SelectItem>)}
                     </SelectContent>
@@ -733,9 +727,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  lunch_start_minute: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    lunch_start_minute: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -759,16 +753,16 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  lunch_end_hour: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    lunch_end_hour: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                         {i.toString().padStart(2, '0')}
                       </SelectItem>)}
                     </SelectContent>
@@ -776,9 +770,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  lunch_end_minute: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    lunch_end_minute: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -799,22 +793,22 @@ export const CompetitionEventRecord: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
                   <Input type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  end_date: e.target.value
-                }))} disabled={isViewMode} required />
+                    ...prev,
+                    end_date: e.target.value
+                  }))} disabled={isViewMode} required />
                 </div>
                 <div>
                   <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  end_hour: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    end_hour: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
                         </SelectItem>)}
                     </SelectContent>
@@ -822,9 +816,9 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div>
                   <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  end_minute: value
-                }))} disabled={isViewMode}>
+                    ...prev,
+                    end_minute: value
+                  }))} disabled={isViewMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -846,9 +840,9 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
               <Label htmlFor="notes" className="mt-2 text-right">Notes</Label>
               <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
-              ...prev,
-              notes: e.target.value
-            }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} />
+                ...prev,
+                notes: e.target.value
+              }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} />
             </div>
 
 
