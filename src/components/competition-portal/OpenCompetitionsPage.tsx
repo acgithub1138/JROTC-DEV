@@ -280,8 +280,8 @@ export const OpenCompetitionsPage = () => {
             registeredPermissions.canAccess,
             canAccessSchedule
           ].filter(Boolean).length}`}>
-            {openPermissions.canAccess && <TabsTrigger value="open">Open</TabsTrigger>}
-            {registeredPermissions.canAccess && <TabsTrigger value="registered">Registered</TabsTrigger>}
+            {openPermissions.canAccess && <TabsTrigger value="open">Open ({openCompetitionsList?.length || 0})</TabsTrigger>}
+            {registeredPermissions.canAccess && <TabsTrigger value="registered">Registered ({registeredCompetitionsList?.length || 0})</TabsTrigger>}
             {canAccessSchedule && <TabsTrigger value="schedule">Schedule</TabsTrigger>}
           </TabsList>
 
