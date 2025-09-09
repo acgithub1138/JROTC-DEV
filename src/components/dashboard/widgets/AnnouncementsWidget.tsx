@@ -177,7 +177,7 @@ export const AnnouncementsWidget: React.FC = () => {
             </div>
           ) : (
             // Multiple announcements - use carousel
-            <div className="relative">
+            <div className="relative px-12">
               <Carousel setApi={setApi} className="w-full">
                 <CarouselContent>
                   {announcements.map(announcement => {
