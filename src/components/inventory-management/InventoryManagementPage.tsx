@@ -154,6 +154,10 @@ const InventoryManagementPage = () => {
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search inventory items..."
+        columns={columns}
+        visibleColumns={enabledColumns.map(col => col.key)}
+        onToggleColumn={toggleColumn}
+        columnsLoading={columnsLoading}
         stockCounter={
           <StockCounter 
             inStockCount={inStockCount} 
