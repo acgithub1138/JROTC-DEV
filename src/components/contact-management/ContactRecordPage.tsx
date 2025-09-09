@@ -290,7 +290,7 @@ export const ContactRecordPage: React.FC = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              {/* Row 1: Name - Type */}
+              {/* Row 1: Name - Status */}
               <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
@@ -310,22 +310,21 @@ export const ContactRecordPage: React.FC = () => {
 
                 <FormField
                   control={form.control}
-                  name="type"
+                  name="status"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Type *</FormLabel>
+                      <FormLabel className="w-16 text-left shrink-0">Status *</FormLabel>
                       <div className="flex-1">
-                         <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select contact type" />
+                              <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-background border shadow-lg z-50">
-                            <SelectItem value="parent">Parent</SelectItem>
-                            <SelectItem value="relative">Relative</SelectItem>
-                            <SelectItem value="friend">Friend</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="semi_active">Semi-Active</SelectItem>
+                            <SelectItem value="not_active">Not Active</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -370,7 +369,7 @@ export const ContactRecordPage: React.FC = () => {
                 />
               </div>
 
-              {/* Row 3: Cadet - Status */}
+              {/* Row 3: Cadet */}
               <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
@@ -399,24 +398,29 @@ export const ContactRecordPage: React.FC = () => {
                     </FormItem>
                   )}
                 />
+                <div></div>
+              </div>
 
+              {/* Row 4: Type - Other */}
+              <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
-                  name="status"
+                  name="type"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Status *</FormLabel>
+                      <FormLabel className="w-16 text-left shrink-0">Type *</FormLabel>
                       <div className="flex-1">
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
+                         <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select contact type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-background border shadow-lg z-50">
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="semi_active">Semi-Active</SelectItem>
-                            <SelectItem value="not_active">Not Active</SelectItem>
+                            <SelectItem value="parent">Parent</SelectItem>
+                            <SelectItem value="relative">Relative</SelectItem>
+                            <SelectItem value="friend">Friend</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -424,11 +428,8 @@ export const ContactRecordPage: React.FC = () => {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              {/* Other Type Field (conditional) */}
-              {form.watch('type') === 'other' && (
-                <div className="grid grid-cols-2 gap-8">
+                {form.watch('type') === 'other' ? (
                   <FormField
                     control={form.control}
                     name="type_other"
@@ -444,9 +445,11 @@ export const ContactRecordPage: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                ) : (
                   <div></div>
-                </div>
-              )}
+                )}
+              </div>
+
 
               {/* Notes Field */}
               <FormField
