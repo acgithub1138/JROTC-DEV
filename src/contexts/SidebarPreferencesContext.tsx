@@ -194,43 +194,11 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
     setIsLoading(true);
 
     try {
-      // Use database-driven permissions
-      const defaultItems = await fetchMenuItemsFromDatabase(debouncedUserProfile, hasPermission);
-
-      // Try to load saved preferences
-      try {
-        const { data: preferences, error } = await supabase
-          .from('user_sidebar_preferences')
-          .select('menu_items')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching sidebar preferences:', error);
-          // Fall back to default permissions-based menu
-          setMenuItems(defaultItems);
-          cacheRef.current[cacheKey] = defaultItems;
-          return;
-        }
-
-        if (preferences?.menu_items && Array.isArray(preferences.menu_items)) {
-          // User has saved preferences - validate they still have permissions
-          const savedItems = preferences.menu_items as string[];
-          const validatedItems = savedItems
-            .map(id => defaultItems.find(item => item.id === id))
-            .filter(Boolean) as MenuItem[];
-          
-          setMenuItems(validatedItems);
-          cacheRef.current[cacheKey] = validatedItems;
-        } else {
-          // No saved preferences - generate from permissions
-          setMenuItems(defaultItems);
-          cacheRef.current[cacheKey] = defaultItems;
-        }
-      } catch (prefsError) {
-        setMenuItems(defaultItems);
-        cacheRef.current[cacheKey] = defaultItems;
-      }
+      // Use database-driven permissions only - no more user preferences lookup
+      const permissionBasedItems = await fetchMenuItemsFromDatabase(debouncedUserProfile, hasPermission);
+      
+      setMenuItems(permissionBasedItems);
+      cacheRef.current[cacheKey] = permissionBasedItems;
 
       lastProfileRef.current = profileKey;
     } catch (error) {
