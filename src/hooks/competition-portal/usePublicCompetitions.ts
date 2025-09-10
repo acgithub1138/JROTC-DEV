@@ -14,6 +14,7 @@ export const usePublicCompetitions = () => {
   const fetchPublicCompetitions = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching public competitions...');
       
       const { data, error } = await supabase
         .from('cp_competitions')
@@ -21,6 +22,8 @@ export const usePublicCompetitions = () => {
         .eq('is_public', true)
         .order('start_date', { ascending: false });
 
+      console.log('Competitions fetch result:', { data, error });
+      
       if (error) throw error;
       setCompetitions(data || []);
     } catch (error) {
