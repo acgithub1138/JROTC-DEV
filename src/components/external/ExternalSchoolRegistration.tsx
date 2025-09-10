@@ -116,8 +116,19 @@ export const ExternalSchoolRegistration = () => {
       
       let errorMessage = "Please try again later.";
       
-      // Handle different types of errors
-      if (error.message?.includes('A school with this name already exists')) {
+      // Handle FunctionsHttpError - extract message from context
+      if (error.context && error.context.json) {
+        try {
+          const errorData = await error.context.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          console.error('Error parsing response:', e);
+        }
+      }
+      // Handle direct error messages
+      else if (error.message?.includes('A school with this name already exists')) {
         errorMessage = "Your school is already registered. Please contact support if you need assistance accessing your account.";
       } else if (error.message?.includes('Invalid email format')) {
         errorMessage = "Please enter a valid email address.";
@@ -125,6 +136,11 @@ export const ExternalSchoolRegistration = () => {
         errorMessage = "Please fill in all required fields.";
       } else if (error.message) {
         errorMessage = error.message;
+      }
+      
+      // Special handling for duplicate school message
+      if (errorMessage.includes('A school with this name already exists')) {
+        errorMessage = "Your school is already registered. Please contact support if you need assistance accessing your account.";
       }
       
       toast({
