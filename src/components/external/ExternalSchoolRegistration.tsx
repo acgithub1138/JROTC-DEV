@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from 'lucide-react';
 import { JROTC_PROGRAM_OPTIONS } from '@/components/competition-portal/my-competitions/utils/constants';
-
 interface SchoolFormData {
   name: string;
   initials: string;
@@ -21,10 +20,11 @@ interface SchoolFormData {
   timezone: string;
   referred_by: string;
 }
-
 export const ExternalSchoolRegistration = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [loading, setLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [formData, setFormData] = useState<SchoolFormData>({
@@ -37,22 +37,21 @@ export const ExternalSchoolRegistration = () => {
     timezone: '',
     referred_by: ''
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { data, error } = await supabase.functions.invoke('external-school-registration', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('external-school-registration', {
         body: formData
       });
-
       if (error) {
         throw error;
       }
-
       setShowSuccessMessage(true);
-      
+
       // Redirect to login page after 3 seconds
       setTimeout(() => {
         navigate('/app/auth');
@@ -68,14 +67,14 @@ export const ExternalSchoolRegistration = () => {
       setLoading(false);
     }
   };
-
   const handleInputChange = (field: keyof SchoolFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
   if (showSuccessMessage) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4 flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4 flex items-center justify-center">
         <Card className="bg-card/95 backdrop-blur-sm shadow-xl max-w-md w-full">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -99,29 +98,19 @@ export const ExternalSchoolRegistration = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/app/auth')}
-            className="text-primary-foreground hover:text-primary"
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app/auth')} className="text-primary-foreground hover:text-primary">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-foreground mb-2">
-            Competition Registration
-          </h1>
+          <h1 className="text-3xl font-bold text-primary-foreground mb-2">Non-Subscriber Registration</h1>
           <p className="text-primary-foreground/80">
             Register your school to participate in JROTC competitions
           </p>
@@ -136,79 +125,43 @@ export const ExternalSchoolRegistration = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">School Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter school name"
-                    required
-                  />
+                  <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter school name" required />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="initials">School Initials</Label>
-                  <Input
-                    id="initials"
-                    value={formData.initials}
-                    onChange={(e) => handleInputChange('initials', e.target.value)}
-                    placeholder="e.g., MJHS"
-                    maxLength={10}
-                  />
+                  <Input id="initials" value={formData.initials} onChange={e => handleInputChange('initials', e.target.value)} placeholder="e.g., MJHS" maxLength={10} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact_person">Contact Person *</Label>
-                  <Input
-                    id="contact_person"
-                    value={formData.contact_person}
-                    onChange={(e) => handleInputChange('contact_person', e.target.value)}
-                    placeholder="Primary contact name"
-                    required
-                  />
+                  <Input id="contact_person" value={formData.contact_person} onChange={e => handleInputChange('contact_person', e.target.value)} placeholder="Primary contact name" required />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact_email">Contact Email *</Label>
-                  <Input
-                    id="contact_email"
-                    type="email"
-                    value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    placeholder="contact@school.edu"
-                    required
-                  />
+                  <Input id="contact_email" type="email" value={formData.contact_email} onChange={e => handleInputChange('contact_email', e.target.value)} placeholder="contact@school.edu" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact_phone">Contact Phone</Label>
-                  <Input
-                    id="contact_phone"
-                    type="tel"
-                    value={formData.contact_phone}
-                    onChange={(e) => handleInputChange('contact_phone', e.target.value)}
-                    placeholder="(555) 123-4567"
-                  />
+                  <Input id="contact_phone" type="tel" value={formData.contact_phone} onChange={e => handleInputChange('contact_phone', e.target.value)} placeholder="(555) 123-4567" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="jrotc_program">JROTC Program *</Label>
-                  <Select
-                    value={formData.jrotc_program}
-                    onValueChange={(value) => handleInputChange('jrotc_program', value)}
-                  >
+                  <Select value={formData.jrotc_program} onValueChange={value => handleInputChange('jrotc_program', value)}>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select JROTC Program" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border shadow-lg z-50">
-                      {JROTC_PROGRAM_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                      {JROTC_PROGRAM_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
                           {option.label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -217,10 +170,7 @@ export const ExternalSchoolRegistration = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Time Zone</Label>
-                  <Select
-                    value={formData.timezone}
-                    onValueChange={(value) => handleInputChange('timezone', value)}
-                  >
+                  <Select value={formData.timezone} onValueChange={value => handleInputChange('timezone', value)}>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select Time Zone" />
                     </SelectTrigger>
@@ -238,26 +188,16 @@ export const ExternalSchoolRegistration = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="referred_by">Referred by</Label>
-                  <Input
-                    id="referred_by"
-                    value={formData.referred_by}
-                    onChange={(e) => handleInputChange('referred_by', e.target.value)}
-                    placeholder="Who referred your school?"
-                  />
+                  <Input id="referred_by" value={formData.referred_by} onChange={e => handleInputChange('referred_by', e.target.value)} placeholder="Who referred your school?" />
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Registering...' : 'Register School & Continue'}
               </Button>
             </form>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
