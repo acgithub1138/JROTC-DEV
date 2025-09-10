@@ -131,12 +131,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userRole = profile.user_roles?.role_name || profile.role;
     
     // Check if user has external role and hasn't been redirected yet
-    if (userRole === 'external' && redirectedUserRef.current !== profile.id) {
+    // Also check current location to prevent redirect loops
+    const currentPath = window.location.pathname;
+    
+    if (userRole === 'external' && 
+        redirectedUserRef.current !== profile.id && 
+        !currentPath.includes('/mobile/competition-portal')) {
       redirectedUserRef.current = profile.id;
-      console.log('Redirecting external user to competition portal');
+      console.log('Redirecting external user to competition portal from:', currentPath);
       
-      // Use window.location to navigate to mobile competition portal
-      window.location.href = '/mobile/competition-portal';
+      // Use setTimeout to prevent redirect loops during auth state changes
+      setTimeout(() => {
+        window.location.href = '/mobile/competition-portal';
+      }, 100);
     }
   }, []);
 
@@ -160,8 +167,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const profile = await fetchUserProfile(session.user.id);
               if (profile && mounted) {
                 setUserProfile(profile);
-                // Check for external user redirect after profile is set
-                handleExternalUserRedirect(profile);
+                // Only redirect on SIGNED_IN event to prevent loops
+                if (event === 'SIGNED_IN') {
+                  handleExternalUserRedirect(profile);
+                }
               }
               setLoading(false);
             }
@@ -190,8 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const profile = await fetchUserProfile(session.user.id);
             if (profile && mounted) {
               setUserProfile(profile);
-              // Check for external user redirect after profile is set
-              handleExternalUserRedirect(profile);
+              // Don't redirect on initial session check to prevent loops
             }
             setLoading(false);
           }
