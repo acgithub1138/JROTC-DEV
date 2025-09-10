@@ -3937,22 +3937,14 @@ export type Database = {
         Returns: Json
       }
       queue_email: {
-        Args:
-          | {
-              recipient_email_param: string
-              record_id_param: string
-              rule_id_param?: string
-              school_id_param: string
-              source_table_param: string
-              template_id_param: string
-            }
-          | {
-              recipient_email_param: string
-              record_id_param: string
-              school_id_param: string
-              source_table_param: string
-              template_id_param: string
-            }
+        Args: {
+          recipient_email_param: string
+          record_id_param: string
+          rule_id_param?: string
+          school_id_param: string
+          source_table_param: string
+          template_id_param: string
+        }
         Returns: string
       }
       replace_template_variables: {
