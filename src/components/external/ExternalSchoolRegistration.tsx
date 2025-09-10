@@ -37,17 +37,54 @@ export const ExternalSchoolRegistration = () => {
     timezone: '',
     referred_by: ''
   });
+
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-numeric characters
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    // Format as (XXX) XXX-XXXX
+    if (phoneNumber.length >= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    } else if (phoneNumber.length >= 3) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    } else {
+      return phoneNumber;
+    }
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
+    // Reset errors
+    setErrors({});
+    
     // Validate all required fields
-    if (!formData.name || !formData.initials || !formData.contact_person || 
-        !formData.contact_email || !formData.contact_phone || !formData.jrotc_program || 
-        !formData.timezone) {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.name) newErrors.name = 'School name is required';
+    if (!formData.initials) newErrors.initials = 'School initials are required';
+    if (!formData.contact_person) newErrors.contact_person = 'Contact person is required';
+    if (!formData.contact_email) {
+      newErrors.contact_email = 'Contact email is required';
+    } else if (!validateEmail(formData.contact_email)) {
+      newErrors.contact_email = 'Please enter a valid email address';
+    }
+    if (!formData.contact_phone) newErrors.contact_phone = 'Contact phone is required';
+    if (!formData.jrotc_program) newErrors.jrotc_program = 'JROTC program is required';
+    if (!formData.timezone) newErrors.timezone = 'Time zone is required';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: "Please fix the errors below and try again.",
         variant: "destructive"
       });
       setLoading(false);
@@ -82,10 +119,25 @@ export const ExternalSchoolRegistration = () => {
     }
   };
   const handleInputChange = (field: keyof SchoolFormData, value: string) => {
+    let processedValue = value;
+    
+    // Format phone number as user types
+    if (field === 'contact_phone') {
+      processedValue = formatPhoneNumber(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
   };
   if (showSuccessMessage) {
     return <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4 flex items-center justify-center">
@@ -139,7 +191,15 @@ export const ExternalSchoolRegistration = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">School Name *</Label>
-                  <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter school name" required />
+                  <Input 
+                    id="name" 
+                    value={formData.name} 
+                    onChange={e => handleInputChange('name', e.target.value)} 
+                    placeholder="Enter school name" 
+                    required 
+                    className={errors.name ? 'border-red-500' : ''}
+                  />
+                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -151,19 +211,38 @@ export const ExternalSchoolRegistration = () => {
                     placeholder="e.g., MJHS" 
                     maxLength={10} 
                     required 
+                    className={errors.initials ? 'border-red-500' : ''}
                   />
+                  {errors.initials && <p className="text-sm text-red-500">{errors.initials}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact_person">Contact Person *</Label>
-                  <Input id="contact_person" value={formData.contact_person} onChange={e => handleInputChange('contact_person', e.target.value)} placeholder="Primary contact name" required />
+                  <Input 
+                    id="contact_person" 
+                    value={formData.contact_person} 
+                    onChange={e => handleInputChange('contact_person', e.target.value)} 
+                    placeholder="Primary contact name" 
+                    required 
+                    className={errors.contact_person ? 'border-red-500' : ''}
+                  />
+                  {errors.contact_person && <p className="text-sm text-red-500">{errors.contact_person}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact_email">Contact Email *</Label>
-                  <Input id="contact_email" type="email" value={formData.contact_email} onChange={e => handleInputChange('contact_email', e.target.value)} placeholder="contact@school.edu" required />
+                  <Input 
+                    id="contact_email" 
+                    type="email" 
+                    value={formData.contact_email} 
+                    onChange={e => handleInputChange('contact_email', e.target.value)} 
+                    placeholder="contact@school.edu" 
+                    required 
+                    className={errors.contact_email ? 'border-red-500' : ''}
+                  />
+                  {errors.contact_email && <p className="text-sm text-red-500">{errors.contact_email}</p>}
                 </div>
               </div>
 
@@ -177,13 +256,15 @@ export const ExternalSchoolRegistration = () => {
                     onChange={e => handleInputChange('contact_phone', e.target.value)} 
                     placeholder="(555) 123-4567" 
                     required 
+                    className={errors.contact_phone ? 'border-red-500' : ''}
                   />
+                  {errors.contact_phone && <p className="text-sm text-red-500">{errors.contact_phone}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="jrotc_program">JROTC Program *</Label>
                   <Select value={formData.jrotc_program} onValueChange={value => handleInputChange('jrotc_program', value)} required>
-                    <SelectTrigger className="bg-background">
+                    <SelectTrigger className={`bg-background ${errors.jrotc_program ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select JROTC Program" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border shadow-lg z-50">
@@ -192,6 +273,7 @@ export const ExternalSchoolRegistration = () => {
                         </SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {errors.jrotc_program && <p className="text-sm text-red-500">{errors.jrotc_program}</p>}
                 </div>
               </div>
 
@@ -199,7 +281,7 @@ export const ExternalSchoolRegistration = () => {
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Time Zone *</Label>
                   <Select value={formData.timezone} onValueChange={value => handleInputChange('timezone', value)} required>
-                    <SelectTrigger className="bg-background">
+                    <SelectTrigger className={`bg-background ${errors.timezone ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select Time Zone" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
@@ -212,6 +294,7 @@ export const ExternalSchoolRegistration = () => {
                       <SelectItem value="Pacific/Honolulu">Hawaii Time (HST)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.timezone && <p className="text-sm text-red-500">{errors.timezone}</p>}
                 </div>
 
                 <div className="space-y-2">
