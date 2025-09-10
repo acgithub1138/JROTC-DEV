@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { generateSecurePassword } from '../_shared/password-generator.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -148,17 +149,21 @@ serve(async (req) => {
 
     console.log('Creating user:', email, 'with role:', finalRoleName, 'role_id:', finalRoleId, 'in school:', school_id)
 
+    // Generate password if none provided
+    const finalPassword = password || generateSecurePassword(12);
+    
     // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: password || 'Sh0wc@se', // Use provided password or default
+      password: finalPassword,
       email_confirm: true, // Skip email verification
       user_metadata: {
         first_name,
         last_name,
         role: finalRoleName,
         role_id: finalRoleId,
-        school_id
+        school_id,
+        generated_password: password ? null : finalPassword // Only include if password was generated
       }
     })
 

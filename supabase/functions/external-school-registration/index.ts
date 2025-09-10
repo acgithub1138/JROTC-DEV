@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { generateSecurePassword } from '../_shared/password-generator.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -120,17 +121,21 @@ serve(async (req) => {
         throw new Error('Failed to get external role');
       }
 
+    // Generate secure password
+    const generatedPassword = generateSecurePassword(12);
+    
     // Create user account (same as create cadet - no email sent)
     const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
       email: schoolData.contact_email,
-      password: 'Sh0wc@se',
+      password: generatedPassword,
       email_confirm: true, // Skip email verification like create cadet
       user_metadata: {
         first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
         last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
         school_id: school.id,
         role: 'external',
-        role_id: externalRole.id
+        role_id: externalRole.id,
+        generated_password: generatedPassword // Pass for email template
       }
     });
 
