@@ -195,9 +195,7 @@ const AuthPage = () => {
             </div>
             
             <div className="mt-6 space-y-3">
-              <Button type="button" variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50" onClick={() => navigate('/parent-register')}>
-                New Parent Login
-              </Button>
+              <Button type="button" variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50" onClick={() => navigate('/parent-register')}>Create New Parent Account</Button>
               
               <Button type="button" variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50" onClick={() => navigate('/external/register')}>Create a free account to Register for Competitions</Button>
               
