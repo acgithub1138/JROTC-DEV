@@ -33,7 +33,13 @@ export const useUserPermissions = () => {
     if (user.id === userProfile.id) return true;
     
     // Check database permission for updating users
-    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
+    if (!hasPermission('users', 'update')) return false;
+    
+    // Admin users can edit users across all schools
+    if (userProfile.role === 'admin') return true;
+    
+    // Non-admin users can only edit users in their own school
+    return user.school_id === userProfile.school_id;
   };
 
   const canDisableUser = (user: User) => {
@@ -45,8 +51,14 @@ export const useUserPermissions = () => {
     // Can't disable yourself
     if (user.id === userProfile.id) return false;
     
-    // Check database permission and same school
-    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
+    // Check database permission for updating users
+    if (!hasPermission('users', 'update')) return false;
+    
+    // Admin users can disable users across all schools
+    if (userProfile.role === 'admin') return true;
+    
+    // Non-admin users can only disable users in their own school
+    return user.school_id === userProfile.school_id;
   };
 
   const canEnableUser = (user: User) => {
@@ -55,8 +67,14 @@ export const useUserPermissions = () => {
     // Can only enable users who are currently disabled
     if (user.active) return false;
     
-    // Check database permission and same school
-    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
+    // Check database permission for updating users
+    if (!hasPermission('users', 'update')) return false;
+    
+    // Admin users can enable users across all schools
+    if (userProfile.role === 'admin') return true;
+    
+    // Non-admin users can only enable users in their own school
+    return user.school_id === userProfile.school_id;
   };
 
   const canResetPassword = (user: User) => {
@@ -65,8 +83,14 @@ export const useUserPermissions = () => {
     // Can't reset your own password
     if (user.id === userProfile.id) return false;
     
-    // Check database permission and same school
-    return hasPermission('users', 'update') && user.school_id === userProfile.school_id;
+    // Check database permission for updating users
+    if (!hasPermission('users', 'update')) return false;
+    
+    // Admin users can reset passwords across all schools
+    if (userProfile.role === 'admin') return true;
+    
+    // Non-admin users can only reset passwords in their own school
+    return user.school_id === userProfile.school_id;
   };
 
   return {
