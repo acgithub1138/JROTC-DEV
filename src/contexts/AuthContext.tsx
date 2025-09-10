@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Use setTimeout to prevent redirect loops during auth state changes
       setTimeout(() => {
-        window.location.href = '/mobile/competition-portal';
+        window.location.href = '/app/competition-portal/open-competitions';
       }, 100);
     }
   }, []);
