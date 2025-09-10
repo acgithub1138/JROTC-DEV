@@ -70,7 +70,7 @@ serve(async (req) => {
       );
     }
 
-    // Create school record
+    // Create school record with comp_register_only flag
     const { data: school, error: schoolError } = await supabase
       .from('schools')
       .insert({
@@ -80,7 +80,8 @@ serve(async (req) => {
         email: schoolData.contact_email,
         phone: schoolData.contact_phone || null,
         notes: schoolData.notes || null,
-        jrotc_program: schoolData.jrotc_program
+        jrotc_program: schoolData.jrotc_program,
+        comp_register_only: true
       })
       .select()
       .single();
@@ -98,11 +99,98 @@ serve(async (req) => {
 
     console.log('External school registered successfully:', school.id);
 
+    // Create user account for contact person
+    let userCreated = false;
+    let passwordResetSent = false;
+    let userCreationMessage = '';
+
+    try {
+      // Get the external role ID
+      const { data: externalRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', 'external')
+        .single();
+
+      if (roleError) {
+        console.error('Error getting external role:', roleError);
+        throw new Error('Failed to get external role');
+      }
+
+      // Create user account
+      const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
+        email: schoolData.contact_email,
+        password: 'Sh0wc@se',
+        email_confirm: true,
+        user_metadata: {
+          first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
+          last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || ''
+        }
+      });
+
+      if (userError) {
+        console.error('Error creating user:', userError);
+        if (userError.message.includes('already registered')) {
+          userCreationMessage = 'Email already has an account - they can use existing login';
+        } else {
+          throw userError;
+        }
+      } else {
+        console.log('User created successfully:', newUser.user.id);
+
+        // Create profile for the new user
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: newUser.user.id,
+            email: schoolData.contact_email,
+            first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
+            last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
+            role_id: externalRole.id,
+            school_id: school.id,
+            password_change_required: true,
+            active: true
+          });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          throw profileError;
+        }
+
+        userCreated = true;
+
+        // Send password reset email
+        const { error: resetError } = await supabase.auth.admin.resetPasswordForEmail(
+          schoolData.contact_email,
+          {
+            redirectTo: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.supabase.co')}/auth/reset-password`
+          }
+        );
+
+        if (resetError) {
+          console.error('Error sending password reset email:', resetError);
+          userCreationMessage = 'Account created but failed to send password setup email';
+        } else {
+          passwordResetSent = true;
+          userCreationMessage = 'Account created and password setup email sent';
+          console.log('Password reset email sent successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error in user creation process:', error);
+      userCreationMessage = 'School registered but failed to create user account';
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true,
         schoolId: school.id,
-        message: 'School registered successfully'
+        message: 'School registered successfully',
+        userAccount: {
+          created: userCreated,
+          passwordResetSent: passwordResetSent,
+          message: userCreationMessage
+        }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
