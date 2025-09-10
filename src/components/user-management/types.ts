@@ -7,7 +7,8 @@ export interface User {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role_id?: string;
+  role?: string; // Deprecated - use role_id instead
   rank?: string;
   created_at: string;
   school_id: string;

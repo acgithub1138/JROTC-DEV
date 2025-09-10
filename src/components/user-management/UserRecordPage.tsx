@@ -46,7 +46,7 @@ const UserRecordPage = () => {
     first_name: '',
     last_name: '',
     email: '',
-    role: '' as UserRole | '',
+    role_id: '',
     school_id: '',
     password: '',
     active: true
@@ -77,7 +77,14 @@ const UserRecordPage = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          user_roles (
+            id,
+            role_name,
+            role_label
+          )
+        `)
         .eq('id', userId)
         .single();
 
@@ -87,7 +94,7 @@ const UserRecordPage = () => {
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         email: data.email || '',
-        role: data.role || '',
+        role_id: data.role_id || '',
         school_id: data.school_id || '',
         password: '', // Never load password
         active: data.active ?? true
@@ -168,6 +175,17 @@ const UserRecordPage = () => {
 
     try {
       if (mode === 'create') {
+        // Get role name from role_id for edge function
+        const selectedRole = allowedRoles.find(role => role.id === userData.role_id);
+        if (!selectedRole) {
+          toast({
+            title: "Error",
+            description: "Please select a valid role",
+            variant: "destructive"
+          });
+          return;
+        }
+
         // Create new user using edge function
         const { data, error } = await supabase.functions.invoke('create-cadet-user', {
           body: {
@@ -175,7 +193,7 @@ const UserRecordPage = () => {
             password: userData.password,
             first_name: userData.first_name,
             last_name: userData.last_name,
-            role: userData.role,
+            role: selectedRole.role_name,
             school_id: userData.school_id,
           },
         });
@@ -217,7 +235,7 @@ const UserRecordPage = () => {
             first_name: userData.first_name,
             last_name: userData.last_name,
             email: userData.email,
-            role: userData.role,
+            role_id: userData.role_id,
             school_id: userData.school_id,
             active: userData.active
           })
@@ -339,7 +357,7 @@ const UserRecordPage = () => {
     first_name: userData.first_name,
     last_name: userData.last_name,
     email: userData.email,
-    role: userData.role,
+    role_id: userData.role_id,
     school_id: userData.school_id,
     active: userData.active,
     created_at: new Date().toISOString()
@@ -514,15 +532,15 @@ const UserRecordPage = () => {
         <div className="space-y-2">
           <Label htmlFor="role" className="text-right">Role *</Label>
           <Select 
-            value={userData.role} 
-            onValueChange={(value: string) => setUserData({ ...userData, role: value as UserRole })}
+            value={userData.role_id} 
+            onValueChange={(value: string) => setUserData({ ...userData, role_id: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
               {allowedRoles.map((role) => (
-                <SelectItem key={role.role_name} value={role.role_name}>
+                <SelectItem key={role.id} value={role.id}>
                   <div className="flex items-center">
                     {getRoleIcon(role.role_name as UserRole)}
                     <span className="ml-2">{role.role_label}</span>
