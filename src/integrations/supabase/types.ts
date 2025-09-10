@@ -2949,6 +2949,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          comp_register_only: boolean
           competition_module: boolean | null
           competition_portal: boolean | null
           contact: string | null
@@ -2974,6 +2975,7 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          comp_register_only?: boolean
           competition_module?: boolean | null
           competition_portal?: boolean | null
           contact?: string | null
@@ -2999,6 +3001,7 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          comp_register_only?: boolean
           competition_module?: boolean | null
           competition_portal?: boolean | null
           contact?: string | null
