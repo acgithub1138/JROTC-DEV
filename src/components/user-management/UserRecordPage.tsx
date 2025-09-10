@@ -432,7 +432,7 @@ const UserRecordPage = () => {
                   schools={schools}
                   mode={mode}
                   canEditSchool={canEditSchool}
-                  canResetPassword={canResetPassword(userForPasswordCheck)}
+                  canResetPassword={userForPasswordCheck ? canResetPassword(userForPasswordCheck) : false}
                   userId={userId}
                   newPassword={newPassword}
                   setNewPassword={setNewPassword}
@@ -456,7 +456,7 @@ const UserRecordPage = () => {
               schools={schools}
               mode={mode}
               canEditSchool={canEditSchool}
-              canResetPassword={canResetPassword(userForPasswordCheck)}
+              canResetPassword={userForPasswordCheck ? canResetPassword(userForPasswordCheck) : false}
               userId={userId}
               newPassword={newPassword}
               setNewPassword={setNewPassword}
