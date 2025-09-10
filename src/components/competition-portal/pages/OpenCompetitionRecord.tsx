@@ -381,19 +381,21 @@ export const OpenCompetitionRecord: React.FC = () => {
       return;
     }
 
-    // Check that all selected events have time slots selected
-    const eventsWithoutTimeSlots = Array.from(selectedEvents).filter(eventId => {
-      const event = events.find(e => e.id === eventId);
-      return event?.start_time && event?.end_time && !selectedTimeSlots.has(eventId);
-    });
-
-    if (eventsWithoutTimeSlots.length > 0) {
-      toast({
-        title: "Time Slots Required",
-        description: "Please select time slots for all selected events.",
-        variant: "destructive"
+    // Check that all selected events have time slots selected (except for external users)
+    if (userProfile?.role !== 'external') {
+      const eventsWithoutTimeSlots = Array.from(selectedEvents).filter(eventId => {
+        const event = events.find(e => e.id === eventId);
+        return event?.start_time && event?.end_time && !selectedTimeSlots.has(eventId);
       });
-      return;
+
+      if (eventsWithoutTimeSlots.length > 0) {
+        toast({
+          title: "Time Slots Required",
+          description: "Please select time slots for all selected events.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     setIsRegistering(true);
