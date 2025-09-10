@@ -135,8 +135,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       redirectedUserRef.current = profile.id;
       console.log('Redirecting external user to competition portal');
       
-      // Use window.location to navigate to competition portal
-      window.location.href = '/competition-portal';
+      // Use window.location to navigate to mobile competition portal
+      window.location.href = '/mobile/competition-portal';
     }
   }, []);
 
