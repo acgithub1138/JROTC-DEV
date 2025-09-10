@@ -32,41 +32,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Memoized password change check
   const passwordChangeRequired = useMemo(() => {
-    if (!user || !userProfile) {
-      console.log('ProtectedRoute: No user or userProfile yet', { user: !!user, userProfile: !!userProfile });
-      return false;
-    }
+    if (!user || !userProfile) return false;
 
     const profileRequiresChange = userProfile.password_change_required === true;
     const metadataOverride = user.user_metadata?.password_change_required === false;
-    
-    console.log('ProtectedRoute: Password change check', {
-      userId: user.id,
-      email: user.email,
-      profileRequiresChange,
-      metadataOverride,
-      passwordChangeRequired: userProfile.password_change_required
-    });
     
     return profileRequiresChange && !metadataOverride;
   }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
 
   // Update password dialog state with debouncing
   useDeepCompareEffect(() => {
-    console.log('ProtectedRoute: useDeepCompareEffect for password dialog', {
-      passwordCheckRefCurrent: passwordCheckRef.current,
-      passwordChangeRequired,
-      showPasswordChange
-    });
-    
     if (passwordCheckRef.current) return;
     
     if (passwordChangeRequired) {
-      console.log('ProtectedRoute: Setting password change dialog to TRUE');
       passwordCheckRef.current = true;
       setShowPasswordChange(true);
     } else {
-      console.log('ProtectedRoute: Setting password change dialog to FALSE');
       setShowPasswordChange(false);
       passwordCheckRef.current = false;
     }
@@ -118,8 +99,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     const timeoutId = setTimeout(async () => {
       try {
-        console.log('Checking parent setup for email:', userProfile?.email, 'school_id:', userProfile?.school_id);
-        
         // Check if the parent has any contact records - use consistent query structure
         const { data: contacts, error } = await supabase
           .from('contacts')
@@ -134,8 +113,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setShowParentSetup(false);
           return;
         }
-
-        console.log('Parent setup check result:', contacts);
 
         // If no contact record exists, show setup modal
         const needsSetup = !contacts || contacts.length === 0;
@@ -211,7 +188,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <ParentSetupModal 
         open={showParentSetup} 
         onClose={() => {
-          console.log('Parent setup modal closed, resetting check');
           setShowParentSetup(false);
           // Reset the check ref so the main useEffect can run again
           parentSetupCheckRef.current = false;
