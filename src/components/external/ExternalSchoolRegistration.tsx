@@ -217,12 +217,23 @@ export const ExternalSchoolRegistration = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Time Zone</Label>
-                  <Input
-                    id="timezone"
+                  <Select
                     value={formData.timezone}
-                    onChange={(e) => handleInputChange('timezone', e.target.value)}
-                    placeholder="e.g., EST, PST"
-                  />
+                    onValueChange={(value) => handleInputChange('timezone', value)}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select Time Zone" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                      <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                      <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                      <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                      <SelectItem value="America/Phoenix">Mountain Time - Arizona (MST)</SelectItem>
+                      <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                      <SelectItem value="America/Anchorage">Alaska Time (AKST)</SelectItem>
+                      <SelectItem value="Pacific/Honolulu">Hawaii Time (HST)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
