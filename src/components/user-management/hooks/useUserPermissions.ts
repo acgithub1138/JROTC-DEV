@@ -23,7 +23,7 @@ export const useUserPermissions = () => {
   };
 
   const canCreateUsers = () => {
-    return hasPermission('users', 'create');
+    return hasPermission('user_admin', 'create');
   };
 
   const canEditUser = (user: User) => {
@@ -33,7 +33,7 @@ export const useUserPermissions = () => {
     if (user.id === userProfile.id) return true;
     
     // Check database permission for updating users
-    if (!hasPermission('users', 'update')) return false;
+    if (!hasPermission('user_admin', 'update')) return false;
     
     // Admin users can edit users across all schools
     if (userProfile.role === 'admin') return true;
@@ -52,7 +52,7 @@ export const useUserPermissions = () => {
     if (user.id === userProfile.id) return false;
     
     // Check database permission for updating users
-    if (!hasPermission('users', 'update')) return false;
+    if (!hasPermission('user_admin', 'update')) return false;
     
     // Admin users can disable users across all schools
     if (userProfile.role === 'admin') return true;
@@ -68,7 +68,7 @@ export const useUserPermissions = () => {
     if (user.active) return false;
     
     // Check database permission for updating users
-    if (!hasPermission('users', 'update')) return false;
+    if (!hasPermission('user_admin', 'update')) return false;
     
     // Admin users can enable users across all schools
     if (userProfile.role === 'admin') return true;
@@ -84,7 +84,7 @@ export const useUserPermissions = () => {
     if (user.id === userProfile.id) return false;
     
     // Check database permission for updating users
-    if (!hasPermission('users', 'update')) return false;
+    if (!hasPermission('user_admin', 'update')) return false;
     
     // Admin users can reset passwords across all schools
     if (userProfile.role === 'admin') return true;
