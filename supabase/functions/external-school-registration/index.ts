@@ -146,21 +146,20 @@ serve(async (req) => {
 
         userCreated = true;
 
-        // Send password reset email
-        const { error: resetError } = await supabase.auth.admin.resetPasswordForEmail(
+        // Send invitation email to set password
+        const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
           schoolData.contact_email,
           {
-            redirectTo: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.supabase.co')}/auth/reset-password`
+            redirectTo: `${req.headers.get('origin') || 'https://jrotc.us'}/auth/callback`
           }
         );
 
-        if (resetError) {
-          console.error('Error sending password reset email:', resetError);
-          userCreationMessage = 'Account created but failed to send password setup email';
+        if (inviteError) {
+          console.error('Error sending invitation email:', inviteError);
+          userCreationMessage = 'Account created but failed to send invitation email';
         } else {
           passwordResetSent = true;
-          userCreationMessage = 'Account created and password setup email sent';
-          
+          userCreationMessage = 'Account created and invitation email sent';
         }
       }
     } catch (error) {
