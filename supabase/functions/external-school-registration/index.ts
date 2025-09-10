@@ -117,16 +117,19 @@ serve(async (req) => {
         throw new Error('Failed to get external role');
       }
 
-      // Create user account
-      const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
-        email: schoolData.contact_email,
-        password: 'Sh0wc@se',
-        email_confirm: true,
-        user_metadata: {
-          first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
-          last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || ''
-        }
-      });
+    // Create user account
+    const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
+      email: schoolData.contact_email,
+      password: 'Sh0wc@se',
+      email_confirm: true,
+      user_metadata: {
+        first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
+        last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
+        school_id: school.id,
+        role: 'external',
+        role_id: externalRole.id
+      }
+    });
 
       if (userError) {
         console.error('Error creating user:', userError);
@@ -137,25 +140,6 @@ serve(async (req) => {
         }
       } else {
         console.log('User created successfully:', newUser.user.id);
-
-        // Create profile for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: newUser.user.id,
-            email: schoolData.contact_email,
-            first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
-            last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
-            role_id: externalRole.id,
-            school_id: school.id,
-            password_change_required: true,
-            active: true
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          throw profileError;
-        }
 
         userCreated = true;
 
