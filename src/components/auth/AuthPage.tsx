@@ -33,33 +33,40 @@ const AuthPage = () => {
     if (!result?.error) {
       // Check if user is on mobile route and redirect accordingly
       const isMobileRoute = location.pathname.startsWith('/mobile');
-      
+
       // Get user profile to check role - we need to wait for auth state to update
       setTimeout(async () => {
         try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', (await supabase.auth.getUser()).data.user?.id)
-            .single();
-          
+          const {
+            data: profile
+          } = await supabase.from('profiles').select('role').eq('id', (await supabase.auth.getUser()).data.user?.id).single();
           if (isMobileRoute) {
             // On mobile, parents go to calendar, others go to dashboard
             if (profile?.role === 'parent') {
-              navigate('/mobile/calendar', { replace: true });
+              navigate('/mobile/calendar', {
+                replace: true
+              });
             } else {
-              navigate('/mobile/dashboard', { replace: true });
+              navigate('/mobile/dashboard', {
+                replace: true
+              });
             }
           } else if (profile?.role === 'parent') {
-            navigate('/app/calendar', { replace: true });
+            navigate('/app/calendar', {
+              replace: true
+            });
           } else {
-            navigate('/app', { replace: true });
+            navigate('/app', {
+              replace: true
+            });
           }
         } catch (error) {
           console.error('Error fetching profile for redirect:', error);
           // Fallback redirect
           const redirectPath = isMobileRoute ? '/mobile/dashboard' : '/app';
-          navigate(redirectPath, { replace: true });
+          navigate(redirectPath, {
+            replace: true
+          });
         }
       }, 100); // Small delay to allow auth state to update
     }
@@ -188,23 +195,11 @@ const AuthPage = () => {
             </div>
             
             <div className="mt-6 space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                onClick={() => navigate('/parent-register')}
-              >
+              <Button type="button" variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50" onClick={() => navigate('/parent-register')}>
                 New Parent Login
               </Button>
               
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-green-600 text-green-600 hover:bg-green-50"
-                onClick={() => navigate('/external/register')}
-              >
-                Register for Competition
-              </Button>
+              <Button type="button" variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50" onClick={() => navigate('/external/register')}>Non-Subscriber's -&gt; Register for Competition</Button>
               
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800 text-center">
