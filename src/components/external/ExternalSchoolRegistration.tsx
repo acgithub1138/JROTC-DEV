@@ -17,8 +17,9 @@ interface SchoolFormData {
   contact_person: string;
   contact_email: string;
   contact_phone: string;
-  notes: string;
   jrotc_program: string;
+  timezone: string;
+  referred_by: string;
 }
 
 export const ExternalSchoolRegistration = () => {
@@ -32,8 +33,9 @@ export const ExternalSchoolRegistration = () => {
     contact_person: '',
     contact_email: '',
     contact_phone: '',
-    notes: '',
-    jrotc_program: 'army'
+    jrotc_program: 'army',
+    timezone: '',
+    referred_by: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,45 +182,58 @@ export const ExternalSchoolRegistration = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="contact_phone">Contact Phone</Label>
-                <Input
-                  id="contact_phone"
-                  type="tel"
-                  value={formData.contact_phone}
-                  onChange={(e) => handleInputChange('contact_phone', e.target.value)}
-                  placeholder="(555) 123-4567"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact_phone">Contact Phone</Label>
+                  <Input
+                    id="contact_phone"
+                    type="tel"
+                    value={formData.contact_phone}
+                    onChange={(e) => handleInputChange('contact_phone', e.target.value)}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="jrotc_program">JROTC Program *</Label>
+                  <Select
+                    value={formData.jrotc_program}
+                    onValueChange={(value) => handleInputChange('jrotc_program', value)}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select JROTC Program" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      {JROTC_PROGRAM_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="jrotc_program">JROTC Program *</Label>
-                <Select
-                  value={formData.jrotc_program}
-                  onValueChange={(value) => handleInputChange('jrotc_program', value)}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select JROTC Program" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
-                    {JROTC_PROGRAM_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Time Zone</Label>
+                  <Input
+                    id="timezone"
+                    value={formData.timezone}
+                    onChange={(e) => handleInputChange('timezone', e.target.value)}
+                    placeholder="e.g., EST, PST"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">Additional Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  placeholder="Any additional information about your school"
-                  rows={3}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="referred_by">Referred by</Label>
+                  <Input
+                    id="referred_by"
+                    value={formData.referred_by}
+                    onChange={(e) => handleInputChange('referred_by', e.target.value)}
+                    placeholder="Who referred your school?"
+                  />
+                </div>
               </div>
 
               <Button 
