@@ -2736,7 +2736,7 @@ export type Database = {
           grade: string | null
           id: string
           job_role_email: string | null
-          last_name: string
+          last_name: string | null
           password_change_required: boolean
           phone: string | null
           rank: string | null
@@ -2756,7 +2756,7 @@ export type Database = {
           grade?: string | null
           id: string
           job_role_email?: string | null
-          last_name: string
+          last_name?: string | null
           password_change_required?: boolean
           phone?: string | null
           rank?: string | null
@@ -2776,7 +2776,7 @@ export type Database = {
           grade?: string | null
           id?: string
           job_role_email?: string | null
-          last_name?: string
+          last_name?: string | null
           password_change_required?: boolean
           phone?: string | null
           rank?: string | null
