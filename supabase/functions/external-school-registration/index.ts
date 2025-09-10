@@ -120,11 +120,11 @@ serve(async (req) => {
         throw new Error('Failed to get external role');
       }
 
-    // Create user account
+    // Create user account (same as create cadet - no email sent)
     const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
       email: schoolData.contact_email,
       password: 'Sh0wc@se',
-      email_confirm: true,
+      email_confirm: true, // Skip email verification like create cadet
       user_metadata: {
         first_name: schoolData.contact_person.split(' ')[0] || schoolData.contact_person,
         last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
@@ -142,25 +142,8 @@ serve(async (req) => {
           throw userError;
         }
       } else {
-        
-
         userCreated = true;
-
-        // Send invitation email to set password
-        const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
-          schoolData.contact_email,
-          {
-            redirectTo: `${req.headers.get('origin') || 'https://jrotc.us'}/auth/callback`
-          }
-        );
-
-        if (inviteError) {
-          console.error('Error sending invitation email:', inviteError);
-          userCreationMessage = 'Account created but failed to send invitation email';
-        } else {
-          passwordResetSent = true;
-          userCreationMessage = 'Account created and invitation email sent';
-        }
+        userCreationMessage = 'Account created successfully';
       }
     } catch (error) {
       console.error('Error in user creation process:', error);
@@ -174,7 +157,7 @@ serve(async (req) => {
         message: 'School registered successfully',
         userAccount: {
           created: userCreated,
-          passwordResetSent: passwordResetSent,
+          passwordResetSent: false, // Same as create cadet - no email sent
           message: userCreationMessage
         }
       }),
