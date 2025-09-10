@@ -834,36 +834,44 @@ export const OpenCompetitionRecord: React.FC = () => {
                           <label className="text-sm font-medium mb-2 block">
                             Select Time Slot:
                           </label>
-                          <Select
-                            value={selectedTimeSlots.get(event.id) || ''}
-                            onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Choose a time slot" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {timeSlots.map((slot) => {
-                                const occupiedLabel = occupiedLabels.get(event.id)?.get(slot.time.toISOString());
-                                
-                                return (
-                                  <SelectItem 
-                                    key={slot.time.toISOString()} 
-                                    value={slot.time.toISOString()}
-                                    disabled={!slot.available}
-                                  >
-                                    <div className="flex items-center justify-between w-full">
-                                      <span>{slot.label}</span>
-                                      {!slot.available && occupiedLabel && (
-                                        <span className="text-xs text-muted-foreground ml-2">
-                                          ({occupiedLabel})
-                                        </span>
-                                      )}
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
+                          {userProfile?.role === 'external' ? (
+                            <div className="w-full p-3 bg-muted rounded-md border">
+                              <p className="text-sm text-muted-foreground">
+                                Only subscribers can select their time slots.
+                              </p>
+                            </div>
+                          ) : (
+                            <Select
+                              value={selectedTimeSlots.get(event.id) || ''}
+                              onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Choose a time slot" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {timeSlots.map((slot) => {
+                                  const occupiedLabel = occupiedLabels.get(event.id)?.get(slot.time.toISOString());
+                                  
+                                  return (
+                                    <SelectItem 
+                                      key={slot.time.toISOString()} 
+                                      value={slot.time.toISOString()}
+                                      disabled={!slot.available}
+                                    >
+                                      <div className="flex items-center justify-between w-full">
+                                        <span>{slot.label}</span>
+                                        {!slot.available && occupiedLabel && (
+                                          <span className="text-xs text-muted-foreground ml-2">
+                                            ({occupiedLabel})
+                                          </span>
+                                        )}
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </div>
                       )}
                     </div>
