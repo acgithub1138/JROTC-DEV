@@ -146,25 +146,41 @@ const ParentRegistrationPage = () => {
 
       const cadetProfile = cadetProfileData[0];
 
+      // Generate secure password for parent
+      const { generateSecurePassword } = await import('@/lib/password-utils');
+      const tempPassword = generateSecurePassword(12);
+      
       // Hardcoded parent role ID (never changes)  
       const parentRoleId = 'f8134411-7778-4c37-a39a-e727cfa197c8';
 
-      // Create parent user account with secure password generation
-      const result = await createUser(parentData.email, '', {
-        first_name: parentData.firstName,
-        last_name: parentData.lastName,
-        school_id: cadetProfile.school_id,
-        role: 'parent',
-        role_id: parentRoleId
+      // Create parent user account using signUp with generated password
+      const redirectUrl = `${window.location.origin}/`;
+      const { error: authError } = await supabase.auth.signUp({
+        email: parentData.email,
+        password: tempPassword,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: parentData.firstName,
+            last_name: parentData.lastName,
+            school_id: cadetProfile.school_id,
+            role: 'parent',
+            role_id: parentRoleId,
+            generated_password: tempPassword
+          }
+        }
       });
-      if (result?.error) {
+
+      if (authError) {
         toast({
           title: "Registration Failed",
-          description: result.error.message || result.error,
+          description: authError.message || "Failed to create parent account",
           variant: "destructive"
         });
         return;
       }
+      // Sign out immediately after account creation to prevent auto-login
+      await supabase.auth.signOut();
 
       // Get the created parent profile
       const {
