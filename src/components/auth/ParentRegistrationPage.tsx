@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 const ParentRegistrationPage = () => {
   const navigate = useNavigate();
   const {
-    signUp
+    createUser
   } = useAuth();
   const {
     toast
@@ -149,8 +149,8 @@ const ParentRegistrationPage = () => {
       // Hardcoded parent role ID (never changes)  
       const parentRoleId = 'f8134411-7778-4c37-a39a-e727cfa197c8';
 
-      // Create parent user account
-      const result = await signUp(parentData.email, 'Sh0wc@se', {
+      // Create parent user account with secure password generation
+      const result = await createUser(parentData.email, '', {
         first_name: parentData.firstName,
         last_name: parentData.lastName,
         school_id: cadetProfile.school_id,
@@ -160,14 +160,11 @@ const ParentRegistrationPage = () => {
       if (result?.error) {
         toast({
           title: "Registration Failed",
-          description: result.error.message,
+          description: result.error.message || result.error,
           variant: "destructive"
         });
         return;
       }
-
-      // Sign out immediately after account creation to prevent auto-login
-      await supabase.auth.signOut();
 
       // Get the created parent profile
       const {
