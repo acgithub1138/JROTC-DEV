@@ -32,10 +32,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Memoized password change check
   const passwordChangeRequired = useMemo(() => {
-    if (!user || !userProfile) return false;
+    if (!user || !userProfile) {
+      console.log('ProtectedRoute: No user or userProfile yet', { user: !!user, userProfile: !!userProfile });
+      return false;
+    }
 
     const profileRequiresChange = userProfile.password_change_required === true;
     const metadataOverride = user.user_metadata?.password_change_required === false;
+    
+    console.log('ProtectedRoute: Password change check', {
+      userId: user.id,
+      email: user.email,
+      profileRequiresChange,
+      metadataOverride,
+      passwordChangeRequired: userProfile.password_change_required
+    });
     
     return profileRequiresChange && !metadataOverride;
   }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
