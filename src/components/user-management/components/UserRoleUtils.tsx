@@ -8,6 +8,7 @@ export const getRoleIcon = (role: string) => {
     case 'cadet': return <GraduationCap className="w-4 h-4" />;
     case 'parent': return <Users className="w-4 h-4" />;
     case 'special_staff': return <Users className="w-4 h-4" />;
+    case 'external': return <Users className="w-4 h-4" />;
     default: return <Users className="w-4 h-4" />;
   }
 };
@@ -20,6 +21,7 @@ export const getRoleColor = (role: string) => {
     case 'cadet': return 'bg-gray-100 text-gray-800';
     case 'parent': return 'bg-purple-100 text-purple-800';
     case 'special_staff': return 'bg-yellow-100 text-yellow-800';
+    case 'external': return 'bg-orange-100 text-orange-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 };
