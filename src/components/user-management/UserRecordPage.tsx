@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Save, X, Key, Eye, EyeOff, UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
+import { ArrowLeft, Save, X, UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +14,7 @@ import { DynamicRole } from '@/hooks/useDynamicRoles';
 import { ProfileHistoryTab } from '@/components/cadet-management/components/ProfileHistoryTab';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useUserPermissions } from './hooks/useUserPermissions';
+import UserForm from './UserForm';
 
 const UserRecordPage = () => {
   const navigate = useNavigate();
@@ -427,14 +424,48 @@ const UserRecordPage = () => {
           {mode === 'edit' ? (
             <Tabs defaultValue="edit" className="w-full">
               <TabsContent value="edit" className="mt-0">
-                <UserForm />
+                <UserForm
+                  userData={userData}
+                  onUserDataChange={setUserData}
+                  onSubmit={handleSubmit}
+                  allowedRoles={allowedRoles}
+                  schools={schools}
+                  mode={mode}
+                  canEditSchool={canEditSchool}
+                  canResetPassword={canResetPassword(userForPasswordCheck)}
+                  userId={userId}
+                  newPassword={newPassword}
+                  setNewPassword={setNewPassword}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                  setPasswordResetConfirmOpen={setPasswordResetConfirmOpen}
+                  generateRandomPassword={generateRandomPassword}
+                  getRoleIcon={getRoleIcon}
+                />
               </TabsContent>
               <TabsContent value="history" className="mt-0">
                 {userId && <ProfileHistoryTab profileId={userId} />}
               </TabsContent>
             </Tabs>
           ) : (
-            <UserForm />
+            <UserForm
+              userData={userData}
+              onUserDataChange={setUserData}
+              onSubmit={handleSubmit}
+              allowedRoles={allowedRoles}
+              schools={schools}
+              mode={mode}
+              canEditSchool={canEditSchool}
+              canResetPassword={canResetPassword(userForPasswordCheck)}
+              userId={userId}
+              newPassword={newPassword}
+              setNewPassword={setNewPassword}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              setPasswordResetConfirmOpen={setPasswordResetConfirmOpen}
+              generateRandomPassword={generateRandomPassword}
+              getRoleIcon={getRoleIcon}
+            />
           )}
         </CardContent>
       </Card>
@@ -475,165 +506,6 @@ const UserRecordPage = () => {
     </div>
   );
 
-  function UserForm() {
-    return (
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="first_name" className="text-right">First Name *</Label>
-            <Input
-              id="first_name"
-              value={userData.first_name}
-              onChange={(e) => setUserData(prev => ({ ...prev, first_name: e.target.value }))}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="last_name" className="text-right">Last Name *</Label>
-            <Input
-              id="last_name"
-              value={userData.last_name}
-              onChange={(e) => setUserData(prev => ({ ...prev, last_name: e.target.value }))}
-              required
-            />
-          </div>
-        </div>
-
-        {/* Email */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-right">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={userData.email}
-            onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
-            required
-          />
-        </div>
-
-        {/* Password - Only for create mode */}
-        {mode === 'create' && (
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-right">Password *</Label>
-            <Input
-              id="password"
-              type="password"
-              value={userData.password}
-              onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
-              required
-              minLength={6}
-              placeholder="Minimum 6 characters"
-            />
-          </div>
-        )}
-
-        {/* Role */}
-        <div className="space-y-2">
-          <Label htmlFor="role" className="text-right">Role *</Label>
-          <Select 
-            value={userData.role_id} 
-            onValueChange={(value: string) => setUserData(prev => ({ ...prev, role_id: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              {allowedRoles.map((role) => (
-                <SelectItem key={role.id} value={role.id}>
-                  <div className="flex items-center">
-                    {getRoleIcon(role.role_name as UserRole)}
-                    <span className="ml-2">{role.role_label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* School */}
-        <div className="space-y-2">
-          <Label htmlFor="school" className="text-right">School *</Label>
-          <Select 
-            value={userData.school_id} 
-            onValueChange={(value) => setUserData(prev => ({ ...prev, school_id: value }))}
-            disabled={!canEditSchool() && schools.length === 1}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select school" />
-            </SelectTrigger>
-            <SelectContent>
-              {schools.map((school) => (
-                <SelectItem key={school.id} value={school.id}>
-                  {school.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {!canEditSchool() && (
-            <p className="text-sm text-muted-foreground">
-              You can only create users for your school
-            </p>
-          )}
-        </div>
-
-        {/* Password Reset Section - Only for edit mode and if user can reset password */}
-        {mode === 'edit' && userForPasswordCheck && canResetPassword(userForPasswordCheck) && (
-          <>
-            <Separator className="my-6" />
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-orange-600">
-                <Key className="w-4 h-4" />
-                Password Reset
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Reset the user's password. They will need to use the new password to sign in.
-              </p>
-              
-              <div className="space-y-2">
-                <Label htmlFor="new-password" className="text-right">New Password</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Input 
-                      id="new-password" 
-                      type={showPassword ? "text" : "password"} 
-                      value={newPassword} 
-                      onChange={(e) => setNewPassword(e.target.value)} 
-                      placeholder="Enter new password (min 6 characters)" 
-                      minLength={6} 
-                    />
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" 
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <Button type="button" variant="outline" onClick={generateRandomPassword}>
-                    Generate
-                  </Button>
-                </div>
-              </div>
-
-              {newPassword && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setPasswordResetConfirmOpen(true)} 
-                  className="w-full"
-                >
-                  Reset Password
-                </Button>
-              )}
-            </div>
-          </>
-        )}
-      </form>
-    );
-  }
 };
 
 export default UserRecordPage;
