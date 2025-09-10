@@ -193,7 +193,7 @@ export const ExternalSchoolRegistration = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Registering...' : 'Register School & Continue'}
+                {loading ? 'Registering...' : 'Register School'}
               </Button>
             </form>
           </CardContent>
