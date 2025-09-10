@@ -137,8 +137,8 @@ const ParentRegistrationPage = () => {
       // Check if cadet was found
       if (!cadetProfileData || cadetProfileData.length === 0 || !cadetProfileData[0]?.cadet_exists) {
         toast({
-          title: "Student Not Found",
-          description: "Could not find an active student with that email address. Please go back and verify the email.",
+          title: "Student Account Inactive",
+          description: "The student account exists but is currently inactive. Please contact your school administrator to activate the student account before parent registration.",
           variant: "destructive"
         });
         return;
