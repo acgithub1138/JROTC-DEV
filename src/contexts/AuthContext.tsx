@@ -71,6 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserProfile = useCallback(async (userId: string) => {
     // Prevent duplicate profile fetches
     if (profileFetchingRef.current || lastFetchedUserIdRef.current === userId) {
+      console.log('Skipping profile fetch - already fetching or same user:', userId);
       return null;
     }
 
@@ -130,10 +131,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Get the role from either user_roles or fallback to profile.role
     const userRole = profile.user_roles?.role_name || profile.role;
     
+    console.log('handleExternalUserRedirect - userRole:', userRole, 'profile.id:', profile.id);
+    
     // Check if user has external role and hasn't been redirected yet
     // Also check current location to prevent redirect loops
     const currentPath = window.location.pathname;
     
+    // IMPORTANT: Only redirect external users, not instructors or other roles
     if (userRole === 'external' && 
         redirectedUserRef.current !== profile.id && 
         !currentPath.includes('/app/competition-portal/open-competitions')) {
@@ -144,23 +148,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTimeout(() => {
         window.location.href = '/app/competition-portal/open-competitions';
       }, 100);
+    } else {
+      console.log('No redirect needed for user role:', userRole);
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
+    console.log('AuthProvider useEffect mounting');
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('Component unmounted, ignoring auth state change');
+          return;
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user && session.user.id !== lastFetchedUserIdRef.current) {
+          console.log('Need to fetch profile for new user:', session.user.id);
           // Defer profile fetching to avoid blocking auth state changes
           setTimeout(async () => {
             if (mounted) {
@@ -176,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }, 0);
         } else if (!session?.user) {
+          console.log('No user session, clearing profile');
           setUserProfile(null);
           lastFetchedUserIdRef.current = null;
           profileFetchingRef.current = false;
@@ -187,13 +199,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
+      if (!mounted) {
+        console.log('Component unmounted, ignoring initial session');
+        return;
+      }
       
       console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user && lastFetchedUserIdRef.current !== session.user.id) {
+        console.log('Initial session - need to fetch profile');
         setTimeout(async () => {
           if (mounted) {
             const profile = await fetchUserProfile(session.user.id);
@@ -205,11 +221,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }, 0);
       } else {
+        console.log('Initial session - no profile fetch needed');
         setLoading(false);
       }
     });
 
     return () => {
+      console.log('AuthProvider useEffect cleanup');
       mounted = false;
       subscription.unsubscribe();
     };
