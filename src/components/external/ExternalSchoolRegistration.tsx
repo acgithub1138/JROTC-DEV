@@ -40,6 +40,20 @@ export const ExternalSchoolRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    // Validate all required fields
+    if (!formData.name || !formData.initials || !formData.contact_person || 
+        !formData.contact_email || !formData.contact_phone || !formData.jrotc_program || 
+        !formData.timezone) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+    
     try {
       const {
         data,
@@ -129,8 +143,15 @@ export const ExternalSchoolRegistration = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="initials">School Initials</Label>
-                  <Input id="initials" value={formData.initials} onChange={e => handleInputChange('initials', e.target.value)} placeholder="e.g., MJHS" maxLength={10} />
+                  <Label htmlFor="initials">School Initials *</Label>
+                  <Input 
+                    id="initials" 
+                    value={formData.initials} 
+                    onChange={e => handleInputChange('initials', e.target.value)} 
+                    placeholder="e.g., MJHS" 
+                    maxLength={10} 
+                    required 
+                  />
                 </div>
               </div>
 
@@ -148,13 +169,20 @@ export const ExternalSchoolRegistration = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact_phone">Contact Phone</Label>
-                  <Input id="contact_phone" type="tel" value={formData.contact_phone} onChange={e => handleInputChange('contact_phone', e.target.value)} placeholder="(555) 123-4567" />
+                  <Label htmlFor="contact_phone">Contact Phone *</Label>
+                  <Input 
+                    id="contact_phone" 
+                    type="tel" 
+                    value={formData.contact_phone} 
+                    onChange={e => handleInputChange('contact_phone', e.target.value)} 
+                    placeholder="(555) 123-4567" 
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="jrotc_program">JROTC Program *</Label>
-                  <Select value={formData.jrotc_program} onValueChange={value => handleInputChange('jrotc_program', value)}>
+                  <Select value={formData.jrotc_program} onValueChange={value => handleInputChange('jrotc_program', value)} required>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select JROTC Program" />
                     </SelectTrigger>
@@ -169,8 +197,8 @@ export const ExternalSchoolRegistration = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="timezone">Time Zone</Label>
-                  <Select value={formData.timezone} onValueChange={value => handleInputChange('timezone', value)}>
+                  <Label htmlFor="timezone">Time Zone *</Label>
+                  <Select value={formData.timezone} onValueChange={value => handleInputChange('timezone', value)} required>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select Time Zone" />
                     </SelectTrigger>
