@@ -12,8 +12,9 @@ interface SchoolRegistrationData {
   contact_person: string;
   contact_email: string;
   contact_phone?: string;
-  notes?: string;
   jrotc_program: string;
+  timezone?: string;
+  referred_by?: string;
 }
 
 serve(async (req) => {
@@ -79,8 +80,9 @@ serve(async (req) => {
         contact: schoolData.contact_person,
         email: schoolData.contact_email,
         phone: schoolData.contact_phone || null,
-        notes: schoolData.notes || null,
         jrotc_program: schoolData.jrotc_program,
+        timezone: schoolData.timezone || null,
+        referred_by: schoolData.referred_by || null,
         comp_register_only: true,
         competition_module: true
       })
