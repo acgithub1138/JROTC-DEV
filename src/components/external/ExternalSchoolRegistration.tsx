@@ -92,15 +92,19 @@ export const ExternalSchoolRegistration = () => {
     }
     
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('external-school-registration', {
+      const { data, error } = await supabase.functions.invoke('external-school-registration', {
         body: formData
       });
+      
       if (error) {
         throw error;
       }
+      
+      // Check if the response indicates an error (even if no exception was thrown)
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      
       setShowSuccessMessage(true);
 
       // Redirect to login page after 3 seconds
@@ -109,9 +113,23 @@ export const ExternalSchoolRegistration = () => {
       }, 3000);
     } catch (error: any) {
       console.error('Registration error:', error);
+      
+      let errorMessage = "Please try again later.";
+      
+      // Handle different types of errors
+      if (error.message?.includes('A school with this name already exists')) {
+        errorMessage = "Your school is already registered. Please contact support if you need assistance accessing your account.";
+      } else if (error.message?.includes('Invalid email format')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message?.includes('Missing required fields')) {
+        errorMessage = "Please fill in all required fields.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Registration Failed",
-        description: error.message || "Please try again later.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
