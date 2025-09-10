@@ -5,6 +5,7 @@ const ROLE_CONFIG = {
   // Administrative roles
   admin: { icon: Shield, color: 'bg-red-100 text-red-800' },
   instructor: { icon: Shield, color: 'bg-blue-100 text-blue-800' },
+  help_desk: { icon: Shield, color: 'bg-cyan-100 text-cyan-800' },
   
   // Staff roles
   command_staff: { icon: Users, color: 'bg-green-100 text-green-800' },
@@ -16,6 +17,7 @@ const ROLE_CONFIG = {
   // External roles
   parent: { icon: Users, color: 'bg-purple-100 text-purple-800' },
   external: { icon: Users, color: 'bg-orange-100 text-orange-800' },
+  booster: { icon: Users, color: 'bg-pink-100 text-pink-800' },
 } as const;
 
 // Default configuration for unknown roles
