@@ -1,27 +1,33 @@
 import { Shield, Users, GraduationCap } from 'lucide-react';
 
+// Role configuration - easy to maintain in one place
+const ROLE_CONFIG = {
+  // Administrative roles
+  admin: { icon: Shield, color: 'bg-red-100 text-red-800' },
+  instructor: { icon: Shield, color: 'bg-blue-100 text-blue-800' },
+  
+  // Staff roles
+  command_staff: { icon: Users, color: 'bg-green-100 text-green-800' },
+  special_staff: { icon: Users, color: 'bg-yellow-100 text-yellow-800' },
+  
+  // Student roles
+  cadet: { icon: GraduationCap, color: 'bg-gray-100 text-gray-800' },
+  
+  // External roles
+  parent: { icon: Users, color: 'bg-purple-100 text-purple-800' },
+  external: { icon: Users, color: 'bg-orange-100 text-orange-800' },
+} as const;
+
+// Default configuration for unknown roles
+const DEFAULT_CONFIG = { icon: Users, color: 'bg-gray-100 text-gray-800' };
+
 export const getRoleIcon = (role: string) => {
-  switch (role?.toLowerCase()) {
-    case 'admin': return <Shield className="w-4 h-4" />;
-    case 'instructor': return <Shield className="w-4 h-4" />;
-    case 'command_staff': return <Users className="w-4 h-4" />;
-    case 'cadet': return <GraduationCap className="w-4 h-4" />;
-    case 'parent': return <Users className="w-4 h-4" />;
-    case 'special_staff': return <Users className="w-4 h-4" />;
-    case 'external': return <Users className="w-4 h-4" />;
-    default: return <Users className="w-4 h-4" />;
-  }
+  const config = ROLE_CONFIG[role?.toLowerCase() as keyof typeof ROLE_CONFIG] || DEFAULT_CONFIG;
+  const IconComponent = config.icon;
+  return <IconComponent className="w-4 h-4" />;
 };
 
 export const getRoleColor = (role: string) => {
-  switch (role?.toLowerCase()) {
-    case 'admin': return 'bg-red-100 text-red-800';
-    case 'instructor': return 'bg-blue-100 text-blue-800';
-    case 'command_staff': return 'bg-green-100 text-green-800';
-    case 'cadet': return 'bg-gray-100 text-gray-800';
-    case 'parent': return 'bg-purple-100 text-purple-800';
-    case 'special_staff': return 'bg-yellow-100 text-yellow-800';
-    case 'external': return 'bg-orange-100 text-orange-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
+  const config = ROLE_CONFIG[role?.toLowerCase() as keyof typeof ROLE_CONFIG] || DEFAULT_CONFIG;
+  return config.color;
 };
