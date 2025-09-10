@@ -162,8 +162,8 @@ serve(async (req) => {
         last_name,
         role: finalRoleName,
         role_id: finalRoleId,
-        school_id,
-        generated_password: password ? null : finalPassword // Only include if password was generated
+        school_id
+        // Removed generated_password - now using temp_pswd field instead
       }
     })
 
@@ -212,11 +212,12 @@ serve(async (req) => {
             cadet_year: cadet_year || null,
             start_year: start_year || null,
             password_change_required: password ? false : true, // Only require password change if using default password
+            temp_pswd: password ? null : finalPassword, // Store generated password in temp_pswd field
           })
           .eq('id', authUser.user!.id)
 
         if (!profileError) {
-          console.log('Profile updated successfully with role:', finalRoleName, 'password_change_required:', password ? false : true)
+          console.log('Profile updated successfully with role:', finalRoleName, 'password_change_required:', password ? false : true, 'temp_pswd stored:', !password)
           return
         }
         

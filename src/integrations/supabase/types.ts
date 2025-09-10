@@ -2744,6 +2744,7 @@ export type Database = {
           role_id: string | null
           school_id: string
           start_year: number | null
+          temp_pswd: string | null
           updated_at: string
         }
         Insert: {
@@ -2764,6 +2765,7 @@ export type Database = {
           role_id?: string | null
           school_id: string
           start_year?: number | null
+          temp_pswd?: string | null
           updated_at?: string
         }
         Update: {
@@ -2784,6 +2786,7 @@ export type Database = {
           role_id?: string | null
           school_id?: string
           start_year?: number | null
+          temp_pswd?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -134,8 +134,8 @@ serve(async (req) => {
         last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
         school_id: school.id,
         role: 'external',
-        role_id: externalRole.id,
-        generated_password: generatedPassword // Pass for email template
+        role_id: externalRole.id
+        // Removed generated_password - now using temp_pswd field instead
       }
     });
 
@@ -149,6 +149,35 @@ serve(async (req) => {
       } else {
         userCreated = true;
         userCreationMessage = 'Account created successfully';
+        
+        // Update profile with temp_pswd for the generated password
+        const updateProfile = async (retries = 3): Promise<void> => {
+          for (let i = 0; i < retries; i++) {
+            // Wait for profile to be created by trigger
+            await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
+            
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .update({
+                temp_pswd: generatedPassword, // Store generated password in temp_pswd field
+                password_change_required: true
+              })
+              .eq('id', newUser.user!.id)
+
+            if (!profileError) {
+              console.log('Profile updated successfully with temp_pswd for external user')
+              return
+            }
+            
+            console.error(`Profile update attempt ${i + 1} failed:`, profileError)
+            if (i === retries - 1) {
+              console.error('Failed to update profile with temp_pswd after all retries')
+            }
+          }
+        }
+        
+        // Update profile (don't throw error if this fails, just log it)
+        await updateProfile().catch(console.error)
       }
     } catch (error) {
       console.error('Error in user creation process:', error);
