@@ -144,6 +144,24 @@ serve(async (req) => {
       } else {
         userCreated = true;
         userCreationMessage = 'Account created successfully';
+        
+        // Trigger email rules for external user creation
+        try {
+          const { error: emailRuleError } = await supabase.rpc('process_email_rules_manual', {
+            source_table_param: 'profiles',
+            record_id_param: newUser.user.id,
+            school_id_param: school.id,
+            operation_type_param: 'external_user_created'
+          });
+          
+          if (emailRuleError) {
+            console.log('Email rule processing failed:', emailRuleError);
+          } else {
+            console.log('Email rules processed for external user:', newUser.user.id);
+          }
+        } catch (emailError) {
+          console.log('Email rule processing error:', emailError);
+        }
       }
     } catch (error) {
       console.error('Error in user creation process:', error);
