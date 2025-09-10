@@ -26,11 +26,15 @@ interface Profile {
   first_name: string;
   last_name: string;
   role: string;
+  role_id?: string;
   school_id: string;
   phone?: string;
   rank?: string;
   password_change_required?: boolean;
   schools?: School;
+  user_roles?: {
+    role_name: string;
+  };
 }
 
 interface AuthContextType {
@@ -93,6 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             competition_module,
             competition_portal,
             logo_url
+          ),
+          user_roles (
+            role_name
           )
         `)
         .eq('id', userId)
@@ -116,6 +123,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Track redirected users to prevent infinite redirects
+  const redirectedUserRef = useRef<string | null>(null);
+
+  const handleExternalUserRedirect = useCallback((profile: Profile) => {
+    // Get the role from either user_roles or fallback to profile.role
+    const userRole = profile.user_roles?.role_name || profile.role;
+    
+    // Check if user has external role and hasn't been redirected yet
+    if (userRole === 'external' && redirectedUserRef.current !== profile.id) {
+      redirectedUserRef.current = profile.id;
+      console.log('Redirecting external user to competition portal');
+      
+      // Use window.location to navigate to competition portal
+      window.location.href = '/competition-portal';
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
@@ -136,6 +160,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const profile = await fetchUserProfile(session.user.id);
               if (profile && mounted) {
                 setUserProfile(profile);
+                // Check for external user redirect after profile is set
+                handleExternalUserRedirect(profile);
               }
               setLoading(false);
             }
@@ -144,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUserProfile(null);
           lastFetchedUserIdRef.current = null;
           profileFetchingRef.current = false;
+          redirectedUserRef.current = null; // Reset redirect tracking
           setLoading(false);
         }
       }
@@ -163,6 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const profile = await fetchUserProfile(session.user.id);
             if (profile && mounted) {
               setUserProfile(profile);
+              // Check for external user redirect after profile is set
+              handleExternalUserRedirect(profile);
             }
             setLoading(false);
           }
@@ -176,7 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile]);
+  }, [fetchUserProfile, handleExternalUserRedirect]);
 
   const signUp = useCallback(async (email: string, password: string, userData?: any) => {
     try {
