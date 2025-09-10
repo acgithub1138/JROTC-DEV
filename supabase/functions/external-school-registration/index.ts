@@ -134,8 +134,8 @@ serve(async (req) => {
         last_name: schoolData.contact_person.split(' ').slice(1).join(' ') || '',
         school_id: school.id,
         role: 'external',
-        role_id: externalRole.id
-        // Removed generated_password - now using temp_pswd field instead
+        role_id: externalRole.id,
+        generated_password: generatedPassword // Pass password to trigger for immediate use
       }
     });
 

@@ -162,8 +162,8 @@ serve(async (req) => {
         last_name,
         role: finalRoleName,
         role_id: finalRoleId,
-        school_id
-        // Removed generated_password - now using temp_pswd field instead
+        school_id,
+        generated_password: password ? null : finalPassword // Pass password to trigger for immediate use
       }
     })
 
