@@ -81,7 +81,7 @@ serve(async (req) => {
         phone: schoolData.contact_phone || null,
         notes: schoolData.notes || null,
         jrotc_program: schoolData.jrotc_program,
-        comp_register_only: true
+        comp_register_only: true,
         competition_module: true
       })
       .select()
@@ -98,7 +98,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('External school registered successfully:', school.id);
+    
 
     // Create user account for contact person
     let userCreated = false;
@@ -140,7 +140,7 @@ serve(async (req) => {
           throw userError;
         }
       } else {
-        console.log('User created successfully:', newUser.user.id);
+        
 
         userCreated = true;
 
@@ -158,7 +158,7 @@ serve(async (req) => {
         } else {
           passwordResetSent = true;
           userCreationMessage = 'Account created and password setup email sent';
-          console.log('Password reset email sent successfully');
+          
         }
       }
     } catch (error) {
