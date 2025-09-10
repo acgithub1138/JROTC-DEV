@@ -485,7 +485,7 @@ const UserRecordPage = () => {
             <Input
               id="first_name"
               value={userData.first_name}
-              onChange={(e) => setUserData({ ...userData, first_name: e.target.value })}
+              onChange={(e) => setUserData(prev => ({ ...prev, first_name: e.target.value }))}
               required
             />
           </div>
@@ -494,7 +494,7 @@ const UserRecordPage = () => {
             <Input
               id="last_name"
               value={userData.last_name}
-              onChange={(e) => setUserData({ ...userData, last_name: e.target.value })}
+              onChange={(e) => setUserData(prev => ({ ...prev, last_name: e.target.value }))}
               required
             />
           </div>
@@ -507,7 +507,7 @@ const UserRecordPage = () => {
             id="email"
             type="email"
             value={userData.email}
-            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+            onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
             required
           />
         </div>
@@ -520,7 +520,7 @@ const UserRecordPage = () => {
               id="password"
               type="password"
               value={userData.password}
-              onChange={(e) => setUserData({ ...userData, password: e.target.value })}
+              onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
               required
               minLength={6}
               placeholder="Minimum 6 characters"
@@ -533,7 +533,7 @@ const UserRecordPage = () => {
           <Label htmlFor="role" className="text-right">Role *</Label>
           <Select 
             value={userData.role_id} 
-            onValueChange={(value: string) => setUserData({ ...userData, role_id: value })}
+            onValueChange={(value: string) => setUserData(prev => ({ ...prev, role_id: value }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select role" />
@@ -556,7 +556,7 @@ const UserRecordPage = () => {
           <Label htmlFor="school" className="text-right">School *</Label>
           <Select 
             value={userData.school_id} 
-            onValueChange={(value) => setUserData({ ...userData, school_id: value })}
+            onValueChange={(value) => setUserData(prev => ({ ...prev, school_id: value }))}
             disabled={!canEditSchool() && schools.length === 1}
           >
             <SelectTrigger>
