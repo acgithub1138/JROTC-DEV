@@ -25,6 +25,7 @@ export const ExternalSchoolRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [formData, setFormData] = useState<SchoolFormData>({
     name: '',
     initials: '',
@@ -48,13 +49,12 @@ export const ExternalSchoolRegistration = () => {
         throw error;
       }
 
-      toast({
-        title: "School Registered Successfully",
-        description: "You can now browse and register for competitions."
-      });
-
-      // Navigate to competitions page with school ID
-      navigate(`/external/competitions?school_id=${data.schoolId}`);
+      setShowSuccessMessage(true);
+      
+      // Redirect to login page after 3 seconds
+      setTimeout(() => {
+        navigate('/app/auth');
+      }, 3000);
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
@@ -70,6 +70,36 @@ export const ExternalSchoolRegistration = () => {
   const handleInputChange = (field: keyof SchoolFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  if (showSuccessMessage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4 flex items-center justify-center">
+        <Card className="bg-card/95 backdrop-blur-sm shadow-xl max-w-md w-full">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">Registration Complete!</h2>
+              <div className="space-y-2">
+                <p className="text-muted-foreground">
+                  Your school has been registered successfully.
+                </p>
+                <p className="text-foreground font-medium">
+                  Please check your email for login instructions.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Redirecting to login page in a few seconds...
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary-foreground to-primary p-4">
