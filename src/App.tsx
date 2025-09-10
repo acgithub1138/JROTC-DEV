@@ -61,7 +61,6 @@ import { MobileCompetitionRegistration } from "@/components/mobile/competition-p
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import ParentRegistrationPage from "@/components/auth/ParentRegistrationPage";
 import { ExternalSchoolRegistration } from "@/components/external/ExternalSchoolRegistration";
-import { ExternalCompetitions } from "@/components/external/ExternalCompetitions";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -267,7 +266,6 @@ const App = () => (
               
               {/* External Competition Registration Routes */}
               <Route path="/external/register" element={<ExternalSchoolRegistration />} />
-              <Route path="/external/competitions" element={<ExternalCompetitions />} />
 
               {/* Redirect /app/login to /app/auth */}
               <Route path="/app/login" element={<Navigate to="/app/auth" replace />} />
