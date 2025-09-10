@@ -136,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (userRole === 'external' && 
         redirectedUserRef.current !== profile.id && 
-        !currentPath.includes('/mobile/competition-portal')) {
+        !currentPath.includes('/app/competition-portal/open-competitions')) {
       redirectedUserRef.current = profile.id;
       console.log('Redirecting external user to competition portal from:', currentPath);
       
