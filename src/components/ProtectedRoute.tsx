@@ -53,12 +53,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Update password dialog state with debouncing
   useDeepCompareEffect(() => {
+    console.log('ProtectedRoute: useDeepCompareEffect for password dialog', {
+      passwordCheckRefCurrent: passwordCheckRef.current,
+      passwordChangeRequired,
+      showPasswordChange
+    });
+    
     if (passwordCheckRef.current) return;
     
     if (passwordChangeRequired) {
+      console.log('ProtectedRoute: Setting password change dialog to TRUE');
       passwordCheckRef.current = true;
       setShowPasswordChange(true);
     } else {
+      console.log('ProtectedRoute: Setting password change dialog to FALSE');
       setShowPasswordChange(false);
       passwordCheckRef.current = false;
     }
