@@ -82,6 +82,7 @@ serve(async (req) => {
         notes: schoolData.notes || null,
         jrotc_program: schoolData.jrotc_program,
         comp_register_only: true
+        competition_module: true
       })
       .select()
       .single();
