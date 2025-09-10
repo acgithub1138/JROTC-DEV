@@ -163,7 +163,13 @@ serve(async (req) => {
         role: finalRoleName,
         role_id: finalRoleId,
         school_id,
-        generated_password: password ? null : finalPassword // Pass password to trigger for immediate use
+        generated_password: password ? null : finalPassword, // Pass password to trigger for immediate use
+        // Pass additional profile fields for trigger to set
+        grade: grade || null,
+        rank: rank || null,
+        flight: flight || null,
+        cadet_year: cadet_year || null,
+        start_year: start_year || null
       }
     })
 
@@ -194,53 +200,29 @@ serve(async (req) => {
 
     console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', finalRoleName)
 
-    // Update the profile that will be automatically created by the trigger
-    // Use a more reliable approach with retries for profile updates
-    const updateProfile = async (retries = 3): Promise<void> => {
-      for (let i = 0; i < retries; i++) {
-        // Wait for profile to be created by trigger (reduced delay for bulk operations)
-        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
-        
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .update({
-            role: finalRoleName,
-            role_id: finalRoleId, // Set the role_id from the lookup
-            grade: grade || null,
-            rank: rank || null,
-            flight: flight || null,
-            cadet_year: cadet_year || null,
-            start_year: start_year || null,
-            password_change_required: password ? false : true, // Only require password change if using default password
-            temp_pswd: password ? null : finalPassword, // Store generated password in temp_pswd field
-          })
-          .eq('id', authUser.user!.id)
-
-        if (!profileError) {
-          console.log('Profile updated successfully with role:', finalRoleName, 'password_change_required:', password ? false : true, 'temp_pswd stored:', !password)
-          return
-        }
-        
-        console.error(`Profile update attempt ${i + 1} failed:`, profileError)
-        if (i === retries - 1) {
-          throw profileError
-        }
+    // Profile will be created automatically by the handle_new_user trigger
+    // which will also handle temp_pswd storage and email queuing
+    
+    // Fetch the complete profile data to return (with retry since trigger might still be running)
+    let profileData: any = null;
+    for (let i = 0; i < 3; i++) {
+      await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+      
+      const { data, error: profileFetchError } = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.user!.id)
+        .single()
+      
+      if (!profileFetchError && data) {
+        profileData = data;
+        break;
       }
-    }
-
-    // Wait for profile update to complete before returning
-    await updateProfile()
-    
-    // Fetch the complete profile data to return
-    const { data: profileData, error: profileFetchError } = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .eq('id', authUser.user!.id)
-      .single()
-    
-    if (profileFetchError) {
-      console.error('Failed to fetch created profile:', profileFetchError)
-      throw profileFetchError
+      
+      if (i === 2) {
+        console.error('Failed to fetch created profile after retries:', profileFetchError)
+        throw new Error('Profile creation failed')
+      }
     }
 
     const response = new Response(
