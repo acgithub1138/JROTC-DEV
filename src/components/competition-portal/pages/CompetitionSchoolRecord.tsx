@@ -202,10 +202,10 @@ export const CompetitionSchoolRecord = () => {
     enabled: !isViewMode
   });
 
-  // Fetch schools when component loads
+  // Fetch schools when component loads or when school registration changes
   useEffect(() => {
     fetchSchools();
-  }, []);
+  }, [schoolRegistration]);
 
   // Initialize form data when school data loads
   useEffect(() => {
@@ -245,12 +245,39 @@ export const CompetitionSchoolRecord = () => {
   const fetchSchools = async () => {
     setIsLoadingSchools(true);
     try {
+      // Get schools with jrotc_program filter
       const {
-        data,
-        error
+        data: filteredSchools,
+        error: filteredError
       } = await supabase.from('schools').select('id, name').not('jrotc_program', 'is', null).order('name');
-      if (error) throw error;
-      setSchools(data || []);
+      if (filteredError) throw filteredError;
+
+      let schoolsList = filteredSchools || [];
+
+      // If we're in edit/view mode and have a school registration, ensure the selected school is included
+      if ((isEditMode || isViewMode) && schoolRegistration?.school_id) {
+        const selectedSchoolExists = schoolsList.some(s => s.id === schoolRegistration.school_id);
+        
+        if (!selectedSchoolExists) {
+          // Fetch the selected school separately
+          const {
+            data: selectedSchool,
+            error: selectedError
+          } = await supabase.from('schools').select('id, name').eq('id', schoolRegistration.school_id).single();
+          
+          if (!selectedError && selectedSchool) {
+            schoolsList = [selectedSchool, ...schoolsList].sort((a, b) => a.name.localeCompare(b.name));
+          }
+        }
+      }
+
+      setSchools(schoolsList);
+      
+      // Debug log to verify selected school is in the list
+      if (schoolRegistration?.school_id) {
+        const selectedSchoolInList = schoolsList.find(s => s.id === schoolRegistration.school_id);
+        console.log('Selected school in dropdown list:', selectedSchoolInList);
+      }
     } catch (error) {
       console.error('Error fetching schools:', error);
     } finally {
@@ -448,13 +475,13 @@ export const CompetitionSchoolRecord = () => {
                   <FormField control={form.control} name="school_id" render={({
                     field
                   }) => <FormItem>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode || isEditMode}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="z-50 bg-background border border-border">
                             {schools.map(school => <SelectItem key={school.id} value={school.id}>
                                 {school.name}
                               </SelectItem>)}
