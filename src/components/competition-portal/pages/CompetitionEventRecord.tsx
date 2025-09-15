@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,6 +55,7 @@ interface FormData {
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userProfile } = useAuth();
 
   // Extract competition ID from pathname since route isn't parameterized
   const competitionId = React.useMemo(() => {
@@ -419,9 +421,8 @@ export const CompetitionEventRecord: React.FC = () => {
           error
         } = await supabase.from('cp_comp_events').insert({
           ...eventData,
-          school_id: undefined,
-          // Let database handle this via auth context
-          created_by: undefined // Let database handle this via auth context
+          school_id: userProfile?.school_id,
+          created_by: userProfile?.id
         });
         if (error) throw error;
         toast.success('Event created successfully');
