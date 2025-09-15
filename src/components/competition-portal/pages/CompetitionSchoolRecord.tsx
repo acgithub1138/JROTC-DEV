@@ -472,9 +472,9 @@ export const CompetitionSchoolRecord = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                   <Label className="text-right">School *</Label>
-                  <FormField control={form.control} name="school_id" render={({
-                    field
-                  }) => <FormItem>
+                  <FormField control={form.control} name="school_id" render={({ field }) => (
+                    <FormItem>
+                      {isCreateMode ? (
                         <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode}>
                           <FormControl>
                             <SelectTrigger>
@@ -482,14 +482,32 @@ export const CompetitionSchoolRecord = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="z-50 bg-background border border-border">
-                            {schools.map(school => <SelectItem key={school.id} value={school.id}>
+                            {schools.map((school) => (
+                              <SelectItem key={school.id} value={school.id}>
                                 {school.name}
-                              </SelectItem>)}
+                              </SelectItem>
+                            ))}
                             {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>} />
+                      ) : (
+                        <>
+                          <Input
+                            readOnly
+                            className="bg-background"
+                            value={
+                              schoolRegistration?.school_name ||
+                              schools.find((s) => s.id === field.value)?.name ||
+                              ''
+                            }
+                          />
+                          {/* Keep the school_id in the form state */}
+                          <input type="hidden" value={field.value} />
+                        </>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
