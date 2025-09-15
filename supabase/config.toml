@@ -1,7 +1,1 @@
 project_id = "vpiwfabbzaebfkadmmgd"
-
-[functions.email-queue-webhook]
-verify_jwt = false
-
-[functions.external-school-registration]
-verify_jwt = false
