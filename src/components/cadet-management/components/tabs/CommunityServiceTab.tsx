@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useCadetCommunityService } from '@/hooks/useCadetRecords';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 interface CommunityServiceTabProps {
   cadetId: string;
 }
@@ -18,6 +20,24 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
     data: communityService = [],
     isLoading
   } = useCadetCommunityService(cadetId);
+
+  // Get cadet profile information for export filename
+  const { data: cadetProfile } = useQuery({
+    queryKey: ['cadetProfile', cadetId],
+    queryFn: async () => {
+      if (!cadetId) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', cadetId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!cadetId,
+  });
 
   // Calculate pagination
   const paginatedData = useMemo(() => {
@@ -56,12 +76,17 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
       .map(row => row.join(','))
       .join('\n');
 
+    // Generate filename with cadet name
+    const lastName = cadetProfile?.last_name || 'Unknown';
+    const firstName = cadetProfile?.first_name || 'Cadet';
+    const filename = `${lastName}_${firstName}_Community_Service_Hours.csv`;
+
     // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `community-service-records-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
