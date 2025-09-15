@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, History } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { ScoreSheetHistoryModal } from '../components/ScoreSheetHistoryModal';
 interface CompetitionResultsTabProps {
   competitionId: string;
 }
@@ -16,6 +17,7 @@ interface CompetitionEventRow {
   score_sheet: any;
   school_id: string;
   created_at: string;
+  has_history?: boolean;
 }
 interface CPSchoolRow {
   school_id: string;
@@ -40,21 +42,64 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
   const [eventMap, setEventMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [historyModal, setHistoryModal] = useState<{
+    isOpen: boolean;
+    competitionEventId: string;
+    schoolName: string;
+    eventName: string;
+  }>({
+    isOpen: false,
+    competitionEventId: '',
+    schoolName: '',
+    eventName: ''
+  });
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-    const [eventsRes, schoolsRes, eventTypesRes] = await Promise.all([supabase.from('competition_events').select('id, event, total_points, score_sheet, school_id, created_at').eq('source_type', 'portal').eq('source_competition_id', competitionId), supabase.from('cp_comp_schools').select('school_id, school_name').eq('competition_id', competitionId), supabase.from('competition_event_types').select('id, name')]);
+    
+    const [eventsRes, schoolsRes, eventTypesRes, historyRes] = await Promise.all([
+      supabase
+        .from('competition_events')
+        .select('id, event, total_points, score_sheet, school_id, created_at')
+        .eq('source_type', 'portal')
+        .eq('source_competition_id', competitionId),
+      supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competitionId),
+      supabase
+        .from('competition_event_types')
+        .select('id, name'),
+      supabase
+        .from('competition_events_history')
+        .select('competition_event_id')
+    ]);
+    
     if (eventsRes.error || schoolsRes.error || eventTypesRes.error) {
       setError(eventsRes.error?.message || schoolsRes.error?.message || eventTypesRes.error?.message || 'Failed to load results');
       setIsLoading(false);
       return;
     }
-    setRows((eventsRes.data || []) as CompetitionEventRow[]);
+
+    // Create a set of competition event IDs that have history
+    const eventIdsWithHistory = new Set(
+      (historyRes.data || []).map(h => h.competition_event_id)
+    );
+
+    // Add has_history property to events
+    const eventsWithHistory = (eventsRes.data || []).map(event => ({
+      ...event,
+      has_history: eventIdsWithHistory.has(event.id)
+    }));
+
+    setRows(eventsWithHistory as CompetitionEventRow[]);
+    
     const schoolNameMap: Record<string, string> = {};
     (schoolsRes.data || []).forEach((s: CPSchoolRow) => {
       if (s.school_id) schoolNameMap[s.school_id] = s.school_name || 'Unknown School';
     });
     setSchoolMap(schoolNameMap);
+    
     const eventNameMap: Record<string, string> = {};
     (eventTypesRes.data || []).forEach((e: any) => {
       if (e.id) eventNameMap[e.id] = e.name || 'Unknown Event';
@@ -82,6 +127,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
       schoolName: string;
       judges: JudgeScore[];
       total: number;
+      eventRecords: CompetitionEventRow[]; // Store the original event records
     };
     const result = new Map<string, {
       event: string;
@@ -129,7 +175,8 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
           schoolId,
           schoolName,
           judges: [],
-          total: 0
+          total: 0,
+          eventRecords: []
         };
         schoolsMap.set(schoolId, agg);
       }
@@ -138,6 +185,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
         score
       });
       agg.total += score;
+      agg.eventRecords.push(r); // Store the event record
     });
     Object.keys(eventGroupMap).forEach(ev => {
       const {
@@ -169,6 +217,24 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
     });
     return result;
   }, [rows, schoolMap, eventMap]);
+  
+  const openHistoryModal = (schoolAgg: any, eventName: string) => {
+    // Find any event record with history for this school
+    const eventWithHistory = schoolAgg.eventRecords.find((record: CompetitionEventRow) => record.has_history);
+    if (eventWithHistory) {
+      setHistoryModal({
+        isOpen: true,
+        competitionEventId: eventWithHistory.id,
+        schoolName: schoolAgg.schoolName,
+        eventName: eventName
+      });
+    }
+  };
+
+  const hasAnyHistory = (schoolAgg: any) => {
+    return schoolAgg.eventRecords.some((record: CompetitionEventRow) => record.has_history);
+  };
+  
   if (!canView) {
     return <div className="p-4 text-sm text-muted-foreground">You don't have permission to view results.</div>;
   }
@@ -199,7 +265,17 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                               <span className="text-sm">{js ? js.score : '-'}</span>
                             </div>;
                 })}
-                          <div className="flex justify-end pt-2">
+                          <div className="flex justify-end gap-2 pt-2">
+                            {hasAnyHistory(s) && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => openHistoryModal(s, group.event)}
+                              >
+                                <History className="h-4 w-4 mr-1" />
+                                History
+                              </Button>
+                            )}
                             {canViewDetails && <Button variant="outline" size="sm" onClick={() => {
                      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
                    }}>
@@ -232,11 +308,23 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                 })}
                          <td className="px-3 font-medium py-[2px]">{s.total.toFixed(1)}</td>
                           <td className="px-3 py-[2px]">
-                            {canViewDetails && <Button variant="ghost" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
+                            <div className="flex gap-1">
+                              {hasAnyHistory(s) && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  aria-label={`View history for ${s.schoolName}`}
+                                  onClick={() => openHistoryModal(s, group.event)}
+                                >
+                                  <History className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {canViewDetails && <Button variant="ghost" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
                      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
                    }}>
                                 <Eye className="h-4 w-4" />
                               </Button>}
+                            </div>
                           </td>
                       </tr>)}
 
@@ -244,6 +332,14 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                 </table>
               </div>}
           </CardContent>
-         </Card>)}
+          </Card>)}
+      
+      <ScoreSheetHistoryModal
+        isOpen={historyModal.isOpen}
+        onClose={() => setHistoryModal(prev => ({ ...prev, isOpen: false }))}
+        competitionEventId={historyModal.competitionEventId}
+        schoolName={historyModal.schoolName}
+        eventName={historyModal.eventName}
+      />
     </div>;
 };
