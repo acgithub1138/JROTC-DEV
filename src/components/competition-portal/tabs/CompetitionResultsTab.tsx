@@ -310,19 +310,26 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                           <td className="px-3 py-[2px]">
                             <div className="flex gap-1">
 
-                              {canViewDetails && <Button variant="outline" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
+                              {canViewDetails && 
+                                <Button variant="outline" 
+                                 size="icon" 
+                                 className="h-6 w-6"
+                                 title="View Scores" 
+                                 aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
                      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
                    }}>
-                                <Eye className="h-4 w-4" />
+                                <Eye className="h-3 w-3" />
                               </Button>}
                               {hasAnyHistory(s) && (
                                 <Button 
-                                  variant="outline" 
+                                  variant="outline"
                                   size="icon" 
+                                  title="Score Change History" 
+                                  className="h-6 w-6"
                                   aria-label={`View history for ${s.schoolName}`}
                                   onClick={() => openHistoryModal(s, group.event)}
                                 >
-                                  <History className="h-4 w-4" />
+                                  <History className="h-3 w-3" />
                                 </Button>
                               )}                              
                             </div>
