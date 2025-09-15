@@ -309,21 +309,22 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                          <td className="px-3 font-medium py-[2px]">{s.total.toFixed(1)}</td>
                           <td className="px-3 py-[2px]">
                             <div className="flex gap-1">
+
+                              {canViewDetails && <Button variant="outline" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
+                     navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
+                   }}>
+                                <Eye className="h-4 w-4" />
+                              </Button>}
                               {hasAnyHistory(s) && (
                                 <Button 
-                                  variant="ghost" 
+                                  variant="outline" 
                                   size="icon" 
                                   aria-label={`View history for ${s.schoolName}`}
                                   onClick={() => openHistoryModal(s, group.event)}
                                 >
                                   <History className="h-4 w-4" />
                                 </Button>
-                              )}
-                              {canViewDetails && <Button variant="ghost" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
-                     navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
-                   }}>
-                                <Eye className="h-4 w-4" />
-                              </Button>}
+                              )}                              
                             </div>
                           </td>
                       </tr>)}
