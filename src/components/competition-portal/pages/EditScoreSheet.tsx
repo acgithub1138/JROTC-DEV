@@ -23,6 +23,7 @@ type CompetitionEvent = {
   team_name: string | null;
   school_id: string;
   created_at: string;
+  hosting_school_id?: string;
 };
 
 export const EditScoreSheet: React.FC = () => {
@@ -71,18 +72,38 @@ export const EditScoreSheet: React.FC = () => {
     setError(null);
 
     try {
-      const { data, error } = await supabase
-        .from('competition_events')
-        .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
-        .eq('id', eventId)
-        .eq('source_type', 'portal')
-        .eq('source_competition_id', competitionId)
-        .single();
+      // Fetch both the competition event and the competition details to check hosting school
+      const [eventResult, competitionResult] = await Promise.all([
+        supabase
+          .from('competition_events')
+          .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
+          .eq('id', eventId)
+          .eq('source_type', 'portal')
+          .eq('source_competition_id', competitionId)
+          .single(),
+        supabase
+          .from('cp_competitions')
+          .select('school_id')
+          .eq('id', competitionId)
+          .single()
+      ]);
+
+      if (eventResult.error) throw eventResult.error;
+      if (competitionResult.error) throw competitionResult.error;
+      if (!eventResult.data) throw new Error('Score sheet not found');
+      if (!competitionResult.data) throw new Error('Competition not found');
+
+      const data = eventResult.data;
+      const competitionData = competitionResult.data;
 
       if (error) throw error;
       if (!data) throw new Error('Score sheet not found');
 
-      setEvent(data);
+      // Store both event data and competition hosting info
+      setEvent({
+        ...data,
+        hosting_school_id: competitionData.school_id
+      });
       
       // Load existing scores and metadata
       if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet)) {
@@ -166,9 +187,12 @@ export const EditScoreSheet: React.FC = () => {
       return;
     }
 
-    // Check school permission
-    if (event.school_id !== userProfile.school_id) {
-      toast.error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school.');
+    // Check school permission - allow editing if user is from the same school OR hosting school
+    const isOwnSchool = event.school_id === userProfile.school_id;
+    const isHostingSchool = event.hosting_school_id === userProfile.school_id;
+    
+    if (!isOwnSchool && !isHostingSchool) {
+      toast.error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school or schools participating in your hosted competition.');
       return;
     }
 
@@ -197,7 +221,7 @@ export const EditScoreSheet: React.FC = () => {
         judge_number: judgeNumber
       };
 
-      // Update competition_events record with verification
+      // Update competition_events record
       const { data: updateResult, error: updateError } = await supabase
         .from('competition_events')
         .update({
@@ -207,7 +231,6 @@ export const EditScoreSheet: React.FC = () => {
           updated_at: new Date().toISOString()
         })
         .eq('id', event.id)
-        .eq('school_id', userProfile.school_id)
         .select('id, updated_at')
         .maybeSingle();
 
