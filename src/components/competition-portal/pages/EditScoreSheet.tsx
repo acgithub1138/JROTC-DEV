@@ -265,7 +265,7 @@ export const EditScoreSheet: React.FC = () => {
       setHasUnsavedChanges(false);
 
       // Navigate back to the view page
-      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.id}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.event}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
 
     } catch (error: any) {
       console.error('Error updating score sheet:', error);
