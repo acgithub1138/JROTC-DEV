@@ -448,7 +448,7 @@ export const CompetitionSchoolRecord = () => {
                   <FormField control={form.control} name="school_id" render={({
                     field
                   }) => <FormItem>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingSchools || isViewMode || isEditMode}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode || isEditMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
