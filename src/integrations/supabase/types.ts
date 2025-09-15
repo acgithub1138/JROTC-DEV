@@ -353,6 +353,47 @@ export type Database = {
           },
         ]
       }
+      competition_events_history: {
+        Row: {
+          change_reason: string
+          changed_by: string
+          competition_event_id: string
+          created_at: string
+          id: string
+          new_values: Json
+          old_values: Json
+          school_id: string
+        }
+        Insert: {
+          change_reason: string
+          changed_by: string
+          competition_event_id: string
+          created_at?: string
+          id?: string
+          new_values?: Json
+          old_values?: Json
+          school_id: string
+        }
+        Update: {
+          change_reason?: string
+          changed_by?: string
+          competition_event_id?: string
+          created_at?: string
+          id?: string
+          new_values?: Json
+          old_values?: Json
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_events_history_competition_event_id_fkey"
+            columns: ["competition_event_id"]
+            isOneToOne: false
+            referencedRelation: "competition_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_placements: {
         Row: {
           competition_date: string

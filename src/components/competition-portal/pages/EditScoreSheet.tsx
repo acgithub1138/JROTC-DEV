@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
 import { useCompetitionTemplates } from '@/components/competition-portal/my-competitions/hooks/useCompetitionTemplates';
+import { useAuth } from '@/contexts/AuthContext';
 
 type CompetitionEvent = {
   id: string;
@@ -45,12 +47,15 @@ export const EditScoreSheet: React.FC = () => {
 
   const { canUpdate } = useCompetitionResultsPermissions();
   const { templates } = useCompetitionTemplates();
+  const { userProfile } = useAuth();
   const [event, setEvent] = useState<CompetitionEvent | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [judgeNumber, setJudgeNumber] = useState('');
   const [teamName, setTeamName] = useState('');
+  const [justification, setJustification] = useState('');
+  const [justificationError, setJustificationError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,11 +150,38 @@ export const EditScoreSheet: React.FC = () => {
     setHasUnsavedChanges(true);
   }, []);
 
+  const handleJustificationChange = React.useCallback((value: string) => {
+    setJustification(value);
+    setJustificationError(false);
+    setHasUnsavedChanges(true);
+  }, []);
+
   const handleSave = async () => {
-    if (!event) return;
+    if (!event || !userProfile) return;
+
+    // Validate justification field
+    if (!justification.trim() || justification.trim().length < 10) {
+      setJustificationError(true);
+      toast.error('Please provide a justification for the score update (minimum 10 characters)');
+      return;
+    }
+
+    // Check school permission
+    if (event.school_id !== userProfile.school_id) {
+      toast.error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school.');
+      return;
+    }
 
     setIsSaving(true);
     try {
+      // Capture old values for history
+      const oldValues = {
+        score_sheet: event.score_sheet,
+        total_points: event.total_points,
+        team_name: event.team_name,
+        judge_number: event.score_sheet?.judge_number
+      };
+
       const updatedScoreSheet = {
         ...event.score_sheet,
         scores,
@@ -158,7 +190,15 @@ export const EditScoreSheet: React.FC = () => {
         calculated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      const newValues = {
+        score_sheet: updatedScoreSheet,
+        total_points: totalPoints,
+        team_name: teamName || null,
+        judge_number: judgeNumber
+      };
+
+      // Update competition_events record with verification
+      const { data: updateResult, error: updateError } = await supabase
         .from('competition_events')
         .update({
           score_sheet: updatedScoreSheet,
@@ -166,21 +206,43 @@ export const EditScoreSheet: React.FC = () => {
           team_name: teamName || null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', event.id);
+        .eq('id', event.id)
+        .eq('school_id', userProfile.school_id)
+        .select('id, updated_at')
+        .maybeSingle();
 
-      if (error) {
-        console.error('Supabase error:', error);
-        if (error.code === 'PGRST301' || error.message?.includes('permission')) {
-          throw new Error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school.');
-        }
-        throw error;
+      if (updateError) {
+        console.error('Supabase error:', updateError);
+        throw new Error('Failed to update score sheet: ' + updateError.message);
+      }
+
+      if (!updateResult) {
+        throw new Error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school.');
+      }
+
+      // Insert history record
+      const { error: historyError } = await supabase
+        .from('competition_events_history')
+        .insert({
+          competition_event_id: event.id,
+          school_id: userProfile.school_id,
+          changed_by: userProfile.id,
+          change_reason: justification.trim(),
+          old_values: oldValues,
+          new_values: newValues
+        });
+
+      if (historyError) {
+        console.error('History insert error:', historyError);
+        // Don't fail the whole operation for history logging issues
+        console.warn('Failed to log history, but score sheet was updated successfully');
       }
 
       toast.success('Score sheet updated successfully');
       setHasUnsavedChanges(false);
 
       // Navigate back to the view page
-      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.event}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.id}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
 
     } catch (error: any) {
       console.error('Error updating score sheet:', error);
@@ -313,6 +375,28 @@ export const EditScoreSheet: React.FC = () => {
           <CardTitle>Score Sheet Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Score Update Justification - Required Field */}
+          <div className="space-y-2">
+            <Label htmlFor="justification" className="font-medium text-destructive">
+              Score Update Justification <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="justification"
+              value={justification}
+              onChange={(e) => handleJustificationChange(e.target.value)}
+              placeholder="Please provide a reason for updating these scores (minimum 10 characters)"
+              className={`min-h-[80px] ${justificationError ? 'border-destructive' : ''}`}
+              required
+            />
+            {justificationError && (
+              <p className="text-sm text-destructive">
+                Justification is required and must be at least 10 characters long
+              </p>
+            )}
+          </div>
+
+          <Separator />
+
           {/* Judge Number and Team Name Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
