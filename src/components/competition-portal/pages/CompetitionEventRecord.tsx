@@ -101,7 +101,7 @@ export const CompetitionEventRecord: React.FC = () => {
     start_hour: '09',
     start_minute: '00',
     end_date: '',
-    end_hour: '10',
+    end_hour: '15',
     end_minute: '00',
     lunch_start_hour: '12',
     lunch_start_minute: '00',
