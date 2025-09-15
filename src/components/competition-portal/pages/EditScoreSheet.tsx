@@ -179,8 +179,8 @@ export const EditScoreSheet: React.FC = () => {
       toast.success('Score sheet updated successfully');
       setHasUnsavedChanges(false);
 
-      // Navigate back to the view page
-      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.event}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
+      // Navigate back to the view page - use event.id instead of event.event to view the specific score sheet
+      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event.id}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
 
     } catch (error: any) {
       console.error('Error updating score sheet:', error);
@@ -192,7 +192,7 @@ export const EditScoreSheet: React.FC = () => {
 
   const handleCancel = () => {
     const navigationAction = () => 
-      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event?.event}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${event?.id}&schoolId=${schoolId}&eventName=${encodeURIComponent('Event')}`);
     
     if (hasUnsavedChanges) {
       setPendingNavigation(() => navigationAction);
