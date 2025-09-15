@@ -159,10 +159,10 @@ export const CompetitionEventRecord: React.FC = () => {
   // Fetch judges and competition date on component mount
   useEffect(() => {
     fetchJudges();
-    if (isCreateMode && competitionId) {
+    if (isCreateMode && competitionId && !timezoneLoading && timezone) {
       fetchCompetitionDate();
     }
-  }, [isCreateMode, competitionId]);
+  }, [isCreateMode, competitionId, timezoneLoading, timezone]);
 
   // Fetch filtered score sheets when event changes
   useEffect(() => {
@@ -271,14 +271,14 @@ export const CompetitionEventRecord: React.FC = () => {
     }
   };
   const fetchCompetitionDate = async () => {
-    if (!competitionId) return;
+    if (!competitionId || !timezone) return;
     try {
       const {
         data,
         error
       } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
       if (error) throw error;
-      if (data?.start_date && !timezoneLoading) {
+      if (data?.start_date) {
         const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
         const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
         setFormData(prev => ({
