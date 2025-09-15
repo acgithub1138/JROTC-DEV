@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useCadetCommunityService } from '@/hooks/useCadetRecords';
 interface CommunityServiceTabProps {
   cadetId: string;
@@ -35,6 +35,38 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
   const handleNextPage = () => {
     setCurrentPage(prev => Math.min(prev + 1, totalPages));
   };
+
+  const handleExportCSV = () => {
+    if (communityService.length === 0) return;
+
+    // CSV headers
+    const headers = ['Date', 'Event', 'Hours', 'Notes', 'Recorded'];
+    
+    // Convert data to CSV format
+    const csvData = communityService.map(service => [
+      format(new Date(service.date), 'yyyy-MM-dd'),
+      `"${service.event || ''}"`,
+      service.hours || 0,
+      `"${service.notes || ''}"`,
+      format(new Date(service.created_at), 'yyyy-MM-dd')
+    ]);
+
+    // Combine headers and data
+    const csvContent = [headers, ...csvData]
+      .map(row => row.join(','))
+      .join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `community-service-records-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -62,14 +94,27 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
   const totalHours = communityService.reduce((sum, service) => sum + (service.hours || 0), 0);
   return <Card>
       <CardHeader>
-        <CardTitle>
-          Community Service Records
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Community Service Records
+            {communityService.length > 0 && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({communityService.length} total records, {totalHours} hours)
+              </span>
+            )}
+          </CardTitle>
           {communityService.length > 0 && (
-            <span className="text-sm font-normal text-muted-foreground ml-2">
-              ({communityService.length} total records, {totalHours} hours)
-            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              className="ml-4"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Community Service
+            </Button>
           )}
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Desktop Table View */}
