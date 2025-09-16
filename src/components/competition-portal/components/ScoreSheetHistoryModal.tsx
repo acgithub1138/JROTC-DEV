@@ -53,11 +53,11 @@ export const ScoreSheetHistoryModal: React.FC<ScoreSheetHistoryModalProps> = ({
     setError(null);
 
     try {
-      // First get all competition event IDs for this school, competition, and event
+      // First get all competition event IDs for this school and event
+      // Note: Some competition_events may have null competition_id, so we'll filter by school_id and event only
       const { data: competitionEvents, error: eventsError } = await supabase
         .from('competition_events')
         .select('id')
-        .eq('competition_id', competitionId)
         .eq('school_id', schoolId)
         .eq('event', eventId);
 
