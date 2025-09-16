@@ -109,16 +109,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                   </div>
                 </div>
                 <div className="flex space-x-1">
-                  {canView && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onView(judge)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  )}
                   {canEdit && (
                     <Button
                       variant="outline"
@@ -239,11 +229,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {canView && (
-                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onView(judge)}>
-                      <Eye className="w-3 h-3" />
-                    </Button>
-                  )}
                   {canEdit && (
                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(judge)}>
                       <Edit className="w-3 h-3" />
