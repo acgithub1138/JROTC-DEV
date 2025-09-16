@@ -118,7 +118,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     const programLabel = programOptions.find(p => p.value === program)?.label || program;
     const eventType = eventTypes.find(et => et.id === eventId);
     const eventName = eventType ? eventType.name : eventId;
-    const baseName = `${programLabel} - ${eventName}`;
+    const schoolInitials = userProfile?.schools?.initials || '';
+    const baseName = `${programLabel} - ${eventName}${schoolInitials ? ` (${schoolInitials})` : ''}`;
 
     // Check if this exact name exists
     const existingTemplates = templates.filter(t => t.template_name.startsWith(baseName) && (!template || t.id !== template.id) // Exclude current template when editing

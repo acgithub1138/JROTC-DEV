@@ -19,6 +19,7 @@ interface School {
   competition_portal?: boolean;
   comp_register_only?: boolean;
   logo_url?: string;
+  initials?: string;
 }
 
 interface Profile {
@@ -98,7 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             jrotc_program,
             competition_module,
             competition_portal,
-            logo_url
+            logo_url,
+            initials
           ),
           user_roles (
             role_name
