@@ -4,16 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
-import { Edit, Trash2, Eye, Phone, Mail, Calendar } from 'lucide-react';
+import { Edit, Trash2, Eye, Phone, Mail } from 'lucide-react';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { EditableJudgeCell } from './EditableJudgeCell';
+import { useJudgeTableLogic } from '@/hooks/competition-portal/useJudgeTableLogic';
 interface Judge {
   id: string;
+  school_id: string;
   name: string;
   phone?: string;
   email?: string;
   available: boolean;
   created_at: string;
+  updated_at: string;
+  created_by?: string;
 }
 interface JudgesTableProps {
   judges: Judge[];
@@ -49,6 +54,13 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
     canDelete
   } = useCPJudgesPermissions();
   const isMobile = useIsMobile();
+  const {
+    editState,
+    setEditState,
+    canEdit: canEditTable,
+    cancelEdit,
+    saveEdit,
+  } = useJudgeTableLogic();
   
   const isAllSelected = judges.length > 0 && selectedJudges.length === judges.length;
   const isIndeterminate = selectedJudges.length > 0 && selectedJudges.length < judges.length;
@@ -143,10 +155,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                     <span>{judge.email}</span>
                   </div>
                 )}
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Created {new Date(judge.created_at).toLocaleDateString()}</span>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -194,25 +202,17 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
             </TableHead>
             <TableHead>
               <button 
-                onClick={() => onSort('status')}
+                onClick={() => onSort('available')}
                 className="flex items-center gap-2 hover:text-foreground font-medium"
               >
-                Status {getSortIcon('status')}
-              </button>
-            </TableHead>
-            <TableHead>
-              <button 
-                onClick={() => onSort('created_at')}
-                className="flex items-center gap-2 hover:text-foreground font-medium"
-              >
-                Created {getSortIcon('created_at')}
+                Status {getSortIcon('available')}
               </button>
             </TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {judges.map(judge => <TableRow key={judge.id}>
+          {judges.map(judge => <TableRow key={judge.id} className="group">
               <TableCell>
                 <Checkbox
                   checked={selectedJudges.includes(judge.id)}
@@ -224,12 +224,21 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
               <TableCell>{judge.phone || '-'}</TableCell>
               <TableCell>{judge.email || '-'}</TableCell>
               <TableCell>
-                <Badge variant={judge.available ? 'default' : 'secondary'}>
-                  {judge.available ? 'Available' : 'Unavailable'}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {new Date(judge.created_at).toLocaleDateString()}
+                <EditableJudgeCell
+                  judge={judge}
+                  field="available"
+                  value={judge.available}
+                  displayValue={
+                    <Badge variant={judge.available ? 'default' : 'secondary'}>
+                      {judge.available ? 'Available' : 'Unavailable'}
+                    </Badge>
+                  }
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTable}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">

@@ -115,13 +115,9 @@ export const JudgesPage: React.FC = () => {
           aValue = (a.email || '').toLowerCase();
           bValue = (b.email || '').toLowerCase();
           break;
-        case 'status':
+        case 'available':
           aValue = a.available ? 1 : 0;
           bValue = b.available ? 1 : 0;
-          break;
-        case 'created_at':
-          aValue = new Date(a.created_at);
-          bValue = new Date(b.created_at);
           break;
         default:
           return 0;
