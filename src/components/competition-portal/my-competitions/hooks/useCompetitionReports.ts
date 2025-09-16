@@ -61,71 +61,30 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     try {
       setIsLoadingCompetitions(true);
       
-      // Fetch competitions that have competition events for the selected event
-      const { data: competitionEvents, error: eventsError } = await supabase
-        .from('competition_events')
-        .select(`
-          competition_id,
-          source_competition_id,
-          competitions(
-            id,
-            name,
-            competition_date
-          ),
-          competition_event_types!inner(
-            name
-          )
-        `)
+      // Use the unified view to get competitions with score sheets for the selected event
+      const { data: competitionsData, error } = await supabase
+        .from('competition_events_with_competitions')
+        .select('competition_id, competition_name, competition_date')
         .eq('school_id', userProfile.school_id)
-        .eq('competition_event_types.name', selectedEvent);
+        .eq('event_name', selectedEvent);
 
-      if (eventsError) throw eventsError;
+      if (error) throw error;
 
-      // Extract unique competitions that have score sheets for this event
-      const competitionsWithScoreSheets = new Map();
+      // Extract unique competitions using a Map to avoid duplicates
+      const uniqueCompetitions = new Map();
       
-      competitionEvents?.forEach(event => {
-        // Handle internal competitions
-        if (event.competition_id && event.competitions) {
-          competitionsWithScoreSheets.set(event.competitions.id, {
-            id: event.competitions.id,
-            name: event.competitions.name,
-            competition_date: event.competitions.competition_date
+      competitionsData?.forEach(comp => {
+        if (!uniqueCompetitions.has(comp.competition_id)) {
+          uniqueCompetitions.set(comp.competition_id, {
+            id: comp.competition_id,
+            name: comp.competition_name,
+            competition_date: comp.competition_date
           });
-        }
-        
-        // Handle portal competitions (source_competition_id)
-        if (event.source_competition_id) {
-          // We need to fetch the portal competition details
-          // For now, we'll handle this in a separate query
         }
       });
 
-      // Fetch portal competition details for source_competition_ids
-      const sourceCompetitionIds = competitionEvents
-        ?.filter(event => event.source_competition_id)
-        .map(event => event.source_competition_id) || [];
-
-      if (sourceCompetitionIds.length > 0) {
-        const { data: portalComps, error: portalError } = await supabase
-          .from('cp_competitions')
-          .select('id, name, start_date')
-          .in('id', sourceCompetitionIds)
-          .eq('school_id', userProfile.school_id);
-
-        if (portalError) throw portalError;
-
-        portalComps?.forEach(comp => {
-          competitionsWithScoreSheets.set(comp.id, {
-            id: comp.id,
-            name: comp.name,
-            competition_date: comp.start_date
-          });
-        });
-      }
-
       // Convert to array and sort by competition date descending
-      const sortedCompetitions = Array.from(competitionsWithScoreSheets.values())
+      const sortedCompetitions = Array.from(uniqueCompetitions.values())
         .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime());
 
       setAvailableCompetitions(sortedCompetitions);
@@ -156,27 +115,14 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       setIsLoading(true);
       
       let query = supabase
-        .from('competition_events')
-        .select(`
-          event,
-          score_sheet,
-          total_points,
-          competition_id,
-          source_competition_id,
-          competitions(
-            id,
-            competition_date
-          ),
-          competition_event_types!inner(
-            name
-          )
-        `)
+        .from('competition_events_with_competitions')
+        .select('*')
         .eq('school_id', userProfile.school_id)
-        .eq('competition_event_types.name', selectedEvent);
+        .eq('event_name', selectedEvent);
       
-      // Filter by specific competitions if selected (check both competition_id and source_competition_id)
+      // Filter by specific competitions if selected
       if (selectedCompetitions && selectedCompetitions.length > 0) {
-        query = query.or(`competition_id.in.(${selectedCompetitions.join(',')}),source_competition_id.in.(${selectedCompetitions.join(',')})`);
+        query = query.in('competition_id', selectedCompetitions);
       }
       
       const { data, error } = await query;
@@ -322,8 +268,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
 
     data.forEach(item => {
-      // Handle null competitions from left join
-      const date = item.competitions?.competition_date || 'Unknown Date';
+      // Get competition date from the unified view
+      const date = item.competition_date || 'Unknown Date';
       
       if (!groupedByDate[date]) {
         groupedByDate[date] = {};

@@ -3712,7 +3712,25 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      competition_events_with_competitions: {
+        Row: {
+          cadet_ids: string[] | null
+          competition_date: string | null
+          competition_event_id: string | null
+          competition_id: string | null
+          competition_name: string | null
+          competition_source: string | null
+          created_at: string | null
+          event: string | null
+          event_name: string | null
+          school_id: string | null
+          score_sheet: Json | null
+          team_name: string | null
+          total_points: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_user_role_to_table: {
