@@ -233,10 +233,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                       {judge.available ? 'Available' : 'Unavailable'}
                     </Badge>
                   }
-                  editState={editState}
-                  setEditState={setEditState}
                   onSave={saveEdit}
-                  onCancel={cancelEdit}
                   canEdit={canEditTable}
                 />
               </TableCell>
