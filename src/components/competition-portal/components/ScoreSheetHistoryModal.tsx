@@ -197,7 +197,7 @@ export const ScoreSheetHistoryModal: React.FC<ScoreSheetHistoryModalProps> = ({
                   <div key={record.id} className="border border-border rounded-lg p-4 space-y-3">
                     <div className="space-y-1">
                       <div className="text-sm font-medium">
-                        Change #{history.length - index} - {format(new Date(record.created_at), 'MMM dd, yyyy \'at\' h:mm a')} - Judge {judgeNumber}
+                        Change #{history.length - index} - {format(new Date(record.created_at), 'MMM dd, yyyy \'at\' h:mm a')} - {judgeNumber}
                       </div>
                     </div>
 
