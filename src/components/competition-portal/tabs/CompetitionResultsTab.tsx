@@ -45,11 +45,15 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
   const [historyModal, setHistoryModal] = useState<{
     isOpen: boolean;
     competitionEventId: string;
+    schoolId: string;
+    eventId: string;
     schoolName: string;
     eventName: string;
   }>({
     isOpen: false,
     competitionEventId: '',
+    schoolId: '',
+    eventId: '',
     schoolName: '',
     eventName: ''
   });
@@ -218,17 +222,15 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
     return result;
   }, [rows, schoolMap, eventMap]);
   
-  const openHistoryModal = (schoolAgg: any, eventName: string) => {
-    // Find any event record with history for this school
-    const eventWithHistory = schoolAgg.eventRecords.find((record: CompetitionEventRow) => record.has_history);
-    if (eventWithHistory) {
-      setHistoryModal({
-        isOpen: true,
-        competitionEventId: eventWithHistory.id,
-        schoolName: schoolAgg.schoolName,
-        eventName: eventName
-      });
-    }
+  const openHistoryModal = (schoolAgg: any, eventName: string, eventId: string) => {
+    setHistoryModal({
+      isOpen: true,
+      competitionEventId: '', // Not needed anymore but keeping for compatibility
+      schoolId: schoolAgg.schoolId,
+      eventId: eventId,
+      schoolName: schoolAgg.schoolName,
+      eventName: eventName
+    });
   };
 
   const hasAnyHistory = (schoolAgg: any) => {
@@ -270,7 +272,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => openHistoryModal(s, group.event)}
+                                onClick={() => openHistoryModal(s, group.event, group.eventId)}
                               >
                                 <History className="h-4 w-4 mr-1" />
                                 History
@@ -327,7 +329,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                                   title="Score Change History" 
                                   className="h-6 w-6"
                                   aria-label={`View history for ${s.schoolName}`}
-                                  onClick={() => openHistoryModal(s, group.event)}
+                                  onClick={() => openHistoryModal(s, group.event, group.eventId)}
                                 >
                                   <History className="h-3 w-3" />
                                 </Button>
@@ -345,7 +347,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
       <ScoreSheetHistoryModal
         isOpen={historyModal.isOpen}
         onClose={() => setHistoryModal(prev => ({ ...prev, isOpen: false }))}
-        competitionEventId={historyModal.competitionEventId}
+        competitionId={competitionId}
+        schoolId={historyModal.schoolId}
+        eventId={historyModal.eventId}
         schoolName={historyModal.schoolName}
         eventName={historyModal.eventName}
       />
