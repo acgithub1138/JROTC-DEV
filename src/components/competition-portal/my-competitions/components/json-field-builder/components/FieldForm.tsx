@@ -57,7 +57,6 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="bold_gray">Bold and Grey</SelectItem>
-              <SelectItem value="calculated">Calculated Field</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="label">Label</SelectItem>
               <SelectItem value="number">Number</SelectItem>
@@ -164,14 +163,16 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="pauseField" 
-            checked={currentField.pauseField || false} 
-            onCheckedChange={checked => onFieldUpdate('pauseField', checked)} 
-          />
-          <Label htmlFor="pauseField">Bold and Grey</Label>
-        </div>
+        {currentField.type !== 'bold_gray' && currentField.type !== 'section_header' && (
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="pauseField" 
+              checked={currentField.pauseField || false} 
+              onCheckedChange={checked => onFieldUpdate('pauseField', checked)} 
+            />
+            <Label htmlFor="pauseField">Bold and Grey</Label>
+          </div>
+        )}
       </div>
 
       <Button type="button" onClick={onAddField} className="w-full" disabled={!currentField.name}>
