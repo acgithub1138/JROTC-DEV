@@ -24,72 +24,45 @@ export const useCompetitions = () => {
     try {
       setIsLoading(true);
       
-      // Fetch internal competitions (ones created by the school)
-      const { data: internalComps, error: internalError } = await supabase
-        .from('competitions')
+      // Use the unified view to get all competitions for the school
+      const { data: allCompetitions, error } = await supabase
+        .from('school_competitions')
         .select('*')
         .eq('school_id', userProfile.school_id)
         .order('competition_date', { ascending: false });
 
-      if (internalError) throw internalError;
+      if (error) throw error;
 
-      // Fetch portal competitions (ones the school is registered for)
-      const { data: portalComps, error: portalError } = await supabase
-        .from('cp_competitions')
-        .select(`
-          *,
-          cp_comp_schools!inner(
-            school_id,
-            status
-          )
-        `)
-        .eq('cp_comp_schools.school_id', userProfile.school_id)
-        .eq('cp_comp_schools.status', 'registered')
-        .order('start_date', { ascending: false });
-
-      if (portalError) throw portalError;
-
-      // Transform and combine competitions
-      const transformedInternal: ExtendedCompetition[] = (internalComps || []).map(comp => ({
-        ...comp,
-        source_type: 'internal' as const,
-        source_competition_id: comp.id
-      }));
-
-      const transformedPortal: ExtendedCompetition[] = (portalComps || []).map(comp => ({
+      // Transform to match the ExtendedCompetition type
+      const transformedCompetitions: ExtendedCompetition[] = (allCompetitions || []).map(comp => ({
         id: comp.id,
         name: comp.name,
         description: comp.description,
         location: comp.location,
-        competition_date: comp.start_date.split('T')[0], // Convert timestamp to date
+        competition_date: comp.competition_date.split('T')[0], // Ensure date format
         registration_deadline: comp.registration_deadline ? comp.registration_deadline.split('T')[0] : null,
-        school_id: userProfile.school_id, // Use current school for consistency
+        school_id: comp.school_id,
         created_at: comp.created_at,
         updated_at: comp.updated_at,
-        source_type: 'portal' as const,
-        source_competition_id: comp.id,
-        // Set other fields to null/default for portal competitions
-        comp_type: null,
-        unarmed_exhibition: null,
-        unarmed_regulation: null,
-        armed_inspection: null,
-        armed_color_guard: null,
-        armed_exhibition: null,
-        armed_regulation: null,
-        cadets: null,
-        teams: null,
-        overall_unarmed_placement: null,
-        overall_armed_placement: null,
-        overall_placement: null,
-        unarmed_inspection: null,
-        unarmed_color_guard: null
+        source_type: comp.source_type as 'internal' | 'portal',
+        source_competition_id: comp.source_competition_id,
+        comp_type: comp.comp_type,
+        teams: comp.teams,
+        cadets: comp.cadets,
+        overall_placement: comp.overall_placement,
+        overall_armed_placement: comp.overall_armed_placement,
+        overall_unarmed_placement: comp.overall_unarmed_placement,
+        armed_regulation: comp.armed_regulation,
+        armed_exhibition: comp.armed_exhibition,
+        armed_color_guard: comp.armed_color_guard,
+        armed_inspection: comp.armed_inspection,
+        unarmed_regulation: comp.unarmed_regulation,
+        unarmed_exhibition: comp.unarmed_exhibition,
+        unarmed_color_guard: comp.unarmed_color_guard,
+        unarmed_inspection: comp.unarmed_inspection
       }));
 
-      // Combine and sort by date
-      const allCompetitions = [...transformedInternal, ...transformedPortal]
-        .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime());
-
-      setCompetitions(allCompetitions);
+      setCompetitions(transformedCompetitions);
     } catch (error) {
       console.error('Error fetching competitions:', error);
       toast.error('Failed to load competitions');

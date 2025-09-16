@@ -3731,6 +3731,52 @@ export type Database = {
         }
         Relationships: []
       }
+      school_competitions: {
+        Row: {
+          armed_color_guard:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_exhibition: Database["public"]["Enums"]["comp_placement"] | null
+          armed_inspection: Database["public"]["Enums"]["comp_placement"] | null
+          armed_regulation: Database["public"]["Enums"]["comp_placement"] | null
+          cadets: string[] | null
+          comp_type: Database["public"]["Enums"]["jrotc_program"] | null
+          competition_date: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          location: string | null
+          name: string | null
+          overall_armed_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_unarmed_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          registration_deadline: string | null
+          school_id: string | null
+          source_competition_id: string | null
+          source_type: string | null
+          teams: string[] | null
+          unarmed_color_guard:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_exhibition:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_inspection:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_regulation:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_user_role_to_table: {
