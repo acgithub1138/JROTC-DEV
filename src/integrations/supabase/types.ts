@@ -507,6 +507,13 @@ export type Database = {
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "competition_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams_with_members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       competition_templates: {
@@ -3427,6 +3434,13 @@ export type Database = {
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tasks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams_with_members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       team_members: {
@@ -3464,6 +3478,13 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams_with_members"
             referencedColumns: ["id"]
           },
         ]
@@ -3731,6 +3752,53 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_stats: {
+        Row: {
+          active_incidents: number | null
+          active_tasks: number | null
+          community_service_hours: number | null
+          community_service_records: number | null
+          in_stock_count: number | null
+          net_budget: number | null
+          out_of_stock_count: number | null
+          overdue_incidents: number | null
+          overdue_tasks: number | null
+          school_id: string | null
+          total_cadets: number | null
+          total_expenses: number | null
+          total_income: number | null
+          total_inventory: number | null
+          total_issued: number | null
+          urgent_critical_incidents: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parent_cadet_tasks: {
+        Row: {
+          cadet_id: string | null
+          cadet_name: string | null
+          due_date: string | null
+          id: string | null
+          is_subtask: boolean | null
+          parent_email: string | null
+          parent_task_title: string | null
+          priority: string | null
+          school_id: string | null
+          status: string | null
+          task_number: string | null
+          task_type: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       school_competitions: {
         Row: {
           armed_color_guard:
@@ -3776,6 +3844,38 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: []
+      }
+      teams_with_members: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          member_count: number | null
+          name: string | null
+          school_id: string | null
+          team_lead_email: string | null
+          team_lead_first_name: string | null
+          team_lead_id: string | null
+          team_lead_last_name: string | null
+          team_members: Json | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_team_lead_id_fkey"
+            columns: ["team_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
