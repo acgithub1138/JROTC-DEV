@@ -60,15 +60,42 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
     try {
       setIsLoadingCompetitions(true);
-      const { data, error } = await supabase
-        .from('competitions')
-        .select('id, name, competition_date')
-        .eq('school_id', userProfile.school_id)
-        .order('competition_date', { ascending: false });
+      
+      // Fetch both internal competitions and portal competitions
+      const [internalComps, portalComps] = await Promise.all([
+        supabase
+          .from('competitions')
+          .select('id, name, competition_date')
+          .eq('school_id', userProfile.school_id),
+        supabase
+          .from('cp_competitions')
+          .select('id, name, start_date')
+          .eq('school_id', userProfile.school_id)
+      ]);
 
-      if (error) throw error;
+      if (internalComps.error) throw internalComps.error;
+      if (portalComps.error) throw portalComps.error;
 
-      setAvailableCompetitions(data || []);
+      // Combine and normalize the data
+      const allCompetitions = [
+        ...(internalComps.data || []).map(comp => ({
+          id: comp.id,
+          name: comp.name,
+          competition_date: comp.competition_date
+        })),
+        ...(portalComps.data || []).map(comp => ({
+          id: comp.id,
+          name: comp.name,
+          competition_date: comp.start_date // Use start_date as competition_date for portal comps
+        }))
+      ];
+
+      // Sort by competition date descending
+      const sortedCompetitions = allCompetitions.sort((a, b) => 
+        new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime()
+      );
+
+      setAvailableCompetitions(sortedCompetitions);
     } catch (error) {
       console.error('Error fetching available competitions:', error);
       toast.error('Failed to load available competitions');
