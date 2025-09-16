@@ -53,7 +53,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
   };
 
   const fetchAvailableCompetitions = async () => {
-    if (!userProfile?.school_id) {
+    if (!userProfile?.school_id || !selectedEvent) {
       setIsLoadingCompetitions(false);
       return;
     }
@@ -61,39 +61,72 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     try {
       setIsLoadingCompetitions(true);
       
-      // Fetch both internal competitions and portal competitions
-      const [internalComps, portalComps] = await Promise.all([
-        supabase
-          .from('competitions')
-          .select('id, name, competition_date')
-          .eq('school_id', userProfile.school_id),
-        supabase
+      // Fetch competitions that have competition events for the selected event
+      const { data: competitionEvents, error: eventsError } = await supabase
+        .from('competition_events')
+        .select(`
+          competition_id,
+          source_competition_id,
+          competitions(
+            id,
+            name,
+            competition_date
+          ),
+          competition_event_types!inner(
+            name
+          )
+        `)
+        .eq('school_id', userProfile.school_id)
+        .eq('competition_event_types.name', selectedEvent);
+
+      if (eventsError) throw eventsError;
+
+      // Extract unique competitions that have score sheets for this event
+      const competitionsWithScoreSheets = new Map();
+      
+      competitionEvents?.forEach(event => {
+        // Handle internal competitions
+        if (event.competition_id && event.competitions) {
+          competitionsWithScoreSheets.set(event.competitions.id, {
+            id: event.competitions.id,
+            name: event.competitions.name,
+            competition_date: event.competitions.competition_date
+          });
+        }
+        
+        // Handle portal competitions (source_competition_id)
+        if (event.source_competition_id) {
+          // We need to fetch the portal competition details
+          // For now, we'll handle this in a separate query
+        }
+      });
+
+      // Fetch portal competition details for source_competition_ids
+      const sourceCompetitionIds = competitionEvents
+        ?.filter(event => event.source_competition_id)
+        .map(event => event.source_competition_id) || [];
+
+      if (sourceCompetitionIds.length > 0) {
+        const { data: portalComps, error: portalError } = await supabase
           .from('cp_competitions')
           .select('id, name, start_date')
-          .eq('school_id', userProfile.school_id)
-      ]);
+          .in('id', sourceCompetitionIds)
+          .eq('school_id', userProfile.school_id);
 
-      if (internalComps.error) throw internalComps.error;
-      if (portalComps.error) throw portalComps.error;
+        if (portalError) throw portalError;
 
-      // Combine and normalize the data
-      const allCompetitions = [
-        ...(internalComps.data || []).map(comp => ({
-          id: comp.id,
-          name: comp.name,
-          competition_date: comp.competition_date
-        })),
-        ...(portalComps.data || []).map(comp => ({
-          id: comp.id,
-          name: comp.name,
-          competition_date: comp.start_date // Use start_date as competition_date for portal comps
-        }))
-      ];
+        portalComps?.forEach(comp => {
+          competitionsWithScoreSheets.set(comp.id, {
+            id: comp.id,
+            name: comp.name,
+            competition_date: comp.start_date
+          });
+        });
+      }
 
-      // Sort by competition date descending
-      const sortedCompetitions = allCompetitions.sort((a, b) => 
-        new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime()
-      );
+      // Convert to array and sort by competition date descending
+      const sortedCompetitions = Array.from(competitionsWithScoreSheets.values())
+        .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime());
 
       setAvailableCompetitions(sortedCompetitions);
     } catch (error) {
@@ -372,8 +405,11 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
   useEffect(() => {
     fetchAvailableEvents();
-    fetchAvailableCompetitions();
   }, [userProfile?.school_id]);
+
+  useEffect(() => {
+    fetchAvailableCompetitions();
+  }, [userProfile?.school_id, selectedEvent]);
 
   useEffect(() => {
     fetchReportData();
