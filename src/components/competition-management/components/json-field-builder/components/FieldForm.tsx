@@ -163,7 +163,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </>
         )}
 
-        {currentField.type !== 'bold_gray' && currentField.type !== 'section_header' && (
+        {currentField.type !== 'bold_gray' && currentField.type !== 'section_header' && currentField.type !== 'text' && (
           <div className="flex items-center space-x-2">
             <Switch 
               id="pauseField" 
