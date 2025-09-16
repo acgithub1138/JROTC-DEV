@@ -242,6 +242,50 @@ export const ScoreSheetRecord = () => {
     }
   };
 
+  const handleSubmitAndAddAnother = async () => {
+    if (!isFormValid || !selectedTemplate || !schoolInfo?.school_id) return;
+    setIsSubmitting(true);
+    try {
+      const eventData = {
+        team_name: teamName || null,
+        event: selectedTemplate.event, // enum from template
+        score_sheet: {
+          template_id: selectedTemplate.id,
+          template_name: selectedTemplate.template_name,
+          judge_number: judgeNumber,
+          scores: scores,
+          calculated_at: new Date().toISOString()
+        },
+        total_points: totalPoints,
+        school_id: schoolInfo.school_id,
+        source_competition_id: competitionId,
+        source_type: 'portal' as const,
+        // keep competition_id null for portal usage
+      } as any;
+
+      const { error } = await supabase
+        .from('competition_events')
+        .insert(eventData);
+      if (error) throw error;
+
+      toast.success('Event score sheet created');
+      
+      // Reset form for next entry
+      setSelectedCompEventId('');
+      setJudgeNumber('');
+      setTeamName('');
+      setScores({});
+      setTotalPoints(0);
+      setSelectedTemplate(null);
+      resetChanges();
+    } catch (e) {
+      console.error('Error creating event:', e);
+      toast.error('Failed to create event');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!competitionId) {
     return (
       <div className="p-6">
@@ -293,6 +337,15 @@ export const ScoreSheetRecord = () => {
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" onClick={handleBack}>
               Cancel
+            </Button>
+            <Button 
+              type="button" 
+              variant="secondary"
+              disabled={!isFormValid || isSubmitting}
+              onClick={handleSubmitAndAddAnother}
+            >
+              <Save className="h-4 w-4" />
+              {isSubmitting ? 'Saving...' : 'Save & Add Another'}
             </Button>
             <Button 
               type="submit" 
