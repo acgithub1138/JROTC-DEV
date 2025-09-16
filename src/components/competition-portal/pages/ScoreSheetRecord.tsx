@@ -187,13 +187,13 @@ export const ScoreSheetRecord = () => {
     if (hasUnsavedChanges && !isViewMode) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     }
   };
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
   };
 
   const handleContinueEditing = () => {
@@ -233,7 +233,7 @@ export const ScoreSheetRecord = () => {
 
       toast.success('Event score sheet created');
       resetChanges();
-      navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     } catch (e) {
       console.error('Error creating event:', e);
       toast.error('Failed to create event');
