@@ -17,9 +17,10 @@ interface ScoreSheetTableProps {
   events: CompetitionEvent[];
   onEventsRefresh?: () => void;
   competitionId?: string;
+  isInternal?: boolean;
 }
 
-export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh, competitionId: propCompetitionId }) => {
+export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh, competitionId: propCompetitionId, isInternal = true }) => {
   const navigate = useNavigate();
   
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -187,6 +188,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                        canView={canViewDetails}
                        canEdit={canUpdate}
                        canDelete={canDelete}
+                       isInternal={isInternal}
                        onEdit={() => {
                          console.log('Edit button clicked for event:', event.id);
                          handleEditScoreSheet(event);

@@ -248,6 +248,7 @@ export const ScoreSheetPage = () => {
                     <ScoreSheetTable 
                       events={schoolData.events} 
                       onEventsRefresh={refetch}
+                      isInternal={!isPortalCompetition}
                     />
                   </div>
                 ))}
@@ -266,6 +267,7 @@ export const ScoreSheetPage = () => {
               <ScoreSheetTable 
                 events={filteredEvents} 
                 onEventsRefresh={refetch}
+                isInternal={!isPortalCompetition}
               />
             </div>
           ) : !showAllSchools && selectedEvent && filteredEvents.length === 0 ? (

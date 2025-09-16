@@ -25,6 +25,8 @@ interface TableActionButtonsProps {
   }>;
   // Legacy readOnly support
   readOnly?: boolean;
+  // For competition portal - only show edit/delete for internal competitions
+  isInternal?: boolean;
 }
 
 export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
@@ -39,7 +41,8 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   onCreate,
   onCancel,
   customActions = [],
-  readOnly = false
+  readOnly = false,
+  isInternal = true
 }) => {
   // If readOnly is true, don't show any actions
   if (readOnly) {
@@ -87,7 +90,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       )}
 
       {/* Edit Action */}
-      {onEdit && canEdit && (
+      {onEdit && canEdit && isInternal && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -103,7 +106,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       )}
 
       {/* Delete Action */}
-      {onDelete && canDelete && (
+      {onDelete && canDelete && isInternal && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
