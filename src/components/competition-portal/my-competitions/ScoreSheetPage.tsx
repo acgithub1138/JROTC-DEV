@@ -150,7 +150,7 @@ export const ScoreSheetPage = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Score Sheets for {competition.name}</h1>
           <div className="flex gap-2">
-            {canCreate && (
+            {canCreate && !isPortalCompetition && (
               <Button onClick={handleAddEvent}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Score Sheet
