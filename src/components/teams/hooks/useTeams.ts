@@ -17,45 +17,41 @@ export const useTeams = () => {
     try {
       setLoading(true);
       
-      // First fetch teams with team lead info
+      // Use the optimized view to fetch teams with members and lead info in one query
       const { data: teamsData, error: teamsError } = await supabase
-        .from('teams')
-        .select(`
-          *,
-          team_lead:profiles!teams_team_lead_id_fkey(
-            id,
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .from('teams_with_members')
+        .select('*')
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: false });
 
       if (teamsError) throw teamsError;
 
-      // Then fetch team members for each team
-      const teamsWithMembers: TeamWithMembers[] = [];
-      
-      for (const team of teamsData || []) {
-        const { data: membersData, error: membersError } = await supabase
-          .from('team_members')
-          .select('*')
-          .eq('team_id', team.id);
+      // Transform the data to match the expected structure
+      const transformedTeams: TeamWithMembers[] = (teamsData || []).map(team => ({
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        team_lead_id: team.team_lead_id,
+        school_id: team.school_id,
+        created_at: team.created_at,
+        updated_at: team.updated_at,
+        team_lead: team.team_lead_first_name ? {
+          id: team.team_lead_id,
+          first_name: team.team_lead_first_name,
+          last_name: team.team_lead_last_name,
+          email: team.team_lead_email
+        } : null,
+        team_members: Array.isArray(team.team_members) ? team.team_members.map((member: any) => ({
+          id: member.id,
+          team_id: member.team_id,
+          cadet_id: member.cadet_id,
+          role: member.role,
+          joined_at: member.joined_at
+        })) : [],
+        member_count: team.member_count
+      }));
 
-        if (membersError) {
-          console.error('Error fetching team members:', membersError);
-          continue;
-        }
-
-        teamsWithMembers.push({
-          ...team,
-          team_members: membersData || [],
-          member_count: membersData?.length || 0
-        });
-      }
-
-      setTeams(teamsWithMembers);
+      setTeams(transformedTeams);
     } catch (error) {
       console.error('Error fetching teams:', error);
       toast({

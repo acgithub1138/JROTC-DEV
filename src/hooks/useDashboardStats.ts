@@ -24,8 +24,24 @@ export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard-stats', userProfile?.id],
     queryFn: async () => {
+      if (!userProfile?.school_id) {
+        throw new Error('User school ID not available');
+      }
+
+      // Use the optimized dashboard stats view for basic school statistics
+      const { data: statsData, error: statsError } = await supabase
+        .from('dashboard_stats')
+        .select('*')
+        .eq('school_id', userProfile.school_id)
+        .maybeSingle();
+
+      if (statsError) {
+        console.error('Error fetching dashboard stats:', statsError);
+        throw statsError;
+      }
+
+      // Fetch additional data that can't be pre-calculated in the view
       const [
-        cadetsResult,
         tasksResult,
         budgetResult,
         inventoryResult,
@@ -33,17 +49,11 @@ export const useDashboardStats = () => {
         schoolsResult,
         communityServiceResult
       ] = await Promise.all([
-        // Total cadets count
-        supabase
-          .from('profiles')
-          .select('id', { count: 'exact' })
-          .neq('role', 'instructor')
-          .eq('active', true),
-        
         // Active tasks count and overdue count
         supabase
           .from('tasks')
           .select('id, status, due_date', { count: 'exact' })
+          .eq('school_id', userProfile.school_id)
           .neq('status', 'completed'),
         
         // Budget transactions (active, non-archived only) for current user's school
@@ -52,17 +62,19 @@ export const useDashboardStats = () => {
           .select('amount, category')
           .eq('archive', false)
           .eq('active', true)
-          .eq('school_id', userProfile?.school_id || ''),
+          .eq('school_id', userProfile.school_id),
         
         // Inventory items count and issued count
         supabase
           .from('inventory_items')
-          .select('id, qty_total, qty_issued, qty_available', { count: 'exact' }),
+          .select('id, qty_total, qty_issued, qty_available', { count: 'exact' })
+          .eq('school_id', userProfile.school_id),
         
         // Incidents data
         supabase
           .from('incidents')
-          .select('id, status, priority, created_at'),
+          .select('id, status, priority, created_at')
+          .eq('school_id', userProfile.school_id),
         
         // Total schools count (for admin dashboard)
         supabase
@@ -130,7 +142,7 @@ export const useDashboardStats = () => {
 
       return {
         cadets: {
-          total: cadetsResult.count || 0,
+          total: statsData?.total_cadets || 0,
           change: '+8 this month' // TODO: Calculate actual monthly change
         },
         tasks: {
