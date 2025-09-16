@@ -65,7 +65,31 @@ export const ViewScoreSheet: React.FC = () => {
         .eq('school_id', schoolId as any);
 
       if (error) throw error;
-      setEventSheets(data || []);
+      
+      // Sort events by judge number to ensure proper column order
+      const sortedEvents = (data || []).sort((a, b) => {
+        const scoreSheetA = a.score_sheet as any;
+        const scoreSheetB = b.score_sheet as any;
+        const judgeA = scoreSheetA?.judge_number || '';
+        const judgeB = scoreSheetB?.judge_number || '';
+        
+        // If both have judge numbers, sort by them
+        if (judgeA && judgeB) {
+          // Extract number from "Judge X" format
+          const numA = parseInt(judgeA.replace(/\D/g, '')) || 0;
+          const numB = parseInt(judgeB.replace(/\D/g, '')) || 0;
+          if (numA !== numB) return numA - numB;
+        }
+        
+        // If only one has judge number, prioritize it
+        if (judgeA && !judgeB) return -1;
+        if (!judgeA && judgeB) return 1;
+        
+        // Fallback to creation date
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+      
+      setEventSheets(sortedEvents);
     } catch (err: any) {
       setError(err.message || 'Failed to load score sheets');
       setEventSheets([]);
