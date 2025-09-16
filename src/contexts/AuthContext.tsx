@@ -17,6 +17,7 @@ interface School {
   jrotc_program?: string;
   competition_module?: boolean;
   competition_portal?: boolean;
+  comp_register_only?: boolean;
   logo_url?: string;
 }
 
@@ -137,8 +138,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Also check current location to prevent redirect loops
     const currentPath = window.location.pathname;
     
-    // IMPORTANT: Only redirect external users, not instructors or other roles
+    // IMPORTANT: Only redirect external users if school has comp_register_only set to true
     if (userRole === 'external' && 
+        profile.schools?.comp_register_only === true &&
         redirectedUserRef.current !== profile.id && 
         !currentPath.includes('/app/competition-portal/open-competitions')) {
       redirectedUserRef.current = profile.id;
@@ -149,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/app/competition-portal/open-competitions';
       }, 100);
     } else {
-      console.log('No redirect needed for user role:', userRole);
+      console.log('No redirect needed for user role:', userRole, 'comp_register_only:', profile.schools?.comp_register_only);
     }
   }, []);
 
