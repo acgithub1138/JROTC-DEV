@@ -181,35 +181,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
               </div>
             )}
 
-            {/* Training Videos Button */}
-            <div className={`${canAccessCompetitionPortal ? 'pt-2' : 'pt-4 border-t border-gray-700'}`}>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-left font-normal"
-                style={{
-                  backgroundColor: 'transparent',
-                  color: currentTheme.link_text,
-                  border: `1px solid ${currentTheme.link_text}`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = currentTheme.link_text;
-                }}
-                onClick={() => {
-                  window.open('https://www.youtube.com/@JORTC-CCC/playlists', '_blank');
-                }}
-              >
-                <Youtube className="w-4 h-4 mr-3" />
-                Training Videos
-              </Button>
-            </div>
             
           </div>
         </ScrollArea>
+
+        {/* Training Videos Button - Fixed at bottom */}
+        <div className="p-3 border-t border-gray-700">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-left font-normal"
+            style={{
+              backgroundColor: 'transparent',
+              color: currentTheme.link_text,
+              border: `1px solid ${currentTheme.link_text}`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = currentTheme.link_text;
+            }}
+            onClick={() => {
+              window.open('https://www.youtube.com/@JORTC-CCC/playlists', '_blank');
+            }}
+          >
+            <Youtube className="w-4 h-4 mr-3" />
+            Training Videos
+          </Button>
+        </div>
       </div>
     </>
   );
