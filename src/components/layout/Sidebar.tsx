@@ -200,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                   e.currentTarget.style.color = currentTheme.link_text;
                 }}
                 onClick={() => {
-                  window.open('https://www.youtube.com/@JORTC-CCC', '_blank');
+                  window.open('https://www.youtube.com/@JORTC-CCC/videos', '_blank');
                 }}
               >
                 <Youtube className="w-4 h-4 mr-3" />
