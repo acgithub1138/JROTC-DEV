@@ -888,45 +888,6 @@ export const OpenCompetitionRecord: React.FC = () => {
 
         {/* Registration Summary */}
         <div className="space-y-6">
-          {/* Current Schedule - show when registered */}
-          {isRegistered && currentSchedules.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Your Schedule
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {currentSchedules.map(schedule => {
-                  const event = events.find(e => e.id === schedule.event_id);
-                  if (!event) return null;
-                  
-                  return (
-                    <div key={schedule.event_id} className="flex justify-between items-center p-3 bg-primary/5 rounded-lg border">
-                      <div>
-                        <div className="font-medium text-sm">
-                          {event.competition_event_types?.name || 'Event'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(schedule.scheduled_time), 'MMM d, yyyy')}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-sm">
-                          {format(new Date(schedule.scheduled_time), 'h:mm a')}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Scheduled Time
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
           <Card>
             <CardHeader>
               <CardTitle>Registration Summary</CardTitle>
