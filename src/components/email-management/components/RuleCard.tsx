@@ -28,8 +28,6 @@ export const RuleCard: React.FC<RuleCardProps> = ({
   // Determine source table based on rule type
   const sourceTable = rule.rule_type.startsWith('subtask_') 
     ? 'subtasks' 
-    : rule.rule_type === 'comp_registration_confirmation' 
-    ? 'cp_comp_schools' 
     : 'tasks';
   
   // Filter templates based on the rule's source table

@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface EmailRule {
   id: string;
   school_id: string;
-  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'task_overdue_reminder' | 'task_comment_added' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled' | 'subtask_overdue_reminder' | 'subtask_comment_added' | 'comp_registration_confirmation';
+  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'task_overdue_reminder' | 'task_comment_added' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled' | 'subtask_overdue_reminder' | 'subtask_comment_added';
   template_id: string | null;
   is_active: boolean;
   trigger_event: 'INSERT' | 'UPDATE';
@@ -30,7 +30,6 @@ export const RULE_LABELS: Record<RuleType, string> = {
   subtask_canceled: 'Subtask Canceled',
   subtask_overdue_reminder: 'Subtask Overdue Reminder',
   subtask_comment_added: 'Subtask Comment Added',
-  comp_registration_confirmation: 'Competition Registration Confirmation',
 };
 
 export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
@@ -46,7 +45,6 @@ export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
   subtask_canceled: 'Triggered when a subtask status is set to Canceled',
   subtask_overdue_reminder: 'Send reminder emails 3, 2, 1 days before and on due date at 10am',
   subtask_comment_added: 'Triggered when a comment is added to a subtask',
-  comp_registration_confirmation: 'Triggered when a school registers for a competition',
 };
 
 export const useEmailRules = (schoolId?: string) => {
