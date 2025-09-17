@@ -9,7 +9,7 @@ import { useThemes } from '@/hooks/useThemes';
 import { usePortal } from '@/contexts/PortalContext';
 import { useNavigate } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
-import { Shield, Home, Trophy } from 'lucide-react';
+import { Shield, Home, Trophy, Youtube } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;
@@ -180,6 +180,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                 </Button>
               </div>
             )}
+
+            {/* Training Videos Button */}
+            <div className={`${canAccessCompetitionPortal ? 'pt-2' : 'pt-4 border-t border-gray-700'}`}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-left font-normal"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: currentTheme.link_text,
+                  border: `1px solid ${currentTheme.link_text}`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = currentTheme.link_text;
+                }}
+                onClick={() => {
+                  window.open('https://www.youtube.com/@JORTC-CCC', '_blank');
+                }}
+              >
+                <Youtube className="w-4 h-4 mr-3" />
+                Training Videos
+              </Button>
+            </div>
             
           </div>
         </ScrollArea>
