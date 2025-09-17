@@ -1,0 +1,153 @@
+-- Update the queue_email function to handle competition registration data
+CREATE OR REPLACE FUNCTION public.queue_email(template_id_param uuid, recipient_email_param text, source_table_param text, record_id_param uuid, school_id_param uuid, rule_id_param uuid DEFAULT NULL::uuid)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+  template_record RECORD;
+  school_record RECORD;
+  processed_subject TEXT;
+  processed_body TEXT;
+  record_data JSONB;
+  flattened_data JSONB;
+  profile_data RECORD;
+  queue_id UUID;
+  email_header_html TEXT;
+  comp_reg_data RECORD;
+BEGIN
+  -- Get the template
+  SELECT * INTO template_record 
+  FROM public.email_templates 
+  WHERE id = template_id_param AND is_active = true;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Template not found or inactive';
+  END IF;
+
+  -- Get school information for header
+  SELECT name, logo_url INTO school_record
+  FROM public.schools 
+  WHERE id = school_id_param;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'School not found';
+  END IF;
+
+  -- Initialize record_data
+  record_data := jsonb_build_object();
+
+  -- Handle different source tables
+  IF source_table_param = 'profiles' THEN
+    -- For profiles table (welcome emails), get profile data including temp_pswd
+    SELECT * INTO profile_data
+    FROM public.profiles 
+    WHERE id = record_id_param;
+    
+    IF FOUND THEN
+      record_data := jsonb_build_object(
+        'id', profile_data.id,
+        'first_name', COALESCE(profile_data.first_name, ''),
+        'last_name', COALESCE(profile_data.last_name, ''),
+        'email', COALESCE(profile_data.email, ''),
+        'role', COALESCE(profile_data.role, ''),
+        'password', COALESCE(profile_data.temp_pswd, 'Please contact your administrator'),
+        'temp_pswd', COALESCE(profile_data.temp_pswd, '')
+      );
+    END IF;
+    
+  ELSIF source_table_param = 'cp_comp_schools' THEN
+    -- For competition registration emails, get comprehensive competition data
+    SELECT * INTO comp_reg_data
+    FROM public.competition_registration_email_data
+    WHERE registration_id = record_id_param;
+    
+    IF FOUND THEN
+      record_data := jsonb_build_object(
+        'competition_name', COALESCE(comp_reg_data.competition_name, ''),
+        'competition_start_date', COALESCE(comp_reg_data.competition_start_date, ''),
+        'competition_end_date', COALESCE(comp_reg_data.competition_end_date, ''),
+        'competition_location', COALESCE(comp_reg_data.competition_location, ''),
+        'competition_address', COALESCE(comp_reg_data.competition_address, ''),
+        'competition_city', COALESCE(comp_reg_data.competition_city, ''),
+        'competition_state', COALESCE(comp_reg_data.competition_state, ''),
+        'competition_zip', COALESCE(comp_reg_data.competition_zip, ''),
+        'hosting_school', COALESCE(comp_reg_data.hosting_school, ''),
+        'registration_deadline', COALESCE(comp_reg_data.registration_deadline, ''),
+        'registered_events_count', COALESCE(comp_reg_data.registered_events_count::text, '0'),
+        'registered_events_text', COALESCE(comp_reg_data.registered_events_text, 'No events registered'),
+        'total_fee', COALESCE(comp_reg_data.total_cost::text, '0'),
+        'total_cost', COALESCE(comp_reg_data.total_cost::text, '0'),
+        'base_fee', COALESCE(comp_reg_data.base_fee::text, '0'),
+        'total_event_fees', COALESCE(comp_reg_data.total_event_fees::text, '0'),
+        'school_name', COALESCE(comp_reg_data.school_name, ''),
+        'school_initials', COALESCE(comp_reg_data.school_initials, ''),
+        'registration_status', COALESCE(comp_reg_data.registration_status, ''),
+        'registration_date', COALESCE(comp_reg_data.registration_date, ''),
+        'paid_status', CASE WHEN comp_reg_data.paid_status THEN 'Paid' ELSE 'Unpaid' END
+      );
+    END IF;
+  END IF;
+
+  -- Initialize flattened_data with the base record
+  flattened_data := record_data;
+
+  -- Add school information to flattened data
+  flattened_data := flattened_data || jsonb_build_object(
+    'school_name', COALESCE(school_record.name, ''),
+    'school_logo_url', COALESCE(school_record.logo_url, ''),
+    'school', jsonb_build_object(
+      'name', COALESCE(school_record.name, ''),
+      'logo_url', COALESCE(school_record.logo_url, '')
+    )
+  );
+
+  -- Process template variables
+  processed_subject := public.replace_template_variables(template_record.subject, flattened_data);
+  processed_body := public.replace_template_variables(template_record.body, flattened_data);
+
+  -- Create email header HTML
+  email_header_html := '<div style="background-color: #f8fafc; padding: 20px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; text-align: center;">';
+  
+  -- Add logo if available
+  IF school_record.logo_url IS NOT NULL AND school_record.logo_url != '' THEN
+    email_header_html := email_header_html || 
+      '<img src="' || school_record.logo_url || '" alt="' || COALESCE(school_record.name, 'School') || ' Logo" style="height: 60px; margin-bottom: 10px; vertical-align: middle;">';
+  END IF;
+  
+  -- Add school name
+  email_header_html := email_header_html || 
+    '<h1 style="margin: 0; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, ''Segoe UI'', Roboto, ''Helvetica Neue'', Arial, sans-serif; font-size: 24px; font-weight: 600;">' || 
+    COALESCE(school_record.name, 'School') || 
+    '</h1></div>';
+
+  -- Prepend header to processed body
+  processed_body := email_header_html || processed_body;
+
+  -- Insert into email queue
+  INSERT INTO public.email_queue (
+    template_id,
+    recipient_email,
+    subject,
+    body,
+    school_id,
+    source_table,
+    record_id,
+    rule_id,
+    scheduled_at
+  ) VALUES (
+    template_record.id,
+    recipient_email_param,
+    processed_subject,
+    processed_body,
+    school_id_param,
+    source_table_param,
+    record_id_param,
+    rule_id_param,
+    NOW()
+  ) RETURNING id INTO queue_id;
+
+  RETURN queue_id;
+END;
+$function$;
