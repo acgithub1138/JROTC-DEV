@@ -309,7 +309,9 @@ export const OpenCompetitionRecord: React.FC = () => {
       if (currentSchedules.length > 0) {
         const timeSlotMap = new Map<string, string>();
         currentSchedules.forEach(schedule => {
-          timeSlotMap.set(schedule.event_id, schedule.scheduled_time);
+          // Convert scheduled_time to ISO string format to match the time slot options
+          const scheduledDate = new Date(schedule.scheduled_time);
+          timeSlotMap.set(schedule.event_id, scheduledDate.toISOString());
         });
         setSelectedTimeSlots(timeSlotMap);
         setInitialSelectedTimeSlots(timeSlotMap);
