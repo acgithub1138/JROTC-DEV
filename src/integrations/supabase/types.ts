@@ -876,6 +876,13 @@ export type Database = {
             foreignKeyName: "cp_comp_events_competition_id_fkey"
             columns: ["competition_id"]
             isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
             referencedRelation: "cp_competitions"
             referencedColumns: ["id"]
           },
@@ -946,6 +953,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cp_comp_resources_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
           {
             foreignKeyName: "cp_comp_resources_competition_id_fkey"
             columns: ["competition_id"]
@@ -1034,6 +1048,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "events"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_schools_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
           },
           {
             foreignKeyName: "cp_comp_schools_competition_id_fkey"
@@ -1189,6 +1210,13 @@ export type Database = {
             foreignKeyName: "cp_event_registrations_competition_id_fkey"
             columns: ["competition_id"]
             isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
             referencedRelation: "cp_competitions"
             referencedColumns: ["id"]
           },
@@ -1260,6 +1288,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_cp_event_schedules_competition"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
           {
             foreignKeyName: "fk_cp_event_schedules_competition"
             columns: ["competition_id"]
@@ -3788,13 +3823,6 @@ export type Database = {
           total_event_fees: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "cp_comp_schools_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "cp_comp_schools_school_id_fkey"
             columns: ["school_id"]
