@@ -4171,6 +4171,10 @@ export type Database = {
         }
         Returns: Json
       }
+      process_delayed_comp_registration_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       process_email_batch: {
         Args: { batch_size?: number }
         Returns: {
