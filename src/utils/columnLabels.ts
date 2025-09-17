@@ -120,6 +120,20 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
       school_id: 'School',
       created_at: 'Created Date',
       updated_at: 'Updated Date'
+    },
+    cp_comp_schools: {
+      id: 'Registration ID',
+      competition_id: 'Competition ID',
+      school_id: 'School ID',
+      school_name: 'School Name',
+      school_initials: 'School Initials',
+      registration_source: 'Registration Source',
+      status: 'Registration Status',
+      paid: 'Paid Status',
+      total_fee: 'Total Fee',
+      notes: 'Notes',
+      created_at: 'Registration Date',
+      updated_at: 'Updated Date'
     }
   };
 

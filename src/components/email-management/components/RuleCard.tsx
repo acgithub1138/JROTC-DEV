@@ -26,7 +26,11 @@ export const RuleCard: React.FC<RuleCardProps> = ({
   isUpdating
 }) => {
   // Determine source table based on rule type
-  const sourceTable = rule.rule_type.startsWith('subtask_') ? 'subtasks' : 'tasks';
+  const sourceTable = rule.rule_type.startsWith('subtask_') 
+    ? 'subtasks' 
+    : rule.rule_type === 'comp_registration_confirmation' 
+    ? 'cp_comp_schools' 
+    : 'tasks';
   
   // Filter templates based on the rule's source table
   const relevantTemplates = templates.filter(t => t.source_table === sourceTable && t.is_active);

@@ -101,11 +101,12 @@ export const useAvailableTables = () => {
         'incidents': 'Incidents'
       };
       
-      // Only include tasks, subtasks and incidents tables
+      // Only include tasks, subtasks, incidents, and competition registration tables
       let availableTables = [
         { name: 'tasks', label: 'Tasks' },
         { name: 'subtasks', label: 'Subtasks' },
-        { name: 'incidents', label: 'Incidents' }
+        { name: 'incidents', label: 'Incidents' },
+        { name: 'cp_comp_schools', label: 'Competition Registrations' }
       ];
       
       // Filter out incidents table unless user is admin

@@ -28,6 +28,7 @@ export const EmailRulesTab: React.FC = () => {
   const isLoading = rulesLoading || templatesLoading;
   const taskTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
   const subtaskTemplates = templates.filter(t => t.source_table === 'subtasks' && t.is_active);
+  const competitionTemplates = templates.filter(t => t.source_table === 'cp_comp_schools' && t.is_active);
   const activeRulesWithoutTemplates = rules.filter(r => r.is_active && !r.template_id);
 
   // Sort rules alphabetically by rule type (name)
@@ -76,7 +77,7 @@ export const EmailRulesTab: React.FC = () => {
         <div>
           <h2 className="text-lg font-semibold">Email Rules</h2>
           <p className="text-sm text-muted-foreground">
-            Configure automated email notifications for task and subtask events
+            Configure automated email notifications for task, subtask, and competition events
           </p>
         </div>
       </div>
@@ -124,15 +125,17 @@ export const EmailRulesTab: React.FC = () => {
         </Card>
       )}
 
-      {schoolIdForRules && (taskTemplates.length === 0 || subtaskTemplates.length === 0) && (
+      {schoolIdForRules && (taskTemplates.length === 0 || subtaskTemplates.length === 0 || competitionTemplates.length === 0) && (
         <Alert>
           <AlertCircle className="w-4 h-4" />
           <AlertDescription>
-            {taskTemplates.length === 0 && subtaskTemplates.length === 0 
-              ? "No task or subtask email templates found. You need to create email templates before you can activate rules."
-              : taskTemplates.length === 0 
-                ? "No task email templates found. Create task templates for task rules to work."
-                : "No subtask email templates found. Create subtask templates for subtask rules to work."
+            {taskTemplates.length === 0 && subtaskTemplates.length === 0 && competitionTemplates.length === 0
+              ? "No email templates found. You need to create email templates before you can activate rules."
+              : [
+                  taskTemplates.length === 0 && "task templates",
+                  subtaskTemplates.length === 0 && "subtask templates", 
+                  competitionTemplates.length === 0 && "competition templates"
+                ].filter(Boolean).join(", ") + " are missing."
             }
             Go to the Templates tab to create templates for the relevant source tables.
           </AlertDescription>
@@ -154,7 +157,7 @@ export const EmailRulesTab: React.FC = () => {
           <CardHeader>
             <CardTitle>Available Rules</CardTitle>
             <CardDescription>
-              Enable rules to automatically send emails when specific task or subtask events occur. 
+              Enable rules to automatically send emails when specific events occur (tasks, subtasks, competitions). 
               Each enabled rule requires an associated email template.
             </CardDescription>
           </CardHeader>
