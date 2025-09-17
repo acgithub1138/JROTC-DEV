@@ -4196,6 +4196,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      queue_delayed_comp_registration_email: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       queue_email: {
         Args: {
           recipient_email_param: string
