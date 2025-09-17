@@ -3752,6 +3752,58 @@ export type Database = {
         }
         Relationships: []
       }
+      competition_registration_email_data: {
+        Row: {
+          base_fee: number | null
+          base_fee_formatted: string | null
+          competition_address: string | null
+          competition_base_fee: number | null
+          competition_city: string | null
+          competition_description: string | null
+          competition_end_date: string | null
+          competition_id: string | null
+          competition_location: string | null
+          competition_name: string | null
+          competition_start_date: string | null
+          competition_state: string | null
+          competition_zip: string | null
+          event_fees_formatted: string | null
+          hosting_school: string | null
+          paid_status: boolean | null
+          registered_events_count: number | null
+          registered_events_json: Json | null
+          registered_events_text: string | null
+          registration_date: string | null
+          registration_deadline: string | null
+          registration_id: string | null
+          registration_notes: string | null
+          registration_source: string | null
+          registration_status: string | null
+          school_calculated_total: number | null
+          school_id: string | null
+          school_initials: string | null
+          school_name: string | null
+          total_cost: number | null
+          total_cost_formatted: string | null
+          total_event_fees: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_schools_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_schools_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dashboard_stats: {
         Row: {
           active_incidents: number | null
