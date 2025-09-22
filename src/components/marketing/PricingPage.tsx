@@ -19,7 +19,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Best for JROTC programs that participate in competitions",
-    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration & Event time selection", "Competition Analytics"],
+    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration", "Event time selection", "Competition Analytics"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
