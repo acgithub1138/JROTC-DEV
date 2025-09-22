@@ -53,7 +53,7 @@ const LandingPage = () => {
     href: "/products/email-management",
     features: ["Automated emails", "Template library", "Targeted messaging", "Communication tracking"]
   }, {
-    icon: Calendar,
+    icon: Users,
     title: "Parent Portal",
     description: "Parent of cadets can get access to a dashboard and calendar.",
     href: "/products/email-management",
