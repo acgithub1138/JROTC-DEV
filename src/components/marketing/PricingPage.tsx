@@ -7,7 +7,7 @@ import { CheckCircle, X } from "lucide-react";
 const PricingPage = () => {
   const plans = [{
     name: "Basic",
-    price: "$2,000",
+    price: "$2,500",
     period: "per year",
     description: "Best for JROTC programs that do not participate in competitions",
     features: ["Dashboard", "Cadet Management", "Task assignment", "Chain of Command Management", "Chain of Command Visual Chart", "Teams Management", "Budget Management", "Inventory Management", "Contact Management", "Event Calendar", "Email Management", "Parent Portal"],
@@ -16,7 +16,7 @@ const PricingPage = () => {
     cta: "Get Started"
   }, {
     name: "Competition Portal - Tracking",
-    price: "$2,500",
+    price: "$3,000",
     period: "per year",
     description: "Best for JROTC programs that participate in competitions",
     features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration", "Event time selection", "Competition Analytics"],
@@ -25,7 +25,7 @@ const PricingPage = () => {
     cta: "Get Started"
   }, {
     name: "Competition Portal - Hosting",
-    price: "$3,000",
+    price: "$3,500",
     period: "per year",
     description: "Best for JORTC programs that host competitions",
     features: ["All Competition Portal - Tracking features +", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Schedule Management", "Real-Time Score Tracking"],
