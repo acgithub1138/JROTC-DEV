@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, FileText, Edit2, Trash2, AlertCircle, CheckCircle, Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
-import { parseCSV, validateCadetData } from './utils/csvProcessor';
+import { parseCSV, validateCadetData, processCSVCadet, CSVProcessorOptions } from './utils/csvProcessor';
 import { NewCadet } from './types';
-import { gradeOptions, flightOptions } from './constants';
+import { gradeOptions, flightOptions, cadetYearOptions } from './constants';
 import { getGradeColor } from '@/utils/gradeColors';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 import { useCadetManagement } from './hooks/useCadetManagement';
@@ -62,20 +62,19 @@ export const CadetBulkUploadPage: React.FC = () => {
     try {
       const csvText = await uploadedFile.text();
       const rawData = parseCSV(csvText);
+      
+      // Prepare validation options
+      const validationOptions: CSVProcessorOptions = {
+        roleOptions,
+        availableGrades: gradeOptions,
+        availableFlights: flightOptions,
+        availableRanks: ranks.map(r => r.rank),
+        cadetYearOptions
+      };
+      
       const processed = rawData.map((row, index) => {
-        const rawCadetYear = row['Cadet Year'] || row['Year'] || '';
-        const cadet: NewCadet = {
-          first_name: row['First Name'] || '',
-          last_name: row['Last Name'] || '',
-          email: row['Email'] || '',
-          role_id: row['Role ID'] || row['Role']?.toLowerCase() || '',
-          grade: row['Grade'] || '',
-          rank: row['Rank'] || '',
-          flight: row['Flight'] || '',
-          cadet_year: convertCadetYear(rawCadetYear),
-          start_year: row['Freshman Year'] ? parseInt(row['Freshman Year']) : undefined
-        };
-        const errors = validateCadetData(cadet);
+        const cadet = processCSVCadet(row, validationOptions);
+        const errors = validateCadetData(cadet, validationOptions);
         return {
           ...cadet,
           id: `temp-${index}`,
@@ -89,7 +88,7 @@ export const CadetBulkUploadPage: React.FC = () => {
     } catch (error) {
       console.error('Error parsing CSV:', error);
     }
-  }, []);
+  }, [roleOptions, ranks]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -113,7 +112,17 @@ export const CadetBulkUploadPage: React.FC = () => {
           ...cadet,
           [field]: value
         };
-        const errors = validateCadetData(updated);
+        
+        // Prepare validation options for re-validation
+        const validationOptions: CSVProcessorOptions = {
+          roleOptions,
+          availableGrades: gradeOptions,
+          availableFlights: flightOptions,
+          availableRanks: ranks.map(r => r.rank),
+          cadetYearOptions
+        };
+        
+        const errors = validateCadetData(updated, validationOptions);
         return {
           ...updated,
           errors,
@@ -209,12 +218,18 @@ export const CadetBulkUploadPage: React.FC = () => {
                     <span>• First Name</span>
                     <span>• Last Name</span>
                     <span>• Email</span>
-                    <span>• Role</span>
-                    <span>• Grade</span>
-                    <span>• Flight</span>
-                    <span>• Rank</span>
-                    <span>• Cadet Year (or Year)</span>
-                    <span>• Freshman Year</span>
+                    <span>• Role (name or ID)</span>
+                    <span>• Grade (optional)</span>
+                    <span>• Flight (optional)</span>
+                    <span>• Rank (optional)</span>
+                    <span>• Cadet Year (optional)</span>
+                    <span>• Freshman Year (optional)</span>
+                  </div>
+                  <div className="mt-3 p-3 bg-muted/50 rounded">
+                    <p className="text-xs">
+                      <strong>Note:</strong> You can use role names like "Cadet", "Instructor", etc. instead of UUIDs. 
+                      The system will automatically convert them to the correct format.
+                    </p>
                   </div>
                 </div>
               </div>
