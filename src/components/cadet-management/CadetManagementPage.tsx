@@ -13,6 +13,7 @@ import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
+import { PasswordFixerButton } from './components/PasswordFixerButton';
 import { Profile } from './types';
 const CadetManagementPage = () => {
   const navigate = useNavigate();
@@ -152,7 +153,10 @@ const CadetManagementPage = () => {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
+            <div className="flex items-center gap-2">
+              <PasswordFixerButton />
+              <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
+            </div>
             {canCreate}
           </div>
         </CardHeader>
