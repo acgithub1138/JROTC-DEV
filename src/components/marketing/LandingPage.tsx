@@ -53,17 +53,23 @@ const LandingPage = () => {
     href: "/products/email-management",
     features: ["Automated emails", "Template library", "Targeted messaging", "Communication tracking"]
   }, {
+    icon: Calendar,
+    title: "Parent Portal",
+    description: "Parent of cadets can get access to a dashboard and calendar.",
+    href: "/products/email-management",
+    features: ["Announcements", "Calendar of events"]
+  }, {
     icon: Trophy,
     title: "Competition Portal - Tracking",
     description: "A place to track all your competitions and review your performance over time.",
     href: "/products/competition-management",
-    features: ["Register for Competitions", "Scoring system", "Performance analytics", "Achievement tracking"]
+    features: ["Register for Competitions", "Select your event time during registration", "Competition Scoring", "Performance analytics", "Achievement tracking"]
   }, {
     icon: Trophy,
     title: "Competition Portal - Hosting",
     description: "Keep your competition events running smoothly from start to finish.",
     href: "/products/competition-management",
-    features: ["Competition Planning", "Resource Management", "Participant Management", "Judge Management", "Custom Score Sheets", "Real-Time Scoring"]
+    features: ["Competition Planning", "Resource Management", "Participant Management", "Judge Management", "Schedule Management", "Custom Score Sheets", "Real-Time Scoring"]
   }];
   const testimonials = [
     //    {
