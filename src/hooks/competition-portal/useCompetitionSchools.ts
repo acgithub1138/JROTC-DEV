@@ -109,6 +109,58 @@ export const useCompetitionSchools = (competitionId?: string) => {
 
   const deleteSchoolRegistration = async (id: string) => {
     try {
+      // First, get the school registration record to access school_id, competition_id, and calendar_event_id
+      const { data: schoolRecord, error: fetchError } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, competition_id, calendar_event_id')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!schoolRecord) throw new Error('School registration not found');
+
+      const { school_id, competition_id, calendar_event_id } = schoolRecord;
+
+      // Delete related records in order (scoped to this school and competition)
+      
+      // 1. Delete event schedules for this school in this competition
+      const { error: schedulesError } = await supabase
+        .from('cp_event_schedules')
+        .delete()
+        .eq('school_id', school_id)
+        .eq('competition_id', competition_id);
+
+      if (schedulesError) {
+        console.error('Error deleting event schedules:', schedulesError);
+        throw new Error('Failed to delete event schedules');
+      }
+
+      // 2. Delete event registrations for this school in this competition
+      const { error: registrationsError } = await supabase
+        .from('cp_event_registrations')
+        .delete()
+        .eq('school_id', school_id)
+        .eq('competition_id', competition_id);
+
+      if (registrationsError) {
+        console.error('Error deleting event registrations:', registrationsError);
+        throw new Error('Failed to delete event registrations');
+      }
+
+      // 3. Delete the calendar event if it exists
+      if (calendar_event_id) {
+        const { error: calendarError } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', calendar_event_id);
+
+        if (calendarError) {
+          console.error('Error deleting calendar event:', calendarError);
+          throw new Error('Failed to delete calendar event');
+        }
+      }
+
+      // 4. Finally, delete the main school registration record
       const { error } = await supabase
         .from('cp_comp_schools')
         .delete()
@@ -117,7 +169,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
       if (error) throw error;
 
       setSchools(prev => prev.filter(school => school.id !== id));
-      toast.success('School registration removed successfully');
+      toast.success('School registration and all related records removed successfully');
     } catch (error) {
       console.error('Error deleting school registration:', error);
       toast.error('Failed to remove school registration');
