@@ -43,7 +43,7 @@ const LandingPage = () => {
   }, {
     icon: Contact,
     title: "JROTC Contacts",
-    description: "Keep parents, relatives, and supporters’ information organized and accessible.",
+    description: "Keep parents, relatives, vendors, and supporters organized and accessible.",
     href: "/products/contacts-management",
     features: ["Contact management"]
   },{
@@ -55,7 +55,7 @@ const LandingPage = () => {
   }, {
     icon: Users,
     title: "Parent Portal",
-    description: "Parent of cadets can get access to a dashboard and calendar.",
+    description: "Parents of cadets can stay informed with announcements and program calendar.",
     href: "/products/email-management",
     features: ["Announcements", "Calendar of events"]
   }, {
