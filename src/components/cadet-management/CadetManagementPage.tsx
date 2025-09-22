@@ -6,6 +6,7 @@ import { Users, Plus } from 'lucide-react';
 import { useCadetManagement } from './hooks/useCadetManagement';
 import { useCadetMassOperations } from './hooks/useCadetMassOperations';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useAuth } from '@/contexts/AuthContext';
 import { CadetPageHeader } from './components/CadetPageHeader';
 import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
@@ -17,6 +18,7 @@ import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './util
 import { Profile } from './types';
 const CadetManagementPage = () => {
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
   const {
     canUpdate,
     canCreate
@@ -155,14 +157,16 @@ const CadetManagementPage = () => {
           <div className="flex items-center justify-between gap-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPasswordRecoveryOpen(true)}
-                className="text-orange-600 border-orange-600 hover:bg-orange-50"
-              >
-                Fix Missing Passwords
-              </Button>
+              {userProfile?.user_roles?.role_name === 'admin' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPasswordRecoveryOpen(true)}
+                  className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                >
+                  Fix Missing Passwords
+                </Button>
+              )}
               <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
             </div>
           </div>
