@@ -12,6 +12,7 @@ import { CadetTabsContent } from './components/CadetTabsContent';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
+import { PasswordRecoveryDialog } from './components/PasswordRecoveryDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
@@ -61,6 +62,7 @@ const CadetManagementPage = () => {
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingProfile, setViewingProfile] = useState<Profile | null>(null);
+  const [passwordRecoveryOpen, setPasswordRecoveryOpen] = useState(false);
   // Removed PT Test dialog states - now using pages
   const handleOpenPTTestDialog = () => navigate('/app/cadets/pt_test_create?mode=single');
   const handleOpenPTTestBulkDialog = () => navigate('/app/cadets/pt_test_create?mode=bulk');
@@ -152,8 +154,17 @@ const CadetManagementPage = () => {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
-            {canCreate}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPasswordRecoveryOpen(true)}
+                className="text-orange-600 border-orange-600 hover:bg-orange-50"
+              >
+                Fix Missing Passwords
+              </Button>
+              <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -191,6 +202,11 @@ const CadetManagementPage = () => {
       <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadetWrapper} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onRefresh={fetchProfiles} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
       
       <ViewCadetDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} profile={viewingProfile} onEditProfile={handleEditProfile} />
+      
+      <PasswordRecoveryDialog 
+        open={passwordRecoveryOpen} 
+        onOpenChange={setPasswordRecoveryOpen} 
+      />
       
       {/* PT Test dialog removed - now using pages */}
     </div>;
