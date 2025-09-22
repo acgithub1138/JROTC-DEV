@@ -28,7 +28,7 @@ const PricingPage = () => {
     price: "$3,000",
     period: "per year",
     description: "Best for JORTC programs that host competitions",
-    features: ["All Competition Portal - Tracking features +", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Real-Time Score Tracking"],
+    features: ["All Competition Portal - Tracking features +", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Schedule Management", "Real-Time Score Tracking"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
