@@ -10,7 +10,7 @@ const PricingPage = () => {
     price: "$2,000",
     period: "per year",
     description: "Best for JROTC programs that do not participate in competitions",
-    features: ["Dashboard", "Cadet Management", "Task assignment", "Chain of Command Management", "Chain of Command Visual Chart", "Teams Management", "Budget Management", "Inventory Management", "Contact Management", "Event Calendar", "Email Management"],
+    features: ["Dashboard", "Cadet Management", "Task assignment", "Chain of Command Management", "Chain of Command Visual Chart", "Teams Management", "Budget Management", "Inventory Management", "Contact Management", "Event Calendar", "Email Management", "Parent Portal"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
@@ -19,7 +19,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Best for JROTC programs that participate in competitions",
-    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration", "Competition Analytics"],
+    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration & Event time selection", "Competition Analytics"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
