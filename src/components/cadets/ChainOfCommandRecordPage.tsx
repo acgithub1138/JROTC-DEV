@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useJobBoard } from '@/components/job-board/hooks/useJobBoard';
 import { useJobBoardRoles } from '@/components/job-board/hooks/useJobBoardRoles';
 import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useRoleValidation } from '@/components/job-board/hooks/useRoleValidation';
 import { JobBoardWithCadet, NewJobBoard } from '@/components/job-board/types';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
@@ -33,6 +34,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState<string>('');
 
   // Form data state
   const [formData, setFormData] = useState<NewJobBoard>({
@@ -48,6 +50,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
   const { roles } = useJobBoardRoles();
   const { jobs, createJob, updateJob } = useJobBoard();
   const { canCreate, canUpdate } = useJobBoardPermissions();
+  const { checkRoleUniqueness, isChecking } = useRoleValidation();
 
   // Load record data for edit mode
   useEffect(() => {
@@ -92,7 +95,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
   }, [mode, recordId, jobs, navigate, toast]);
 
   // Handle form field changes
-  const handleFieldChange = (field: keyof NewJobBoard, value: string) => {
+  const handleFieldChange = async (field: keyof NewJobBoard, value: string) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
       
@@ -106,6 +109,21 @@ export const ChainOfCommandRecordPage: React.FC = () => {
       return newData;
     });
     setHasUnsavedChanges(true);
+
+    // Validate role uniqueness when role field changes
+    if (field === 'role' && value.trim()) {
+      setRoleError('');
+      const excludeJobId = mode === 'edit' && record ? record.id : undefined;
+      const { isUnique, error } = await checkRoleUniqueness(value.trim(), excludeJobId);
+      
+      if (error) {
+        setRoleError(error);
+      } else if (!isUnique) {
+        setRoleError('This role name already exists in your school. Please choose a different name.');
+      }
+    } else if (field === 'role') {
+      setRoleError('');
+    }
   };
 
   // Handle form submission
@@ -116,6 +134,38 @@ export const ChainOfCommandRecordPage: React.FC = () => {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check for role validation errors
+    if (roleError) {
+      toast({
+        title: "Validation Error",
+        description: roleError,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Final role uniqueness check before submission
+    const excludeJobId = mode === 'edit' && record ? record.id : undefined;
+    const { isUnique, error } = await checkRoleUniqueness(formData.role.trim(), excludeJobId);
+    
+    if (error) {
+      toast({
+        title: "Validation Error", 
+        description: error,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!isUnique) {
+      toast({
+        title: "Validation Error",
+        description: "This role name already exists in your school. Please choose a different name.",
         variant: "destructive"
       });
       return;
@@ -229,7 +279,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           
           <Button 
             onClick={handleSubmit} 
-            disabled={isLoading || !hasUnsavedChanges || !formData.role || !formData.reports_to || !formData.assistant}
+            disabled={isLoading || !hasUnsavedChanges || !formData.role || !formData.reports_to || !formData.assistant || !!roleError || isChecking}
             className="flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
@@ -280,7 +330,19 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                       onChange={e => handleFieldChange('role', e.target.value)}
                       placeholder="Enter job role..." 
                       required 
+                      className={roleError ? "border-red-500" : ""}
                     />
+                    {roleError && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{roleError}</span>
+                      </div>
+                    )}
+                    {isChecking && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Checking role availability...
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
