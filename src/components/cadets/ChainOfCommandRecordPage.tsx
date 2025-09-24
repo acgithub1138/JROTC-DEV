@@ -95,7 +95,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
   }, [mode, recordId, jobs, navigate, toast]);
 
   // Handle form field changes
-  const handleFieldChange = async (field: keyof NewJobBoard, value: string) => {
+  const handleFieldChange = (field: keyof NewJobBoard, value: string) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
       
@@ -110,18 +110,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
     });
     setHasUnsavedChanges(true);
 
-    // Validate role uniqueness when role field changes
-    if (field === 'role' && value.trim()) {
-      setRoleError('');
-      const excludeJobId = mode === 'edit' && record ? record.id : undefined;
-      const { isUnique, error } = await checkRoleUniqueness(value.trim(), excludeJobId);
-      
-      if (error) {
-        setRoleError(error);
-      } else if (!isUnique) {
-        setRoleError('This role name already exists in your school. Please choose a different name.');
-      }
-    } else if (field === 'role') {
+    // Clear role error when role field changes
+    if (field === 'role') {
       setRoleError('');
     }
   };
@@ -154,20 +144,12 @@ export const ChainOfCommandRecordPage: React.FC = () => {
     const { isUnique, error } = await checkRoleUniqueness(formData.role.trim(), excludeJobId);
     
     if (error) {
-      toast({
-        title: "Validation Error", 
-        description: error,
-        variant: "destructive"
-      });
+      setRoleError(error);
       return;
     }
     
     if (!isUnique) {
-      toast({
-        title: "Validation Error",
-        description: "This role name already exists in your school. Please choose a different name.",
-        variant: "destructive"
-      });
+      setRoleError("Role already exists, please change.");
       return;
     }
 
@@ -279,7 +261,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           
           <Button 
             onClick={handleSubmit} 
-            disabled={isLoading || !hasUnsavedChanges || !formData.role || !formData.reports_to || !formData.assistant || !!roleError || isChecking}
+            disabled={isLoading || !hasUnsavedChanges || !formData.role || !formData.reports_to || !formData.assistant}
             className="flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
