@@ -149,17 +149,96 @@ export const useJobBoard = () => {
 
   const updateJob = useMutation({
     mutationFn: async ({ id, updates, suppressToast }: { id: string; updates: Partial<NewJobBoard>; suppressToast?: boolean }) => {
-      // Get the current job data before updating
+      // Get the current job data before updating (including connections)
       const { data: currentJob } = await supabase
         .from('job_board')
-        .select('cadet_id, email_address')
+        .select('cadet_id, email_address, role, reports_to, assistant, connections')
         .eq('id', id)
         .single();
+
+      // Clean up connections when reporting structure changes
+      let cleanedUpdates = { ...updates };
+      if (currentJob?.connections && (updates.reports_to !== undefined || updates.assistant !== undefined)) {
+        const currentConnections = currentJob.connections as any[] || [];
+        let updatedConnections = [...currentConnections];
+
+        // If reports_to is being changed or cleared
+        if (updates.reports_to !== undefined) {
+          if (updates.reports_to === '' || updates.reports_to === 'NA') {
+            // Remove all reports_to connections
+            updatedConnections = updatedConnections.filter(conn => conn.type !== 'reports_to');
+          }
+        }
+
+        // If assistant is being changed or cleared  
+        if (updates.assistant !== undefined) {
+          if (updates.assistant === '' || updates.assistant === 'NA') {
+            // Remove all assistant connections
+            updatedConnections = updatedConnections.filter(conn => conn.type !== 'assistant');
+          }
+        }
+
+        cleanedUpdates.connections = updatedConnections;
+      }
+
+      // Also clean up reverse connections in other jobs that reference this role
+      if (currentJob?.role && (updates.reports_to !== undefined || updates.assistant !== undefined)) {
+        // Get all jobs that might have connections to this role
+        const { data: allJobs } = await supabase
+          .from('job_board')
+          .select('id, role, connections, reports_to, assistant')
+          .eq('school_id', userProfile?.school_id)
+          .neq('id', id);
+
+        if (allJobs) {
+          const jobsToUpdate: Array<{id: string, connections: any[]}> = [];
+
+          for (const job of allJobs) {
+            const jobConnections = job.connections as any[] || [];
+            let needsUpdate = false;
+            let filteredConnections = [...jobConnections];
+
+            // If this job's reports_to is being cleared and there are connections referencing this role
+            if (updates.reports_to !== undefined && (updates.reports_to === '' || updates.reports_to === 'NA')) {
+              const originalLength = filteredConnections.length;
+              filteredConnections = filteredConnections.filter(conn => 
+                !(conn.type === 'reports_to' && conn.target_role === currentJob.role)
+              );
+              if (filteredConnections.length !== originalLength) needsUpdate = true;
+            }
+
+            // If this job's assistant is being cleared and there are connections referencing this role
+            if (updates.assistant !== undefined && (updates.assistant === '' || updates.assistant === 'NA')) {
+              const originalLength = filteredConnections.length;
+              filteredConnections = filteredConnections.filter(conn => 
+                !(conn.type === 'assistant' && conn.target_role === currentJob.role)
+              );
+              if (filteredConnections.length !== originalLength) needsUpdate = true;
+            }
+
+            if (needsUpdate) {
+              jobsToUpdate.push({ id: job.id, connections: filteredConnections });
+            }
+          }
+
+          // Update jobs with cleaned connections
+          for (const jobUpdate of jobsToUpdate) {
+            const { error: connectionError } = await supabase
+              .from('job_board')
+              .update({ connections: jobUpdate.connections })
+              .eq('id', jobUpdate.id);
+            
+            if (connectionError) {
+              console.warn('Failed to clean up reverse connections:', connectionError);
+            }
+          }
+        }
+      }
 
       // Update the job board entry
       const { data, error } = await supabase
         .from('job_board')
-        .update(updates as any)
+        .update(cleanedUpdates as any)
         .eq('id', id)
         .select(`
           *,
