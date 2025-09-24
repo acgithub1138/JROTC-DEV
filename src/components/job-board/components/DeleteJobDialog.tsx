@@ -30,6 +30,7 @@ export const DeleteJobDialog = ({
   if (!job) return null;
 
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
+    if (!cadet) return 'Unassigned';
     return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
