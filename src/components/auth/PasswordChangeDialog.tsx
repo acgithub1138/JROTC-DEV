@@ -60,10 +60,21 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
         throw passwordError;
       }
 
-      // Try to clear the server-side flag via RPC (may fail due to DB triggers)
+      // Try to clear the server-side flag via RPC
       const { error: profileError } = await supabase.rpc('clear_password_change_requirement');
       if (profileError) {
-        console.error('Profile update error:', profileError);
+        console.error('Profile update error (RPC):', profileError);
+      }
+
+      // Also update the profile directly as a fallback to ensure DB flag is cleared
+      if (userProfile?.id) {
+        const { error: directUpdateError } = await supabase
+          .from('profiles')
+          .update({ password_change_required: false, temp_pswd: null })
+          .eq('id', userProfile.id);
+        if (directUpdateError) {
+          console.warn('Direct profile update warning:', directUpdateError);
+        }
       }
 
       // Always set a client-side override in user metadata so the dialog won't reappear
