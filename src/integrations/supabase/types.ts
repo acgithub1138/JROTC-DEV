@@ -3907,10 +3907,12 @@ export type Database = {
           fee: number | null
           id: string | null
           interval: number | null
+          judges: string[] | null
           location: string | null
           max_participants: number | null
           notes: string | null
           registration_count: number | null
+          resources: string[] | null
           school_id: string | null
           score_sheet: string | null
           start_time: string | null
