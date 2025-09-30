@@ -220,11 +220,11 @@ serve(async (req) => {
       password_change_required: !password // Require change if we generated it
     }
 
-    console.log('Upserting profile into public.profiles for user:', authUser.user!.id)
+    console.log('Inserting profile into public.profiles for user:', authUser.user!.id)
     
     const { data: profileData, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .upsert(profileInsert, { onConflict: 'id' })
+      .insert(profileInsert)
       .select()
       .single()
     
