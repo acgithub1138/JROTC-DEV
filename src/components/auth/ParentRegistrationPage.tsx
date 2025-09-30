@@ -155,7 +155,7 @@ const ParentRegistrationPage = () => {
 
       // Create parent user account using signUp with generated password
       const redirectUrl = `${window.location.origin}/`;
-      const { error: authError } = await supabase.auth.signUp({
+      const { data: signUpRes, error: authError } = await supabase.auth.signUp({
         email: parentData.email,
         password: tempPassword,
         options: {
@@ -166,7 +166,9 @@ const ParentRegistrationPage = () => {
             school_id: cadetProfile.school_id,
             role: 'parent',
             role_id: parentRoleId,
-            generated_password: tempPassword
+            generated_password: tempPassword,
+            password_change_required: true,
+            temp_pswd: tempPassword
           }
         }
       });
@@ -179,39 +181,61 @@ const ParentRegistrationPage = () => {
         });
         return;
       }
-      // Sign out immediately after account creation to prevent auto-login
-      await supabase.auth.signOut();
 
-      // Get the created parent profile
-      const {
-        data: newParentProfile
-      } = await supabase.from('profiles').select('id').eq('email', parentData.email).single();
-      if (newParentProfile) {
-        // Set password_change_required and temp_pswd for parent account
-        await supabase
+      // Ensure the profile exists, then set password_change_required before signing out
+      const newUserId = signUpRes?.user?.id;
+      let profileId: string | null = null;
+
+      if (newUserId) {
+        for (let i = 0; i < 10; i++) {
+          const { data: profileRow } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', newUserId)
+            .single();
+          if (profileRow?.id) {
+            profileId = profileRow.id;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 300));
+        }
+      }
+
+      if (!profileId) {
+        const { data: newParentProfile } = await supabase
           .from('profiles')
-          .update({ 
-            password_change_required: true,
-            temp_pswd: tempPassword
-          })
-          .eq('id', newParentProfile.id);
+          .select('id')
+          .eq('email', parentData.email)
+          .single();
+        profileId = newParentProfile?.id ?? null;
+      }
+
+      if (profileId) {
+        const { error: updateErr } = await supabase
+          .from('profiles')
+          .update({ password_change_required: true, temp_pswd: tempPassword })
+          .eq('id', profileId);
+        if (updateErr) {
+          console.error('Failed to set password_change_required:', updateErr);
+        }
 
         // Create contact record linking parent to cadet
-        const {
-          error: contactError
-        } = await supabase.from('contacts').insert({
+        const { error: contactError } = await supabase.from('contacts').insert({
           name: `${parentData.firstName} ${parentData.lastName}`,
           email: parentData.email,
           type: 'parent',
           status: 'active',
           cadet_id: cadetProfile.cadet_id,
           school_id: cadetProfile.school_id,
-          created_by: newParentProfile.id
+          created_by: profileId
         });
         if (contactError) {
           console.error('Failed to create contact record:', contactError);
         }
       }
+
+      // Now sign out to prevent auto-login to the new parent account
+      await supabase.auth.signOut();
       toast({
         title: "Registration Successful",
         description: "Your parent account has been created. Please check your email for your password. Please sign in to access your cadet's school calendar."
