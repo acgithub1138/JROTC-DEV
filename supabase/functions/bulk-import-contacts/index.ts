@@ -150,7 +150,6 @@ serve(async (req) => {
               const { data: parentTemplate } = await supabase
                 .from('email_templates')
                 .select('id')
-                .eq('school_id', userProfile.school_id)
                 .eq('name', 'Welcome New Parent')
                 .eq('is_active', true)
                 .single();
