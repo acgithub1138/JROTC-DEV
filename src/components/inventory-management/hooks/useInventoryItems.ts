@@ -30,6 +30,8 @@ export const useInventoryItems = () => {
       return data as InventoryItem[];
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 3 * 60 * 1000, // 3 minutes - inventory changes moderately
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
 
   const createMutation = useMutation({

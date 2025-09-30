@@ -34,6 +34,8 @@ export const useCompetitionEventTypes = () => {
       if (error) throw error;
       return data as CompetitionEventType[];
     },
+    staleTime: 15 * 60 * 1000, // 15 minutes - event types change infrequently
+    gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
 
   const addEventTypeMutation = useMutation({

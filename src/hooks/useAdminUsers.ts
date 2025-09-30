@@ -26,5 +26,7 @@ export const useAdminUsers = () => {
 
       return data || [];
     },
+    staleTime: 15 * 60 * 1000, // 15 minutes - admin users change infrequently
+    gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
 };

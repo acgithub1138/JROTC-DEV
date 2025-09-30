@@ -28,5 +28,7 @@ export const useSubtasksQuery = (parentTaskId?: string) => {
       return data as Subtask[];
     },
     enabled: !!userProfile?.school_id && !!parentTaskId,
+    staleTime: 1 * 60 * 1000, // 1 minute - subtasks change frequently
+    gcTime: 5 * 60 * 1000, // 5 minutes cache
   });
 };

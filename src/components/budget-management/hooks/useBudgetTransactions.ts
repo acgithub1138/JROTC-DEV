@@ -29,6 +29,8 @@ export const useBudgetYears = () => {
       return uniqueYears as string[];
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 10 * 60 * 1000, // 10 minutes - budget years are stable
+    gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
 };
 
@@ -86,6 +88,8 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
       return data as BudgetTransaction[];
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 2 * 60 * 1000, // 2 minutes - transactions change moderately
+    gcTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   const createMutation = useMutation({

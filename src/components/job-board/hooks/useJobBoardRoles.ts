@@ -24,6 +24,8 @@ export const useJobBoardRoles = () => {
       return uniqueRoles;
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 10 * 60 * 1000, // 10 minutes - roles change infrequently
+    gcTime: 20 * 60 * 1000, // 20 minutes cache
   });
 
   return { roles, isLoading };
