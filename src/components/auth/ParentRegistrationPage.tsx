@@ -25,6 +25,7 @@ const ParentRegistrationPage = () => {
   const [parentData, setParentData] = useState({
     firstName: '',
     lastName: '',
+    phone: '',
     email: ''
   });
 
@@ -35,6 +36,18 @@ const ParentRegistrationPage = () => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const formatPhoneNumber = (value: string) => {
+    const phoneNumber = value.replace(/\D/g, '');
+    if (phoneNumber.length <= 3) return phoneNumber;
+    if (phoneNumber.length <= 6) return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhoneNumber(value);
+    setParentData({ ...parentData, phone: formatted });
   };
 
   const handleEmailChange = (value: string) => {
@@ -223,6 +236,7 @@ const ParentRegistrationPage = () => {
         const { error: contactError } = await supabase.from('contacts').insert({
           name: `${parentData.firstName} ${parentData.lastName}`,
           email: parentData.email,
+          phone: parentData.phone || null,
           type: 'parent',
           status: 'active',
           cadet_id: cadetProfile.cadet_id,
@@ -302,6 +316,18 @@ const ParentRegistrationPage = () => {
                   </div>
                 </div>
                 
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="(555) 555-5555" 
+                    value={parentData.phone} 
+                    onChange={e => handlePhoneChange(e.target.value)} 
+                    maxLength={14}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
                   <Input 
