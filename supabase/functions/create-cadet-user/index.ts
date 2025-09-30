@@ -200,30 +200,51 @@ serve(async (req) => {
 
     console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', finalRoleName)
 
-    // Profile will be created automatically by the handle_new_user trigger
-    // which will also handle temp_pswd storage and email queuing
-    
-    // Fetch the complete profile data to return (with retry since trigger might still be running)
-    let profileData: any = null;
-    for (let i = 0; i < 3; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
-      
-      const { data, error: profileFetchError } = await supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.user!.id)
-        .single()
-      
-      if (!profileFetchError && data) {
-        profileData = data;
-        break;
-      }
-      
-      if (i === 2) {
-        console.error('Failed to fetch created profile after retries:', profileFetchError)
-        throw new Error('Profile creation failed')
-      }
+    // Directly insert profile (don't rely on trigger which may be broken/missing)
+    // Store temp_pswd if password was generated
+    const profileInsert = {
+      id: authUser.user!.id,
+      email,
+      first_name,
+      last_name,
+      role: finalRoleName,
+      role_id: finalRoleId,
+      school_id,
+      grade: grade || null,
+      rank: rank || null,
+      flight: flight || null,
+      cadet_year: cadet_year || null,
+      start_year: start_year || null,
+      active: true,
+      temp_pswd: password ? null : finalPassword, // Store generated password for email
+      password_change_required: !password // Require change if we generated it
     }
+
+    console.log('Inserting profile into public.profiles for user:', authUser.user!.id)
+    
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .insert(profileInsert)
+      .select()
+      .single()
+    
+    if (profileError) {
+      console.error('Profile insert failed:', profileError)
+      
+      // Cleanup: delete the auth user to avoid orphaned accounts
+      console.log('Cleaning up auth user due to profile insert failure')
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(authUser.user!.id)
+        console.log('Auth user deleted successfully')
+      } catch (deleteError) {
+        console.error('Failed to cleanup auth user:', deleteError)
+      }
+      
+      // Return detailed error
+      throw new Error(`Profile creation failed: ${profileError.message || 'Unknown error'}. The user account was not created.`)
+    }
+    
+    console.log('Profile created successfully for user:', authUser.user!.id)
 
     const response = new Response(
       JSON.stringify({ 

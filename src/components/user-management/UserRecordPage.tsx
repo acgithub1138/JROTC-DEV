@@ -205,16 +205,10 @@ const UserRecordPage = () => {
           return;
         } else if (data?.error) {
           console.error('User creation failed:', data.error);
-          // Handle specific error messages
-          let errorMessage = "Failed to create user. Please try again.";
-          if (data.error.includes("admin-only roles")) {
-            errorMessage = "You don't have permission to assign this role. Contact your administrator.";
-          } else if (data.error.includes("already exists")) {
-            errorMessage = "A user with this email already exists.";
-          }
+          // Display the exact error message from the function
           toast({
             title: "User Creation Failed",
-            description: errorMessage,
+            description: data.error,
             variant: "destructive",
           });
           return;
