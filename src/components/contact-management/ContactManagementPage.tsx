@@ -10,6 +10,7 @@ import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Contact {
   id: string;
@@ -29,6 +30,7 @@ export interface Contact {
 
 const ContactManagementPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { canCreate, canDelete: canDeletePermission } = useTablePermissions('contacts');
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
@@ -135,12 +137,41 @@ const ContactManagementPage = () => {
   const handleBulkDelete = async () => {
     if (selectedContacts.length === 0) return;
     
-    // Delete all selected contacts
+    const count = selectedContacts.length;
+    let successCount = 0;
+    let failCount = 0;
+    
+    // Delete all selected contacts without showing individual toasts
     for (const contactId of selectedContacts) {
-      await deleteContact(contactId);
+      try {
+        await deleteContact(contactId, false);
+        successCount++;
+      } catch (error) {
+        failCount++;
+      }
     }
     
     setSelectedContacts([]);
+    
+    // Show single toast with results
+    if (failCount === 0) {
+      toast({
+        title: "Success",
+        description: `${successCount} contact${successCount > 1 ? 's' : ''} deleted successfully`,
+      });
+    } else if (successCount > 0) {
+      toast({
+        title: "Partially Complete",
+        description: `${successCount} contact${successCount > 1 ? 's' : ''} deleted, ${failCount} failed`,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: `Failed to delete ${failCount} contact${failCount > 1 ? 's' : ''}`,
+        variant: "destructive"
+      });
+    }
   };
 
   return (

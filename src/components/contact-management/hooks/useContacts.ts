@@ -110,7 +110,7 @@ export const useContacts = (searchValue: string = '') => {
     }
   };
 
-  const deleteContact = async (id: string) => {
+  const deleteContact = async (id: string, showToast: boolean = true) => {
     try {
       // Call edge function to handle deletion (will also delete auth account for parents)
       const { error } = await supabase.functions.invoke('delete-contact', {
@@ -120,17 +120,23 @@ export const useContacts = (searchValue: string = '') => {
       if (error) throw error;
 
       setContacts(prev => prev.filter(contact => contact.id !== id));
-      toast({
-        title: "Success",
-        description: "Contact deleted successfully",
-      });
+      
+      if (showToast) {
+        toast({
+          title: "Success",
+          description: "Contact deleted successfully",
+        });
+      }
     } catch (error) {
       console.error('Error deleting contact:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete contact",
-        variant: "destructive"
-      });
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: "Failed to delete contact",
+          variant: "destructive"
+        });
+      }
+      throw error;
     }
   };
 
