@@ -118,7 +118,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
             {sortedEvents.map(event => (
               <Card key={event.id}>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{event.competition_event_types?.name || 'N/A'}</CardTitle>
+                  <CardTitle className="text-lg">{event.event_name || 'N/A'}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-3">
@@ -242,7 +242,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
             </TableHeader>
             <TableBody>
                {sortedEvents.map(event => <TableRow key={event.id}>
-                   <TableCell className="font-medium py-[8px]">{event.competition_event_types?.name || 'N/A'}</TableCell>
+                   <TableCell className="font-medium py-[8px]">{event.event_name || 'N/A'}</TableCell>
                    <TableCell>{event.location || 'N/A'}</TableCell>
                     <TableCell>
                       {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}
@@ -343,7 +343,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Event</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the event "{eventToDelete?.competition_event_types?.name || 'this event'}"? 
+              Are you sure you want to delete the event "{eventToDelete?.event_name || 'this event'}"? 
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
