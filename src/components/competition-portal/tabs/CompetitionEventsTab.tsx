@@ -219,7 +219,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           <Table>
             <TableHeader>
                <TableRow>
-                  <SortableTableHead sortKey="cp_events.name" currentSort={sortConfig} onSort={handleSort}>
+                  <SortableTableHead sortKey="event_name" currentSort={sortConfig} onSort={handleSort}>
                     Event
                   </SortableTableHead>
                   <SortableTableHead sortKey="location" currentSort={sortConfig} onSort={handleSort}>

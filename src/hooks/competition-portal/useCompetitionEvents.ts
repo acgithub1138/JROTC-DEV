@@ -30,7 +30,34 @@ export const useCompetitionEvents = (competitionId?: string) => {
 
       if (error) throw error;
 
-      return (data || []) as CompEvent[];
+      let events = (data || []) as CompEvent[];
+
+      // Enrichment fallback: if any event_name is null, fetch from competition_event_types
+      const eventsWithoutNames = events.filter(e => !e.event_name && e.event);
+      if (eventsWithoutNames.length > 0) {
+        const eventIds = [...new Set(eventsWithoutNames.map(e => e.event))];
+        const { data: eventTypes } = await supabase
+          .from('competition_event_types')
+          .select('id, name, description')
+          .in('id', eventIds);
+
+        if (eventTypes) {
+          const typeMap = new Map(eventTypes.map(t => [t.id, t]));
+          events = events.map(e => {
+            if (!e.event_name && e.event) {
+              const type = typeMap.get(e.event);
+              return {
+                ...e,
+                event_name: type?.name || null,
+                event_description: type?.description || null
+              };
+            }
+            return e;
+          });
+        }
+      }
+
+      return events;
     } catch (error) {
       console.error('Error fetching competition events:', error);
       toast.error('Failed to load events');
