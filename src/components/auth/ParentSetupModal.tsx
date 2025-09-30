@@ -44,6 +44,7 @@ const ParentSetupModal: React.FC<ParentSetupModalProps> = ({ open, onClose }) =>
         .eq('school_id', userProfile.school_id)
         .eq('active', true)
         .not('role', 'in', '(admin,instructor)')
+        .not('grade', 'is', null)
         .order('last_name', { ascending: true });
 
       if (error) throw error;
