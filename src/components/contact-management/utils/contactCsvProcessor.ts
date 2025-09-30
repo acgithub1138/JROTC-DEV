@@ -53,7 +53,7 @@ export function formatPhoneNumber(phone: string): string {
   return phone;
 }
 
-export function validateContactData(contact: ContactCSVData): string[] {
+export function validateContactData(contact: ContactCSVData | ParsedContact): string[] {
   const errors: string[] = [];
 
   // Required field validations
@@ -82,6 +82,11 @@ export function validateContactData(contact: ContactCSVData): string[] {
   // Phone validation (optional but must be valid if provided)
   if (contact.phone && !validatePhoneNumber(contact.phone)) {
     errors.push('Phone number must be 10 digits');
+  }
+
+  // If a cadet name was provided but no cadet_id was matched, it's invalid
+  if (contact.cadet && contact.cadet.trim() !== '' && !contact.cadet_id) {
+    errors.push('Cadet not found - select from dropdown');
   }
 
   return errors;
