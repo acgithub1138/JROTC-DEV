@@ -108,7 +108,7 @@ export const ContactDataPreviewTable: React.FC<ContactDataPreviewTableProps> = (
                     <SelectTrigger className="h-8">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px]">
                       <SelectItem value="parent">Parent</SelectItem>
                       <SelectItem value="relative">Relative</SelectItem>
                       <SelectItem value="friend">Friend</SelectItem>
@@ -124,14 +124,14 @@ export const ContactDataPreviewTable: React.FC<ContactDataPreviewTableProps> = (
               <TableCell>
                 {editingRow === contact.id ? (
                   <Select 
-                    value={contact.cadet_id || ''} 
-                    onValueChange={value => onUpdate(contact.id, { cadet_id: value || undefined })}
+                    value={contact.cadet_id || 'none'} 
+                    onValueChange={value => onUpdate(contact.id, { cadet_id: value === 'none' ? undefined : value })}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue placeholder="Select cadet" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                      <SelectItem value="none">None</SelectItem>
                       {cadets.map(cadet => (
                         <SelectItem key={cadet.id} value={cadet.id}>
                           {cadet.full_name}
