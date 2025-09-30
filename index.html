@@ -18,6 +18,11 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
     
+    <!-- Resource hints to reduce network dependency chain -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="dns-prefetch" href="https://vpiwfabbzaebfkadmmgd.supabase.co" />
+    <link rel="preconnect" href="https://vpiwfabbzaebfkadmmgd.supabase.co" crossorigin />
+    
     <!-- Critical CSS - Inline for faster initial paint -->
     <style>
       :root {
