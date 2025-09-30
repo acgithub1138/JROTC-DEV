@@ -151,7 +151,7 @@ serve(async (req) => {
                 .from('email_templates')
                 .select('id')
                 .eq('school_id', userProfile.school_id)
-                .ilike('name', '%Welcome%New%Parent%')
+                .eq('name', 'Welcome New Parent')
                 .eq('is_active', true)
                 .single();
 
