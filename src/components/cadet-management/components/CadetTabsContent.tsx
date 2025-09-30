@@ -104,15 +104,12 @@ export const CadetTabsContent = ({
       {canAccessCadets && (
         <TabsContent value="cadets" className="mt-4">
           <Tabs value={activeSubTab} onValueChange={onSubTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="active">
                 Active ({profiles.filter(p => p.active && p.role !== 'parent').length})
               </TabsTrigger>
               <TabsTrigger value="inactive">
                 Non-Active ({profiles.filter(p => !p.active && p.role !== 'parent').length})
-              </TabsTrigger>
-              <TabsTrigger value="parents">
-                Parents ({profiles.filter(p => p.role === 'parent').length})
               </TabsTrigger>
             </TabsList>
             
@@ -132,21 +129,6 @@ export const CadetTabsContent = ({
             </TabsContent>
 
             <TabsContent value="inactive" className="mt-4">
-              {!isMobile && (
-                <div className="flex justify-end p-4 border-b">
-                  <BulkCadetActions 
-                    selectedCadets={selectedCadets} 
-                    onSelectionClear={() => onSelectAll(false)} 
-                    canEdit={canUpdate} 
-                    canDelete={canDelete} 
-                    onRefresh={onRefresh} 
-                  />
-                </div>
-              )}
-              {renderCadetDisplay()}
-            </TabsContent>
-
-            <TabsContent value="parents" className="mt-4">
               {!isMobile && (
                 <div className="flex justify-end p-4 border-b">
                   <BulkCadetActions 
