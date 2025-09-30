@@ -13,9 +13,28 @@ export const getFilteredProfiles = (
     return [];
   }
   
-  const isActive = activeSubTab === 'active';
   return profiles.filter(profile => {
-    const matchesActiveStatus = profile.active === isActive;
+    // Handle parents tab
+    if (activeSubTab === 'parents') {
+      const isParent = profile.role === 'parent';
+      
+      if (!searchTerm) return isParent;
+      
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        profile.first_name.toLowerCase().includes(searchLower) ||
+        profile.last_name.toLowerCase().includes(searchLower) ||
+        (profile.role?.toLowerCase() || '').includes(searchLower) ||
+        (profile.grade?.toLowerCase() || '').includes(searchLower) ||
+        (profile.rank?.toLowerCase() || '').includes(searchLower) ||
+        (profile.flight?.toLowerCase() || '').includes(searchLower);
+      
+      return isParent && matchesSearch;
+    }
+    
+    // Handle active/inactive tabs - exclude parents
+    const isActive = activeSubTab === 'active';
+    const matchesActiveStatus = profile.active === isActive && profile.role !== 'parent';
     
     if (!searchTerm) return matchesActiveStatus;
     
