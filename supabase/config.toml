@@ -2,3 +2,6 @@ project_id = "vpiwfabbzaebfkadmmgd"
 
 [functions.email-queue-webhook]
 verify_jwt = false
+
+[functions.bulk-import-contacts]
+verify_jwt = true

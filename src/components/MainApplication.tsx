@@ -52,6 +52,7 @@ import { BudgetExpenseRecordPage } from '@/components/budget-management/BudgetEx
 import BudgetReportPage from '@/components/budget-management/BudgetReportPage';
 import ContactManagementPage from '@/components/contact-management/ContactManagementPage';
 import { ContactRecordPage } from '@/components/contact-management/ContactRecordPage';
+import { ContactBulkImportPage } from '@/components/contact-management/ContactBulkImportPage';
 import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
 import { CalendarRecordPage } from '@/components/calendar/CalendarRecordPage';
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
@@ -246,6 +247,7 @@ const MainApplication = () => {
             <Route path="budget/budget_report" element={<BudgetReportPage />} />
             <Route path="contacts" element={<ContactManagementPage />} />
             <Route path="contacts/contact_record" element={<ContactRecordPage />} />
+            <Route path="contacts/bulk-import" element={<ContactBulkImportPage />} />
             <Route path="calendar" element={<CalendarManagementPage />} />
             <Route path="calendar/calendar_record" element={<CalendarRecordPage />} />
             <Route path="competitions" element={<CompetitionManagementPage />} />

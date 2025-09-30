@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { ContactTable } from './components/ContactTable';
@@ -126,10 +126,16 @@ const ContactManagementPage = () => {
         </div>
         <div className="flex gap-2">
           {canCreate && (
-            <Button onClick={handleAddContact}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Contact
-            </Button>
+            <>
+              <Button variant="outline" onClick={() => navigate('/app/contacts/bulk-import')}>
+                <Upload className="w-4 h-4 mr-2" />
+                Bulk Import
+              </Button>
+              <Button onClick={handleAddContact}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Contact
+              </Button>
+            </>
           )}
         </div>
       </div>
