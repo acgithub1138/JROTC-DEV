@@ -112,10 +112,10 @@ export const useContacts = (searchValue: string = '') => {
 
   const deleteContact = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('id', id);
+      // Call edge function to handle deletion (will also delete auth account for parents)
+      const { error } = await supabase.functions.invoke('delete-contact', {
+        body: { contactId: id }
+      });
 
       if (error) throw error;
 
