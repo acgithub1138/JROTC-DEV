@@ -65,7 +65,7 @@ export const MobileHostEvents: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground text-sm line-clamp-2">
-                        {event.competition_event_types?.name || 'Unnamed Event'}
+                        {event.event_name || 'N/A'}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1">
                         {event.location || 'Location TBD'}
@@ -80,7 +80,7 @@ export const MobileHostEvents: React.FC = () => {
                   <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                     {event.start_time && <div className="flex items-center">
                         <Clock size={12} className="mr-1" />
-                        {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_12H, timezone)}
+                        {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}
                       </div>}
                     <div className="flex items-center">
                       <Users size={12} className="mr-1" />
