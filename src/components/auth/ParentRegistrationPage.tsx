@@ -187,6 +187,15 @@ const ParentRegistrationPage = () => {
         data: newParentProfile
       } = await supabase.from('profiles').select('id').eq('email', parentData.email).single();
       if (newParentProfile) {
+        // Set password_change_required and temp_pswd for parent account
+        await supabase
+          .from('profiles')
+          .update({ 
+            password_change_required: true,
+            temp_pswd: tempPassword
+          })
+          .eq('id', newParentProfile.id);
+
         // Create contact record linking parent to cadet
         const {
           error: contactError
