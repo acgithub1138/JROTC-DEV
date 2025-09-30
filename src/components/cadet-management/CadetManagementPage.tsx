@@ -167,7 +167,7 @@ const CadetManagementPage = () => {
                   Fix Missing Passwords
                 </Button>
               )}
-              <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
+              <div className="text-sm text-muted-foreground">New users will get their password in an email and must reset it whent the log in.</div>
             </div>
           </div>
         </CardHeader>
