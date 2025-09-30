@@ -28,6 +28,8 @@
         --primary-glow: 210 100% 40%;
         --secondary: 210 40% 96.1%;
         --secondary-foreground: 222.2 47.4% 11.2%;
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%;
         --border: 214.3 31.8% 91.4%;
         --radius: 0.5rem;
       }
@@ -36,6 +38,8 @@
         --foreground: 210 40% 98%;
         --primary: 210 40% 98%;
         --primary-foreground: 222.2 47.4% 11.2%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
       }
       * {
         border-color: hsl(var(--border));
@@ -48,6 +52,16 @@
       }
       #root {
         min-height: 100vh;
+      }
+      /* Critical hero styles for LCP optimization */
+      h1 {
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+      }
+      /* Optimize font loading */
+      @font-face {
+        font-display: swap;
       }
     </style>
     

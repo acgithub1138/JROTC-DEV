@@ -93,8 +93,7 @@ const LandingPage = () => {
   ];
   const benefits = ["Save 10+ hours per week on administrative tasks", "Improve cadet engagement and tracking by 300%", "Streamline communication with automated systems", "Reduce paperwork and manual processes by 80%", "Enhanced competition planning and scoring", "Better budget and inventory management"];
   return <div className="min-h-screen">
-      <MobileSuggestionBanner />
-      {/* Hero Section */}
+      {/* Hero Section - Critical content rendered first */}
       <section className="relative py-10 lg:py-16 bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
@@ -127,6 +126,9 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      
+      {/* Deferred: Load banner after hero renders */}
+      <MobileSuggestionBanner />
 
       {/* Problem/Solution */}
       <section className="py-16 bg-muted/30">
@@ -167,8 +169,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-20">
+      {/* Features Grid - Deferred rendering */}
+      <section className="py-20" style={{ contentVisibility: 'auto' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">
