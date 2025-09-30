@@ -224,7 +224,7 @@ serve(async (req) => {
     
     const { data: profileData, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .insert(profileInsert)
+      .upsert(profileInsert, { onConflict: 'id' })
       .select()
       .single()
     
