@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatPhoneNumber } from '@/utils/formatUtils';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'];
 type Judge = Database['public']['Tables']['cp_judges']['Row'];
 interface ViewJudgesModalProps {
@@ -66,7 +67,7 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
                   {judges.map(judge => <TableRow key={judge.id}>
                       <TableCell className="py-[4px]">{judge.name || '-'}</TableCell>
                       <TableCell>{judge.email || '-'}</TableCell>
-                      <TableCell>{judge.phone || '-'}</TableCell>
+                      <TableCell>{formatPhoneNumber(judge.phone)}</TableCell>
                       <TableCell>{judge.available ? 'Yes' : 'No'}</TableCell>
                     </TableRow>)}
                 </TableBody>
