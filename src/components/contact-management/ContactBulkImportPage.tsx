@@ -62,8 +62,47 @@ export const ContactBulkImportPage: React.FC = () => {
 
       const rawData = parseCSV(csvText);
       
+      // Fetch active cadets for matching
+      const { data: cadets, error: cadetsError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .eq('school_id', userProfile?.school_id)
+        .eq('active', true)
+        .neq('role', 'parent');
+
+      if (cadetsError) {
+        console.error('Error fetching cadets:', cadetsError);
+      }
+
       const processed = rawData.map((row, index) => {
         const contact = processCSVContact(row);
+        
+        // Try to match cadet name if provided
+        if (contact.cadet && cadets && cadets.length > 0) {
+          const cadetName = contact.cadet.trim().toLowerCase();
+          
+          // Try to find matching cadet
+          const matchedCadet = cadets.find(c => {
+            const firstName = c.first_name?.toLowerCase() || '';
+            const lastName = c.last_name?.toLowerCase() || '';
+            
+            // Check "First Last" format
+            const firstLast = `${firstName} ${lastName}`.trim();
+            // Check "Last First" format
+            const lastFirst = `${lastName} ${firstName}`.trim();
+            // Check "Last, First" format
+            const lastCommaFirst = `${lastName}, ${firstName}`.trim();
+            
+            return cadetName === firstLast || 
+                   cadetName === lastFirst || 
+                   cadetName === lastCommaFirst;
+          });
+          
+          if (matchedCadet) {
+            contact.cadet_id = matchedCadet.id;
+          }
+        }
+        
         const errors = validateContactData(contact);
         return {
           ...contact,
@@ -85,7 +124,7 @@ export const ContactBulkImportPage: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, userProfile?.school_id]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
