@@ -146,9 +146,18 @@ serve(async (req) => {
                 })
                 .eq('id', signUpData.user.id);
 
-              // Queue welcome email using the global template
+              // Find the "Welcome New Parent" template
+              const { data: parentTemplate } = await supabase
+                .from('email_templates')
+                .select('id')
+                .eq('school_id', userProfile.school_id)
+                .ilike('name', '%Welcome%New%Parent%')
+                .eq('is_active', true)
+                .single();
+
+              // Queue welcome email using the specific template if found, otherwise use global
               await supabase.rpc('queue_email', {
-                template_id_param: null, // Will use global template
+                template_id_param: parentTemplate?.id || null,
                 recipient_email_param: contact.email,
                 source_table_param: 'profiles',
                 record_id_param: signUpData.user.id,
