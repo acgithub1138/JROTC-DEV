@@ -29,9 +29,10 @@ export interface Contact {
 
 const ContactManagementPage = () => {
   const navigate = useNavigate();
-  const { canCreate } = useTablePermissions('contacts');
+  const { canCreate, canDelete: canDeletePermission } = useTablePermissions('contacts');
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -115,6 +116,33 @@ const ContactManagementPage = () => {
     setDeletingContact(null);
   };
 
+  const handleSelectContact = (contactId: string) => {
+    setSelectedContacts(prev => 
+      prev.includes(contactId) 
+        ? prev.filter(id => id !== contactId)
+        : [...prev, contactId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedContacts.length === sortedContacts.length) {
+      setSelectedContacts([]);
+    } else {
+      setSelectedContacts(sortedContacts.map(c => c.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedContacts.length === 0) return;
+    
+    // Delete all selected contacts
+    for (const contactId of selectedContacts) {
+      await deleteContact(contactId);
+    }
+    
+    setSelectedContacts([]);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -125,6 +153,14 @@ const ContactManagementPage = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          {selectedContacts.length > 0 && canDeletePermission && (
+            <Button 
+              variant="destructive" 
+              onClick={handleBulkDelete}
+            >
+              Delete Selected ({selectedContacts.length})
+            </Button>
+          )}
           {canCreate && (
             <>
               <Button variant="outline" onClick={() => navigate('/app/contacts/bulk-import')}>
@@ -155,6 +191,8 @@ const ContactManagementPage = () => {
             onView={setViewingContact}
             onNavigateToRecord={handleViewContact}
             onDelete={handleDeleteContact}
+            selectedContacts={selectedContacts}
+            onSelectContact={handleSelectContact}
           />
         ) : (
           <ContactTable
@@ -168,6 +206,9 @@ const ContactManagementPage = () => {
             sortDirection={sortDirection}
             onSort={handleSort}
             getSortIcon={getSortIcon}
+            selectedContacts={selectedContacts}
+            onSelectContact={handleSelectContact}
+            onSelectAll={handleSelectAll}
           />
         )}
       </StandardTableWrapper>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Phone, Mail, User, Eye } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { Contact } from '../ContactManagementPage';
@@ -13,6 +14,8 @@ interface ContactCardsProps {
   onView?: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
   onNavigateToRecord: (contact: Contact) => void;
+  selectedContacts: string[];
+  onSelectContact: (contactId: string) => void;
 }
 
 export const ContactCards: React.FC<ContactCardsProps> = ({
@@ -22,6 +25,8 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
   onView,
   onDelete,
   onNavigateToRecord,
+  selectedContacts,
+  onSelectContact,
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
@@ -102,7 +107,15 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
         <Card key={contact.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
-              <div>
+              <div className="flex items-start gap-3 flex-1">
+                {canDelete && (
+                  <Checkbox
+                    checked={selectedContacts.includes(contact.id)}
+                    onCheckedChange={() => onSelectContact(contact.id)}
+                    className="mt-1"
+                  />
+                )}
+                <div className="flex-1">
                 {canViewDetails ? (
                   <button
                     onClick={() => onNavigateToRecord(contact)}
@@ -116,6 +129,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
                 <div className="flex space-x-2 mt-1">
                   {getTypeBadge(contact.type, contact.type_other)}
                   {getStatusBadge(contact.status)}
+                </div>
                 </div>
               </div>
             </div>

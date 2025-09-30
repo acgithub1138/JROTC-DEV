@@ -2,6 +2,7 @@ import React from 'react';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { Contact } from '../ContactManagementPage';
@@ -16,6 +17,9 @@ interface ContactTableProps {
   sortDirection?: 'asc' | 'desc';
   onSort?: (field: string) => void;
   getSortIcon?: (field: string) => React.ReactNode;
+  selectedContacts: string[];
+  onSelectContact: (contactId: string) => void;
+  onSelectAll: () => void;
 }
 export const ContactTable: React.FC<ContactTableProps> = ({
   contacts,
@@ -27,7 +31,10 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   sortField,
   sortDirection,
   onSort,
-  getSortIcon
+  getSortIcon,
+  selectedContacts,
+  onSelectContact,
+  onSelectAll
 }) => {
   const {
     canEdit: canUpdate,
@@ -70,6 +77,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
     return <StandardTable>
         <StandardTableHeader>
           <TableRow>
+            {canDelete && <TableHead className="w-12"></TableHead>}
             <TableHead>Name</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
@@ -80,6 +88,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
         </StandardTableHeader>
         <StandardTableBody>
           {[...Array(5)].map((_, i) => <TableRow key={i}>
+              {canDelete && <TableCell><div className="h-4 bg-gray-200 rounded animate-pulse" /></TableCell>}
               <TableCell><div className="h-4 bg-gray-200 rounded animate-pulse" /></TableCell>
               <TableCell><div className="h-4 bg-gray-200 rounded animate-pulse" /></TableCell>
               <TableCell><div className="h-4 bg-gray-200 rounded animate-pulse" /></TableCell>
@@ -93,6 +102,14 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   return <StandardTable>
       <StandardTableHeader>
         <TableRow>
+          {canDelete && (
+            <TableHead className="w-12">
+              <Checkbox
+                checked={selectedContacts.length === contacts.length && contacts.length > 0}
+                onCheckedChange={onSelectAll}
+              />
+            </TableHead>
+          )}
           <TableHead>
             {onSort ? (
               <button 
@@ -156,8 +173,16 @@ export const ContactTable: React.FC<ContactTableProps> = ({
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>
-      <StandardTableBody emptyMessage="No contacts found" colSpan={6}>
+      <StandardTableBody emptyMessage="No contacts found" colSpan={canDelete ? 7 : 6}>
         {contacts.map(contact => <TableRow key={contact.id}>
+            {canDelete && (
+              <TableCell className="py-[8px]">
+                <Checkbox
+                  checked={selectedContacts.includes(contact.id)}
+                  onCheckedChange={() => onSelectContact(contact.id)}
+                />
+              </TableCell>
+            )}
             <TableCell className="font-medium py-[8px]">
               {canViewDetails ? (
                 <button
