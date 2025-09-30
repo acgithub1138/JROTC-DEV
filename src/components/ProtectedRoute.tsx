@@ -21,14 +21,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requirePermission = 'read',
   requireAdminRole = false 
 }) => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, refreshProfile } = useAuth();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
   const queryClient = useQueryClient();
   const parentSetupCheckRef = useRef<boolean>(false);
-  const passwordCheckRef = useRef<boolean>(false);
 
   // Memoized password change check
   const passwordChangeRequired = useMemo(() => {
@@ -40,17 +39,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return profileRequiresChange && !metadataOverride;
   }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
 
-  // Update password dialog state with debouncing
+  // Update password dialog state - show whenever password change is required
   useDeepCompareEffect(() => {
-    if (passwordCheckRef.current) return;
-    
-    if (passwordChangeRequired) {
-      passwordCheckRef.current = true;
-      setShowPasswordChange(true);
-    } else {
-      setShowPasswordChange(false);
-      passwordCheckRef.current = false;
-    }
+    setShowPasswordChange(passwordChangeRequired);
   }, [passwordChangeRequired]);
 
   // Memoized permission and admin role check
@@ -149,7 +140,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         {children}
         <PasswordChangeDialog 
           open={showPasswordChange} 
-          onClose={() => setShowPasswordChange(false)} 
+          onClose={() => {
+            setShowPasswordChange(false);
+          }} 
         />
       </>
     );

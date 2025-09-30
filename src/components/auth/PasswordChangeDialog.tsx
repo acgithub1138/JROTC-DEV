@@ -14,7 +14,7 @@ interface PasswordChangeDialogProps {
 }
 
 const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClose }) => {
-  const { userProfile } = useAuth();
+  const { userProfile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -80,6 +80,10 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
       });
 
       setPasswords({ newPassword: '', confirmPassword: '' });
+      
+      // Refresh the user profile to get updated password_change_required status
+      await refreshProfile();
+      
       onClose();
     } catch (error: any) {
       console.error('Password change error:', error);
@@ -91,7 +95,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
     } finally {
       setLoading(false);
     }
-  }, [passwords, toast, onClose]);
+  }, [passwords, toast, onClose, refreshProfile]);
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>

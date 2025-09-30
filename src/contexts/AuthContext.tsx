@@ -47,6 +47,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   createUser: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
+  refreshProfile: () => Promise<void>;
   loading: boolean;
 }
 
@@ -331,6 +332,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    if (!user?.id) return;
+    
+    // Reset the ref to allow a new fetch
+    lastFetchedUserIdRef.current = null;
+    profileFetchingRef.current = false;
+    
+    const profile = await fetchUserProfile(user.id);
+    if (profile) {
+      setUserProfile(profile);
+    }
+  }, [user?.id, fetchUserProfile]);
+
   const value = useMemo(() => ({
     user,
     session,
@@ -340,7 +354,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     createUser,
-  }), [user, session, userProfile, loading, signUp, signIn, signOut, createUser]);
+    refreshProfile,
+  }), [user, session, userProfile, loading, signUp, signIn, signOut, createUser, refreshProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
