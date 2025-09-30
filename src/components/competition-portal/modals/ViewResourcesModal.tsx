@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import { formatPhoneNumber } from '@/utils/formatUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -73,7 +74,7 @@ export const ViewResourcesModal: React.FC<ViewResourcesModalProps> = ({
                     <TableRow key={resource.id}>
                       <TableCell className="py-[4px]">{resource.last_name}, {resource.first_name}</TableCell>
                       <TableCell>{resource.email || '-'}</TableCell>
-                      <TableCell>{resource.phone || '-'}</TableCell>
+                      <TableCell>{formatPhoneNumber(resource.phone) || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
