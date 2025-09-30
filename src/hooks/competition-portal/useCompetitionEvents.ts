@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -7,59 +7,48 @@ import type { Database } from '@/integrations/supabase/types';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   competition_event_types?: { name: string } | null;
   registration_count?: number;
+  event_name?: string;
+  event_description?: string;
 };
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
 
 export const useCompetitionEvents = (competitionId?: string) => {
   const { userProfile } = useAuth();
-  const [events, setEvents] = useState<CompEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchEvents = async () => {
-    if (!competitionId) return;
+  const fetchEvents = async (): Promise<CompEvent[]> => {
+    if (!competitionId || !userProfile?.school_id) return [];
 
     try {
-      setIsLoading(true);
+      // Use optimized view that includes registration counts - eliminates N+1 queries
       const { data, error } = await supabase
-        .from('cp_comp_events')
-        .select(`
-          *,
-          competition_event_types!event(name)
-        `)
+        .from('cp_comp_events_detailed')
+        .select('*')
         .eq('competition_id', competitionId)
-        .order('start_time', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch registration counts for each event
-      const eventsWithCounts = await Promise.all(
-        (data || []).map(async (event) => {
-          const { count } = await supabase
-            .from('cp_event_registrations')
-            .select('*', { count: 'exact' })
-            .eq('event_id', event.id)
-            .eq('competition_id', competitionId)
-            .neq('status', 'cancelled');
-
-          return {
-            ...event,
-            registration_count: count || 0
-          };
-        })
-      );
-
-      setEvents(eventsWithCounts);
+      return (data || []) as CompEvent[];
     } catch (error) {
       console.error('Error fetching competition events:', error);
       toast.error('Failed to load events');
-    } finally {
-      setIsLoading(false);
+      return [];
     }
   };
+  
+  // Use React Query for better caching and performance
+  const { data: events = [], isLoading, refetch } = useQuery({
+    queryKey: ['competition-events', competitionId, userProfile?.school_id],
+    queryFn: fetchEvents,
+    enabled: !!competitionId && !!userProfile?.school_id,
+    staleTime: 2 * 60 * 1000, // 2 minutes - events don't change frequently
+    gcTime: 5 * 60 * 1000, // 5 minutes cache
+  });
 
   const createEvent = async (eventData: CompEventInsert) => {
-    if (!userProfile?.school_id) return;
+    if (!userProfile?.school_id || !competitionId) return;
 
     try {
       const { data, error } = await supabase
@@ -67,26 +56,20 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .insert({
           ...eventData,
           school_id: userProfile.school_id,
+          competition_id: competitionId,
           created_by: userProfile.id
         })
-        .select(`
-          *,
-          competition_event_types!event(name)
-        `)
+        .select()
         .single();
 
       if (error) throw error;
 
-      setEvents(prev => {
-        const newEvent = { ...data, registration_count: 0 };
-        return [...prev, newEvent].sort((a, b) => 
-          new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-        );
-      });
+      // Invalidate queries to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
       toast.success('Event added successfully');
       return data;
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('Error creating competition event:', error);
       toast.error('Failed to add event');
       throw error;
     }
@@ -101,25 +84,17 @@ export const useCompetitionEvents = (competitionId?: string) => {
           updated_by: userProfile?.id
         })
         .eq('id', id)
-        .select(`
-          *,
-          competition_event_types!event(name)
-        `)
+        .select()
         .single();
 
       if (error) throw error;
 
-      setEvents(prev => 
-        prev.map(event => 
-          event.id === id ? { ...data, registration_count: event.registration_count } : event
-        ).sort((a, b) => 
-          new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-        )
-      );
+      // Invalidate queries to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
       toast.success('Event updated successfully');
       return data;
     } catch (error) {
-      console.error('Error updating event:', error);
+      console.error('Error updating competition event:', error);
       toast.error('Failed to update event');
       throw error;
     }
@@ -134,18 +109,15 @@ export const useCompetitionEvents = (competitionId?: string) => {
 
       if (error) throw error;
 
-      setEvents(prev => prev.filter(event => event.id !== id));
-      toast.success('Event removed successfully');
+      // Invalidate queries to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
+      toast.success('Event deleted successfully');
     } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error('Failed to remove event');
+      console.error('Error deleting competition event:', error);
+      toast.error('Failed to delete event');
       throw error;
     }
   };
-
-  useEffect(() => {
-    fetchEvents();
-  }, [competitionId]);
 
   return {
     events,
@@ -153,6 +125,6 @@ export const useCompetitionEvents = (competitionId?: string) => {
     createEvent,
     updateEvent,
     deleteEvent,
-    refetch: fetchEvents
+    refetch
   };
 };

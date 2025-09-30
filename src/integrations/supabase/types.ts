@@ -1235,6 +1235,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cp_event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events_detailed"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cp_event_registrations_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -1307,6 +1314,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "cp_comp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cp_event_schedules_event"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events_detailed"
             referencedColumns: ["id"]
           },
           {
@@ -3787,6 +3801,56 @@ export type Database = {
         }
         Relationships: []
       }
+      competition_events_with_registrations: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string | null
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
+          name: string | null
+          registration_count: number | null
+          school_id: string | null
+          score_sheet: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          name?: string | null
+          registration_count?: never
+          school_id?: string | null
+          score_sheet?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          name?: string | null
+          registration_count?: never
+          school_id?: string | null
+          score_sheet?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_events_score_sheet_fkey"
+            columns: ["score_sheet"]
+            isOneToOne: false
+            referencedRelation: "competition_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_registration_email_data: {
         Row: {
           base_fee: number | null
@@ -3828,6 +3892,64 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_comp_events_detailed: {
+        Row: {
+          competition_id: string | null
+          created_at: string | null
+          end_time: string | null
+          event: string | null
+          event_description: string | null
+          event_name: string | null
+          fee: number | null
+          id: string | null
+          interval: number | null
+          location: string | null
+          max_participants: number | null
+          notes: string | null
+          registration_count: number | null
+          school_id: string | null
+          score_sheet: string | null
+          start_time: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_score_sheet_fkey"
+            columns: ["score_sheet"]
+            isOneToOne: false
+            referencedRelation: "competition_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -3924,6 +4046,67 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: []
+      }
+      tasks_with_profiles: {
+        Row: {
+          assigned_by: string | null
+          assigned_by_email: string | null
+          assigned_by_first_name: string | null
+          assigned_by_last_name: string | null
+          assigned_to: string | null
+          assigned_to_email: string | null
+          assigned_to_first_name: string | null
+          assigned_to_last_name: string | null
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string | null
+          priority: string | null
+          school_id: string | null
+          status: string | null
+          task_number: string | null
+          team_id: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams_with_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teams_with_members: {
         Row: {

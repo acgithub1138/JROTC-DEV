@@ -10,15 +10,11 @@ export const useTasksQuery = () => {
   const { canUpdate, canUpdateAssigned } = useTaskPermissions();
 
   return useQuery({
-    queryKey: ['tasks', userProfile?.school_id, canUpdate, canUpdateAssigned],
+    queryKey: ['tasks', userProfile?.school_id, canUpdate, canUpdateAssigned, userProfile?.id],
     queryFn: async () => {
       let query = supabase
-        .from('tasks')
-        .select(`
-          *,
-          assigned_to_profile:profiles!tasks_assigned_to_fkey(id, first_name, last_name, email),
-          assigned_by_profile:profiles!tasks_assigned_by_fkey(id, first_name, last_name, email)
-        `);
+        .from('tasks_with_profiles')
+        .select('*');
 
       // If user has update_assigned permission but NOT update permission,
       // they can only see tasks assigned to them
@@ -35,5 +31,7 @@ export const useTasksQuery = () => {
       return data as Task[];
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 30 * 1000, // 30 seconds - tasks change frequently
+    gcTime: 2 * 60 * 1000, // 2 minutes cache
   });
 };

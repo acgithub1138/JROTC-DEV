@@ -115,7 +115,8 @@ export const useOptimizedDashboardStats = () => {
       };
     },
     enabled: !!userProfile?.id, // Only run query when user profile is loaded
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - dashboard data doesn't change very frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
     refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
 
