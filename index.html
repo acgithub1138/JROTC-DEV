@@ -70,6 +70,32 @@
       }
     </style>
     
+    <!-- Intercept and defer Vite's CSS to prevent render blocking -->
+    <script>
+      // Prevent render-blocking CSS by deferring stylesheet loading
+      (function() {
+        'use strict';
+        var originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+          var element = originalCreateElement.call(this, tagName);
+          if (tagName.toLowerCase() === 'link') {
+            var originalSetAttribute = element.setAttribute;
+            element.setAttribute = function(name, value) {
+              // Defer CSS loading to prevent render blocking
+              if (name === 'rel' && value === 'stylesheet') {
+                element.media = 'print';
+                element.onload = function() {
+                  this.media = 'all';
+                };
+              }
+              return originalSetAttribute.call(this, name, value);
+            };
+          }
+          return element;
+        };
+      })();
+    </script>
+    
     <!-- Enhanced Sentry blocking - MUST run before any other scripts -->
     <script>
       (function() {
