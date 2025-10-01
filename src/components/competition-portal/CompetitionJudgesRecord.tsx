@@ -12,6 +12,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface JudgeFormData {
   judges: string[];
@@ -48,6 +50,7 @@ export const CompetitionJudgesRecord = () => {
     events: competitionEvents,
     isLoading: eventsLoading
   } = useCompetitionEvents(competitionId);
+  const { timezone } = useSchoolTimezone();
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<JudgeFormData>({
     defaultValues: {
@@ -76,11 +79,14 @@ export const CompetitionJudgesRecord = () => {
     if (isEditMode && judges.length > 0) {
       const judge = judges.find(j => j.id === judgeId);
       if (judge) {
-        // Parse existing datetime strings to extract hour and minute
-        const startHour = judge.start_time ? new Date(judge.start_time).getHours().toString().padStart(2, '0') : '09';
-        const startMinute = judge.start_time ? new Date(judge.start_time).getMinutes().toString().padStart(2, '0') : '00';
-        const endHour = judge.end_time ? new Date(judge.end_time).getHours().toString().padStart(2, '0') : '17';
-        const endMinute = judge.end_time ? new Date(judge.end_time).getMinutes().toString().padStart(2, '0') : '00';
+        // Convert UTC times to school timezone for editing
+        const startInSchoolTz = judge.start_time ? convertToSchoolTimezone(new Date(judge.start_time), timezone) : null;
+        const endInSchoolTz = judge.end_time ? convertToSchoolTimezone(new Date(judge.end_time), timezone) : null;
+        
+        const startHour = startInSchoolTz ? startInSchoolTz.getHours().toString().padStart(2, '0') : '09';
+        const startMinute = startInSchoolTz ? startInSchoolTz.getMinutes().toString().padStart(2, '0') : '00';
+        const endHour = endInSchoolTz ? endInSchoolTz.getHours().toString().padStart(2, '0') : '17';
+        const endMinute = endInSchoolTz ? endInSchoolTz.getMinutes().toString().padStart(2, '0') : '00';
         
         form.reset({
           judges: [judge.judge],
@@ -94,7 +100,7 @@ export const CompetitionJudgesRecord = () => {
         });
       }
     }
-  }, [isEditMode, judgeId, judges, form]);
+  }, [isEditMode, judgeId, judges, form, timezone]);
   const onSubmit = async (data: JudgeFormData) => {
     if (!competitionId) return;
     setIsSaving(true);
@@ -105,9 +111,15 @@ export const CompetitionJudgesRecord = () => {
         ? new Date(selectedEventData.start_time).toISOString().split('T')[0]
         : new Date().toISOString().split('T')[0];
       
-      // Construct datetime strings
-      const startTime = `${dateStr}T${data.start_time_hour}:${data.start_time_minute}:00`;
-      const endTime = `${dateStr}T${data.end_time_hour}:${data.end_time_minute}:00`;
+      // Create dates in school timezone, then convert to UTC
+      const startDateInSchoolTz = new Date(`${dateStr}T${data.start_time_hour}:${data.start_time_minute}:00`);
+      const endDateInSchoolTz = new Date(`${dateStr}T${data.end_time_hour}:${data.end_time_minute}:00`);
+      
+      const startTimeUTC = convertFromSchoolTimezone(startDateInSchoolTz, timezone);
+      const endTimeUTC = convertFromSchoolTimezone(endDateInSchoolTz, timezone);
+      
+      const startTime = startTimeUTC.toISOString();
+      const endTime = endTimeUTC.toISOString();
       
       if (isEditMode) {
         // Edit mode: update single judge
