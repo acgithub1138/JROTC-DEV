@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,10 +23,13 @@ interface JudgeFormData {
 }
 export const CompetitionJudgesRecord = () => {
   const navigate = useNavigate();
-  const {
-    id: competitionId
-  } = useParams();
   const location = useLocation();
+  
+  // Extract competition ID from pathname since route isn't parameterized
+  const competitionId = React.useMemo(() => {
+    const match = location.pathname.match(/\/competition-details\/([^\/]+)\/judges_record/);
+    return match?.[1] || null;
+  }, [location.pathname]);
   const judgeId = location.state?.judgeId;
   const isEditMode = !!judgeId;
   const {
