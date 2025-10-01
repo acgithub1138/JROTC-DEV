@@ -589,6 +589,7 @@ export const CalendarRecordPage: React.FC = () => {
                             value={field.value || ''}
                             onValueChange={(value) => handleFieldChange('location', value)}
                             placeholder="Enter location or search address"
+                            disabled={!canEdit}
                           />
                         </FormControl>
                         <FormMessage />
