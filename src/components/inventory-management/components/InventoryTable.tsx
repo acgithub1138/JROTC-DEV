@@ -17,10 +17,12 @@ import { ViewInventoryItemDialog } from './ViewInventoryItemDialog';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getPaginatedItems } from '@/utils/pagination';
 import type { Tables } from '@/integrations/supabase/types';
 type InventoryItem = Tables<'inventory_items'>;
 interface InventoryTableProps {
   items: InventoryItem[];
+  currentPage: number;
   isLoading: boolean;
   selectedItems: string[];
   visibleColumns: string[];
@@ -31,6 +33,7 @@ interface InventoryTableProps {
 }
 export const InventoryTable: React.FC<InventoryTableProps> = ({
   items,
+  currentPage,
   isLoading,
   selectedItems,
   visibleColumns,
@@ -55,6 +58,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     canDelete,
     canViewDetails
   } = useInventoryTablePermissions();
+  // Sort items BEFORE pagination
   const {
     sortedData: sortedItems,
     sortConfig,
@@ -66,6 +70,12 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       direction: 'asc'
     }
   });
+  
+  // Paginate sorted items
+  const paginatedItems = React.useMemo(() => 
+    getPaginatedItems(sortedItems, currentPage),
+    [sortedItems, currentPage]
+  );
   const handleEdit = async (item: InventoryItem) => {
     if (!canUpdate) return;
     await onEdit(item);
@@ -96,7 +106,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   };
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      onSelectionChange(sortedItems.map(item => item.id));
+      onSelectionChange(paginatedItems.map(item => item.id));
     } else {
       onSelectionChange([]);
     }
@@ -147,7 +157,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     return (
       <>
         <div className="space-y-4">
-          {sortedItems.map(item => (
+          {paginatedItems.map(item => (
             <Card key={item.id} className="w-full">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
@@ -257,7 +267,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               </CardContent>
             </Card>
           ))}
-          {sortedItems.length === 0 && (
+          {paginatedItems.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               No inventory items found
             </div>
@@ -289,7 +299,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         <StandardTableHeader>
           <TableRow>
             <TableHead className="w-12">
-              <Checkbox checked={selectedItems.length === sortedItems.length && sortedItems.length > 0} onCheckedChange={handleSelectAll} />
+              <Checkbox checked={selectedItems.length === paginatedItems.length && paginatedItems.length > 0} onCheckedChange={handleSelectAll} />
             </TableHead>
             {isColumnVisible('item_id') && <SortableTableHead sortKey="item_id" currentSort={sortConfig} onSort={handleSort}>
                 Item ID
@@ -329,7 +339,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           </TableRow>
         </StandardTableHeader>
         <StandardTableBody emptyMessage="No inventory items found" emptyIcon={<Package className="w-12 h-12" />} colSpan={visibleColumns.length + 2}>
-          {sortedItems.map(item => <TableRow key={item.id} className="hover:bg-muted/50">
+          {paginatedItems.map(item => <TableRow key={item.id} className="hover:bg-muted/50">
                <TableCell className={getPaddingClass()}>
                 <Checkbox checked={selectedItems.includes(item.id)} onCheckedChange={checked => handleSelectItem(item.id, !!checked)} />
               </TableCell>

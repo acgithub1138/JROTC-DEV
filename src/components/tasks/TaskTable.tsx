@@ -7,8 +7,6 @@ import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
 import { TaskTableRow } from './table/TaskTableRow';
-import { useSortableTable } from '@/hooks/useSortableTable';
-import { useTaskSorting } from '@/hooks/useTaskSorting';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -34,17 +32,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   const [expandedTasks, setExpandedTasks] = React.useState<Set<string>>(new Set());
   const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
   
-  const { customSortFn } = useTaskSorting();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
   const { canDelete, canUpdate } = useTaskPermissions();
   const { deleteTask } = useTasks();
   
-  const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
-    data: tasks,
-    customSortFn
-  });
+  // Tasks are already sorted in TaskTabs, just display them
+  const sortedTasks = tasks;
 
   const handleSelectTask = (taskId: string, checked: boolean) => {
     setSelectedTasks(prev => 
@@ -97,63 +92,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                 onCheckedChange={(checked) => handleSelectAll(checked as boolean, sortedTasks)}
               />
             </TableHead>
-            <SortableTableHead
-              sortKey="task_number"
-              currentSort={sortConfig}
-              onSort={handleSort}
-              className="text-center"
-            >
-              Task #
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="title"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Task Name
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="description"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Description
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="status"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Status
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="priority"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Priority
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="assigned_to_name"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Assigned To
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="due_date"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Due Date
-            </SortableTableHead>
-            <SortableTableHead
-              sortKey="created_at"
-              currentSort={sortConfig}
-              onSort={handleSort}
-            >
-              Created
-            </SortableTableHead>
+            <TableHead className="text-center">Task #</TableHead>
+            <TableHead>Task Name</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Assigned To</TableHead>
+            <TableHead>Due Date</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>

@@ -49,8 +49,8 @@ const InventoryManagementPageOptimized = () => {
   const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
     useInventoryFilters(inventoryItems);
   
+  // Pagination - will be applied AFTER sorting in InventoryTable
   const totalPages = getTotalPages(filteredItems.length);
-  const paginatedItems = getPaginatedItems(filteredItems, currentPage);
 
   // Calculate stock counts for filtered items
   const inStockCount = filteredItems.filter(item => (item.qty_available || 0) > 0).length;
@@ -226,7 +226,8 @@ const InventoryManagementPageOptimized = () => {
         }
       >
         <InventoryTable 
-          items={paginatedItems as any} 
+          items={filteredItems as any}
+          currentPage={currentPage}
           isLoading={isLoading} 
           selectedItems={selectedItems} 
           visibleColumns={enabledColumns.map(col => col.key)} 

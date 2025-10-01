@@ -8,6 +8,9 @@ import { TaskCards } from './TaskCards';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
+import { useSortableTable } from '@/hooks/useSortableTable';
+import { useTaskSorting } from '@/hooks/useTaskSorting';
+import { getPaginatedItems } from '@/utils/pagination';
 
 interface TaskTabsProps {
   myActiveTasks: (Task | Subtask)[];
@@ -54,6 +57,41 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const { isNative } = useCapacitor();
+  const { customSortFn } = useTaskSorting();
+  
+  // Sort myActiveTasks BEFORE pagination
+  const { sortedData: sortedMyActiveTasks } = useSortableTable({
+    data: myActiveTasks,
+    customSortFn
+  });
+  
+  // Sort allSchoolTasks BEFORE pagination  
+  const { sortedData: sortedAllSchoolTasks } = useSortableTable({
+    data: allSchoolTasks,
+    customSortFn
+  });
+  
+  // Sort completedTasks BEFORE pagination
+  const { sortedData: sortedCompletedTasks } = useSortableTable({
+    data: completedTasks,
+    customSortFn
+  });
+  
+  // Paginate sorted tasks
+  const paginatedMyTasks = useMemo(() => 
+    getPaginatedItems(sortedMyActiveTasks, currentPageMyTasks),
+    [sortedMyActiveTasks, currentPageMyTasks]
+  );
+  
+  const paginatedAllTasks = useMemo(() => 
+    getPaginatedItems(sortedAllSchoolTasks, currentPageAllTasks),
+    [sortedAllSchoolTasks, currentPageAllTasks]
+  );
+  
+  const paginatedCompletedTasks = useMemo(() => 
+    getPaginatedItems(sortedCompletedTasks, currentPageCompleted),
+    [sortedCompletedTasks, currentPageCompleted]
+  );
   
   // Memoize the rendering logic to prevent unnecessary re-renders
   const renderTaskContent = useCallback((tasks: (Task | Subtask)[], isAllTasksTab = false) => {
@@ -91,31 +129,31 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
       </TabsList>
 
       <TabsContent value="mytasks" className="space-y-4">
-        {renderTaskContent(myActiveTasks)}
+        {renderTaskContent(paginatedMyTasks)}
         <TablePagination
           currentPage={currentPageMyTasks}
           totalPages={myTasksPages}
-          totalItems={myActiveTasks.length}
+          totalItems={sortedMyActiveTasks.length}
           onPageChange={onPageChangeMyTasks}
         />
       </TabsContent>
 
       <TabsContent value="alltasks" className="space-y-4">
-        {renderTaskContent(allSchoolTasks, true)}
+        {renderTaskContent(paginatedAllTasks, true)}
         <TablePagination
           currentPage={currentPageAllTasks}
           totalPages={allTasksPages}
-          totalItems={allSchoolTasks.length}
+          totalItems={sortedAllSchoolTasks.length}
           onPageChange={onPageChangeAllTasks}
         />
       </TabsContent>
 
       <TabsContent value="completed" className="space-y-4">
-        {renderTaskContent(completedTasks)}
+        {renderTaskContent(paginatedCompletedTasks)}
         <TablePagination
           currentPage={currentPageCompleted}
           totalPages={completedTasksPages}
-          totalItems={completedTasks.length}
+          totalItems={sortedCompletedTasks.length}
           onPageChange={onPageChangeCompleted}
         />
       </TabsContent>

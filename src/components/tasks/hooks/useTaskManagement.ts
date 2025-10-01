@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getAllSchoolTasksAndSubtasks, getAllSchoolTasksAndSubtasksForSearch, getCompletedTasks } from '@/utils/taskFilters';
-import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
+import { getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
 import { useAllSchoolSubtasksQuery } from '@/hooks/subtasks/useAllSchoolSubtasksQuery';
@@ -54,19 +54,22 @@ export const useTaskManagement = () => {
     );
   }, [filteredTasks.allSchool, overdueFilter]);
 
-  // Memoize pagination calculations
+  // Return filtered tasks without pagination - let TaskTable handle sorting and TaskTabs handle pagination
   const paginationData = useMemo(() => {
     const myTasksPages = getTotalPages(filteredTasks.myActive.length);
     const allTasksPages = getTotalPages(overdueFilteredTasks.length);
     const completedTasksPages = getTotalPages(filteredTasks.completed.length);
 
     return {
-      myTasks: getPaginatedItems(filteredTasks.myActive, currentPageMyTasks),
-      allTasks: getPaginatedItems(overdueFilteredTasks, currentPageAllTasks),
-      completedTasks: getPaginatedItems(filteredTasks.completed, currentPageCompleted),
+      myTasks: filteredTasks.myActive, // Return full filtered list
+      allTasks: overdueFilteredTasks, // Return full filtered list
+      completedTasks: filteredTasks.completed, // Return full filtered list
       myTasksPages,
       allTasksPages,
-      completedTasksPages
+      completedTasksPages,
+      currentPageMyTasks,
+      currentPageAllTasks,
+      currentPageCompleted
     };
   }, [
     filteredTasks, 
@@ -99,12 +102,12 @@ export const useTaskManagement = () => {
     setSearchTerm,
     overdueFilter,
     setOverdueFilter,
-    myActiveTasks: paginationData.myTasks as (Task | Subtask)[],
-    allSchoolTasks: paginationData.allTasks as (Task | Subtask)[],
-    completedTasks: paginationData.completedTasks,
-    currentPageMyTasks,
-    currentPageAllTasks,
-    currentPageCompleted,
+    myActiveTasks: paginationData.myTasks as (Task | Subtask)[], // Full filtered list
+    allSchoolTasks: paginationData.allTasks as (Task | Subtask)[], // Full filtered list
+    completedTasks: paginationData.completedTasks, // Full filtered list
+    currentPageMyTasks: paginationData.currentPageMyTasks,
+    currentPageAllTasks: paginationData.currentPageAllTasks,
+    currentPageCompleted: paginationData.currentPageCompleted,
     myTasksPages: paginationData.myTasksPages,
     allTasksPages: paginationData.allTasksPages,
     completedTasksPages: paginationData.completedTasksPages,
