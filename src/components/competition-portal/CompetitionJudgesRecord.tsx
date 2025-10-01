@@ -178,10 +178,14 @@ export const CompetitionJudgesRecord = () => {
                           <SelectValue placeholder="Select an event (optional)" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
+                      <SelectContent className="bg-background">
+                        {competitionEvents.length === 0 ? (
+                          <div className="p-2 text-sm text-muted-foreground">No events available</div>
+                        ) : (
+                          competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
                             {event.event_name || 'Unnamed Event'}
-                          </SelectItem>)}
+                          </SelectItem>)
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
