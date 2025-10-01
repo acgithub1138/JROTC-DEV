@@ -45,22 +45,14 @@ export const MobileEditEvent: React.FC = () => {
     max_participants: '',
     fee: '',
     interval: '',
-    notes: '',
-    judges: [] as string[],
-    resources: [] as string[]
+    notes: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
-  const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [initialFormData, setInitialFormData] = useState(formData);
-  
-  const {
-    users: schoolUsers,
-    isLoading: usersLoading
-  } = useSchoolUsers(true);
 
   const { timezone } = useSchoolTimezone();
 
@@ -73,7 +65,6 @@ export const MobileEditEvent: React.FC = () => {
   useEffect(() => {
     fetchEvent();
     fetchEvents();
-    fetchJudges();
   }, [eventId]);
 
   useEffect(() => {
@@ -100,9 +91,7 @@ export const MobileEditEvent: React.FC = () => {
         max_participants: event.max_participants?.toString() || '',
         fee: (event as any).fee?.toString() || '',
         interval: (event as any).interval?.toString() || '',
-        notes: event.notes || '',
-        judges: event.judges || [],
-        resources: event.resources || []
+        notes: event.notes || ''
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -178,47 +167,6 @@ export const MobileEditEvent: React.FC = () => {
     }
   };
 
-  const fetchJudges = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cp_judges')
-        .select('id, name')
-        .eq('available', true);
-      
-      if (error) throw error;
-      setJudges(data || []);
-    } catch (error) {
-      console.error('Error fetching judges:', error);
-      toast.error('Failed to load judges');
-    }
-  };
-
-  const addJudge = (judgeId: string) => {
-    if (!formData.judges.includes(judgeId)) {
-      setFormData({ ...formData, judges: [...formData.judges, judgeId] });
-    }
-  };
-
-  const removeJudge = (judgeId: string) => {
-    setFormData({ 
-      ...formData, 
-      judges: formData.judges.filter(id => id !== judgeId) 
-    });
-  };
-
-  const addResource = (resourceId: string) => {
-    if (!formData.resources.includes(resourceId)) {
-      setFormData({ ...formData, resources: [...formData.resources, resourceId] });
-    }
-  };
-
-  const removeResource = (resourceId: string) => {
-    setFormData({ 
-      ...formData, 
-      resources: formData.resources.filter(id => id !== resourceId) 
-    });
-  };
-
   const handleSave = async () => {
     if (!eventId) return;
 
@@ -267,9 +215,7 @@ export const MobileEditEvent: React.FC = () => {
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         interval: formData.interval ? parseFloat(formData.interval) : null,
-        notes: formData.notes || null,
-        judges: formData.judges,
-        resources: formData.resources
+        notes: formData.notes || null
       };
 
       const { error } = await supabase
@@ -556,74 +502,6 @@ export const MobileEditEvent: React.FC = () => {
                 onChange={(value) => setFormData({ ...formData, lunch_end_time: value })}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Judges */}
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 space-y-4">
-            <h3 className="font-semibold text-foreground">Judges</h3>
-            
-            <div className="flex flex-wrap gap-2">
-              {formData.judges.map((judgeId) => {
-                const judge = judges.find(j => j.id === judgeId);
-                return (
-                  <Badge key={judgeId} variant="secondary" className="flex items-center gap-1">
-                    {judge?.name || 'Unknown Judge'}
-                    <X size={12} className="cursor-pointer" onClick={() => removeJudge(judgeId)} />
-                  </Badge>
-                );
-              })}
-            </div>
-
-            <Select onValueChange={addJudge}>
-              <SelectTrigger>
-                <SelectValue placeholder="Add judge" />
-              </SelectTrigger>
-              <SelectContent>
-                {judges
-                  .filter(judge => !formData.judges.includes(judge.id))
-                  .map((judge) => (
-                    <SelectItem key={judge.id} value={judge.id}>
-                      {judge.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        {/* Resources */}
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 space-y-4">
-            <h3 className="font-semibold text-foreground">Resources</h3>
-            
-            <div className="flex flex-wrap gap-2">
-              {formData.resources.map((resourceId) => {
-                const user = schoolUsers.find(u => u.id === resourceId);
-                return (
-                  <Badge key={resourceId} variant="secondary" className="flex items-center gap-1">
-                    {user ? `${user.last_name}, ${user.first_name}` : 'Unknown Resource'}
-                    <X size={12} className="cursor-pointer" onClick={() => removeResource(resourceId)} />
-                  </Badge>
-                );
-              })}
-            </div>
-
-            <Select onValueChange={addResource}>
-              <SelectTrigger>
-                <SelectValue placeholder="Add resource" />
-              </SelectTrigger>
-              <SelectContent>
-                {schoolUsers
-                  .filter(user => !formData.resources.includes(user.id))
-                  .map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
           </CardContent>
         </Card>
 

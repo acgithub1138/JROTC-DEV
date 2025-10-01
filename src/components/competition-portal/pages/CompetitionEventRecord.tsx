@@ -49,8 +49,6 @@ interface FormData {
   interval: string;
   notes: string;
   score_sheet: string;
-  judges: string[];
-  resources: string[];
 }
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
@@ -70,19 +68,11 @@ export const CompetitionEventRecord: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [judges, setJudges] = useState<Array<{
-    id: string;
-    name: string;
-  }>>([]);
   const [scoreSheets, setScoreSheets] = useState<Array<{
     id: string;
     template_name: string;
     jrotc_program: string;
   }>>([]);
-  const {
-    users: schoolUsers,
-    isLoading: usersLoading
-  } = useSchoolUsers(true);
   const {
     timezone,
     isLoading: timezoneLoading
@@ -113,9 +103,7 @@ export const CompetitionEventRecord: React.FC = () => {
     fee: '',
     interval: '',
     notes: '',
-    score_sheet: '',
-    judges: [],
-    resources: []
+    score_sheet: ''
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const {
@@ -158,9 +146,8 @@ export const CompetitionEventRecord: React.FC = () => {
     }
   }, [existingEvent, isEditMode, isViewMode, eventTypes, timezone]);
 
-  // Fetch judges and competition date on component mount
+  // Fetch competition date on component mount for create mode
   useEffect(() => {
-    fetchJudges();
     if (isCreateMode && competitionId && !timezoneLoading && timezone) {
       fetchCompetitionDate();
     }
@@ -231,9 +218,7 @@ export const CompetitionEventRecord: React.FC = () => {
       fee: (event as any).fee?.toString() || '',
       interval: (event as any).interval?.toString() || '',
       notes: event.notes || '',
-      score_sheet: (event as any).score_sheet || '',
-      judges: event.judges || [],
-      resources: event.resources || []
+      score_sheet: (event as any).score_sheet || ''
     };
   }
   const fetchEventData = async () => {
@@ -255,21 +240,6 @@ export const CompetitionEventRecord: React.FC = () => {
       navigate(`/app/competition-portal/competition-details/${competitionId}`);
     } finally {
       setIsLoading(false);
-    }
-  };
-  const fetchJudges = async () => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_judges').select('id, name').eq('available', true).order('name', {
-        ascending: true
-      });
-      if (error) throw error;
-      setJudges(data || []);
-    } catch (error) {
-      console.error('Error fetching judges:', error);
-      toast.error('Failed to load judges');
     }
   };
   const fetchCompetitionDate = async () => {
@@ -412,9 +382,7 @@ export const CompetitionEventRecord: React.FC = () => {
         fee: formData.fee ? parseFloat(formData.fee) : null,
         interval: formData.interval ? parseInt(formData.interval) : null,
         notes: formData.notes || null,
-        score_sheet: formData.score_sheet || null,
-        judges: formData.judges,
-        resources: formData.resources
+        score_sheet: formData.score_sheet || null
       };
       if (isCreateMode) {
         const {
@@ -467,47 +435,6 @@ export const CompetitionEventRecord: React.FC = () => {
       navigate(`/app/competition-portal/competition-details/${competitionId}`);
     }
   };
-  const addJudge = (judgeId: string) => {
-    if (!formData.judges.includes(judgeId)) {
-      setFormData(prev => ({
-        ...prev,
-        judges: [...prev.judges, judgeId]
-      }));
-    }
-  };
-  const removeJudge = (judgeId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      judges: prev.judges.filter(id => id !== judgeId)
-    }));
-  };
-  const addResource = (resourceId: string) => {
-    if (!formData.resources.includes(resourceId)) {
-      setFormData(prev => ({
-        ...prev,
-        resources: [...prev.resources, resourceId]
-      }));
-    }
-  };
-  const removeResource = (resourceId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      resources: prev.resources.filter(id => id !== resourceId)
-    }));
-  };
-  const getSelectedJudges = () => {
-    return judges.filter(judge => formData.judges.includes(judge.id));
-  };
-  const getAvailableJudges = () => {
-    return judges.filter(judge => !formData.judges.includes(judge.id));
-  };
-  const getSelectedResources = () => {
-    return schoolUsers.filter(user => formData.resources.includes(user.id));
-  };
-  const getAvailableResources = () => {
-    return schoolUsers.filter(user => !formData.resources.includes(user.id)).sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
-  };
-
   // Show loading state while waiting for data
   if ((isEditMode || isViewMode) && eventId && !existingEvent && isLoading) {
     return <div className="p-6 space-y-6">
@@ -600,24 +527,6 @@ export const CompetitionEventRecord: React.FC = () => {
                   ...prev,
                   location: e.target.value
                 }))} placeholder="Event location" disabled={isViewMode} required />
-              </div>
-            </div>
-
-            {/* Judge & Resource Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label className="text-right">Judges</Label>
-                <MultiSelectJudges judges={judges} selectedJudgeIds={formData.judges} onChange={judgeIds => setFormData(prev => ({
-                  ...prev,
-                  judges: judgeIds
-                }))} disabled={isViewMode} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label className="text-right">Resources</Label>
-                <MultiSelectResources resources={schoolUsers} selectedResourceIds={formData.resources} onChange={resourceIds => setFormData(prev => ({
-                  ...prev,
-                  resources: resourceIds
-                }))} disabled={isViewMode} />
               </div>
             </div>
 

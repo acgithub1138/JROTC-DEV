@@ -51,12 +51,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     fee: '',
     interval: '',
     notes: '',
-    score_sheet: '',
-    judges: [] as string[],
-    resources: [] as string[]
+    score_sheet: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
   const [scoreSheets, setScoreSheets] = useState<Array<{
     id: string;
     template_name: string;
@@ -64,11 +61,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   }>>([]);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [initialFormData, setInitialFormData] = useState(formData);
-  
-  const {
-    users: schoolUsers,
-    isLoading: usersLoading
-  } = useSchoolUsers(true); // Only active users
 
   const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
   const { timezone } = useSchoolTimezone();
@@ -79,11 +71,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     enabled: open
   });
 
-  useEffect(() => {
-    if (open && event) {
-      fetchJudges();
-    }
-  }, [open, event]);
 
   // Fetch filtered score sheets when event data is available
   useEffect(() => {
@@ -139,29 +126,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         fee: (event as any).fee?.toString() || '',
         interval: (event as any).interval?.toString() || '',
         notes: event.notes || '',
-        score_sheet: (event as any).score_sheet || '',
-        judges: event.judges || [],
-        resources: event.resources || []
+        score_sheet: (event as any).score_sheet || ''
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
     }
   }, [event, eventTypes, timezone]);
-
-  const fetchJudges = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cp_judges')
-        .select('id, name')
-        .eq('available', true);
-      
-      if (error) throw error;
-      setJudges(data || []);
-    } catch (error) {
-      console.error('Error fetching judges:', error);
-      toast.error('Failed to load judges');
-    }
-  };
 
   const fetchFilteredScoreSheets = async () => {
     try {
@@ -197,54 +167,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       console.error('Error fetching filtered score sheets:', error);
       toast.error('Failed to load score sheets');
     }
-  };
-
-  const addJudge = (judgeId: string) => {
-    if (!formData.judges.includes(judgeId)) {
-      setFormData(prev => ({
-        ...prev,
-        judges: [...prev.judges, judgeId]
-      }));
-    }
-  };
-
-  const removeJudge = (judgeId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      judges: prev.judges.filter(id => id !== judgeId)
-    }));
-  };
-
-  const addResource = (resourceId: string) => {
-    if (!formData.resources.includes(resourceId)) {
-      setFormData(prev => ({
-        ...prev,
-        resources: [...prev.resources, resourceId]
-      }));
-    }
-  };
-
-  const removeResource = (resourceId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      resources: prev.resources.filter(id => id !== resourceId)
-    }));
-  };
-
-  const getSelectedJudges = () => {
-    return judges.filter(judge => formData.judges.includes(judge.id));
-  };
-
-  const getAvailableJudges = () => {
-    return judges.filter(judge => !formData.judges.includes(judge.id));
-  };
-
-  const getSelectedResources = () => {
-    return schoolUsers.filter(user => formData.resources.includes(user.id));
-  };
-
-  const getAvailableResources = () => {
-    return schoolUsers.filter(user => !formData.resources.includes(user.id));
   };
 
   // Calculate max participants when interval is set
@@ -365,8 +287,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         notes: formData.notes || null,
         score_sheet: formData.score_sheet || null,
-        judges: formData.judges,
-        resources: formData.resources,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         interval: formData.interval ? parseInt(formData.interval) : null
       } as any;
@@ -668,70 +588,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, fee: e.target.value }))}
                 placeholder="0.00"
               />
-            </div>
-          </div>
-
-          <div>
-            <Label>Judges</Label>
-            <div className="space-y-2">
-              <Select onValueChange={addJudge}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Add judges" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableJudges().map((judge) => (
-                    <SelectItem key={judge.id} value={judge.id}>
-                      {judge.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {getSelectedJudges().length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getSelectedJudges().map((judge) => (
-                    <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
-                      {judge.name}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeJudge(judge.id)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <Label>Resources</Label>
-            <div className="space-y-2">
-              <Select onValueChange={addResource}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Add resources" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableResources().map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {getSelectedResources().length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getSelectedResources().map((user) => (
-                    <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                      {user.last_name}, {user.first_name}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeResource(user.id)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

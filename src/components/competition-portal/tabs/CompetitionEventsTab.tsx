@@ -334,8 +334,8 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
         </div>}
 
       {/* Modals removed - using page navigation instead */}
-      <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} event={selectedEventForView} />
-      <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} event={selectedEventForView} />
+      <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} eventId={selectedEventForView?.id || null} />
+      <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} eventId={selectedEventForView?.id || null} />
       <ViewEventSchoolsModal open={showSchoolsModal} onOpenChange={setShowSchoolsModal} event={selectedEventForView} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
