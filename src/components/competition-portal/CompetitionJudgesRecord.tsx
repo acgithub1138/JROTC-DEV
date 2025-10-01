@@ -7,14 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
-import { MobileDateTimePicker } from '@/components/mobile/ui/MobileDateTimePicker';
 
 interface JudgeFormData {
-  judge: string;
+  judges: string[]; // Changed to array for multiple selection
   event: string;
   location: string;
   start_time: string;
@@ -49,7 +49,7 @@ export const CompetitionJudgesRecord = () => {
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<JudgeFormData>({
     defaultValues: {
-      judge: '',
+      judges: [], // Changed to array
       event: '',
       location: '',
       start_time: '',
@@ -73,7 +73,7 @@ export const CompetitionJudgesRecord = () => {
       const judge = judges.find(j => j.id === judgeId);
       if (judge) {
         form.reset({
-          judge: judge.judge,
+          judges: [judge.judge], // Wrap in array for edit mode
           event: (judge as any).event || '',
           location: judge.location || '',
           start_time: judge.start_time || '',
@@ -87,19 +87,32 @@ export const CompetitionJudgesRecord = () => {
     if (!competitionId) return;
     setIsSaving(true);
     try {
-      const judgeData: any = {
-        competition_id: competitionId,
-        judge: data.judge,
-        event: data.event || null,
-        location: data.location || null,
-        start_time: data.start_time || null,
-        end_time: data.end_time || null,
-        assignment_details: data.assignment_details || null
-      };
       if (isEditMode) {
+        // Edit mode: update single judge
+        const judgeData: any = {
+          competition_id: competitionId,
+          judge: data.judges[0], // Use first judge in edit mode
+          event: data.event || null,
+          location: data.location || null,
+          start_time: data.start_time || null,
+          end_time: data.end_time || null,
+          assignment_details: data.assignment_details || null
+        };
         await updateJudge(judgeId, judgeData);
       } else {
-        await createJudge(judgeData);
+        // Create mode: create a record for each selected judge
+        for (const judgeId of data.judges) {
+          const judgeData: any = {
+            competition_id: competitionId,
+            judge: judgeId,
+            event: data.event || null,
+            location: data.location || null,
+            start_time: data.start_time || null,
+            end_time: data.end_time || null,
+            assignment_details: data.assignment_details || null
+          };
+          await createJudge(judgeData);
+        }
       }
       navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
     } catch (error) {
@@ -150,24 +163,63 @@ export const CompetitionJudgesRecord = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField control={form.control} name="judge" rules={{
-              required: 'Judge is required'
+              <FormField control={form.control} name="judges" rules={{
+              required: 'At least one judge is required',
+              validate: (value) => value && value.length > 0 || 'At least one judge is required'
             }} render={({
               field
             }) => <FormItem>
-                    <FormLabel>Judge</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
+                    <FormLabel>Judge{!isEditMode && 's'}</FormLabel>
+                    <FormControl>
+                      <Select 
+                        onValueChange={(value) => {
+                          if (isEditMode) {
+                            // Edit mode: single selection
+                            field.onChange([value]);
+                          } else {
+                            // Create mode: toggle selection
+                            const current = field.value || [];
+                            if (current.includes(value)) {
+                              field.onChange(current.filter(id => id !== value));
+                            } else {
+                              field.onChange([...current, value]);
+                            }
+                          }
+                        }} 
+                        value={field.value?.[0] || ''}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a judge" />
+                          <SelectValue placeholder={isEditMode ? "Select a judge" : `${field.value?.length || 0} judge(s) selected`} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableJudges.map(judge => <SelectItem key={judge.id} value={judge.id}>
-                            {judge.name} {!judge.available && '(Unavailable)'}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {availableJudges.map(judge => {
+                            const isSelected = field.value?.includes(judge.id);
+                            return (
+                              <SelectItem 
+                                key={judge.id} 
+                                value={judge.id}
+                                className={isSelected && !isEditMode ? 'bg-accent' : ''}
+                              >
+                                {isSelected && !isEditMode && '✓ '}
+                                {judge.name} {!judge.available && '(Unavailable)'}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    {!isEditMode && field.value && field.value.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {field.value.map(judgeId => {
+                          const judge = availableJudges.find(j => j.id === judgeId);
+                          return judge ? (
+                            <Badge key={judgeId} variant="secondary" className="text-sm">
+                              {judge.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>} />
 
@@ -208,9 +260,13 @@ export const CompetitionJudgesRecord = () => {
                 <FormField control={form.control} name="start_time" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Start Time</FormLabel>
+                      <FormLabel>Start Time (24-hour format)</FormLabel>
                       <FormControl>
-                        <Input type="datetime-local" {...field} />
+                        <Input 
+                          type="datetime-local" 
+                          {...field} 
+                          step="900"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -218,9 +274,13 @@ export const CompetitionJudgesRecord = () => {
                 <FormField control={form.control} name="end_time" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>End Time</FormLabel>
+                      <FormLabel>End Time (24-hour format)</FormLabel>
                       <FormControl>
-                        <Input type="datetime-local" {...field} />
+                        <Input 
+                          type="datetime-local" 
+                          {...field}
+                          step="900"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
