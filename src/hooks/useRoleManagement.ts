@@ -47,6 +47,18 @@ export const useRoleManagement = () => {
     },
   });
 
+  // Fetch roles (id and name) for resolving role_id
+  const { data: roles = [] } = useQuery({
+    queryKey: ['user-roles-basic'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('id, role_name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Fetch all role permissions
   const { data: allRolePermissions = [] } = useQuery({
     queryKey: ['role-permissions'],
@@ -70,22 +82,30 @@ export const useRoleManagement = () => {
   // Get all permissions for a specific role
   const getRolePermissions = useCallback((role: UserRole): RolePermissions[string] => {
     const rolePerms: { [module: string]: { [action: string]: boolean } } = {};
+
+    const matchedRole = roles.find(r => r.role_name === role);
+    const roleId = matchedRole?.id;
+    if (!roleId) {
+      console.warn('Role ID not found for role name:', role);
+    } else {
+      console.log('Resolved role to role_id:', { role, roleId });
+    }
     
     modules.forEach(module => {
       rolePerms[module.id] = {};
       actions.forEach(action => {
-        const permission = allRolePermissions.find(
-          p => p.role?.role_name === role &&
-               p.module?.id === module.id &&
-               p.action?.id === action.id
-        );
-        rolePerms[module.id][action.id] = permission?.enabled || false;
+        const permission = allRolePermissions.find(p => (
+          (roleId ? p.role_id === roleId : p.role?.role_name === role) &&
+          p.module_id === module.id &&
+          p.action_id === action.id
+        ));
+        rolePerms[module.id][action.id] = permission?.enabled ?? false;
       });
     });
-    
+
     console.log(`Role permissions for ${role} (total: ${Object.keys(rolePerms).length} modules):`, rolePerms);
     return rolePerms;
-  }, [modules, actions, allRolePermissions]);
+  }, [modules, actions, allRolePermissions, roles]);
 
   // Update permission mutation
   const updatePermissionMutation = useMutation({

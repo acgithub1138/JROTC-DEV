@@ -82,23 +82,9 @@ export const RoleManagementPage: React.FC = () => {
     return roles;
   }, [allRoles]);
 
-  // Get base permissions and merge with optimistic changes
+  // Get base permissions and rely on DB as source of truth (no optimistic merge)
   const basePermissions = getRolePermissions(selectedRole);
-  const rolePermissions = useMemo(() => {
-    const merged = { ...basePermissions };
-    
-    // Apply optimistic changes
-    Object.keys(optimisticChanges).forEach(moduleName => {
-      if (!merged[moduleName]) {
-        merged[moduleName] = {};
-      }
-      Object.keys(optimisticChanges[moduleName]).forEach(actionName => {
-        merged[moduleName][actionName] = optimisticChanges[moduleName][actionName];
-      });
-    });
-    
-    return merged;
-  }, [basePermissions, optimisticChanges]);
+  const rolePermissions = basePermissions;
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
     // Find module and action names for optimistic update
