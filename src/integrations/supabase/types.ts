@@ -4040,6 +4040,38 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permission_details: {
+        Row: {
+          action_id: string | null
+          enabled: boolean | null
+          module_id: string | null
+          role_id: string | null
+          role_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "permission_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_competitions: {
         Row: {
           armed_color_guard:
