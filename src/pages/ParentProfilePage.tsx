@@ -14,39 +14,34 @@ const ParentProfilePage = () => {
     isLoading,
     refetch
   } = useParentContact();
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [tempPhone, setTempPhone] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
   const handleEditPhone = () => {
     setTempPhone(contact?.phone || '');
     setIsEditingPhone(true);
   };
-
   const handleCancelPhone = () => {
     setIsEditingPhone(false);
     setTempPhone('');
   };
-
   const handleSavePhone = async () => {
     if (!contact?.id) return;
-    
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('contacts')
-        .update({ phone: tempPhone })
-        .eq('id', contact.id);
-
+      const {
+        error
+      } = await supabase.from('contacts').update({
+        phone: tempPhone
+      }).eq('id', contact.id);
       if (error) throw error;
-
       toast({
         title: 'Success',
-        description: 'Phone updated successfully',
+        description: 'Phone updated successfully'
       });
-      
       setIsEditingPhone(false);
       refetch();
     } catch (error) {
@@ -54,7 +49,7 @@ const ParentProfilePage = () => {
       toast({
         title: 'Error',
         description: 'Failed to update phone',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsSaving(false);
@@ -144,12 +139,7 @@ const ParentProfilePage = () => {
           </div>
 
           {/* Status */}
-          <div className="flex items-center gap-4">
-            <Label className="w-32 text-muted-foreground">Status</Label>
-            <Badge className={getStatusColor(contact.status)}>
-              {getStatusLabel(contact.status)}
-            </Badge>
-          </div>
+          
 
           {/* Phone */}
           <div className="flex items-center gap-4">
@@ -157,44 +147,20 @@ const ParentProfilePage = () => {
               <Phone className="w-4 h-4" />
               Phone
             </Label>
-            {isEditingPhone ? (
-              <div className="flex items-center gap-2 flex-1">
-                <Input
-                  type="tel"
-                  value={tempPhone}
-                  onChange={(e) => setTempPhone(e.target.value)}
-                  className="flex-1"
-                  disabled={isSaving}
-                />
-                <Button
-                  size="sm"
-                  onClick={handleSavePhone}
-                  disabled={isSaving}
-                >
+            {isEditingPhone ? <div className="flex items-center gap-2 flex-1">
+                <Input type="tel" value={tempPhone} onChange={e => setTempPhone(e.target.value)} className="flex-1" disabled={isSaving} />
+                <Button size="sm" onClick={handleSavePhone} disabled={isSaving}>
                   <Check className="w-4 h-4" />
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCancelPhone}
-                  disabled={isSaving}
-                >
+                <Button size="sm" variant="outline" onClick={handleCancelPhone} disabled={isSaving}>
                   <X className="w-4 h-4" />
                 </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 group flex-1">
+              </div> : <div className="flex items-center gap-2 group flex-1">
                 <p className="text-base flex-1">{contact.phone || 'Not provided'}</p>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleEditPhone}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
+                <Button size="sm" variant="ghost" onClick={handleEditPhone} className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <Edit2 className="w-4 h-4" />
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Email */}
