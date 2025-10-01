@@ -155,12 +155,6 @@ export const useRoleManagement = () => {
       console.log('Permission upserted successfully:', data);
       return data;
     },
-    onSuccess: async (data, variables) => {
-      console.log('updatePermissionMutation success, invalidating and refetching queries');
-      // Both invalidate AND refetch to ensure UI updates
-      await queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
-      await queryClient.refetchQueries({ queryKey: ['role-permissions'] });
-    },
     onError: (error, variables) => {
       console.error('updatePermissionMutation error:', error, 'Variables:', variables);
     },
