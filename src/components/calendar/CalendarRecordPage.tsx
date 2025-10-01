@@ -234,6 +234,18 @@ export const CalendarRecordPage: React.FC = () => {
     // If no end date, it's valid (end date is optional)
     if (!data.end_date) return { isValid: true, error: '' };
     
+    // For all-day events, only compare dates (ignore time)
+    if (data.is_all_day) {
+      if (data.end_date < data.start_date) {
+        return { 
+          isValid: false, 
+          error: 'End date must be on or after start date' 
+        };
+      }
+      return { isValid: true, error: '' };
+    }
+    
+    // For timed events, compare full datetime
     const startDateTime = new Date(`${data.start_date}T${data.start_time_hour}:${data.start_time_minute}:00`);
     const endDateTime = new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`);
     
