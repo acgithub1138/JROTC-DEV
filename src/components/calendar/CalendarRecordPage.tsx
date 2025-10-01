@@ -26,6 +26,7 @@ import { RecurrenceRule } from '@/utils/recurrence';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
 import { EventAssignmentSection } from './components/EventAssignmentSection';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Event title is required'),
@@ -820,6 +821,20 @@ export const CalendarRecordPage: React.FC = () => {
               {/* Event Assignments for existing events */}
               {event && (
                 <EventAssignmentSection eventId={event.id} />
+              )}
+
+              {/* Attachments for existing events */}
+              {event && (
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">Attachments</h3>
+                  <AttachmentSection 
+                    recordType="event" 
+                    recordId={event.id} 
+                    canEdit={canEdit} 
+                    defaultOpen={true} 
+                    showContentOnly={true} 
+                  />
+                </div>
               )}
 
               <div className="flex justify-between pt-6">

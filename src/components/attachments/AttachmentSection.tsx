@@ -6,7 +6,7 @@ import { FileAttachmentUpload } from './FileAttachmentUpload';
 import { AttachmentList } from './AttachmentList';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 interface AttachmentSectionProps {
-  recordType: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction';
+  recordType: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event';
   recordId: string;
   canEdit?: boolean;
   defaultOpen?: boolean;
@@ -59,6 +59,18 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   if (showContentOnly) {
     return <div className="space-y-4">
         <AttachmentList recordType={recordType} recordId={recordId} canEdit={canEdit} />
+
+        {canEdit && !showUpload && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowUpload(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Attachment
+          </Button>
+        )}
 
         {showUpload && canEdit && <div className="space-y-3">
             <FileAttachmentUpload onFileSelect={handleFileUpload} disabled={isUploading} />
