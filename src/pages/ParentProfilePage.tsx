@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useParentContact } from '@/hooks/useParentContact';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, User, UserCircle } from 'lucide-react';
-
 const ParentProfilePage = () => {
-  const { contact, isLoading } = useParentContact();
-
+  const {
+    contact,
+    isLoading
+  } = useParentContact();
   if (isLoading) {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
           <p className="text-muted-foreground">View your contact information</p>
@@ -23,13 +23,10 @@ const ParentProfilePage = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   if (!contact) {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
           <p className="text-muted-foreground">View your contact information</p>
@@ -39,10 +36,8 @@ const ParentProfilePage = () => {
             <p className="text-muted-foreground">No contact information found.</p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -55,7 +50,6 @@ const ParentProfilePage = () => {
         return 'bg-secondary text-secondary-foreground';
     }
   };
-
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'active':
@@ -68,16 +62,13 @@ const ParentProfilePage = () => {
         return status;
     }
   };
-
   const getTypeLabel = (type: string, typeOther: string | null) => {
     if (type === 'other' && typeOther) {
       return typeOther;
     }
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
         <p className="text-muted-foreground">View your contact information</p>
@@ -101,10 +92,7 @@ const ParentProfilePage = () => {
           </div>
 
           {/* Type */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Type</div>
-            <p className="text-base">{getTypeLabel(contact.type, contact.type_other)}</p>
-          </div>
+          
 
           {/* Status */}
           <div className="space-y-2">
@@ -115,30 +103,24 @@ const ParentProfilePage = () => {
           </div>
 
           {/* Phone */}
-          {contact.phone && (
-            <div className="space-y-2">
+          {contact.phone && <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Phone className="w-4 h-4" />
                 Phone
               </div>
               <p className="text-base">{contact.phone}</p>
-            </div>
-          )}
+            </div>}
 
           {/* Email */}
-          {contact.email && (
-            <div className="space-y-2">
+          {contact.email && <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Mail className="w-4 h-4" />
                 Email
               </div>
               <p className="text-base">{contact.email}</p>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default ParentProfilePage;
