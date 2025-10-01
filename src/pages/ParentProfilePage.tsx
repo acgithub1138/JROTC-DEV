@@ -4,6 +4,7 @@ import { useParentContact } from '@/hooks/useParentContact';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Mail, Phone, User, UserCircle, Edit2, X, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,61 +16,18 @@ const ParentProfilePage = () => {
   } = useParentContact();
   const { toast } = useToast();
   
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const [tempEmail, setTempEmail] = useState('');
   const [tempPhone, setTempPhone] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
-  const handleEditEmail = () => {
-    setTempEmail(contact?.email || '');
-    setIsEditingEmail(true);
-  };
 
   const handleEditPhone = () => {
     setTempPhone(contact?.phone || '');
     setIsEditingPhone(true);
   };
 
-  const handleCancelEmail = () => {
-    setIsEditingEmail(false);
-    setTempEmail('');
-  };
-
   const handleCancelPhone = () => {
     setIsEditingPhone(false);
     setTempPhone('');
-  };
-
-  const handleSaveEmail = async () => {
-    if (!contact?.id) return;
-    
-    setIsSaving(true);
-    try {
-      const { error } = await supabase
-        .from('contacts')
-        .update({ email: tempEmail })
-        .eq('id', contact.id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Email updated successfully',
-      });
-      
-      setIsEditingEmail(false);
-      refetch();
-    } catch (error) {
-      console.error('Error updating email:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update email',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const handleSavePhone = async () => {
@@ -175,35 +133,32 @@ const ParentProfilePage = () => {
             Contact Information
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {/* Name */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <Label className="w-32 flex items-center gap-2 text-muted-foreground">
               <User className="w-4 h-4" />
               Name
-            </div>
-            <p className="text-lg font-medium">{contact.name}</p>
+            </Label>
+            <p className="text-base font-medium flex-1">{contact.name}</p>
           </div>
 
-          {/* Type */}
-          
-
           {/* Status */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Status</div>
+          <div className="flex items-center gap-4">
+            <Label className="w-32 text-muted-foreground">Status</Label>
             <Badge className={getStatusColor(contact.status)}>
               {getStatusLabel(contact.status)}
             </Badge>
           </div>
 
           {/* Phone */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <Label className="w-32 flex items-center gap-2 text-muted-foreground">
               <Phone className="w-4 h-4" />
               Phone
-            </div>
+            </Label>
             {isEditingPhone ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1">
                 <Input
                   type="tel"
                   value={tempPhone}
@@ -228,7 +183,7 @@ const ParentProfilePage = () => {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 group">
+              <div className="flex items-center gap-2 group flex-1">
                 <p className="text-base flex-1">{contact.phone || 'Not provided'}</p>
                 <Button
                   size="sm"
@@ -243,49 +198,12 @@ const ParentProfilePage = () => {
           </div>
 
           {/* Email */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <Label className="w-32 flex items-center gap-2 text-muted-foreground">
               <Mail className="w-4 h-4" />
               Email
-            </div>
-            {isEditingEmail ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="email"
-                  value={tempEmail}
-                  onChange={(e) => setTempEmail(e.target.value)}
-                  className="flex-1"
-                  disabled={isSaving}
-                />
-                <Button
-                  size="sm"
-                  onClick={handleSaveEmail}
-                  disabled={isSaving}
-                >
-                  <Check className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCancelEmail}
-                  disabled={isSaving}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 group">
-                <p className="text-base flex-1">{contact.email || 'Not provided'}</p>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleEditEmail}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+            </Label>
+            <p className="text-base flex-1">{contact.email || 'Not provided'}</p>
           </div>
         </CardContent>
       </Card>
