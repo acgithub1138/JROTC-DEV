@@ -34,12 +34,20 @@ export const AttachmentList: React.FC<AttachmentListProps> = ({
     try {
       const url = await getFileUrl(attachment.file_path);
       if (url) {
+        // Fetch the file as a blob to ensure correct filename
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
         const link = document.createElement('a');
-        link.href = url;
+        link.href = blobUrl;
         link.download = attachment.file_name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        // Clean up the blob URL
+        URL.revokeObjectURL(blobUrl);
       }
     } catch (error) {
       console.error('Download error:', error);
