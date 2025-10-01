@@ -237,7 +237,7 @@ export const CompetitionEventRecord: React.FC = () => {
     } catch (error) {
       console.error('Error fetching event:', error);
       toast.error('Failed to load event data');
-      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } finally {
       setIsLoading(false);
     }
@@ -402,7 +402,7 @@ export const CompetitionEventRecord: React.FC = () => {
         toast.success('Event updated successfully');
       }
       resetChanges();
-      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
       console.error('Error saving event:', error);
       toast.error('Failed to save event');
@@ -419,7 +419,7 @@ export const CompetitionEventRecord: React.FC = () => {
       } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
       if (error) throw error;
       toast.success('Event deleted successfully');
-      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
       console.error('Error deleting event:', error);
       toast.error('Failed to delete event');
@@ -432,7 +432,7 @@ export const CompetitionEventRecord: React.FC = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     }
   };
   // Show loading state while waiting for data
@@ -782,7 +782,7 @@ export const CompetitionEventRecord: React.FC = () => {
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={() => {
       setShowUnsavedDialog(false);
-      navigate(`/app/competition-portal/competition-details/${competitionId}`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     }} onCancel={() => setShowUnsavedDialog(false)} />
     </div>;
 };
