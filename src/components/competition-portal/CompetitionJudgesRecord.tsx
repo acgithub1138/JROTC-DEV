@@ -116,9 +116,7 @@ export const CompetitionJudgesRecord = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold">
-          {isEditMode ? 'Edit' : 'Assign'} Judge
-        </h1>
+        
       </div>
 
       <Card className="max-w-4xl mx-auto">
