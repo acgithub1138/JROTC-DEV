@@ -22,8 +22,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { format } from 'date-fns';
 import { formatPhoneNumber } from '@/utils/formatUtils';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 interface CompetitionJudgesTabProps {
   competitionId: string;
@@ -33,6 +34,7 @@ export const CompetitionJudgesTab = ({ competitionId }: CompetitionJudgesTabProp
   const navigate = useNavigate();
   const { canCreate, canUpdate, canDelete } = useCompetitionJudgesPermissions();
   const { judges, isLoading, deleteJudge } = useCompetitionJudges(competitionId);
+  const { timezone } = useSchoolTimezone();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [judgeToDelete, setJudgeToDelete] = useState<string | null>(null);
 
@@ -107,10 +109,10 @@ export const CompetitionJudgesTab = ({ competitionId }: CompetitionJudgesTabProp
                     {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
                   </TableCell>
                   <TableCell>
-                    {judge.start_time ? format(new Date(judge.start_time), 'MMM d, yyyy HH:mm') : '-'}
+                    {judge.start_time ? formatTimeForDisplay(judge.start_time, TIME_FORMATS.SHORT_DATETIME_24H, timezone) : '-'}
                   </TableCell>
                   <TableCell>
-                    {judge.end_time ? format(new Date(judge.end_time), 'MMM d, yyyy HH:mm') : '-'}
+                    {judge.end_time ? formatTimeForDisplay(judge.end_time, TIME_FORMATS.SHORT_DATETIME_24H, timezone) : '-'}
                   </TableCell>
                   <TableCell>{judge.location || '-'}</TableCell>
                   <TableCell>
