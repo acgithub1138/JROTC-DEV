@@ -142,10 +142,13 @@ const CompetitionPortalLayout = () => {
     } else if (path.startsWith('/app/competition-portal/my-competitions/score-sheets/')) {
       return <ScoreSheetPage />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/events_record')) {
+      console.log('CompetitionPortalLayout - Rendering CompetitionEventRecord');
       return <CompetitionEventRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/judges_record')) {
+      console.log('CompetitionPortalLayout - Rendering CompetitionJudgesRecord');
       return <CompetitionJudgesRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/resources_record')) {
+      console.log('CompetitionPortalLayout - Rendering CompetitionResourceRecord');
       return <CompetitionResourceRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/school_record')) {
       return <CompetitionSchoolRecord />;
