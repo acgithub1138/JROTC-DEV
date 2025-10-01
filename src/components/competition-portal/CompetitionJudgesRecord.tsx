@@ -171,7 +171,7 @@ export const CompetitionJudgesRecord = () => {
   }
   return <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Judges
         </Button>
