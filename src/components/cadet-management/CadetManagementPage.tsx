@@ -16,6 +16,8 @@ import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { PasswordRecoveryDialog } from './components/PasswordRecoveryDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
+import { useSortableTable } from '@/hooks/useSortableTable';
+import { SortConfig } from '@/components/ui/sortable-table';
 const CadetManagementPage = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
@@ -126,9 +128,19 @@ const CadetManagementPage = () => {
   const handleAddCadetWrapper = (e: React.FormEvent) => {
     handleAddCadet(e, () => setAddDialogOpen(false));
   };
+  
+  // Step 1: Filter profiles
   const filteredProfiles = getFilteredProfiles(profiles, activeTab, activeSubTab, searchTerm);
-  const totalPages = getTotalPages(filteredProfiles.length);
-  const paginatedProfiles = getPaginatedProfiles(filteredProfiles, currentPage);
+  
+  // Step 2: Sort filtered profiles (BEFORE pagination)
+  const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
+    data: filteredProfiles,
+    defaultSort: { key: 'last_name', direction: 'asc' }
+  });
+  
+  // Step 3: Paginate sorted profiles
+  const totalPages = getTotalPages(sortedProfiles.length);
+  const paginatedProfiles = getPaginatedProfiles(sortedProfiles, currentPage);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -179,7 +191,9 @@ const CadetManagementPage = () => {
             activeSubTab={activeSubTab}
             onSubTabChange={setActiveSubTab}
             profiles={profiles} 
-            paginatedProfiles={paginatedProfiles} 
+            paginatedProfiles={paginatedProfiles}
+            sortConfig={sortConfig}
+            onSort={handleSort}
             selectedCadets={selectedCadets} 
             massOperationLoading={massOperationLoading} 
             onEditProfile={handleEditProfile} 
@@ -195,11 +209,11 @@ const CadetManagementPage = () => {
             searchTerm={searchTerm} 
           />
 
-          {filteredProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
+          {sortedProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No cadets found
             </div>}
 
-          <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredProfiles.length} onPageChange={handlePageChange} />
+          <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={sortedProfiles.length} onPageChange={handlePageChange} />
         </CardContent>
       </Card>
 

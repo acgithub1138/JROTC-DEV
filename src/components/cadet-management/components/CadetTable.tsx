@@ -1,20 +1,22 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SortableTableHead } from '@/components/ui/sortable-table';
+import { SortableTableHead, SortConfig } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CheckCircle, X } from 'lucide-react';
-import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
 import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
 import { useAuth } from '@/contexts/AuthContext';
 import { JROTCProgram } from '@/utils/jrotcRanks';
+
 interface CadetTableProps {
   profiles: Profile[];
   activeTab: string;
+  sortConfig: SortConfig | null;
+  onSort: (key: string) => void;
   onEditProfile: (profile: Profile) => void;
   onViewProfile: (profile: Profile) => void;
   onToggleStatus: (profile: Profile) => void;
@@ -25,6 +27,8 @@ interface CadetTableProps {
 export const CadetTable = ({
   profiles,
   activeTab,
+  sortConfig,
+  onSort,
   onEditProfile,
   onViewProfile,
   onToggleStatus,
@@ -40,17 +44,7 @@ export const CadetTable = ({
   const {
     userProfile
   } = useAuth();
-  const {
-    sortedData: sortedProfiles,
-    sortConfig,
-    handleSort
-  } = useSortableTable({
-    data: profiles,
-    defaultSort: {
-      key: 'last_name',
-      direction: 'asc'
-    }
-  });
+  
   const allSelected = profiles.length > 0 && selectedCadets.length === profiles.length;
   const someSelected = selectedCadets.length > 0 && selectedCadets.length < profiles.length;
   return <Table>
@@ -59,29 +53,29 @@ export const CadetTable = ({
           <TableHead className="w-12">
             <Checkbox checked={allSelected} onCheckedChange={checked => onSelectAll(checked as boolean)} aria-label={someSelected ? "Some selected" : allSelected ? "All selected" : "None selected"} />
           </TableHead>
-          <SortableTableHead sortKey="last_name" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="last_name" currentSort={sortConfig} onSort={onSort}>
             Name
           </SortableTableHead>
-          <SortableTableHead sortKey="role" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="role" currentSort={sortConfig} onSort={onSort}>
             Role
           </SortableTableHead>
-          <SortableTableHead sortKey="grade" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="grade" currentSort={sortConfig} onSort={onSort}>
             Grade
           </SortableTableHead>
-          <SortableTableHead sortKey="cadet_year" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="cadet_year" currentSort={sortConfig} onSort={onSort}>
             Year
           </SortableTableHead>
-          <SortableTableHead sortKey="rank" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="rank" currentSort={sortConfig} onSort={onSort}>
             Rank
           </SortableTableHead>
-          <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={onSort}>
             Flight
           </SortableTableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedProfiles.map(profile => <TableRow key={profile.id} className={`
+        {profiles.map(profile => <TableRow key={profile.id} className={`
               ${activeTab === 'inactive' ? "opacity-60" : ""}
               ${selectedCadets.includes(profile.id) ? "bg-blue-50" : ""}
             `}>

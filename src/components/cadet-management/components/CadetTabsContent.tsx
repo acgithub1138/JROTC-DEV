@@ -10,6 +10,8 @@ import { Profile } from '../types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { usePermissionContext } from '@/contexts/PermissionContext';
+import { SortConfig } from '@/components/ui/sortable-table';
+
 interface CadetTabsContentProps {
   activeTab: string;
   onTabChange: (value: string) => void;
@@ -17,6 +19,8 @@ interface CadetTabsContentProps {
   onSubTabChange: (value: string) => void;
   profiles: Profile[];
   paginatedProfiles: Profile[];
+  sortConfig: SortConfig | null;
+  onSort: (key: string) => void;
   selectedCadets: string[];
   massOperationLoading: boolean;
   onEditProfile: (profile: Profile) => void;
@@ -35,6 +39,8 @@ export const CadetTabsContent = ({
   onSubTabChange,
   profiles,
   paginatedProfiles,
+  sortConfig,
+  onSort,
   selectedCadets,
   massOperationLoading,
   onEditProfile,
@@ -90,7 +96,7 @@ export const CadetTabsContent = ({
     if (isMobile) {
       return <CadetCards profiles={paginatedProfiles} activeTab={activeSubTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} />;
     }
-    return <CadetTable profiles={paginatedProfiles} activeTab={activeSubTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
+    return <CadetTable profiles={paginatedProfiles} activeTab={activeSubTab} sortConfig={sortConfig} onSort={onSort} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
   };
   return <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className={`grid w-full ${gridCols}`}>
