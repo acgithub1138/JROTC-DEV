@@ -7,7 +7,7 @@ import { X, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useEventPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 interface EventAssignmentSectionProps {
   eventId: string;
@@ -47,7 +47,8 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile } = useAuth();
   const { toast } = useToast();
-  const { canUpdate } = useEventPermissions();
+  const { hasPermission } = usePermissionContext();
+  const canAssign = hasPermission('calendar', 'assign');
 
   useEffect(() => {
     fetchData();
@@ -215,7 +216,7 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
                   <span className="text-sm text-muted-foreground">({assignment.role})</span>
                 )}
               </div>
-              {canUpdate && (
+              {canAssign && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -229,7 +230,7 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
         </div>
 
         {/* Add new assignment */}
-        {canUpdate && (
+        {canAssign && (
           <div className="space-y-2 p-3 border rounded bg-muted/50">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <Select 
