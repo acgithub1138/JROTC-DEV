@@ -805,13 +805,11 @@ export type Database = {
           fee: number | null
           id: string
           interval: number | null
-          judges: string[] | null
           location: string | null
           lunch_end_time: string | null
           lunch_start_time: string | null
           max_participants: number | null
           notes: string | null
-          resources: string[] | null
           school_id: string
           score_sheet: string | null
           sop: string | null
@@ -830,13 +828,11 @@ export type Database = {
           fee?: number | null
           id?: string
           interval?: number | null
-          judges?: string[] | null
           location?: string | null
           lunch_end_time?: string | null
           lunch_start_time?: string | null
           max_participants?: number | null
           notes?: string | null
-          resources?: string[] | null
           school_id: string
           score_sheet?: string | null
           sop?: string | null
@@ -855,13 +851,11 @@ export type Database = {
           fee?: number | null
           id?: string
           interval?: number | null
-          judges?: string[] | null
           location?: string | null
           lunch_end_time?: string | null
           lunch_start_time?: string | null
           max_participants?: number | null
           notes?: string | null
-          resources?: string[] | null
           school_id?: string
           score_sheet?: string | null
           sop?: string | null
@@ -908,6 +902,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cp_comp_judges: {
+        Row: {
+          assignment_details: string | null
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          end_time: string | null
+          id: string
+          judge: string
+          location: string | null
+          school_id: string
+          start_time: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assignment_details?: string | null
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          judge: string
+          location?: string | null
+          school_id: string
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assignment_details?: string | null
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          judge?: string
+          location?: string | null
+          school_id?: string
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       cp_comp_resources: {
         Row: {
@@ -3907,12 +3946,10 @@ export type Database = {
           fee: number | null
           id: string | null
           interval: number | null
-          judges: string[] | null
           location: string | null
           max_participants: number | null
           notes: string | null
           registration_count: number | null
-          resources: string[] | null
           school_id: string | null
           score_sheet: string | null
           start_time: string | null

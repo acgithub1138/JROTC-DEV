@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCompetitionEventsPermissions, useCompetitionResourcesPermissions, useCompetitionSchoolsPermissions, useCompetitionSchedulePermissions, useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionEventsPermissions, useCompetitionResourcesPermissions, useCompetitionSchoolsPermissions, useCompetitionSchedulePermissions, useCompetitionResultsPermissions, useCompetitionJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
 import { CompetitionScheduleTab } from './tabs/CompetitionScheduleTab';
 import { CompetitionResultsTab } from './tabs/CompetitionResultsTab';
+import { CompetitionJudgesTab } from './tabs/CompetitionJudgesTab';
 export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +47,7 @@ export const CompetitionDetailsPage = () => {
 
   // Get permissions for each tab
   const eventsPermissions = useCompetitionEventsPermissions();
+  const judgesPermissions = useCompetitionJudgesPermissions();
   const resourcesPermissions = useCompetitionResourcesPermissions();
   const schoolsPermissions = useCompetitionSchoolsPermissions();
   const schedulePermissions = useCompetitionSchedulePermissions();
@@ -57,6 +59,11 @@ export const CompetitionDetailsPage = () => {
     name: 'cp_comp_events',
     label: 'Events',
     canAccess: eventsPermissions.canAccess
+  }, {
+    id: 'judges',
+    name: 'cp_comp_judges',
+    label: 'Judges',
+    canAccess: judgesPermissions.canAccess
   }, {
     id: 'resources',
     name: 'cp_comp_resources',
@@ -79,14 +86,21 @@ export const CompetitionDetailsPage = () => {
     canAccess: resultsPermissions.canAccess
   }].filter(tab => tab.canAccess);
 
+  // Map URL segments to tab names - updated with judges tab
+  const urlToTabMap: { [key: string]: string } = {
+    'events': 'cp_comp_events',
+    'judges': 'cp_comp_judges',
+    'resources': 'cp_comp_resources', 
+    'schools': 'cp_comp_schools',
+    'schedule': 'cp_schedules',
+    'results': 'cp_results'
+  };
+
   // Get the active tab from URL, fallback to first available tab
   const activeTabFromUrl = getActiveTabFromUrl();
   const defaultTab = activeTabFromUrl && availableTabs.find(tab => tab.name === activeTabFromUrl) 
     ? activeTabFromUrl 
     : availableTabs[0]?.name;
-  console.log('Route params:', params);
-  console.log('Competition ID:', competitionId);
-  console.log('Current path:', window.location.pathname);
   if (!competitionId) {
     return <div className="p-6">
         <div className="text-center">
@@ -119,6 +133,7 @@ export const CompetitionDetailsPage = () => {
                 <CardContent className="py-[8px]">
                   {/* Render tab content based on tab name */}
                   {tab.name === 'cp_comp_events' && <CompetitionEventsTab competitionId={competitionId} />}
+                  {tab.name === 'cp_comp_judges' && <CompetitionJudgesTab competitionId={competitionId} />}
                   {tab.name === 'cp_comp_resources' && <CompetitionResourcesTab competitionId={competitionId} />}
                   {tab.name === 'cp_comp_schools' && <CompetitionSchoolsTab competitionId={competitionId} />}
                   {tab.name === 'cp_schedules' && <div className="schedule-print-wrapper">

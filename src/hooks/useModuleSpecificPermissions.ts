@@ -249,6 +249,16 @@ export const useCompetitionResultsPermissions = () => {
   };
 };
 
+// Competition Judges specific permissions
+export const useCompetitionJudgesPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_comp_judges');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
 // Open Competitions specific permissions
 export const useOpenCompetitionsPermissions = () => {
   const modulePermissions = useModulePermissions('open_competitions');
