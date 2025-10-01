@@ -14,11 +14,13 @@ import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 
 interface JudgeFormData {
-  judges: string[]; // Changed to array for multiple selection
+  judges: string[];
   event: string;
   location: string;
-  start_time: string;
-  end_time: string;
+  start_time_hour: string;
+  start_time_minute: string;
+  end_time_hour: string;
+  end_time_minute: string;
   assignment_details: string;
 }
 export const CompetitionJudgesRecord = () => {
@@ -49,11 +51,13 @@ export const CompetitionJudgesRecord = () => {
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<JudgeFormData>({
     defaultValues: {
-      judges: [], // Changed to array
+      judges: [],
       event: '',
       location: '',
-      start_time: '',
-      end_time: '',
+      start_time_hour: '09',
+      start_time_minute: '00',
+      end_time_hour: '17',
+      end_time_minute: '00',
       assignment_details: ''
     }
   });
@@ -72,12 +76,20 @@ export const CompetitionJudgesRecord = () => {
     if (isEditMode && judges.length > 0) {
       const judge = judges.find(j => j.id === judgeId);
       if (judge) {
+        // Parse existing datetime strings to extract hour and minute
+        const startHour = judge.start_time ? new Date(judge.start_time).getHours().toString().padStart(2, '0') : '09';
+        const startMinute = judge.start_time ? new Date(judge.start_time).getMinutes().toString().padStart(2, '0') : '00';
+        const endHour = judge.end_time ? new Date(judge.end_time).getHours().toString().padStart(2, '0') : '17';
+        const endMinute = judge.end_time ? new Date(judge.end_time).getMinutes().toString().padStart(2, '0') : '00';
+        
         form.reset({
-          judges: [judge.judge], // Wrap in array for edit mode
+          judges: [judge.judge],
           event: (judge as any).event || '',
           location: judge.location || '',
-          start_time: judge.start_time || '',
-          end_time: judge.end_time || '',
+          start_time_hour: startHour,
+          start_time_minute: startMinute,
+          end_time_hour: endHour,
+          end_time_minute: endMinute,
           assignment_details: judge.assignment_details || ''
         });
       }
@@ -87,28 +99,38 @@ export const CompetitionJudgesRecord = () => {
     if (!competitionId) return;
     setIsSaving(true);
     try {
+      // Get the event's start_time if an event is selected
+      const selectedEventData = competitionEvents.find(e => e.id === data.event);
+      const dateStr = selectedEventData?.start_time 
+        ? new Date(selectedEventData.start_time).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+      
+      // Construct datetime strings
+      const startTime = `${dateStr}T${data.start_time_hour}:${data.start_time_minute}:00`;
+      const endTime = `${dateStr}T${data.end_time_hour}:${data.end_time_minute}:00`;
+      
       if (isEditMode) {
         // Edit mode: update single judge
         const judgeData: any = {
           competition_id: competitionId,
-          judge: data.judges[0], // Use first judge in edit mode
+          judge: data.judges[0],
           event: data.event || null,
           location: data.location || null,
-          start_time: data.start_time || null,
-          end_time: data.end_time || null,
+          start_time: startTime,
+          end_time: endTime,
           assignment_details: data.assignment_details || null
         };
         await updateJudge(judgeId, judgeData);
       } else {
         // Create mode: create a record for each selected judge
-        for (const judgeId of data.judges) {
+        for (const selectedJudgeId of data.judges) {
           const judgeData: any = {
             competition_id: competitionId,
-            judge: judgeId,
+            judge: selectedJudgeId,
             event: data.event || null,
             location: data.location || null,
-            start_time: data.start_time || null,
-            end_time: data.end_time || null,
+            start_time: startTime,
+            end_time: endTime,
             assignment_details: data.assignment_details || null
           };
           await createJudge(judgeData);
@@ -256,34 +278,100 @@ export const CompetitionJudgesRecord = () => {
                     <FormMessage />
                   </FormItem>} />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="start_time" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>Start Time (24-hour format)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="datetime-local" 
-                          {...field} 
-                          step="900"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+              <div className="space-y-4">
+                {/* Start Time */}
+                <div className="flex items-center gap-2">
+                  <FormLabel className="w-24 text-left shrink-0">Start Time</FormLabel>
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="start_time_hour"
+                      render={({ field }) => (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Hour" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                {i.toString().padStart(2, '0')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="start_time_minute"
+                      render={({ field }) => (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Min" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                              <SelectItem key={minute} value={minute}>
+                                {minute}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                </div>
 
-                <FormField control={form.control} name="end_time" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>End Time (24-hour format)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="datetime-local" 
-                          {...field}
-                          step="900"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+                {/* End Time */}
+                <div className="flex items-center gap-2">
+                  <FormLabel className="w-24 text-left shrink-0">End Time</FormLabel>
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="end_time_hour"
+                      render={({ field }) => (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Hour" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                {i.toString().padStart(2, '0')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="end_time_minute"
+                      render={({ field }) => (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Min" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                              <SelectItem key={minute} value={minute}>
+                                {minute}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
 
               <FormField control={form.control} name="assignment_details" render={({
