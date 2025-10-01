@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
+import { useRolePermissionMap } from '@/hooks/useRolePermissionMap';
 import { useDynamicRoles } from '@/hooks/useDynamicRoles';
 import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
@@ -27,8 +28,7 @@ const getRoleColor = (roleName: string): string => {
 };
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
-  // Track optimistic updates for immediate UI feedback
-  const [optimisticChanges, setOptimisticChanges] = useState<Record<string, Record<string, boolean>>>({});
+  // Optimistic state removed: rely on DB + role-scoped refetch for truth
   
   const {
     modules,
@@ -82,81 +82,25 @@ export const RoleManagementPage: React.FC = () => {
     return roles;
   }, [allRoles]);
 
-  // Get base permissions and rely on DB as source of truth (no optimistic merge)
-  const basePermissions = getRolePermissions(selectedRole);
-  const rolePermissions = basePermissions;
+  // Use role-scoped permissions map as the source of truth
+  const { rolePermissionsMap, refetch: refetchRolePerms } = useRolePermissionMap(selectedRole);
+  const rolePermissions = rolePermissionsMap;
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
-    // Find module and action names for optimistic update
     const module = modules.find(m => m.id === moduleId);
     const action = actions.find(a => a.id === actionId);
-    
     if (!module || !action) {
       console.error('Module or action not found:', { moduleId, actionId });
       return;
     }
-    
-    console.log('Updating permission:', {
-      selectedRole,
-      moduleName: module.name,
-      actionName: action.name,
-      moduleId,
-      actionId,
-      enabled
-    });
-    
-    // Apply optimistic update immediately (keyed by IDs)
-    setOptimisticChanges(prev => ({
-      ...prev,
-      [moduleId]: {
-        ...(prev[moduleId] || {}),
-        [actionId]: enabled,
-      },
-    }));
-    
-    updatePermission({
-      role: selectedRole,
-      moduleId,
-      actionId,
-      enabled
-    }, {
+    updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
       onSuccess: () => {
-        // Clear optimistic change after successful mutation
-        setOptimisticChanges(prev => {
-          const newChanges = { ...prev };
-          if (newChanges[moduleId]) {
-            if (newChanges[moduleId][actionId] !== undefined) {
-              delete newChanges[moduleId][actionId];
-            }
-            if (Object.keys(newChanges[moduleId]).length === 0) {
-              delete newChanges[moduleId];
-            }
-          }
-          return newChanges;
-        });
-        console.log('Permission update successful, optimistic change cleared');
+        // Refetch just the role-scoped permissions to sync UI without flashing
+        refetchRolePerms();
       },
       onError: error => {
-        // Revert optimistic change on error
-        setOptimisticChanges(prev => {
-          const newChanges = { ...prev };
-          if (newChanges[moduleId]) {
-            if (newChanges[moduleId][actionId] !== undefined) {
-              delete newChanges[moduleId][actionId];
-            }
-            if (Object.keys(newChanges[moduleId]).length === 0) {
-              delete newChanges[moduleId];
-            }
-          }
-          return newChanges;
-        });
-        
         console.error('Permission update error:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to update permission. Please try again.',
-          variant: 'destructive'
-        });
+        toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
       }
     });
   };
