@@ -1,15 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { User, LogOut, Settings, Menu, Shield, Trophy, Building2 } from 'lucide-react';
+import { User, LogOut, Settings, Menu, Shield, Trophy, Building2, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { SchoolProfileModal } from '@/components/school/SchoolProfileModal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   activeModule: string;
@@ -34,9 +35,34 @@ export const Header: React.FC<HeaderProps> = ({
   const { canAccessCompetitionPortal, setPortal } = usePortal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [schoolProfileOpen, setSchoolProfileOpen] = useState(false);
+  const [linkedCadetId, setLinkedCadetId] = useState<string | null>(null);
   const {
     menuItems
   } = useSidebarPreferences();
+
+  // Fetch linked cadet ID for parent users
+  useEffect(() => {
+    const fetchLinkedCadet = async () => {
+      if (userProfile?.role === 'parent' && userProfile?.email && userProfile?.school_id) {
+        try {
+          const { data, error } = await supabase
+            .from('contacts')
+            .select('cadet_id')
+            .eq('email', userProfile.email)
+            .eq('school_id', userProfile.school_id)
+            .maybeSingle();
+
+          if (data?.cadet_id) {
+            setLinkedCadetId(data.cadet_id);
+          }
+        } catch (error) {
+          console.error('Error fetching linked cadet:', error);
+        }
+      }
+    };
+
+    fetchLinkedCadet();
+  }, [userProfile?.role, userProfile?.email, userProfile?.school_id]);
 
   const getModuleTitle = (module: string) => {
     const titles: {
@@ -181,6 +207,14 @@ export const Header: React.FC<HeaderProps> = ({
                 <User className="w-4 h-4 mr-2" />
                 My Profile
               </DropdownMenuItem>
+              
+              {userProfile?.role === 'parent' && linkedCadetId && (
+                <DropdownMenuItem onClick={() => navigate(`/app/cadets/cadet_record?mode=view&id=${linkedCadetId}`)}>
+                  <UserCircle className="w-4 h-4 mr-2" />
+                  My Cadet's Profile
+                </DropdownMenuItem>
+              )}
+              
               <DropdownMenuSeparator />
               
               <DropdownMenuItem onClick={signOut}>
