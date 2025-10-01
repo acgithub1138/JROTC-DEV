@@ -83,7 +83,7 @@ export const RoleManagementPage: React.FC = () => {
   }, [allRoles]);
 
   // Use role-scoped permissions map as the source of truth
-  const { rolePermissionsMap, refetch: refetchRolePerms } = useRolePermissionMap(selectedRole);
+  const { rolePermissionsMap, refetch: refetchRolePerms, setOptimisticPermission } = useRolePermissionMap(selectedRole);
   const rolePermissions = rolePermissionsMap;
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
@@ -93,13 +93,16 @@ export const RoleManagementPage: React.FC = () => {
       console.error('Module or action not found:', { moduleId, actionId });
       return;
     }
+    
+    // Apply optimistic update immediately
+    setOptimisticPermission(moduleId, actionId, enabled);
+    
+    // Update database in background
     updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
-      onSuccess: () => {
-        // Refetch just the role-scoped permissions to sync UI without flashing
-        refetchRolePerms();
-      },
       onError: error => {
         console.error('Permission update error:', error);
+        // Revert optimistic update on error
+        refetchRolePerms();
         toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
       }
     });

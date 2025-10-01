@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import type { UserRole } from '@/hooks/useRoleManagement';
@@ -7,6 +7,8 @@ import type { UserRole } from '@/hooks/useRoleManagement';
 // Build a role-scoped permissions map directly from role_permission_details view
 // Map shape: { [module_id]: { [action_id]: boolean } }
 export const useRolePermissionMap = (selectedRole: UserRole) => {
+  const queryClient = useQueryClient();
+  
   // Fetch permissions directly from the view using role_name (no need for role_id lookup)
   const {
     data: rolePerms = [],
@@ -37,9 +39,29 @@ export const useRolePermissionMap = (selectedRole: UserRole) => {
     return map;
   }, [rolePerms]);
 
+  // Optimistic update function
+  const setOptimisticPermission = useCallback((moduleId: string, actionId: string, enabled: boolean) => {
+    queryClient.setQueryData<Array<{ module_id: string; action_id: string; enabled: boolean }>>(
+      ['role-permissions-by-role', selectedRole],
+      (old) => {
+        if (!old) return old;
+        
+        // Find and update the specific permission
+        const updated = old.map(perm => 
+          perm.module_id === moduleId && perm.action_id === actionId
+            ? { ...perm, enabled }
+            : perm
+        );
+        
+        return updated;
+      }
+    );
+  }, [queryClient, selectedRole]);
+
   return {
     rolePermissionsMap,
     refetch,
     isFetching,
+    setOptimisticPermission,
   };
 };
