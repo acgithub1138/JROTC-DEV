@@ -163,11 +163,9 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
     return acc;
   }, {} as Record<string, DashboardWidget[]>);
 
-  const getPermissionKey = (actionId: string) => `${dashboardModule.id}-${actionId}`;
-
-  const isPermissionEnabled = (actionName: string) => {
-    const modulePermissions = rolePermissions[dashboardModule.name];
-    return modulePermissions ? modulePermissions[actionName] : false;
+  // Helper to check if a widget permission is enabled (using ID-based lookup)
+  const isPermissionEnabled = (actionId: string) => {
+    return rolePermissions[dashboardModule.id]?.[actionId] || false;
   };
 
   return (
@@ -204,8 +202,7 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
                 if (!action) return null;
 
                 const Icon = widget.icon;
-                const permissionKey = getPermissionKey(action.id);
-                const isEnabled = isPermissionEnabled(action.name);
+                const isEnabled = isPermissionEnabled(action.id);
 
                 return (
                   <TableRow key={widget.name} className="hover:bg-muted/50">
