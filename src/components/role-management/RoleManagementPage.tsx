@@ -27,6 +27,9 @@ const getRoleColor = (roleName: string): string => {
 };
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
+  // Track optimistic updates for immediate UI feedback
+  const [optimisticChanges, setOptimisticChanges] = useState<Record<string, Record<string, boolean>>>({});
+  
   const {
     modules,
     actions,
@@ -79,21 +82,85 @@ export const RoleManagementPage: React.FC = () => {
     return roles;
   }, [allRoles]);
 
-  const rolePermissions = getRolePermissions(selectedRole);
+  // Get base permissions and merge with optimistic changes
+  const basePermissions = getRolePermissions(selectedRole);
+  const rolePermissions = useMemo(() => {
+    const merged = { ...basePermissions };
+    
+    // Apply optimistic changes
+    Object.keys(optimisticChanges).forEach(moduleName => {
+      if (!merged[moduleName]) {
+        merged[moduleName] = {};
+      }
+      Object.keys(optimisticChanges[moduleName]).forEach(actionName => {
+        merged[moduleName][actionName] = optimisticChanges[moduleName][actionName];
+      });
+    });
+    
+    return merged;
+  }, [basePermissions, optimisticChanges]);
+  
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
+    // Find module and action names for optimistic update
+    const module = modules.find(m => m.id === moduleId);
+    const action = actions.find(a => a.id === actionId);
+    
+    if (!module || !action) {
+      console.error('Module or action not found:', { moduleId, actionId });
+      return;
+    }
+    
     console.log('Updating permission:', {
       selectedRole,
+      moduleName: module.name,
+      actionName: action.name,
       moduleId,
       actionId,
       enabled
     });
+    
+    // Apply optimistic update immediately
+    setOptimisticChanges(prev => ({
+      ...prev,
+      [module.name]: {
+        ...prev[module.name],
+        [action.name]: enabled
+      }
+    }));
+    
     updatePermission({
       role: selectedRole,
       moduleId,
       actionId,
       enabled
     }, {
+      onSuccess: () => {
+        // Clear optimistic change after successful mutation
+        setOptimisticChanges(prev => {
+          const newChanges = { ...prev };
+          if (newChanges[module.name]) {
+            delete newChanges[module.name][action.name];
+            if (Object.keys(newChanges[module.name]).length === 0) {
+              delete newChanges[module.name];
+            }
+          }
+          return newChanges;
+        });
+        console.log('Permission update successful, optimistic change cleared');
+      },
       onError: error => {
+        // Revert optimistic change on error
+        setOptimisticChanges(prev => {
+          const newChanges = { ...prev };
+          if (newChanges[module.name]) {
+            delete newChanges[module.name][action.name];
+            if (Object.keys(newChanges[module.name]).length === 0) {
+              delete newChanges[module.name];
+            }
+          }
+          return newChanges;
+        });
+        
         console.error('Permission update error:', error);
         toast({
           title: 'Error',

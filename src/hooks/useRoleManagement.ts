@@ -57,10 +57,12 @@ export const useRoleManagement = () => {
           *,
           module:permission_modules(*),
           action:permission_actions(*),
-          role_id:user_roles(role_name)
+          role:user_roles(role_name)
         `);
       
       if (error) throw error;
+      
+      console.log('Fetched role permissions:', data?.length, 'total permissions');
       return data;
     },
   });
@@ -73,7 +75,7 @@ export const useRoleManagement = () => {
       rolePerms[module.name] = {};
       actions.forEach(action => {
         const permission = allRolePermissions.find(
-          p => p.role_id?.role_name === role && 
+          p => p.role?.role_name === role && 
                p.module?.name === module.name && 
                p.action?.name === action.name
         );
@@ -81,6 +83,7 @@ export const useRoleManagement = () => {
       });
     });
     
+    console.log(`Role permissions for ${role} (total: ${Object.keys(rolePerms).length} modules):`, rolePerms);
     return rolePerms;
   }, [modules, actions, allRolePermissions]);
 
@@ -132,9 +135,11 @@ export const useRoleManagement = () => {
       console.log('Permission upserted successfully:', data);
       return data;
     },
-    onSuccess: (data, variables) => {
-      console.log('updatePermissionMutation success, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+    onSuccess: async (data, variables) => {
+      console.log('updatePermissionMutation success, invalidating and refetching queries');
+      // Both invalidate AND refetch to ensure UI updates
+      await queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+      await queryClient.refetchQueries({ queryKey: ['role-permissions'] });
     },
     onError: (error, variables) => {
       console.error('updatePermissionMutation error:', error, 'Variables:', variables);
