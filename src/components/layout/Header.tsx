@@ -171,7 +171,13 @@ export const Header: React.FC<HeaderProps> = ({
                 </>
               )}
               
-              <DropdownMenuItem onClick={() => navigate(`/app/cadets/cadet_record?mode=view&id=${userProfile?.id}`)}>
+              <DropdownMenuItem onClick={() => {
+                if (userProfile?.role === 'parent') {
+                  navigate('/app/parent-profile');
+                } else {
+                  navigate(`/app/cadets/cadet_record?mode=view&id=${userProfile?.id}`);
+                }
+              }}>
                 <User className="w-4 h-4 mr-2" />
                 My Profile
               </DropdownMenuItem>

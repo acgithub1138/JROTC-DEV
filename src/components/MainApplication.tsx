@@ -63,6 +63,7 @@ import { ChainOfCommandRecordPage } from '@/components/cadets/ChainOfCommandReco
 import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
+import ParentProfilePage from '@/pages/ParentProfilePage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -255,6 +256,7 @@ const MainApplication = () => {
             <Route path="announcements" element={<AnnouncementManagementPage />} />
             <Route path="announcements/announcements_record" element={<AnnouncementRecordPage />} />
             <Route path="roles" element={<RoleManagementPage />} />
+            <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}
             <Route path="competition-portal/competitions/competition_record" element={<CPCompetitionRecordPage />} />
