@@ -207,6 +207,8 @@ export const useEvents = (filters: EventFilters) => {
           ? 'Recurring event created successfully' 
           : 'Event created successfully',
       });
+      
+      return data; // Return the created event
     } catch (error) {
       console.error('Error creating event:', error);
       toast({

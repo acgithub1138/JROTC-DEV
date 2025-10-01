@@ -67,6 +67,8 @@ export const CalendarRecordPage: React.FC = () => {
     interval: 1,
     endType: 'never',
   });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   const { events, createEvent, updateEvent, deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
@@ -267,11 +269,18 @@ export const CalendarRecordPage: React.FC = () => {
           description: 'Event updated successfully'
         });
       } else {
-        await createEvent(eventData);
-        toast({
-          title: 'Success',
-          description: 'Event created successfully'
-        });
+        const newEvent = await createEvent(eventData);
+        if (newEvent) {
+          setCreatedEventId(newEvent.id);
+          toast({
+            title: 'Success',
+            description: 'Event created successfully'
+          });
+          
+          // Show dialog asking if user wants to add attachments
+          setShowAttachmentDialog(true);
+          return; // Don't navigate yet
+        }
       }
       
       navigate('/app/calendar');
@@ -874,6 +883,42 @@ export const CalendarRecordPage: React.FC = () => {
         onDiscard={handleDiscardChanges}
         onCancel={handleContinueEditing}
       />
+
+      {/* Add Attachments Dialog after event creation */}
+      <Dialog open={showAttachmentDialog} onOpenChange={(open) => {
+        if (!open) {
+          navigate('/app/calendar');
+        }
+        setShowAttachmentDialog(open);
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Attachments to Event?</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Would you like to add attachments to this event?
+            </p>
+            {createdEventId && (
+              <AttachmentSection 
+                recordType="event" 
+                recordId={createdEventId} 
+                canEdit={true} 
+                defaultOpen={true} 
+                showContentOnly={true} 
+              />
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => {
+              setShowAttachmentDialog(false);
+              navigate('/app/calendar');
+            }}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
