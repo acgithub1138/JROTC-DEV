@@ -72,14 +72,14 @@ export const useRoleManagement = () => {
     const rolePerms: { [module: string]: { [action: string]: boolean } } = {};
     
     modules.forEach(module => {
-      rolePerms[module.name] = {};
+      rolePerms[module.id] = {};
       actions.forEach(action => {
         const permission = allRolePermissions.find(
-          p => p.role?.role_name === role && 
-               p.module?.name === module.name && 
-               p.action?.name === action.name
+          p => p.role?.role_name === role &&
+               p.module?.id === module.id &&
+               p.action?.id === action.id
         );
-        rolePerms[module.name][action.name] = permission?.enabled || false;
+        rolePerms[module.id][action.id] = permission?.enabled || false;
       });
     });
     

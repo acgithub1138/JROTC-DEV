@@ -119,13 +119,13 @@ export const RoleManagementPage: React.FC = () => {
       enabled
     });
     
-    // Apply optimistic update immediately
+    // Apply optimistic update immediately (keyed by IDs)
     setOptimisticChanges(prev => ({
       ...prev,
-      [module.name]: {
-        ...prev[module.name],
-        [action.name]: enabled
-      }
+      [moduleId]: {
+        ...(prev[moduleId] || {}),
+        [actionId]: enabled,
+      },
     }));
     
     updatePermission({
@@ -138,10 +138,12 @@ export const RoleManagementPage: React.FC = () => {
         // Clear optimistic change after successful mutation
         setOptimisticChanges(prev => {
           const newChanges = { ...prev };
-          if (newChanges[module.name]) {
-            delete newChanges[module.name][action.name];
-            if (Object.keys(newChanges[module.name]).length === 0) {
-              delete newChanges[module.name];
+          if (newChanges[moduleId]) {
+            if (newChanges[moduleId][actionId] !== undefined) {
+              delete newChanges[moduleId][actionId];
+            }
+            if (Object.keys(newChanges[moduleId]).length === 0) {
+              delete newChanges[moduleId];
             }
           }
           return newChanges;
@@ -152,10 +154,12 @@ export const RoleManagementPage: React.FC = () => {
         // Revert optimistic change on error
         setOptimisticChanges(prev => {
           const newChanges = { ...prev };
-          if (newChanges[module.name]) {
-            delete newChanges[module.name][action.name];
-            if (Object.keys(newChanges[module.name]).length === 0) {
-              delete newChanges[module.name];
+          if (newChanges[moduleId]) {
+            if (newChanges[moduleId][actionId] !== undefined) {
+              delete newChanges[moduleId][actionId];
+            }
+            if (Object.keys(newChanges[moduleId]).length === 0) {
+              delete newChanges[moduleId];
             }
           }
           return newChanges;

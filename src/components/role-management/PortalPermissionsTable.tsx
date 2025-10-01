@@ -90,7 +90,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
                 <div className="font-medium">{module.label}</div>
               </td>
               {filteredActions.map(action => {
-            const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+            const isEnabled = rolePermissions[module.id]?.[action.id] || false;
             return <td key={action.id} className="p-3 text-center px-[4px] py-[4px]">
                     <Checkbox 
                       checked={isEnabled} 
