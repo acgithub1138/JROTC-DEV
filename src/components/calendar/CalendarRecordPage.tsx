@@ -28,6 +28,7 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
 import { EventAssignmentSection } from './components/EventAssignmentSection';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Event title is required'),
@@ -71,6 +72,28 @@ export const CalendarRecordPage: React.FC = () => {
   const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
   const [showAttachments, setShowAttachments] = useState(false);
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const { uploadFile } = useAttachments('event', event?.id || 'temp');
+
+  const uploadPendingFiles = async (eventId: string) => {
+    if (pendingFiles.length === 0) return;
+    setIsUploadingFiles(true);
+    try {
+      for (const file of pendingFiles) {
+        await uploadFile({
+          record_type: 'event',
+          record_id: eventId,
+          file
+        });
+      }
+      setPendingFiles([]);
+    } catch (e) {
+      console.error('Error uploading event files:', e);
+    } finally {
+      setIsUploadingFiles(false);
+    }
+  };
 
   const { events, createEvent, updateEvent, deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
@@ -273,6 +296,10 @@ export const CalendarRecordPage: React.FC = () => {
       } else {
         const newEvent = await createEvent(eventData);
         if (newEvent) {
+          // Upload any files selected before creation
+          if (pendingFiles.length > 0) {
+            await uploadPendingFiles(newEvent.id);
+          }
           setCreatedEventId(newEvent.id);
           setShowAttachmentConfirm(true); // Show confirmation dialog first
           return; // Don't navigate yet
@@ -836,6 +863,45 @@ export const CalendarRecordPage: React.FC = () => {
                   onRecurrenceRuleChange={setRecurrenceRule}
                   eventStartDate={form.watch('start_date')}
                 />
+              )}
+
+              {/* Attachments (create only) */}
+              {!isEditMode && (
+                <div className="flex items-start gap-2">
+                  <FormLabel className="w-32 text-left shrink-0 pt-2">Attachments</FormLabel>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setPendingFiles(prev => [...prev, ...files]);
+                      }}
+                      disabled={!canEdit}
+                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                    />
+                    {pendingFiles.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-muted-foreground">Files to upload after event creation:</p>
+                        {pendingFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                            <span>{file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                              className="text-destructive hover:opacity-80"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {isUploadingFiles && (
+                          <p className="text-sm text-muted-foreground">Uploading files...</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* Event Assignments for existing events */}
