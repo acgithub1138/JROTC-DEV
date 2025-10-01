@@ -74,6 +74,7 @@ export const AttachmentList: React.FC<AttachmentListProps> = ({
             </div>
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => handleDownload(attachment)}
@@ -83,6 +84,7 @@ export const AttachmentList: React.FC<AttachmentListProps> = ({
               </Button>
               {canEdit && (
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => deleteFile(attachment.id)}
