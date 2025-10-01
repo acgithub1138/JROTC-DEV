@@ -11,6 +11,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { TablePagination } from '@/components/ui/table-pagination';
+import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 
 export interface Contact {
   id: string;
@@ -38,6 +40,7 @@ const ContactManagementPage = () => {
   const [searchValue, setSearchValue] = useState('');
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
   const isMobile = useIsMobile();
 
   const {
@@ -53,6 +56,7 @@ const ContactManagementPage = () => {
       setSortField(field);
       setSortDirection('asc');
     }
+    setCurrentPage(1);
   };
 
   const getSortIcon = (field: string) => {
@@ -96,6 +100,9 @@ const ContactManagementPage = () => {
     return 0;
   });
 
+  const paginatedContacts = getPaginatedItems(sortedContacts, currentPage);
+  const totalPages = getTotalPages(sortedContacts.length);
+
   const handleAddContact = () => {
     navigate('/app/contacts/contact_record?mode=create');
   };
@@ -127,10 +134,15 @@ const ContactManagementPage = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedContacts.length === sortedContacts.length) {
-      setSelectedContacts([]);
+    const paginatedIds = paginatedContacts.map(c => c.id);
+    const allPaginatedSelected = paginatedIds.every(id => selectedContacts.includes(id));
+    
+    if (allPaginatedSelected) {
+      // Deselect all from current page
+      setSelectedContacts(prev => prev.filter(id => !paginatedIds.includes(id)));
     } else {
-      setSelectedContacts(sortedContacts.map(c => c.id));
+      // Select all from current page
+      setSelectedContacts(prev => [...new Set([...prev, ...paginatedIds])]);
     }
   };
 
@@ -211,12 +223,15 @@ const ContactManagementPage = () => {
         title=""
         description=""
         searchValue={searchValue}
-        onSearchChange={setSearchValue}
+        onSearchChange={(value) => {
+          setSearchValue(value);
+          setCurrentPage(1);
+        }}
         searchPlaceholder="Search contacts by name, email, or phone..."
       >
         {isMobile ? (
           <ContactCards
-            contacts={sortedContacts}
+            contacts={paginatedContacts}
             isLoading={isLoading}
             onEdit={handleEditContact}
             onView={setViewingContact}
@@ -227,7 +242,7 @@ const ContactManagementPage = () => {
           />
         ) : (
           <ContactTable
-            contacts={sortedContacts}
+            contacts={paginatedContacts}
             isLoading={isLoading}
             onEdit={handleEditContact}
             onView={setViewingContact}
@@ -242,6 +257,13 @@ const ContactManagementPage = () => {
             onSelectAll={handleSelectAll}
           />
         )}
+        
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={sortedContacts.length}
+          onPageChange={setCurrentPage}
+        />
       </StandardTableWrapper>
 
       {viewingContact && (
