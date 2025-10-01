@@ -92,6 +92,29 @@ export const CompetitionJudgesRecord = () => {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
 
+  if (availableJudges.length === 0) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={handleCancel}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <h1 className="text-3xl font-bold">
+            {isEditMode ? 'Edit' : 'Assign'} Judge
+          </h1>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-muted-foreground">
+              No available judges. Please create judges and try again.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
