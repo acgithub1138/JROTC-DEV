@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -69,9 +68,6 @@ export const CalendarRecordPage: React.FC = () => {
     interval: 1,
     endType: 'never',
   });
-  const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
-  const [showAttachments, setShowAttachments] = useState(false);
-  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const { uploadFile } = useAttachments('event', event?.id || 'temp');
@@ -300,9 +296,8 @@ export const CalendarRecordPage: React.FC = () => {
           if (pendingFiles.length > 0) {
             await uploadPendingFiles(newEvent.id);
           }
-          setCreatedEventId(newEvent.id);
-          setShowAttachmentConfirm(true); // Show confirmation dialog first
-          return; // Don't navigate yet
+          navigate('/app/calendar');
+          return;
         }
       }
       
@@ -347,21 +342,6 @@ export const CalendarRecordPage: React.FC = () => {
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    navigate('/app/calendar');
-  };
-
-  const handleAttachmentConfirm = (addAttachments: boolean) => {
-    setShowAttachmentConfirm(false);
-    if (addAttachments) {
-      setShowAttachments(true);
-    } else {
-      navigate('/app/calendar');
-    }
-  };
-
-  const handleAttachmentsClose = () => {
-    setShowAttachments(false);
-    setCreatedEventId(null);
     navigate('/app/calendar');
   };
 
@@ -961,62 +941,6 @@ export const CalendarRecordPage: React.FC = () => {
         onCancel={handleContinueEditing}
       />
 
-      {/* Attachment Confirmation Dialog */}
-      <AlertDialog open={showAttachmentConfirm} onOpenChange={() => {}}>
-        <AlertDialogContent className="sm:max-w-[400px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Add Attachments?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your event has been created successfully! Would you like to add any file attachments?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => handleAttachmentConfirm(false)}>
-              No, I'm done
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleAttachmentConfirm(true)}>
-              Yes, add attachments
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add Attachments Dialog */}
-      <Dialog open={showAttachments} onOpenChange={(open) => {
-        if (!open) {
-          handleAttachmentsClose();
-        }
-      }}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Attachments</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-medium text-sm mb-2">Event Created Successfully!</h3>
-              <p className="text-sm text-muted-foreground">
-                You can now add attachments or close this dialog.
-              </p>
-            </div>
-            
-            {createdEventId && (
-              <AttachmentSection 
-                recordType="event" 
-                recordId={createdEventId} 
-                canEdit={true} 
-                defaultOpen={true} 
-                showContentOnly={false}
-              />
-            )}
-
-            <div className="flex justify-end pt-4">
-              <Button onClick={handleAttachmentsClose}>
-                Done
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
