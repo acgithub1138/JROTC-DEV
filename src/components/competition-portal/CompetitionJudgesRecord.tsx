@@ -11,7 +11,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { MobileDateTimePicker } from '@/components/mobile/ui/MobileDateTimePicker';
-
 interface JudgeFormData {
   judge: string;
   location: string;
@@ -19,18 +18,25 @@ interface JudgeFormData {
   end_time: string;
   assignment_details: string;
 }
-
 export const CompetitionJudgesRecord = () => {
   const navigate = useNavigate();
-  const { id: competitionId } = useParams();
+  const {
+    id: competitionId
+  } = useParams();
   const location = useLocation();
   const judgeId = location.state?.judgeId;
   const isEditMode = !!judgeId;
-
-  const { judges: availableJudges, isLoading: judgesLoading } = useJudges();
-  const { judges, createJudge, updateJudge, isLoading } = useCompetitionJudges(competitionId);
+  const {
+    judges: availableJudges,
+    isLoading: judgesLoading
+  } = useJudges();
+  const {
+    judges,
+    createJudge,
+    updateJudge,
+    isLoading
+  } = useCompetitionJudges(competitionId);
   const [isSaving, setIsSaving] = useState(false);
-
   const form = useForm<JudgeFormData>({
     defaultValues: {
       judge: '',
@@ -40,7 +46,6 @@ export const CompetitionJudgesRecord = () => {
       assignment_details: ''
     }
   });
-
   useEffect(() => {
     if (isEditMode && judges.length > 0) {
       const judge = judges.find(j => j.id === judgeId);
@@ -55,10 +60,8 @@ export const CompetitionJudgesRecord = () => {
       }
     }
   }, [isEditMode, judgeId, judges, form]);
-
   const onSubmit = async (data: JudgeFormData) => {
     if (!competitionId) return;
-
     setIsSaving(true);
     try {
       const judgeData: any = {
@@ -69,13 +72,11 @@ export const CompetitionJudgesRecord = () => {
         end_time: data.end_time || null,
         assignment_details: data.assignment_details || null
       };
-
       if (isEditMode) {
         await updateJudge(judgeId, judgeData);
       } else {
         await createJudge(judgeData);
       }
-
       navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
     } catch (error) {
       console.error('Error saving judge assignment:', error);
@@ -83,18 +84,14 @@ export const CompetitionJudgesRecord = () => {
       setIsSaving(false);
     }
   };
-
   const handleCancel = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
   };
-
-  if (judgesLoading || (isEditMode && isLoading)) {
+  if (judgesLoading || isEditMode && isLoading) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
-
   if (availableJudges.length === 0) {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={handleCancel}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -111,12 +108,9 @@ export const CompetitionJudgesRecord = () => {
             </p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={handleCancel}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -127,19 +121,18 @@ export const CompetitionJudgesRecord = () => {
         </h1>
       </div>
 
-      <Card>
+      <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Judge Assignment Details</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="judge"
-                rules={{ required: 'Judge is required' }}
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="judge" rules={{
+              required: 'Judge is required'
+            }} render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Judge</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -148,85 +141,55 @@ export const CompetitionJudgesRecord = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {availableJudges.map((judge) => (
-                          <SelectItem key={judge.id} value={judge.id}>
+                        {availableJudges.map(judge => <SelectItem key={judge.id} value={judge.id}>
                             {judge.name} {!judge.available && '(Unavailable)'}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="location" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter location" />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="start_time"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="start_time" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Start Time</FormLabel>
                       <FormControl>
-                        <Input
-                          type="datetime-local"
-                          {...field}
-                        />
+                        <Input type="datetime-local" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
 
-                <FormField
-                  control={form.control}
-                  name="end_time"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="end_time" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>End Time</FormLabel>
                       <FormControl>
-                        <Input
-                          type="datetime-local"
-                          {...field}
-                        />
+                        <Input type="datetime-local" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
-              <FormField
-                control={form.control}
-                name="assignment_details"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="assignment_details" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Assignment Details</FormLabel>
                     <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Enter any additional details about this assignment"
-                        rows={4}
-                      />
+                      <Textarea {...field} placeholder="Enter any additional details about this assignment" rows={4} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <div className="flex gap-4">
                 <Button type="submit" disabled={isSaving}>
@@ -240,6 +203,5 @@ export const CompetitionJudgesRecord = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
