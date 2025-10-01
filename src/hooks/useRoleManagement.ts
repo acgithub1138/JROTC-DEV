@@ -92,6 +92,8 @@ export const useRoleManagement = () => {
       actionId: string;
       enabled: boolean;
     }) => {
+      console.log('updatePermissionMutation starting:', { role, moduleId, actionId, enabled });
+      
       // First get the role_id for the given role name
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
@@ -99,25 +101,43 @@ export const useRoleManagement = () => {
         .eq('role_name', role)
         .single();
       
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Error fetching role_id:', roleError);
+        throw roleError;
+      }
+      
+      console.log('Found role_id:', roleData.id);
+      
+      const upsertData = {
+        role_id: roleData.id,
+        module_id: moduleId,
+        action_id: actionId,
+        enabled,
+      };
+      
+      console.log('Upserting permission:', upsertData);
       
       const { data, error } = await supabase
         .from('role_permissions')
-        .upsert({
-          role_id: roleData.id,
-          module_id: moduleId,
-          action_id: actionId,
-          enabled,
-        } as any, {
+        .upsert(upsertData as any, {
           onConflict: 'role_id,module_id,action_id'
         })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error upserting permission:', error);
+        throw error;
+      }
+      
+      console.log('Permission upserted successfully:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      console.log('updatePermissionMutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+    },
+    onError: (error, variables) => {
+      console.error('updatePermissionMutation error:', error, 'Variables:', variables);
     },
   });
 

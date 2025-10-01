@@ -92,7 +92,22 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
               {filteredActions.map(action => {
             const isEnabled = rolePermissions[module.name]?.[action.name] || false;
             return <td key={action.id} className="p-3 text-center px-[4px] py-[4px]">
-                    <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
+                    <Checkbox 
+                      checked={isEnabled} 
+                      disabled={isUpdating} 
+                      onCheckedChange={(checked) => {
+                        console.log('Checkbox changed:', {
+                          module: module.name,
+                          action: action.name,
+                          currentState: isEnabled,
+                          newState: checked,
+                          checkedType: typeof checked
+                        });
+                        // Convert indeterminate state to true, otherwise use boolean value
+                        const enabledValue = checked === 'indeterminate' ? true : Boolean(checked);
+                        handlePermissionChange(module.id, action.id, enabledValue);
+                      }} 
+                    />
                   </td>;
           })}
             </tr>)}
