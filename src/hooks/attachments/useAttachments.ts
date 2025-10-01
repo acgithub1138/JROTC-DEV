@@ -131,7 +131,15 @@ export const useAttachments = (recordType: string, recordId: string) => {
       .from('task-incident-attachments')
       .createSignedUrl(filePath, 3600); // 1 hour expiry
     
-    return data?.signedUrl || null;
+    if (data?.signedUrl) {
+      // If the URL is relative, prepend the Supabase URL
+      if (data.signedUrl.startsWith('/')) {
+        return `https://vpiwfabbzaebfkadmmgd.supabase.co/storage/v1${data.signedUrl}`;
+      }
+      return data.signedUrl;
+    }
+    
+    return null;
   };
 
   return {
