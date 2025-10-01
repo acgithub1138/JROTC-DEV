@@ -10,9 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
+import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { MobileDateTimePicker } from '@/components/mobile/ui/MobileDateTimePicker';
+
 interface JudgeFormData {
   judge: string;
+  event: string;
   location: string;
   start_time: string;
   end_time: string;
@@ -36,22 +39,39 @@ export const CompetitionJudgesRecord = () => {
     updateJudge,
     isLoading
   } = useCompetitionJudges(competitionId);
+  const {
+    events: competitionEvents,
+    isLoading: eventsLoading
+  } = useCompetitionEvents(competitionId);
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<JudgeFormData>({
     defaultValues: {
       judge: '',
+      event: '',
       location: '',
       start_time: '',
       end_time: '',
       assignment_details: ''
     }
   });
+
+  // Watch event field to auto-fill location
+  const selectedEvent = form.watch('event');
+  useEffect(() => {
+    if (selectedEvent) {
+      const event = competitionEvents.find(e => e.id === selectedEvent);
+      if (event?.location) {
+        form.setValue('location', event.location);
+      }
+    }
+  }, [selectedEvent, competitionEvents, form]);
   useEffect(() => {
     if (isEditMode && judges.length > 0) {
       const judge = judges.find(j => j.id === judgeId);
       if (judge) {
         form.reset({
           judge: judge.judge,
+          event: (judge as any).event || '',
           location: judge.location || '',
           start_time: judge.start_time || '',
           end_time: judge.end_time || '',
@@ -67,6 +87,7 @@ export const CompetitionJudgesRecord = () => {
       const judgeData: any = {
         competition_id: competitionId,
         judge: data.judge,
+        event: data.event || null,
         location: data.location || null,
         start_time: data.start_time || null,
         end_time: data.end_time || null,
@@ -87,7 +108,7 @@ export const CompetitionJudgesRecord = () => {
   const handleCancel = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
   };
-  if (judgesLoading || isEditMode && isLoading) {
+  if (judgesLoading || eventsLoading || (isEditMode && isLoading)) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
   if (availableJudges.length === 0) {
@@ -141,6 +162,25 @@ export const CompetitionJudgesRecord = () => {
                       <SelectContent>
                         {availableJudges.map(judge => <SelectItem key={judge.id} value={judge.id}>
                             {judge.name} {!judge.available && '(Unavailable)'}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>} />
+
+              <FormField control={form.control} name="event" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel>Event</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an event (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
+                            {event.event_name || 'Unnamed Event'}
                           </SelectItem>)}
                       </SelectContent>
                     </Select>

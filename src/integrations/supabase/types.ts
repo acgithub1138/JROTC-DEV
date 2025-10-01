@@ -910,6 +910,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           end_time: string | null
+          event: string | null
           id: string
           judge: string
           location: string | null
@@ -924,6 +925,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           end_time?: string | null
+          event?: string | null
           id?: string
           judge: string
           location?: string | null
@@ -938,6 +940,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           end_time?: string | null
+          event?: string | null
           id?: string
           judge?: string
           location?: string | null
@@ -946,7 +949,43 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_judges_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events_detailed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cp_comp_resources: {
         Row: {
