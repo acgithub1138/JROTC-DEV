@@ -36,10 +36,11 @@ export const CompetitionDetailsPage = () => {
     // Map URL segments to tab names
     const urlToTabMap: { [key: string]: string } = {
       'events': 'cp_comp_events',
+      'judges': 'cp_comp_judges', 
       'resources': 'cp_comp_resources', 
       'schools': 'cp_comp_schools',
       'schedule': 'cp_schedules',
-      'results': 'cp_results'
+      'results': 'cp_results'      
     };
     
     return urlToTabMap[lastSegment] || null;
