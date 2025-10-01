@@ -211,16 +211,14 @@ const DashboardOverview = () => {
       baseStats.push({
         title: 'Equipment',
         value: statsLoading ? '...' : stats?.inventory.total?.toString() || '0',
-        change: statsLoading ? 'Loading...' : (
-          <div className="flex items-center gap-2 text-xs mt-2">
+        change: statsLoading ? 'Loading...' : <div className="flex items-center gap-2 text-xs mt-2">
             <Badge title="In Stock" variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
               {stats?.inventory.inStock || 0}
             </Badge>
             <Badge title="Out of Stock" variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
               {stats?.inventory.outOfStock || 0}
             </Badge>
-          </div>
-        ),
+          </div>,
         icon: Package,
         color: 'text-purple-600',
         bgColor: 'bg-purple-100'
@@ -322,9 +320,7 @@ const DashboardOverview = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {userProfile?.first_name}! Here's an overview of your JROTC unit.
-          </p>
+          
           {isNative && <Badge variant="secondary" className="mt-2">
               <Smartphone className="w-3 h-3 mr-1" />
               Mobile App - {platform}
@@ -340,20 +336,15 @@ const DashboardOverview = () => {
         const isClickable = !!stat.onClick;
         const CardElement = isClickable ? 'button' : 'div';
         return <Card key={stat.title} className={`hover:shadow-md transition-shadow ${isClickable ? 'cursor-pointer' : ''}`}>
-              <CardElement 
-                className={`w-full ${isClickable ? 'text-left' : ''}`}
-                onClick={stat.onClick}
-              >
+              <CardElement className={`w-full ${isClickable ? 'text-left' : ''}`} onClick={stat.onClick}>
                 <CardContent className="p-6 py-[12px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                       <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                      {stat.change && (
-                        <div className="text-sm text-muted-foreground mt-1">
+                      {stat.change && <div className="text-sm text-muted-foreground mt-1">
                           {stat.change}
-                        </div>
-                      )}
+                        </div>}
                     </div>
                     <div className={`p-3 rounded-full ${stat.bgColor}`}>
                       <Icon className={`w-6 h-6 ${stat.color}`} />
