@@ -61,12 +61,12 @@ const ParentProfilePage = () => {
     }
   };
   if (isLoading) {
-    return <div className="p-6 space-y-6">
-        <div>
+    return <div className="p-6 space-y-6 flex flex-col items-center">
+        <div className="w-full max-w-md">
           <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
           <p className="text-muted-foreground">View your contact information</p>
         </div>
-        <Card>
+        <Card className="w-full max-w-md">
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-1/4"></div>
@@ -78,12 +78,12 @@ const ParentProfilePage = () => {
       </div>;
   }
   if (!contact) {
-    return <div className="p-6 space-y-6">
-        <div>
+    return <div className="p-6 space-y-6 flex flex-col items-center">
+        <div className="w-full max-w-md">
           <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
           <p className="text-muted-foreground">View your contact information</p>
         </div>
-        <Card>
+        <Card className="w-full max-w-md">
           <CardContent className="p-6">
             <p className="text-muted-foreground">No contact information found.</p>
           </CardContent>
@@ -120,13 +120,13 @@ const ParentProfilePage = () => {
     }
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
-  return <div className="p-6 space-y-6">
-      <div>
+  return <div className="p-6 space-y-6 flex flex-col items-center">
+      <div className="w-full max-w-md">
         <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
         <p className="text-muted-foreground">View your contact information</p>
       </div>
 
-      <Card>
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserCircle className="w-5 h-5" />
