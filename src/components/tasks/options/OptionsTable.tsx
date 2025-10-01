@@ -35,7 +35,7 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
       <TableBody>
         {options.map(option => <TableRow key={option.id}>
             <TableCell className="py-[8px]">{option.label}</TableCell>
-            <TableCell><code>{option.value}</code></TableCell>
+            <TableCell>{option.value}</TableCell>
             <TableCell>
               <Badge className={option.color_class}>{option.label}</Badge>
             </TableCell>
