@@ -261,12 +261,24 @@ export const CalendarRecordPage: React.FC = () => {
       }
 
       // Create dates in school timezone, then convert to UTC for storage
-      const startDateTime = new Date(`${data.start_date}T${data.start_time_hour}:${data.start_time_minute}:00`);
-      const endDateTime = data.end_date ? new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`) : null;
+      let startDateTime: Date;
+      let endDateTime: Date | null;
       
-      // Convert from school timezone to UTC
-      const startDateUTC = convertFromSchoolTimezone(startDateTime, timezone);
-      const endDateUTC = endDateTime ? convertFromSchoolTimezone(endDateTime, timezone) : null;
+      if (data.is_all_day) {
+        // For all-day events, set time to 12:00:00 UTC to avoid timezone issues
+        startDateTime = new Date(`${data.start_date}T12:00:00Z`);
+        endDateTime = data.end_date 
+          ? new Date(`${data.end_date}T12:00:00Z`)
+          : new Date(`${data.start_date}T12:00:00Z`);
+      } else {
+        // For timed events, use the selected times and convert from school timezone
+        startDateTime = new Date(`${data.start_date}T${data.start_time_hour}:${data.start_time_minute}:00`);
+        endDateTime = data.end_date ? new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`) : null;
+      }
+      
+      // Convert from school timezone to UTC (only for non-all-day events)
+      const startDateUTC = data.is_all_day ? startDateTime : convertFromSchoolTimezone(startDateTime, timezone);
+      const endDateUTC = endDateTime ? (data.is_all_day ? endDateTime : convertFromSchoolTimezone(endDateTime, timezone)) : null;
 
       const eventData = {
         title: data.title,
