@@ -88,7 +88,7 @@ export const CompetitionJudgesRecord = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
   };
 
-  if (isLoading || judgesLoading) {
+  if (judgesLoading || (isEditMode && isLoading)) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
 
