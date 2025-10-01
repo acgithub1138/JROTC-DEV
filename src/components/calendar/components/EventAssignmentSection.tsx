@@ -7,6 +7,7 @@ import { X, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEventPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface EventAssignmentSectionProps {
   eventId: string;
@@ -46,6 +47,7 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const { canUpdate } = useEventPermissions();
 
   useEffect(() => {
     fetchData();
@@ -213,81 +215,85 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
                   <span className="text-sm text-muted-foreground">({assignment.role})</span>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeAssignment(assignment.id)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              {canUpdate && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeAssignment(assignment.id)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           ))}
         </div>
 
         {/* Add new assignment */}
-        <div className="space-y-2 p-3 border rounded bg-muted/50">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <Select 
-              value={newAssignment.type} 
-              onValueChange={(value: 'team' | 'cadet') => 
-                setNewAssignment(prev => ({ ...prev, type: value, assigneeId: '' }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="team">Team</SelectItem>
-                <SelectItem value="cadet">Cadet</SelectItem>
-              </SelectContent>
-            </Select>
+        {canUpdate && (
+          <div className="space-y-2 p-3 border rounded bg-muted/50">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+              <Select 
+                value={newAssignment.type} 
+                onValueChange={(value: 'team' | 'cadet') => 
+                  setNewAssignment(prev => ({ ...prev, type: value, assigneeId: '' }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="team">Team</SelectItem>
+                  <SelectItem value="cadet">Cadet</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select 
-              value={newAssignment.assigneeId} 
-              onValueChange={(value) => 
-                setNewAssignment(prev => ({ ...prev, assigneeId: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={`Select ${newAssignment.type}`} />
-              </SelectTrigger>
-              <SelectContent>
-                {newAssignment.type === 'team' 
-                  ? teams.map(team => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))
-                  : profiles
-                      .sort((a, b) => a.last_name.localeCompare(b.last_name))
-                      .map(profile => (
-                        <SelectItem key={profile.id} value={profile.id}>
-                          {profile.last_name}, {profile.first_name}
+              <Select 
+                value={newAssignment.assigneeId} 
+                onValueChange={(value) => 
+                  setNewAssignment(prev => ({ ...prev, assigneeId: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={`Select ${newAssignment.type}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {newAssignment.type === 'team' 
+                    ? teams.map(team => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
                         </SelectItem>
                       ))
-                }
-              </SelectContent>
-            </Select>
+                    : profiles
+                        .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                        .map(profile => (
+                          <SelectItem key={profile.id} value={profile.id}>
+                            {profile.last_name}, {profile.first_name}
+                          </SelectItem>
+                        ))
+                  }
+                </SelectContent>
+              </Select>
 
-            <input
-              type="text"
-              placeholder="Role (optional)"
-              className="px-3 py-2 border rounded text-sm"
-              value={newAssignment.role}
-              onChange={(e) => setNewAssignment(prev => ({ ...prev, role: e.target.value }))}
-            />
+              <input
+                type="text"
+                placeholder="Role (optional)"
+                className="px-3 py-2 border rounded text-sm"
+                value={newAssignment.role}
+                onChange={(e) => setNewAssignment(prev => ({ ...prev, role: e.target.value }))}
+              />
 
-            <Button 
-              type="button"
-              onClick={addAssignment}
-              disabled={!newAssignment.assigneeId}
-              size="sm"
-            >
-              <Plus className="w-4 h-4" />
-              Add
-            </Button>
+              <Button 
+                type="button"
+                onClick={addAssignment}
+                disabled={!newAssignment.assigneeId}
+                size="sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
