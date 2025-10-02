@@ -122,7 +122,7 @@ export const EventScheduleView = ({
           </h1>
         </div>
         
-<div className="flex items-center justify-between gap-4 no-print w-full">
+<div className="flex flex-nowrap items-center justify-between gap-4 no-print w-full">
   {/* Left side - dropdown */}
   <div className="flex items-center space-x-2 min-w-0">
     <Label htmlFor="school-filter" className="text-sm whitespace-nowrap">
