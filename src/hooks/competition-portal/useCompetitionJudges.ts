@@ -59,7 +59,7 @@ export const useCompetitionJudges = (competitionId?: string) => {
           if (compEventsData && compEventsData.length > 0) {
             const eventTypeIds = compEventsData.map(e => e.event).filter(Boolean);
             const { data: eventTypesData } = await supabase
-              .from('cp_events')
+              .from('competition_event_types')
               .select('id, name')
               .in('id', eventTypeIds);
 
