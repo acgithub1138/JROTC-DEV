@@ -102,7 +102,7 @@ export const CompetitionJudgesTab = ({
                         {canUpdate && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(judge.id)}>
                             <Edit className="h-3 w-3" />
                           </Button>}
-                        {canDelete && <Button variant="outline" size="icon" className=h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
+                        {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
                             <Trash2 className="h-3 w-3" />
                           </Button>}
                       </div>
