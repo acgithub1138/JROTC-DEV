@@ -3,11 +3,118 @@ import { format, parse } from 'date-fns';
 
 /**
  * ============================================================================
- * CANONICAL TIMEZONE CONVERSION FUNCTIONS
+ * TIMEZONE UTILITIES - DOCUMENTATION & USAGE GUIDE
  * ============================================================================
- * ALWAYS use these two functions for timezone conversion:
- * - convertToUTC: When saving to database
- * - convertToUI: When displaying to user
+ * 
+ * This module provides timezone conversion utilities for the application.
+ * 
+ * ## Core Principles
+ * 
+ * 1. **Database Storage**: Always store dates in UTC (ISO 8601 format)
+ * 2. **User Display**: Always show dates in the school's local timezone
+ * 3. **User Input**: Always interpret input in the school's local timezone
+ * 
+ * ## Primary Functions (USE THESE)
+ * 
+ * ### convertToUTC
+ * Converts school-local date/time to UTC for database storage
+ * ```typescript
+ * // User selects "2024-03-15" and "14:30" in New York
+ * const utcISO = convertToUTC('2024-03-15', '14:30', 'America/New_York');
+ * // Returns: "2024-03-15T18:30:00.000Z" (UTC)
+ * // Now save this to the database
+ * ```
+ * 
+ * ### convertToUI
+ * Converts UTC timestamp to school timezone for display
+ * ```typescript
+ * // Database has "2024-03-15T18:30:00.000Z"
+ * const time = convertToUI(dbTimestamp, 'America/New_York', 'time');
+ * // Returns: "14:30"
+ * 
+ * const datetime = convertToUI(dbTimestamp, 'America/New_York', 'datetime');
+ * // Returns: "03/15/2024 14:30"
+ * ```
+ * 
+ * ## Direct date-fns-tz Functions (USE WHEN NEEDED)
+ * 
+ * For custom formatting or advanced use cases, you can import from date-fns-tz:
+ * 
+ * ### formatInTimeZone
+ * ```typescript
+ * import { formatInTimeZone } from 'date-fns-tz';
+ * const formatted = formatInTimeZone(utcDate, timezone, 'PPpp');
+ * ```
+ * 
+ * ### toZonedTime
+ * Converts UTC to local time (returns Date object)
+ * ```typescript
+ * import { toZonedTime } from 'date-fns-tz';
+ * const localDate = toZonedTime(utcDate, timezone);
+ * ```
+ * 
+ * ### fromZonedTime
+ * Converts local time to UTC (returns Date object)
+ * ```typescript
+ * import { fromZonedTime } from 'date-fns-tz';
+ * const utcDate = fromZonedTime(localDate, timezone);
+ * ```
+ * 
+ * ## Common Patterns
+ * 
+ * ### Pattern 1: Saving Form Data
+ * ```typescript
+ * const handleSubmit = (formData) => {
+ *   const startTimeUTC = convertToUTC(
+ *     formData.date,      // "2024-03-15"
+ *     formData.time,      // "14:30"
+ *     timezone
+ *   );
+ *   await supabase.from('events').insert({ start_time: startTimeUTC });
+ * };
+ * ```
+ * 
+ * ### Pattern 2: Displaying Data
+ * ```typescript
+ * const EventCard = ({ event }) => {
+ *   const displayTime = convertToUI(event.start_time, timezone, 'datetime');
+ *   return <div>{displayTime}</div>;
+ * };
+ * ```
+ * 
+ * ### Pattern 3: Editing Existing Data
+ * ```typescript
+ * useEffect(() => {
+ *   if (existingEvent) {
+ *     // Convert UTC back to local for form
+ *     const localDate = toZonedTime(new Date(existingEvent.start_time), timezone);
+ *     setFormData({
+ *       date: formatInTimeZone(localDate, timezone, 'yyyy-MM-dd'),
+ *       time: formatInTimeZone(localDate, timezone, 'HH:mm'),
+ *     });
+ *   }
+ * }, [existingEvent]);
+ * ```
+ * 
+ * ## Date-Only Fields (Important!)
+ * 
+ * For date-only fields (like budget.date which is a DATE type, not TIMESTAMP):
+ * - Store as YYYY-MM-DD string directly
+ * - Display as MM/DD/YYYY using simple string manipulation
+ * - DO NOT use timezone conversion
+ * 
+ * ```typescript
+ * // Good - for date-only fields
+ * const formatDateDisplay = (dateString: string) => {
+ *   if (!dateString) return '-';
+ *   const [year, month, day] = dateString.split('-');
+ *   return `${month}/${day}/${year}`;
+ * };
+ * 
+ * // Bad - don't use timezone conversion for date-only
+ * const bad = convertToUI(dateString, timezone, 'date'); // Wrong!
+ * ```
+ * 
  * ============================================================================
  */
 
@@ -46,7 +153,7 @@ export const convertToUTC = (
  * Converts UTC timestamp to school timezone for UI display
  * @param utc - UTC timestamp (ISO string or Date object)
  * @param timezone - School's IANA timezone
- * @param mode - Output format: 'time' (HH:mm), 'date' (YYYY-MM-DD), 'datetime' (YYYY-MM-DD HH:mm), 'dateKey' (YYYY-MM-DD)
+ * @param mode - Output format: 'time' (HH:mm), 'date' (MM/dd/yyyy), 'datetime' (MM/dd/yyyy HH:mm), 'dateKey' (yyyy-MM-dd)
  * @returns Formatted string in school timezone
  * @example convertToUI('2024-03-15T18:30:00Z', 'America/New_York', 'time') // "14:30"
  */
@@ -75,12 +182,27 @@ export const convertToUI = (
 
 /**
  * ============================================================================
- * DEPRECATED FUNCTIONS - Use convertToUTC and convertToUI instead
+ * DEPRECATED FUNCTIONS - DO NOT USE IN NEW CODE
+ * ============================================================================
+ * These functions are kept for backward compatibility only.
+ * They will be removed in a future version.
+ * 
+ * Migration guide:
+ * - convertToSchoolTimezone() → Use toZonedTime() from 'date-fns-tz' directly
+ * - convertFromSchoolTimezone() → Use fromZonedTime() from 'date-fns-tz' directly
+ * - formatInSchoolTimezone() → Use convertToUI() or formatInTimeZone() directly
  * ============================================================================
  */
 
 /**
- * @deprecated Use convertToUI instead
+ * @deprecated Use toZonedTime from 'date-fns-tz' directly
+ * @example
+ * // Instead of:
+ * const local = convertToSchoolTimezone(utcDate, timezone);
+ * 
+ * // Use:
+ * import { toZonedTime } from 'date-fns-tz';
+ * const local = toZonedTime(utcDate, timezone);
  */
 export const convertToSchoolTimezone = (date: Date | string, schoolTimezone: string): Date => {
   const utcDate = typeof date === 'string' ? new Date(date) : date;
@@ -88,14 +210,31 @@ export const convertToSchoolTimezone = (date: Date | string, schoolTimezone: str
 };
 
 /**
- * @deprecated Use convertToUTC instead
+ * @deprecated Use fromZonedTime from 'date-fns-tz' directly
+ * @example
+ * // Instead of:
+ * const utc = convertFromSchoolTimezone(localDate, timezone);
+ * 
+ * // Use:
+ * import { fromZonedTime } from 'date-fns-tz';
+ * const utc = fromZonedTime(localDate, timezone);
  */
 export const convertFromSchoolTimezone = (date: Date, schoolTimezone: string): Date => {
   return fromZonedTime(date, schoolTimezone);
 };
 
 /**
- * @deprecated Use convertToUI instead
+ * @deprecated Use convertToUI() or formatInTimeZone() directly
+ * @example
+ * // Instead of:
+ * const formatted = formatInSchoolTimezone(date, 'MM/dd/yyyy HH:mm', timezone);
+ * 
+ * // Use:
+ * const formatted = convertToUI(date, timezone, 'datetime');
+ * 
+ * // Or for custom formats:
+ * import { formatInTimeZone } from 'date-fns-tz';
+ * const formatted = formatInTimeZone(date, timezone, 'MM/dd/yyyy HH:mm');
  */
 export const formatInSchoolTimezone = (
   date: Date | string,
