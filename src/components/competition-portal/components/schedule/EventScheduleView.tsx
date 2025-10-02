@@ -141,10 +141,6 @@ export const EventScheduleView = ({
         ))}
       </SelectContent>
     </Select>
-  </div>
-
-  {/* Right side - button */}
-  <div className="ml-auto flex-shrink-0">
     <Button 
       variant="outline" 
       onClick={handlePrint} 
