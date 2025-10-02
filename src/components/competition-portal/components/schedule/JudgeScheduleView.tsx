@@ -88,9 +88,9 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
         {/* Left side - dropdown */}
         <div className="flex-1 min-w-0 flex items-center gap-2">
           
-      	<Label htmlFor="judge-filter" className="text-sm whitespace-nowrap">
+      	<label htmlFor="judge-filter" className="text-sm whitespace-nowrap">
             Filter by Judge:
-          </Label>
+          </label>
           
       	<Select value={selectedJudge} onValueChange={setSelectedJudge}>
       		<SelectTrigger className="w-40 sm:w-48">
