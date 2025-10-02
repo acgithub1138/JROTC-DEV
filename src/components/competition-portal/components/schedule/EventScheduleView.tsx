@@ -91,10 +91,51 @@ export const EventScheduleView = ({
     events.some(event => shouldShowSlot(event.id, timeSlot))
   );
 
+  // Build linear schedule data for individual school print
+  const linearScheduleData = React.useMemo(() => {
+    if (selectedSchoolFilter === 'all' || !timeline) return [];
+    
+    const scheduleItems: Array<{
+      date: string;
+      time: string;
+      eventName: string;
+      location: string;
+      sortKey: number;
+    }> = [];
+
+    events.forEach(event => {
+      allTimeSlots.forEach(timeSlot => {
+        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+        if (assignedSchool?.id === selectedSchoolFilter && timeline.isEventActive(event.id, timeSlot)) {
+          scheduleItems.push({
+            date: formatTimeForDisplay(timeSlot, TIME_FORMATS.SHORT_DATE, timezone),
+            time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+            eventName: event.event_name,
+            location: event.event_location || '-',
+            sortKey: new Date(timeSlot).getTime()
+          });
+        }
+      });
+    });
+
+    return scheduleItems
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .filter((item, index, self) => 
+        index === self.findIndex(t => 
+          t.date === item.date && t.time === item.time && t.eventName === item.eventName
+        )
+      );
+  }, [selectedSchoolFilter, timeline, events, allTimeSlots, timezone]);
+
+  const selectedSchoolName = React.useMemo(() => {
+    if (selectedSchoolFilter === 'all') return '';
+    return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
+  }, [selectedSchoolFilter, registeredSchools]);
+
   return (
     <TooltipProvider>
       <div className="schedule-print-container space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between no-print">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
             <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
@@ -210,6 +251,33 @@ export const EventScheduleView = ({
             </div>
           </CardContent>
         </Card>
+
+        {/* Linear table for individual school print */}
+        {selectedSchoolFilter !== 'all' && linearScheduleData.length > 0 && (
+          <div className="print-only">
+            <h2 className="text-xl font-bold mb-4">School Schedule – {selectedSchoolName}</h2>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-primary">
+                  <th className="text-left p-3 font-semibold">Date</th>
+                  <th className="text-left p-3 font-semibold">Time</th>
+                  <th className="text-left p-3 font-semibold">Event</th>
+                  <th className="text-left p-3 font-semibold">Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                {linearScheduleData.map((item, index) => (
+                  <tr key={`${item.date}-${item.time}-${item.eventName}-${index}`} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                    <td className="p-3">{item.date}</td>
+                    <td className="p-3">{item.time}</td>
+                    <td className="p-3">{item.eventName}</td>
+                    <td className="p-3">{item.location}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

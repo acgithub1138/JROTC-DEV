@@ -133,8 +133,27 @@
   }
 }
 
+/* Print utility classes */
+.print-only {
+  display: none;
+}
+
+.no-print {
+  display: block;
+}
+
 /* Print styles for schedule */
 @media print {
+  /* Show print-only content */
+  .print-only {
+    display: block !important;
+  }
+  
+  /* Hide no-print content */
+  .no-print {
+    display: none !important;
+  }
+  
   @page {
     size: portrait;
     margin: 0.5in;

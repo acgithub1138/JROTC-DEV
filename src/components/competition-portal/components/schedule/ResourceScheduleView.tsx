@@ -13,7 +13,7 @@ interface ResourceScheduleViewProps {
 }
 
 export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProps) => {
-  const { timeline, isLoading } = useResourceSchedule(competitionId);
+  const { timeline, resourceAssignments, isLoading } = useResourceSchedule(competitionId);
   const { timezone } = useSchoolTimezone();
   const [selectedResource, setSelectedResource] = useState<string>('all');
 
@@ -72,9 +72,17 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
     );
   }
 
+  // Get filtered resource assignments for individual print
+  const filteredResourceAssignments = useMemo(() => {
+    if (selectedResource === 'all' || !resourceAssignments) return [];
+    return resourceAssignments
+      .filter(assignment => assignment.resource_name === selectedResource)
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }, [resourceAssignments, selectedResource]);
+
   return (
     <div className="schedule-print-container space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between no-print">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Filter by Cadet:</label>
           <Select value={selectedResource} onValueChange={setSelectedResource}>
@@ -95,7 +103,8 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
         </Button>
       </div>
 
-      <Card>
+      {/* Grid view for screen and "All Cadets" print */}
+      <Card className={selectedResource !== 'all' ? 'no-print' : ''}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-max">
@@ -166,6 +175,37 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
           </div>
         </CardContent>
       </Card>
+
+      {/* Linear table for individual cadet print */}
+      {selectedResource !== 'all' && filteredResourceAssignments.length > 0 && (
+        <div className="print-only">
+          <h2 className="text-xl font-bold mb-4">Cadet Schedule – {selectedResource}</h2>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-primary">
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-left p-3 font-semibold">Time Range</th>
+                <th className="text-left p-3 font-semibold">Location</th>
+                <th className="text-left p-3 font-semibold">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResourceAssignments.map((assignment, index) => (
+                <tr key={assignment.id} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                  <td className="p-3">
+                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.SHORT_DATE, timezone)}
+                  </td>
+                  <td className="p-3">
+                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} - {formatTimeForDisplay(assignment.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                  </td>
+                  <td className="p-3">{assignment.location}</td>
+                  <td className="p-3">{assignment.assignment_details || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

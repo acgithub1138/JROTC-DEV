@@ -13,7 +13,7 @@ interface JudgeScheduleViewProps {
 }
 
 export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => {
-  const { timeline, isLoading } = useJudgeSchedule(competitionId);
+  const { timeline, judgeAssignments, isLoading } = useJudgeSchedule(competitionId);
   const { timezone } = useSchoolTimezone();
   const [selectedJudge, setSelectedJudge] = useState<string>('all');
 
@@ -72,9 +72,17 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     );
   }
 
+  // Get filtered judge assignments for individual print
+  const filteredJudgeAssignments = useMemo(() => {
+    if (selectedJudge === 'all' || !judgeAssignments) return [];
+    return judgeAssignments
+      .filter(assignment => assignment.judge_name === selectedJudge)
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }, [judgeAssignments, selectedJudge]);
+
   return (
     <div className="schedule-print-container space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between no-print">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Filter by Judge:</label>
           <Select value={selectedJudge} onValueChange={setSelectedJudge}>
@@ -95,7 +103,8 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
         </Button>
       </div>
 
-      <Card>
+      {/* Grid view for screen and "All Judges" print */}
+      <Card className={selectedJudge !== 'all' ? 'no-print' : ''}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-max">
@@ -167,6 +176,37 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
           </div>
         </CardContent>
       </Card>
+
+      {/* Linear table for individual judge print */}
+      {selectedJudge !== 'all' && filteredJudgeAssignments.length > 0 && (
+        <div className="print-only">
+          <h2 className="text-xl font-bold mb-4">Judge Schedule – {selectedJudge}</h2>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-primary">
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-left p-3 font-semibold">Time Range</th>
+                <th className="text-left p-3 font-semibold">Event</th>
+                <th className="text-left p-3 font-semibold">Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredJudgeAssignments.map((assignment, index) => (
+                <tr key={assignment.id} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                  <td className="p-3">
+                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.SHORT_DATE, timezone)}
+                  </td>
+                  <td className="p-3">
+                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} - {formatTimeForDisplay(assignment.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                  </td>
+                  <td className="p-3">{assignment.event_name}</td>
+                  <td className="p-3">{assignment.location || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
