@@ -26,8 +26,18 @@ export const useResourceLocations = (competitionId?: string) => {
 
       if (error) throw error;
 
-      // Get unique locations
-      const uniqueLocations = [...new Set(data.map(item => item.location).filter(Boolean))] as string[];
+      // Get unique locations (case-insensitive, trimmed)
+      const locationMap = new Map<string, string>();
+      data.forEach(item => {
+        if (item.location) {
+          const trimmed = item.location.trim();
+          const key = trimmed.toLowerCase();
+          if (!locationMap.has(key)) {
+            locationMap.set(key, trimmed);
+          }
+        }
+      });
+      const uniqueLocations = Array.from(locationMap.values()).sort((a, b) => a.localeCompare(b));
       setLocations(uniqueLocations);
     } catch (error) {
       console.error('Error fetching locations:', error);
