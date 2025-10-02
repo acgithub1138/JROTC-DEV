@@ -37,8 +37,17 @@ export const getMyActiveTasksAndSubtasks = (
   const myTasks = getMyActiveTasks(tasks, userId);
   const mySubtasks = getMyActiveSubtasks(subtasks, userId);
   
+  // Create a Set of task IDs that are assigned to the user
+  const myTaskIds = new Set(myTasks.map(task => task.id));
+  
+  // Filter out subtasks whose parent tasks are already in myTasks
+  // Only include "orphaned" subtasks (where parent is not assigned to user)
+  const orphanedSubtasks = mySubtasks.filter(subtask => 
+    !myTaskIds.has(subtask.parent_task_id)
+  );
+  
   // Combine and sort by created_at (newest first)
-  return [...myTasks, ...mySubtasks].sort((a, b) => 
+  return [...myTasks, ...orphanedSubtasks].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 };
