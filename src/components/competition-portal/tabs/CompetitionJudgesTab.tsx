@@ -98,12 +98,12 @@ export const CompetitionJudgesTab = ({
                   <TableCell>{judge.event_name || '-'}</TableCell>
                   <TableCell>{judge.location || '-'}</TableCell>
                   {(canUpdate || canDelete) && <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {canUpdate && <Button variant="ghost" size="sm" onClick={() => handleEdit(judge.id)}>
-                            <Edit className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2">
+                        {canUpdate && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(judge.id)}>
+                            <Edit className="h-3 w-3" />
                           </Button>}
-                        {canDelete && <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(judge.id)}>
-                            <Trash2 className="h-4 w-4" />
+                        {canDelete && <Button variant="outline" size="icon" className=h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
+                            <Trash2 className="h-3 w-3" />
                           </Button>}
                       </div>
                     </TableCell>}
