@@ -22,21 +22,31 @@ export const useResourceLocations = (competitionId?: string) => {
         .select('location')
         .eq('school_id', userProfile.school_id)
         .not('location', 'is', null)
+        .neq('location', '')
         .order('location', { ascending: true });
 
       if (error) throw error;
 
-      // Get unique locations (case-insensitive, trimmed)
+      // Robust unique locations (normalize unicode, collapse spaces, trim, case-insensitive)
+      const canonicalize = (s: string) =>
+        s
+          .normalize('NFKC')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase();
+
       const locationMap = new Map<string, string>();
-      data.forEach(item => {
+      data.forEach((item) => {
         if (item.location) {
-          const trimmed = item.location.trim();
-          const key = trimmed.toLowerCase();
+          const normalized = item.location.normalize('NFKC').replace(/\s+/g, ' ').trim();
+          if (normalized.length === 0) return;
+          const key = canonicalize(item.location);
           if (!locationMap.has(key)) {
-            locationMap.set(key, trimmed);
+            locationMap.set(key, normalized);
           }
         }
       });
+
       const uniqueLocations = Array.from(locationMap.values()).sort((a, b) => a.localeCompare(b));
       setLocations(uniqueLocations);
     } catch (error) {

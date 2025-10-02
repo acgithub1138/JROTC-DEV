@@ -89,10 +89,10 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
   return (
     <div className="flex gap-2">
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger className="flex-1">
+        <SelectTrigger className="flex-1 bg-background">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-[60] bg-popover text-popover-foreground max-h-60 overflow-auto scroll-smooth">
           {options.map((option) => (
             <SelectItem key={option} value={option}>
               {option}
