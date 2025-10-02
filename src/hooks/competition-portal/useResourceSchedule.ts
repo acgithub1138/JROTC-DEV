@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { convertToSchoolTimezone } from '@/utils/timezoneUtils';
-import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export interface ResourceAssignment {
   id: string;
@@ -24,7 +22,6 @@ export const useResourceSchedule = (competitionId?: string) => {
   const [resourceAssignments, setResourceAssignments] = useState<ResourceAssignment[]>([]);
   const [timeline, setTimeline] = useState<ResourceTimeline | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { timezone } = useSchoolTimezone();
 
   const fetchResourceSchedule = useCallback(async () => {
     if (!competitionId) return;
@@ -63,8 +60,8 @@ export const useResourceSchedule = (competitionId?: string) => {
 
       // Generate timeline
       if (assignments.length > 0) {
-        const startTimes = assignments.map(a => convertToSchoolTimezone(a.start_time, timezone));
-        const endTimes = assignments.map(a => convertToSchoolTimezone(a.end_time, timezone));
+        const startTimes = assignments.map(a => new Date(a.start_time));
+        const endTimes = assignments.map(a => new Date(a.end_time));
 
         const timelineStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
         const timelineEnd = new Date(Math.max(...endTimes.map(t => t.getTime())));
@@ -86,8 +83,8 @@ export const useResourceSchedule = (competitionId?: string) => {
           getResourcesForSlot: (location: string, timeSlot: Date) => {
             const resources = assignments.filter(a => {
               if (a.location !== location) return false;
-              const start = convertToSchoolTimezone(a.start_time, timezone);
-              const end = convertToSchoolTimezone(a.end_time, timezone);
+              const start = new Date(a.start_time);
+              const end = new Date(a.end_time);
               return timeSlot >= start && timeSlot < end;
             });
             return resources.map(r => ({ name: r.resource_name, details: r.assignment_details }));
@@ -102,7 +99,7 @@ export const useResourceSchedule = (competitionId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [competitionId, timezone]);
+  }, [competitionId]);
 
   useEffect(() => {
     if (competitionId) {
