@@ -21,6 +21,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useResourceLocations } from '@/hooks/competition-portal/useResourceLocations';
+import { SelectWithAdd } from '@/components/competition-portal/components/SelectWithAdd';
 
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
@@ -61,6 +63,7 @@ export const CompetitionResourceRecord: React.FC = () => {
   const { users, isLoading: usersLoading } = useSchoolUsers(true);
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
   const { resources, createResource, updateResource, deleteResource, isLoading: resourcesLoading } = useCompetitionResources(competitionId);
+  const { locations, isLoading: locationsLoading, refetch: refetchLocations } = useResourceLocations(competitionId);
 
   const existingResource = resourceId ? resources.find(r => r.id === resourceId) : null;
   const isCreateMode = mode === 'create';
@@ -347,11 +350,13 @@ export const CompetitionResourceRecord: React.FC = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input 
-                            id="location"
-                            placeholder="Enter location" 
-                            disabled={isViewMode}
-                            {...field} 
+                          <SelectWithAdd
+                            value={field.value || ''}
+                            onValueChange={field.onChange}
+                            options={locations}
+                            placeholder={locationsLoading ? "Loading locations..." : "Select or add location"}
+                            disabled={isViewMode || locationsLoading}
+                            onAddNew={refetchLocations}
                           />
                         </FormControl>
                         <FormMessage />
