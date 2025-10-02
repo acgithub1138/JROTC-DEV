@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -92,7 +92,7 @@ export const EventScheduleView = ({
   );
 
   // Build linear schedule data for individual school print
-  const linearScheduleData = React.useMemo(() => {
+  const linearScheduleData = useMemo(() => {
     if (selectedSchoolFilter === 'all' || !timeline) return [];
     
     const scheduleItems: Array<{
@@ -103,8 +103,9 @@ export const EventScheduleView = ({
       sortKey: number;
     }> = [];
 
+    const slots = getAllTimeSlots();
     events.forEach(event => {
-      allTimeSlots.forEach(timeSlot => {
+      slots.forEach(timeSlot => {
         const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
         if (assignedSchool?.id === selectedSchoolFilter && timeline.isEventActive(event.id, timeSlot)) {
           scheduleItems.push({
@@ -125,9 +126,9 @@ export const EventScheduleView = ({
           t.date === item.date && t.time === item.time && t.eventName === item.eventName
         )
       );
-  }, [selectedSchoolFilter, timeline, events, allTimeSlots, timezone]);
+  }, [selectedSchoolFilter, timeline, events, timezone]);
 
-  const selectedSchoolName = React.useMemo(() => {
+  const selectedSchoolName = useMemo(() => {
     if (selectedSchoolFilter === 'all') return '';
     return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
   }, [selectedSchoolFilter, registeredSchools]);
