@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -29,7 +27,6 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
 }) => {
   const ADD_NEW_MARKER = '__ADD_NEW__';
   const [isAdding, setIsAdding] = useState(false);
-  const [newValue, setNewValue] = useState('');
   const [internalValue, setInternalValue] = useState(value);
 
   // Sync internal value when external value changes
@@ -42,84 +39,29 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
   const handleSelectChange = (selectedValue: string) => {
     if (selectedValue === ADD_NEW_MARKER) {
       setIsAdding(true);
-      setNewValue('');
+      setInternalValue('');
+      onValueChange('');
     } else {
       setInternalValue(selectedValue);
       onValueChange(selectedValue);
-    }
-  };
-
-  const handleAddNew = () => {
-    if (newValue.trim()) {
-      const trimmedValue = newValue.trim();
-      onValueChange(trimmedValue);
-      setInternalValue(trimmedValue);
-      if (onAddNew) {
-        onAddNew(trimmedValue);
-      }
-      setNewValue('');
       setIsAdding(false);
     }
   };
 
-  const handleCancel = () => {
-    setIsAdding(false);
-    setNewValue('');
-    // Restore previous value
-    if (internalValue) {
-      onValueChange(internalValue);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddNew();
-    } else if (e.key === 'Escape') {
-      handleCancel();
-    }
-  };
-
-  const handleBlur = () => {
-    if (newValue.trim()) {
-      handleAddNew();
-    } else {
-      handleCancel();
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVal = e.target.value;
+    setInternalValue(newVal);
+    onValueChange(newVal);
   };
 
   if (isAdding) {
     return (
-      <div className="flex gap-2">
-        <Input
-          value={newValue}
-          onChange={(e) => setNewValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          placeholder="Enter new location..."
-          autoFocus
-          disabled={disabled}
-        />
-        <Button
-          type="button"
-          size="sm"
-          onClick={handleAddNew}
-          disabled={!newValue.trim() || disabled}
-          onMouseDown={(e) => e.preventDefault()} // Prevent blur
-        >
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={disabled}
-          onMouseDown={(e) => e.preventDefault()} // Prevent blur
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+      <Input
+        value={internalValue}
+        onChange={handleInputChange}
+        placeholder="Enter new location..."
+        disabled={disabled}
+      />
     );
   }
 
