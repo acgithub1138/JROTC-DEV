@@ -17,6 +17,7 @@ type Judge = {
 
 type CompJudgeWithProfile = CompJudge & {
   judge_profile?: Judge;
+  event_name?: string;
 };
 
 export const useCompetitionJudges = (competitionId?: string) => {
@@ -37,7 +38,7 @@ export const useCompetitionJudges = (competitionId?: string) => {
         .eq('competition_id', competitionId)
         .order('start_time', { ascending: true });
 
-      // Fetch judge details separately
+      // Fetch judge details and event details separately
       if (data && data.length > 0) {
         const judgeIds = data.map(j => j.judge);
         const { data: judgesData } = await supabase
@@ -45,10 +46,35 @@ export const useCompetitionJudges = (competitionId?: string) => {
           .select('id, name, email, phone, available')
           .in('id', judgeIds);
 
-        // Merge judge profile data
+        // Fetch event details
+        const eventIds = data.map(j => j.event).filter(Boolean);
+        let eventsData: Array<{ id: string; event: string | null }> = [];
+        
+        if (eventIds.length > 0) {
+          const { data: compEventsData } = await supabase
+            .from('cp_comp_events')
+            .select('id, event')
+            .in('id', eventIds);
+
+          if (compEventsData && compEventsData.length > 0) {
+            const eventTypeIds = compEventsData.map(e => e.event).filter(Boolean);
+            const { data: eventTypesData } = await supabase
+              .from('cp_events')
+              .select('id, name')
+              .in('id', eventTypeIds);
+
+            eventsData = compEventsData.map(ce => ({
+              id: ce.id,
+              event: eventTypesData?.find(e => e.id === ce.event)?.name || null
+            }));
+          }
+        }
+
+        // Merge judge profile and event data
         const enrichedData = data.map(judge => ({
           ...judge,
-          judge_profile: judgesData?.find(j => j.id === judge.judge)
+          judge_profile: judgesData?.find(j => j.id === judge.judge),
+          event_name: eventsData.find(e => e.id === judge.event)?.event || undefined
         }));
         
         setJudges(enrichedData as CompJudgeWithProfile[]);

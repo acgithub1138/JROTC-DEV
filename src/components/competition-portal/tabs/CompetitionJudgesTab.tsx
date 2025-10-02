@@ -89,12 +89,11 @@ export const CompetitionJudgesTab = ({ competitionId }: CompetitionJudgesTabProp
             <TableHeader>
               <TableRow>
                 <TableHead>Judge Name</TableHead>
-                <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Start Time</TableHead>
                 <TableHead>End Time</TableHead>
+                <TableHead>Event</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Available</TableHead>
                 {(canUpdate || canDelete) && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -104,7 +103,6 @@ export const CompetitionJudgesTab = ({ competitionId }: CompetitionJudgesTabProp
                   <TableCell className="font-medium">
                     {judge.judge_profile?.name || 'Unknown'}
                   </TableCell>
-                  <TableCell>{judge.judge_profile?.email || '-'}</TableCell>
                   <TableCell>
                     {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
                   </TableCell>
@@ -114,12 +112,8 @@ export const CompetitionJudgesTab = ({ competitionId }: CompetitionJudgesTabProp
                   <TableCell>
                     {judge.end_time ? formatTimeForDisplay(judge.end_time, TIME_FORMATS.SHORT_DATETIME_24H, timezone) : '-'}
                   </TableCell>
+                  <TableCell>{judge.event_name || '-'}</TableCell>
                   <TableCell>{judge.location || '-'}</TableCell>
-                  <TableCell>
-                    <span className={judge.judge_profile?.available ? 'text-success' : 'text-muted-foreground'}>
-                      {judge.judge_profile?.available ? 'Yes' : 'No'}
-                    </span>
-                  </TableCell>
                   {(canUpdate || canDelete) && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
