@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { format } from 'date-fns';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
@@ -281,11 +281,11 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
+            {task.due_date ? convertToUI(task.due_date, timezone, 'date') : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">
-          {formatTimeForDisplay(task.created_at, TIME_FORMATS.SHORT_DATE, timezone)}
+          {convertToUI(task.created_at, timezone, 'date')}
         </TableCell>
         <TableCell className="py-2">
           <TableActionButtons
