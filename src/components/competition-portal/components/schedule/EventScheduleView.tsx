@@ -121,7 +121,9 @@ export const EventScheduleView = ({
             Competition Schedule – {selectedSchoolFilter === 'all' ? 'All Schools' : selectedSchoolName}
           </h1>
         </div>
-        <div className="flex items-center justify-between flex-nowrap gap-4 no-print">
+        
+        <div className="flex items-center justify-between gap-4 no-print w-full">
+          {/* Left side - dropdown */}
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
             <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
@@ -130,13 +132,21 @@ export const EventScheduleView = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All schools</SelectItem>
-                {registeredSchools?.map(school => <SelectItem key={school.id} value={school.id}>
+                {registeredSchools?.map(school => (
+                  <SelectItem key={school.id} value={school.id}>
                     {school.name}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
+        
+          {/* Right side - button */}
+          <Button 
+            variant="outline" 
+            onClick={handlePrint} 
+            className="flex items-center gap-2"
+          >
             <Printer className="h-4 w-4" />
             Print Schedule
           </Button>
