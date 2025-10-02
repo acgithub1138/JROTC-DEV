@@ -74,7 +74,7 @@ export const ResourceScheduleView = ({
       </div>;
   }
   
-  return (
+  return 
       <div className="schedule-print-container space-y-4">
       {/* Print-only title */}
       <div className="print-only text-center mb-4">
@@ -188,5 +188,4 @@ export const ResourceScheduleView = ({
           </table>
         </div>}
     </div>;
-);
 };
