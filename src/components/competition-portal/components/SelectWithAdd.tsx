@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Plus, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,18 +27,47 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
   disabled = false,
   onAddNew
 }) => {
+  const ADD_NEW_MARKER = '__ADD_NEW__';
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState('');
-  const skipBlurCommit = useRef(false);
+  const [internalValue, setInternalValue] = useState(value);
+
+  // Sync internal value when external value changes
+  useEffect(() => {
+    if (value !== internalValue && !isAdding) {
+      setInternalValue(value);
+    }
+  }, [value]);
+
+  const handleSelectChange = (selectedValue: string) => {
+    if (selectedValue === ADD_NEW_MARKER) {
+      setIsAdding(true);
+      setNewValue('');
+    } else {
+      setInternalValue(selectedValue);
+      onValueChange(selectedValue);
+    }
+  };
 
   const handleAddNew = () => {
     if (newValue.trim()) {
-      onValueChange(newValue.trim());
+      const trimmedValue = newValue.trim();
+      onValueChange(trimmedValue);
+      setInternalValue(trimmedValue);
       if (onAddNew) {
-        onAddNew(newValue.trim());
+        onAddNew(trimmedValue);
       }
       setNewValue('');
       setIsAdding(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsAdding(false);
+    setNewValue('');
+    // Restore previous value
+    if (internalValue) {
+      onValueChange(internalValue);
     }
   };
 
@@ -47,8 +76,15 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
       e.preventDefault();
       handleAddNew();
     } else if (e.key === 'Escape') {
-      setIsAdding(false);
-      setNewValue('');
+      handleCancel();
+    }
+  };
+
+  const handleBlur = () => {
+    if (newValue.trim()) {
+      handleAddNew();
+    } else {
+      handleCancel();
     }
   };
 
@@ -59,18 +95,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
           value={newValue}
           onChange={(e) => setNewValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onBlur={() => {
-            if (!skipBlurCommit.current) {
-              if (newValue.trim()) {
-                handleAddNew();
-              } else {
-                // Cancel if blur without typing
-                setIsAdding(false);
-                setNewValue('');
-              }
-            }
-            skipBlurCommit.current = false;
-          }}
+          onBlur={handleBlur}
           placeholder="Enter new location..."
           autoFocus
           disabled={disabled}
@@ -78,9 +103,9 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
         <Button
           type="button"
           size="sm"
-          onMouseDown={() => { skipBlurCommit.current = true; }}
           onClick={handleAddNew}
           disabled={!newValue.trim() || disabled}
+          onMouseDown={(e) => e.preventDefault()} // Prevent blur
         >
           <Check className="h-4 w-4" />
         </Button>
@@ -88,42 +113,31 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
           type="button"
           size="sm"
           variant="outline"
-          onMouseDown={() => { skipBlurCommit.current = true; }}
-          onClick={() => {
-            setIsAdding(false);
-            setNewValue('');
-          }}
+          onClick={handleCancel}
           disabled={disabled}
+          onMouseDown={(e) => e.preventDefault()} // Prevent blur
         >
-          Cancel
+          <X className="h-4 w-4" />
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-2">
-      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger className="flex-1 bg-background">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent className="z-[60] bg-popover text-popover-foreground max-h-60 overflow-auto scroll-smooth">
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        onClick={() => setIsAdding(true)}
-        disabled={disabled}
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
-    </div>
+    <Select value={internalValue || ''} onValueChange={handleSelectChange} disabled={disabled}>
+      <SelectTrigger className="bg-background">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="z-[60] bg-popover text-popover-foreground max-h-60 overflow-auto scroll-smooth">
+        <SelectItem value={ADD_NEW_MARKER} className="font-medium text-primary">
+          + Add New Location
+        </SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
