@@ -10,8 +10,7 @@ import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { convertToUI } from '@/utils/timezoneUtils';
+import { format as formatDate } from 'date-fns';
 import { formatCurrency as formatCurrencyUtil } from '@/utils/timeDisplayUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
@@ -33,13 +32,16 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
-  const { timezone } = useSchoolTimezone();
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
   });
-  const formatDate = (dateString: string) => {
-    return convertToUI(dateString, timezone, 'date');
+  
+  // Format date from YYYY-MM-DD to MM/DD/YYYY (no timezone conversion needed for date-only fields)
+  const formatDateDisplay = (dateString: string) => {
+    if (!dateString) return '-';
+    const [year, month, day] = dateString.split('-');
+    return `${month}/${day}/${year}`;
   };
 
   const getCategoryBadge = (category: string) => {
@@ -168,7 +170,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             </TableCell>
             <TableCell className={getPaddingClass()}>{getCategoryBadge(transaction.category)}</TableCell>
             <TableCell className={`capitalize ${getPaddingClass()}`}>{transaction.type}</TableCell>
-            <TableCell className={getPaddingClass()}>{formatDate(transaction.date)}</TableCell>
+            <TableCell className={getPaddingClass()}>{formatDateDisplay(transaction.date)}</TableCell>
             <TableCell className={`${transaction.category === 'income' ? 'text-green-600' : 'text-red-600'} ${getPaddingClass()}`}>
               {formatCurrencyUtil(transaction.amount)}
             </TableCell>
