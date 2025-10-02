@@ -104,6 +104,27 @@ export const CompetitionJudgesRecord = () => {
   }, [isEditMode, judgeId, judges, form, timezone]);
   const onSubmit = async (data: JudgeFormData) => {
     if (!competitionId) return;
+    
+    // Validate that all required fields are filled
+    if (!data.judges || data.judges.length === 0) {
+      form.setError('judges', { message: 'At least one judge is required' });
+      return;
+    }
+    if (!data.event) {
+      form.setError('event', { message: 'Event is required' });
+      return;
+    }
+    if (!data.location || data.location.trim() === '') {
+      form.setError('location', { message: 'Location is required' });
+      return;
+    }
+    if (!data.start_time_hour || !data.start_time_minute) {
+      return;
+    }
+    if (!data.end_time_hour || !data.end_time_minute) {
+      return;
+    }
+    
     setIsSaving(true);
     try {
       // Get the event's start_time if an event is selected
@@ -204,7 +225,7 @@ export const CompetitionJudgesRecord = () => {
             }} render={({
               field
             }) => <FormItem>
-                    <FormLabel>Judge{!isEditMode && 's'}</FormLabel>
+                    <FormLabel>Judge{!isEditMode && 's'} *</FormLabel>
                     <FormControl>
                       <Select 
                         onValueChange={(value) => {
@@ -258,14 +279,16 @@ export const CompetitionJudgesRecord = () => {
                     <FormMessage />
                   </FormItem>} />
 
-              <FormField control={form.control} name="event" render={({
+              <FormField control={form.control} name="event" rules={{
+              required: 'Event is required'
+            }} render={({
               field
             }) => <FormItem>
-                    <FormLabel>Event</FormLabel>
+                    <FormLabel>Event *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select an event (optional)" />
+                          <SelectValue placeholder="Select an event" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background">
@@ -281,10 +304,12 @@ export const CompetitionJudgesRecord = () => {
                     <FormMessage />
                   </FormItem>} />
 
-              <FormField control={form.control} name="location" render={({
+              <FormField control={form.control} name="location" rules={{
+              required: 'Location is required'
+            }} render={({
               field
             }) => <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Location *</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter location" />
                     </FormControl>
@@ -294,46 +319,54 @@ export const CompetitionJudgesRecord = () => {
               <div className="space-y-4">
                 {/* Start Time */}
                 <div className="flex items-center gap-2">
-                  <FormLabel className="w-24 text-left shrink-0">Start Time</FormLabel>
+                  <FormLabel className="w-24 text-left shrink-0">Start Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField
                       control={form.control}
                       name="start_time_hour"
+                      rules={{ required: 'Start hour is required' }}
                       render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Hour" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                                {i.toString().padStart(2, '0')}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormItem>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Hour" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="start_time_minute"
+                      rules={{ required: 'Start minute is required' }}
                       render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Min" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                            {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                              <SelectItem key={minute} value={minute}>
-                                {minute}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormItem>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Min" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                                <SelectItem key={minute} value={minute}>
+                                  {minute}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </div>
@@ -341,46 +374,54 @@ export const CompetitionJudgesRecord = () => {
 
                 {/* End Time */}
                 <div className="flex items-center gap-2">
-                  <FormLabel className="w-24 text-left shrink-0">End Time</FormLabel>
+                  <FormLabel className="w-24 text-left shrink-0">End Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField
                       control={form.control}
                       name="end_time_hour"
+                      rules={{ required: 'End hour is required' }}
                       render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Hour" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                                {i.toString().padStart(2, '0')}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormItem>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Hour" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="end_time_minute"
+                      rules={{ required: 'End minute is required' }}
                       render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Min" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                            {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                              <SelectItem key={minute} value={minute}>
-                                {minute}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormItem>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Min" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
+                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                                <SelectItem key={minute} value={minute}>
+                                  {minute}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </div>
