@@ -16,7 +16,7 @@ import { useCompetitionResources } from '@/hooks/competition-portal/useCompetiti
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { formatInSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -161,14 +161,20 @@ export const CompetitionResourceRecord: React.FC = () => {
 
       // Build start time if date and time are provided
       if (data.start_date && data.start_time_hour && data.start_time_minute) {
-        const startDateTime = new Date(`${data.start_date}T${data.start_time_hour}:${data.start_time_minute}:00`);
-        startTime = startDateTime.toISOString();
+        const [year, month, day] = data.start_date.split('-').map(Number);
+        const startDateTime = new Date(year, month - 1, day, Number(data.start_time_hour), Number(data.start_time_minute), 0);
+        // Convert from school timezone to UTC
+        const startTimeUTC = convertFromSchoolTimezone(startDateTime, timezone);
+        startTime = startTimeUTC.toISOString();
       }
 
       // Build end time if date and time are provided
       if (data.end_date && data.end_time_hour && data.end_time_minute) {
-        const endDateTime = new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`);
-        endTime = endDateTime.toISOString();
+        const [year, month, day] = data.end_date.split('-').map(Number);
+        const endDateTime = new Date(year, month - 1, day, Number(data.end_time_hour), Number(data.end_time_minute), 0);
+        // Convert from school timezone to UTC
+        const endTimeUTC = convertFromSchoolTimezone(endDateTime, timezone);
+        endTime = endTimeUTC.toISOString();
       }
 
       const resourceData = {

@@ -16,6 +16,7 @@ import { MobileDateTimePicker } from '@/components/mobile/ui/MobileDateTimePicke
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatInSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
 
 export const MobileEditResource: React.FC = () => {
   const navigate = useNavigate();
@@ -35,9 +36,9 @@ export const MobileEditResource: React.FC = () => {
     resource: currentResource?.resource || '',
     location: currentResource?.location || '',
     start_date: currentResource?.start_time ? new Date(currentResource.start_time) : new Date(),
-    start_time: currentResource?.start_time ? format(new Date(currentResource.start_time), 'HH:mm') : '08:00',
+    start_time: currentResource?.start_time ? formatInSchoolTimezone(currentResource.start_time, 'HH:mm', timezone) : '08:00',
     end_date: currentResource?.end_time ? new Date(currentResource.end_time) : new Date(),
-    end_time: currentResource?.end_time ? format(new Date(currentResource.end_time), 'HH:mm') : '09:00',
+    end_time: currentResource?.end_time ? formatInSchoolTimezone(currentResource.end_time, 'HH:mm', timezone) : '09:00',
     assignment_details: currentResource?.assignment_details || ''
   };
 
@@ -56,14 +57,14 @@ export const MobileEditResource: React.FC = () => {
         resource: currentResource.resource || '',
         location: currentResource.location || '',
         start_date: currentResource.start_time ? new Date(currentResource.start_time) : new Date(),
-        start_time: currentResource.start_time ? format(new Date(currentResource.start_time), 'HH:mm') : '08:00',
+        start_time: currentResource.start_time ? formatInSchoolTimezone(currentResource.start_time, 'HH:mm', timezone) : '08:00',
         end_date: currentResource.end_time ? new Date(currentResource.end_time) : new Date(),
-        end_time: currentResource.end_time ? format(new Date(currentResource.end_time), 'HH:mm') : '09:00',
+        end_time: currentResource.end_time ? formatInSchoolTimezone(currentResource.end_time, 'HH:mm', timezone) : '09:00',
         assignment_details: currentResource.assignment_details || ''
       };
       setFormData(newFormData);
     }
-  }, [currentResource]);
+  }, [currentResource, timezone]);
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => {
@@ -112,15 +113,23 @@ export const MobileEditResource: React.FC = () => {
       // Build start time if date and time are provided
       if (formData.start_date && formData.start_time) {
         const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
-        const startDateTime = new Date(`${startDateStr}T${formData.start_time}:00`);
-        startTime = startDateTime.toISOString();
+        const [hours, minutes] = formData.start_time.split(':').map(Number);
+        const startDateTime = new Date(formData.start_date);
+        startDateTime.setHours(hours, minutes, 0, 0);
+        // Convert from school timezone to UTC
+        const startTimeUTC = convertFromSchoolTimezone(startDateTime, timezone);
+        startTime = startTimeUTC.toISOString();
       }
 
       // Build end time if date and time are provided
       if (formData.end_date && formData.end_time) {
         const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
-        const endDateTime = new Date(`${endDateStr}T${formData.end_time}:00`);
-        endTime = endDateTime.toISOString();
+        const [hours, minutes] = formData.end_time.split(':').map(Number);
+        const endDateTime = new Date(formData.end_date);
+        endDateTime.setHours(hours, minutes, 0, 0);
+        // Convert from school timezone to UTC
+        const endTimeUTC = convertFromSchoolTimezone(endDateTime, timezone);
+        endTime = endTimeUTC.toISOString();
       }
 
       await updateResource(resourceId, {
