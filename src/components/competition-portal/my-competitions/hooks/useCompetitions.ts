@@ -34,13 +34,14 @@ export const useCompetitions = () => {
       if (error) throw error;
 
       // Transform to match the ExtendedCompetition type
+      // Note: Dates from database are already ISO strings in UTC, keep them as-is for internal use
       const transformedCompetitions: ExtendedCompetition[] = (allCompetitions || []).map(comp => ({
         id: comp.id,
         name: comp.name,
         description: comp.description,
         location: comp.location,
-        competition_date: comp.competition_date.split('T')[0], // Ensure date format
-        registration_deadline: comp.registration_deadline ? comp.registration_deadline.split('T')[0] : null,
+        competition_date: comp.competition_date,
+        registration_deadline: comp.registration_deadline,
         school_id: comp.school_id,
         created_at: comp.created_at,
         updated_at: comp.updated_at,

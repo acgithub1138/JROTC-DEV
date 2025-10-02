@@ -18,7 +18,7 @@ import { AddressLookupField } from './AddressLookupField';
 import { RecurrenceSettings } from './RecurrenceSettings';
 import { RecurrenceRule } from '@/utils/recurrence';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { convertToSchoolTimezone, convertFromSchoolTimezone, formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
 
 interface EventFormProps {
   event?: Event | null;
@@ -93,18 +93,19 @@ export const EventForm: React.FC<EventFormProps> = ({
   useEffect(() => {
     if (event && !timezoneLoading) {
       // Convert UTC event dates to school timezone for display
-      const startDate = convertToSchoolTimezone(event.start_date, timezone);
-      const endDate = event.end_date ? convertToSchoolTimezone(event.end_date, timezone) : null;
+      const startDateKey = convertToUI(event.start_date, timezone, 'dateKey');
+      const startTime = convertToUI(event.start_date, timezone, 'time');
+      const [startHour, startMinute] = startTime.split(':');
       
       const eventFormData = {
         title: event.title,
         description: event.description || '',
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        start_time_hour: format(startDate, 'HH'),
-        start_time_minute: format(startDate, 'mm'),
-        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
-        end_time_hour: endDate ? format(endDate, 'HH') : '10',
-        end_time_minute: endDate ? format(endDate, 'mm') : '00',
+        start_date: startDateKey,
+        start_time_hour: startHour,
+        start_time_minute: startMinute,
+        end_date: event.end_date ? convertToUI(event.end_date, timezone, 'dateKey') : '',
+        end_time_hour: event.end_date ? convertToUI(event.end_date, timezone, 'time').split(':')[0] : '10',
+        end_time_minute: event.end_date ? convertToUI(event.end_date, timezone, 'time').split(':')[1] : '00',
         location: event.location || '',
         event_type: event.event_type || '',
         is_all_day: event.is_all_day,
@@ -120,8 +121,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       }
     } else if (selectedDate && !timezoneLoading && !eventTypesLoading) {
       // Convert selected date to school timezone for display
-      const schoolDate = convertToSchoolTimezone(selectedDate, timezone);
-      const dateStr = format(schoolDate, 'yyyy-MM-dd');
+      const dateStr = convertToUI(selectedDate, timezone, 'dateKey');
       
       // Find the "Event" type as default
       const defaultEventType = eventTypes.find(type => type.label.toLowerCase() === 'event');
@@ -176,26 +176,22 @@ export const EventForm: React.FC<EventFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Create dates in school timezone, then convert to UTC for storage
-      const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
-      const endDateTime = formData.end_date ? new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`) : null;
-      
-      // Convert from school timezone to UTC
-      const startDateUTC = convertFromSchoolTimezone(startDateTime, timezone);
-      const endDateUTC = endDateTime ? convertFromSchoolTimezone(endDateTime, timezone) : null;
+      // Convert from school timezone to UTC for storage
+      const startTime = `${formData.start_time_hour}:${formData.start_time_minute}`;
+      const endTime = formData.end_date ? `${formData.end_time_hour}:${formData.end_time_minute}` : null;
       
       const eventData = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        event_type: formData.event_type || null, // Convert empty string to null for UUID field
+        event_type: formData.event_type || null,
         is_all_day: formData.is_all_day,
-        start_date: startDateUTC.toISOString(),
-        end_date: endDateUTC ? endDateUTC.toISOString() : null,
+        start_date: convertToUTC(formData.start_date, startTime, timezone, { isAllDay: formData.is_all_day }),
+        end_date: formData.end_date && endTime ? convertToUTC(formData.end_date, endTime, timezone, { isAllDay: formData.is_all_day }) : null,
         is_recurring: isRecurring,
         recurrence_rule: isRecurring ? recurrenceRule : null,
         recurrence_end_date: isRecurring && recurrenceRule.endType === 'date' && recurrenceRule.endDate 
-          ? convertFromSchoolTimezone(new Date(recurrenceRule.endDate), timezone).toISOString() 
+          ? convertToUTC(recurrenceRule.endDate, '12:00', timezone, { isAllDay: true })
           : null,
       };
       

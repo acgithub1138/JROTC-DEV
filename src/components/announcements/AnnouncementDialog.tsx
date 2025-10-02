@@ -13,6 +13,8 @@ import { cn } from '@/lib/utils';
 import { AnnouncementRichTextEditor } from './components/AnnouncementRichTextEditor';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { Announcement } from '@/hooks/useAnnouncements';
+import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface AnnouncementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +32,7 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState([0]);
+  const { timezone } = useSchoolTimezone();
 
   // Priority mapping helper
   const getPriorityLabel = (value: number) => {
@@ -50,8 +53,8 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
     return 0; // Low
   };
   const [isActive, setIsActive] = useState(true);
-  const [publishDate, setPublishDate] = useState<Date | undefined>(new Date());
-  const [expireDate, setExpireDate] = useState<Date | undefined>();
+  const [publishDate, setPublishDate] = useState<string>('');
+  const [expireDate, setExpireDate] = useState<string>('');
   const [hasExpiration, setHasExpiration] = useState(false);
   useEffect(() => {
     if (announcement && mode === 'edit') {
@@ -59,12 +62,12 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
       setContent(announcement.content);
       setPriority([getPriorityValue(announcement.priority)]);
       setIsActive(announcement.is_active);
-      setPublishDate(new Date(announcement.publish_date));
+      setPublishDate(convertToUI(announcement.publish_date, timezone, 'dateKey'));
       if (announcement.expire_date) {
-        setExpireDate(new Date(announcement.expire_date));
+        setExpireDate(convertToUI(announcement.expire_date, timezone, 'dateKey'));
         setHasExpiration(true);
       } else {
-        setExpireDate(undefined);
+        setExpireDate('');
         setHasExpiration(false);
       }
     } else {
@@ -73,21 +76,21 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
       setContent('');
       setPriority([0]);
       setIsActive(true);
-      setPublishDate(new Date());
-      setExpireDate(undefined);
+      const today = new Date();
+      setPublishDate(format(today, 'yyyy-MM-dd'));
+      setExpireDate('');
       setHasExpiration(false);
     }
-  }, [announcement, mode, open]);
+  }, [announcement, mode, open, timezone]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
       title,
       content,
       priority: priority[0] === 2 ? 8 : priority[0] === 1 ? 5 : 2,
-      // Convert back to numeric for storage
       is_active: isActive,
-      publish_date: publishDate?.toISOString(),
-      expire_date: hasExpiration && expireDate ? expireDate.toISOString() : null
+      publish_date: convertToUTC(publishDate, '12:00', timezone, { isAllDay: true }),
+      expire_date: hasExpiration && expireDate ? convertToUTC(expireDate, '12:00', timezone, { isAllDay: true }) : null
     };
     if (mode === 'edit' && announcement) {
       onSubmit({
@@ -137,18 +140,14 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
             {/* Right Column */}
             <div className="space-y-4">
               <div>
-                <Label>Publish Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !publishDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {publishDate ? format(publishDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={publishDate} onSelect={setPublishDate} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="publish_date">Publish Date *</Label>
+                <Input
+                  id="publish_date"
+                  type="date"
+                  value={publishDate}
+                  onChange={(e) => setPublishDate(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="flex items-center space-x-2">
@@ -157,18 +156,13 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
               </div>
 
               {hasExpiration && <div>
-                  <Label>Expire Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !expireDate && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {expireDate ? format(expireDate, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={expireDate} onSelect={setExpireDate} initialFocus />
-                    </PopoverContent>
-                  </Popover>
+                  <Label htmlFor="expire_date">Expire Date</Label>
+                  <Input
+                    id="expire_date"
+                    type="date"
+                    value={expireDate}
+                    onChange={(e) => setExpireDate(e.target.value)}
+                  />
                 </div>}
             </div>
           </div>

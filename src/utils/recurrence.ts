@@ -1,4 +1,5 @@
 import { addDays, addWeeks, addMonths, isBefore, isAfter, format, startOfDay } from 'date-fns';
+import { convertToUTC, convertToUI } from './timezoneUtils';
 
 export interface RecurrenceRule {
   frequency: 'daily' | 'weekly' | 'monthly';
@@ -27,8 +28,11 @@ export interface RecurringEventInstance {
 export function generateRecurringEvents(
   baseEvent: any,
   recurrenceRule: RecurrenceRule,
-  maxInstances?: number
+  maxInstances?: number,
+  timezone?: string
 ): RecurringEventInstance[] {
+  // Default to UTC if no timezone provided (backward compatibility)
+  const tz = timezone || 'UTC';
   // Calculate a reasonable max instances based on the recurrence rule
   if (!maxInstances) {
     if (recurrenceRule.endType === 'date' && recurrenceRule.endDate) {
@@ -93,22 +97,30 @@ export function generateRecurringEvents(
       }
     }
     
-    // Create instance
+    // Create instance - convert to UTC for storage
     const instanceStartDate = new Date(currentDate);
     const instanceEndDate = endDate ? new Date(instanceStartDate.getTime() + eventDuration) : undefined;
+    
+    // Extract date and time components from the instance dates in school timezone
+    const startDateKey = convertToUI(instanceStartDate, tz, 'dateKey');
+    const startTime = convertToUI(instanceStartDate, tz, 'time');
     
     instances.push({
       title: baseEvent.title,
       description: baseEvent.description,
-      start_date: instanceStartDate.toISOString(),
-      end_date: instanceEndDate?.toISOString(),
+      start_date: convertToUTC(startDateKey, startTime, tz, { isAllDay: baseEvent.is_all_day }),
+      end_date: instanceEndDate ? (() => {
+        const endDateKey = convertToUI(instanceEndDate, tz, 'dateKey');
+        const endTime = convertToUI(instanceEndDate, tz, 'time');
+        return convertToUTC(endDateKey, endTime, tz, { isAllDay: baseEvent.is_all_day });
+      })() : undefined,
       location: baseEvent.location,
       event_type: baseEvent.event_type,
       is_all_day: baseEvent.is_all_day,
       school_id: baseEvent.school_id,
       created_by: baseEvent.created_by,
       parent_event_id: baseEvent.id,
-      is_recurring: false // Individual instances are not recurring themselves
+      is_recurring: false
     });
     
     instanceCount++;

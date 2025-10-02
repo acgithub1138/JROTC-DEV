@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Event } from '../CalendarManagementPage';
 import { generateRecurringEvents, validateRecurrenceRule } from '@/utils/recurrence';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 interface EventFilters {
   eventType: string;
@@ -15,6 +16,7 @@ export const useEvents = (filters: EventFilters) => {
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const { timezone } = useSchoolTimezone();
 
   const fetchEvents = async (retryCount = 0) => {
     if (!userProfile?.school_id) {
@@ -163,7 +165,7 @@ export const useEvents = (filters: EventFilters) => {
       if (data.is_recurring && data.recurrence_rule) {
         try {
           console.log('Generating recurring instances for event:', data.id, 'with rule:', data.recurrence_rule);
-          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any);
+          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any, undefined, timezone);
           console.log('Generated instances:', recurringInstances.length, recurringInstances);
           
           if (recurringInstances.length > 0) {
@@ -243,7 +245,7 @@ export const useEvents = (filters: EventFilters) => {
           console.error('Error deleting existing recurring instances:', deleteError);
         } else {
           // Generate new recurring instances
-          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any);
+          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any, undefined, timezone);
           
           if (recurringInstances.length > 0) {
             const { error: insertError } = await supabase
