@@ -1,22 +1,25 @@
-import { convertToUI } from './timezoneUtils';
+import { formatInSchoolTimezone } from './timezoneUtils';
 
 /**
  * Common date/time format strings for consistent display
- * @deprecated Use convertToUI with mode parameter instead
  */
 export const TIME_FORMATS = {
-  DATE_ONLY: 'M/d/yyyy',
+  DATE_ONLY: 'MM/dd/yyyy',
   TIME_ONLY_24H: 'HH:mm',
-  DATETIME_24H: 'M/d/yyyy HH:mm',
-  DATETIME_12H: 'M/d/yyyy h:mm a',
-  FULL_DATE: 'EEEE, MMMM d, yyyy',
-  FULL_DATETIME_24H: 'EEEE, MMMM d, yyyy HH:mm',
-  SHORT_DATE: 'MMM d, yyyy',
-  SHORT_DATETIME_24H: 'MMM d, yyyy HH:mm',
+  DATETIME_24H: 'MM/dd/yyyy HH:mm',
+  DATETIME_12H: 'MM/dd/yyyy h:mm a',
+  FULL_DATE: 'EEEE, MMMM dd, yyyy',
+  FULL_DATETIME_24H: 'EEEE, MMMM dd, yyyy HH:mm',
+  SHORT_DATE: 'MMM dd, yyyy',
+  SHORT_DATETIME_24H: 'MMM dd, yyyy HH:mm',
 } as const;
 
 /**
- * @deprecated Use convertToUI instead
+ * Formats a date/time for display in the school's timezone
+ * @param date - Date to format (UTC or local)
+ * @param format - Format string to use
+ * @param schoolTimezone - School's timezone
+ * @returns Formatted date string in school timezone
  */
 export const formatTimeForDisplay = (
   date: Date | string | null,
@@ -24,11 +27,7 @@ export const formatTimeForDisplay = (
   schoolTimezone: string
 ): string => {
   if (!date) return '-';
-  // Map common formats to convertToUI modes
-  if (format === 'M/d/yyyy') return convertToUI(date, schoolTimezone, 'date');
-  if (format === 'HH:mm') return convertToUI(date, schoolTimezone, 'time');
-  if (format === 'yyyy-MM-dd') return convertToUI(date, schoolTimezone, 'dateKey');
-  return convertToUI(date, schoolTimezone, 'datetime');
+  return formatInSchoolTimezone(date, format, schoolTimezone);
 };
 
 /**
