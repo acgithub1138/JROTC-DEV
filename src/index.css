@@ -235,4 +235,32 @@
     text-align: center !important;
     page-break-after: avoid !important;
   }
+
+  /* Linear table for single school print */
+  .print-only table {
+    font-size: 10px !important;
+    table-layout: auto !important;
+  }
+
+  .print-only th,
+  .print-only td {
+    padding: 6px 8px !important;
+    text-align: left !important;
+  }
+
+  .print-only th {
+    font-weight: 600 !important;
+    background-color: #e5e7eb !important;
+  }
+
+  .print-only h1 {
+    font-size: 18px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .print-only h2 {
+    font-size: 14px !important;
+    margin: 20px 0 8px 0 !important;
+    text-align: left !important;
+  }
 }
