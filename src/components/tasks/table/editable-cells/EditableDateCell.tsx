@@ -4,6 +4,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { convertToUTC } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 interface EditableDateCellProps {
   value: Date | null;
@@ -15,6 +17,7 @@ export const EditableDateCell: React.FC<EditableDateCellProps> = ({
   onValueChange,
 }) => {
   const [open, setOpen] = useState(false);
+  const { timezone } = useSchoolTimezone();
 
   const handleDateSelect = (date: Date | undefined) => {
     console.log('Due date changed:', date);

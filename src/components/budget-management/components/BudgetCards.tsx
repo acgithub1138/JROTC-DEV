@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetCardsProps {
@@ -42,7 +42,7 @@ export const BudgetCards = ({
   };
 
   const formatDate = (dateString: string) => {
-    return formatTimeForDisplay(dateString, TIME_FORMATS.DATE_ONLY, timezone);
+    return convertToUI(dateString, timezone, 'date');
   };
 
   const formatAmount = (amount: number, category: string) => {

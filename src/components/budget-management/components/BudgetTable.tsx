@@ -11,7 +11,8 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, formatCurrency as formatCurrencyUtil, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatCurrency as formatCurrencyUtil } from '@/utils/timeDisplayUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -38,7 +39,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     data: transactions
   });
   const formatDate = (dateString: string) => {
-    return formatTimeForDisplay(dateString, TIME_FORMATS.DATE_ONLY, timezone);
+    return convertToUI(dateString, timezone, 'date');
   };
 
   const getCategoryBadge = (category: string) => {

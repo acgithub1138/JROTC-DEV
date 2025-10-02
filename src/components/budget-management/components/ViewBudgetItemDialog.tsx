@@ -12,7 +12,7 @@ import { DollarSign, Calendar, CreditCard, FileText, Edit, Tag } from 'lucide-re
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface ViewBudgetItemDialogProps {
   open: boolean;
@@ -142,7 +142,7 @@ export const ViewBudgetItemDialog = ({
                   <label className="text-sm font-medium text-muted-foreground">Date</label>
                   <div className="flex items-center gap-2 mt-1">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-base">{formatTimeForDisplay(item.date, TIME_FORMATS.FULL_DATE, timezone)}</p>
+                    <p className="text-base">{convertToUI(item.date, timezone, 'date')}</p>
                   </div>
                 </div>
               </div>

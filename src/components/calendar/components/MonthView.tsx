@@ -6,7 +6,7 @@ import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
 import { RotateCcw } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { isSameDayInSchoolTimezone, formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { isSameDayInSchoolTimezone, convertToUI } from '@/utils/timezoneUtils';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -122,9 +122,9 @@ export const MonthView = ({
                      {event.is_recurring && (
                        <RotateCcw className="w-3 h-3 flex-shrink-0" />
                      )}
-                      <span className="truncate">
-                        {event.is_all_day ? event.title : `${formatInSchoolTimezone(event.start_date, 'HH:mm', timezone)} ${event.title}`}
-                      </span>
+                       <span className="truncate">
+                         {event.is_all_day ? event.title : `${convertToUI(event.start_date, timezone, 'time')} ${event.title}`}
+                       </span>
                    </div>
                 ))}
                 

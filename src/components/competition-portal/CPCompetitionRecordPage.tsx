@@ -15,6 +15,8 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
+import { convertToUTC } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 interface FormData {
   name: string;
@@ -84,6 +86,7 @@ export const CPCompetitionRecordPage = () => {
   const [formData, setFormData] = useState<FormData>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const { timezone } = useSchoolTimezone();
 
   // Reinitialize form data when competition data becomes available
   useEffect(() => {
@@ -245,37 +248,34 @@ export const CPCompetitionRecordPage = () => {
         return;
       }
 
-      // Combine date and time fields into datetime strings
-      const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
-      const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      // Convert to UTC using timezone-aware functions
+      const startDateUTC = convertToUTC(
+        formData.start_date,
+        `${formData.start_time_hour}:${formData.start_time_minute}`,
+        timezone
+      );
       
-      // Validate created dates
-      if (isNaN(startDateTime.getTime())) {
-        toast.error('Invalid start date/time');
-        return;
-      }
+      const endDateUTC = convertToUTC(
+        formData.end_date,
+        `${formData.end_time_hour}:${formData.end_time_minute}`,
+        timezone
+      );
       
-      if (isNaN(endDateTime.getTime())) {
-        toast.error('Invalid end date/time');
-        return;
-      }
-      
-      const registrationDeadline = formData.registration_deadline_date 
-        ? new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_hour}:${formData.registration_deadline_minute}:00`)
+      const registrationDeadlineUTC = formData.registration_deadline_date 
+        ? convertToUTC(
+            formData.registration_deadline_date,
+            `${formData.registration_deadline_hour}:${formData.registration_deadline_minute}`,
+            timezone
+          )
         : null;
-        
-      if (registrationDeadline && isNaN(registrationDeadline.getTime())) {
-        toast.error('Invalid registration deadline date/time');
-        return;
-      }
 
       // Submit data that matches cp_competitions schema
       const submissionData = {
         name: formData.name,
         description: formData.description,
         location: formData.location,
-        start_date: startDateTime.toISOString(),
-        end_date: endDateTime.toISOString(),
+        start_date: startDateUTC,
+        end_date: endDateUTC,
         program: formData.program as 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force',
         fee: formData.fee ? parseFloat(formData.fee) : null,
         address: addressData.address,
@@ -283,7 +283,7 @@ export const CPCompetitionRecordPage = () => {
         state: addressData.state,
         zip: addressData.zip,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        registration_deadline: registrationDeadline ? registrationDeadline.toISOString() : null,
+        registration_deadline: registrationDeadlineUTC,
         hosting_school: formData.hosting_school,
         sop: formData.sop === 'none' ? null : formData.sop,
         sop_link: formData.sop_link,

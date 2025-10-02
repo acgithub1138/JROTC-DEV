@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Printer } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
-import { getSchoolDateKey } from '@/utils/timezoneUtils';
+import { convertToUI, getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,8 +83,8 @@ export const EventScheduleView = ({
         const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
         if (assignedSchool?.id === selectedSchoolFilter && timeline.isEventActive(event.id, timeSlot)) {
           scheduleItems.push({
-            date: formatTimeForDisplay(timeSlot, TIME_FORMATS.SHORT_DATE, timezone),
-            time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+            date: convertToUI(timeSlot, timezone, 'date'),
+            time: convertToUI(timeSlot, timezone, 'time'),
             eventName: event.event_name,
             location: event.event_location || '-',
             sortKey: new Date(timeSlot).getTime()
@@ -181,12 +180,12 @@ export const EventScheduleView = ({
                   const isNewDay = index === 0 || currentDateKey !== previousDateKey;
                   return [isNewDay && <tr key={`day-${index}`} className="bg-muted/50">
                           <td colSpan={events.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
-                            {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
+                            {convertToUI(timeSlot, timezone, 'date')}
                           </td>
                         </tr>, <tr key={timeSlot.toISOString()} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                        <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
-                          {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
-                        </td>
+                      <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
+                        {convertToUI(timeSlot, timezone, 'time')}
+                      </td>
                         {events.map(event => {
                       const isEventActive = timeline?.isEventActive(event.id, timeSlot);
                       const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);

@@ -15,7 +15,7 @@ import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, Co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -203,7 +203,11 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
       const newDueDate = editData.due_date;
       const dueDatesAreDifferent = oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime() || !oldDueDate && newDueDate || oldDueDate && !newDueDate;
       if (dueDatesAreDifferent) {
-        updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
+        updateData.due_date = newDueDate ? convertToUTC(
+          newDueDate.toISOString().split('T')[0],
+          '12:00',
+          timezone
+        ) : null;
         changes.push({
           field: 'due_date',
           oldValue: oldDueDate,
@@ -298,20 +302,31 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   const completeTaskAndSubtasks = async (includeSubtasks = false) => {
     try {
       // Update the main task
+      const now = new Date();
       await updateTask({
         id: currentTask.id,
         status: getDefaultCompletionStatus(statusOptions),
-        completed_at: new Date().toISOString()
+        completed_at: convertToUTC(
+          now.toISOString().split('T')[0],
+          `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
+          timezone
+        )
       });
 
       // Update subtasks if requested
       if (includeSubtasks && subtasks) {
         const incompleteSubtasks = subtasks.filter(subtask => !isTaskDone(subtask.status, statusOptions));
+        const now = new Date();
+        const completedAtUTC = convertToUTC(
+          now.toISOString().split('T')[0],
+          `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
+          timezone
+        );
         for (const subtask of incompleteSubtasks) {
           await updateSubtask({
             id: subtask.id,
             status: getDefaultCompletionStatus(statusOptions),
-            completed_at: new Date().toISOString()
+            completed_at: completedAtUTC
           });
         }
       }
@@ -456,7 +471,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                       });
                     }
                   }} className="h-8 w-auto min-w-[150px]" /> : <span className="text-sm font-medium">
-                        {currentTask.due_date ? formatTimeForDisplay(currentTask.due_date, TIME_FORMATS.FULL_DATE, timezone) : 'No due date'}
+                        {currentTask.due_date ? convertToUI(currentTask.due_date, timezone, 'date') : 'No due date'}
                       </span>}
                  </div>
               </CardContent>
@@ -499,7 +514,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
                     <span className="text-sm font-medium">
-                      {formatTimeForDisplay(currentTask.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+                      {convertToUI(currentTask.created_at, timezone, 'date')}
                     </span>
                  </div>
                  

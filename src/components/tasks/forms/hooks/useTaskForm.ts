@@ -8,6 +8,8 @@ import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOpt
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
+import { convertToUTC } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -24,6 +26,7 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
   const { handleSystemComment } = useTaskSystemComments();
   const { users } = useSchoolUsers();
+  const { timezone } = useSchoolTimezone();
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -81,7 +84,11 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
       status: data.status,
       priority: data.priority,
       assigned_to: finalAssignedTo,
-      due_date: data.due_date ? data.due_date.toISOString() : null,
+      due_date: data.due_date ? convertToUTC(
+        data.due_date.toISOString().split('T')[0],
+        '12:00',
+        timezone
+      ) : null,
       team_id: null,
     };
 

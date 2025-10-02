@@ -9,8 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, ArrowLeft, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -20,6 +18,8 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { AnnouncementViewer } from './components/AnnouncementViewer';
 import { useToast } from '@/hooks/use-toast';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 type AnnouncementRecordMode = 'create' | 'edit' | 'view';
 
@@ -48,9 +48,10 @@ export const AnnouncementRecordPage = () => {
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState([0]);
   const [isActive, setIsActive] = useState(true);
-  const [publishDate, setPublishDate] = useState<Date | undefined>(new Date());
-  const [expireDate, setExpireDate] = useState<Date | undefined>();
+  const [publishDate, setPublishDate] = useState<string>('');
+  const [expireDate, setExpireDate] = useState<string>('');
   const [hasExpiration, setHasExpiration] = useState<boolean>(false);
+  const { timezone } = useSchoolTimezone();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,12 +102,12 @@ export const AnnouncementRecordPage = () => {
       setContent(currentAnnouncement.content);
       setPriority([getPriorityValue(currentAnnouncement.priority)]);
       setIsActive(currentAnnouncement.is_active);
-      setPublishDate(new Date(currentAnnouncement.publish_date));
+      setPublishDate(convertToUI(currentAnnouncement.publish_date, timezone, 'dateKey'));
       if (currentAnnouncement.expire_date) {
-        setExpireDate(new Date(currentAnnouncement.expire_date));
+        setExpireDate(convertToUI(currentAnnouncement.expire_date, timezone, 'dateKey'));
         setHasExpiration(true);
       } else {
-        setExpireDate(undefined);
+        setExpireDate('');
         setHasExpiration(false);
       }
     } else if (mode === 'create') {
@@ -115,11 +116,11 @@ export const AnnouncementRecordPage = () => {
       setContent('');
       setPriority([0]);
       setIsActive(true);
-      setPublishDate(new Date());
-      setExpireDate(undefined);
+      setPublishDate(format(new Date(), 'yyyy-MM-dd'));
+      setExpireDate('');
       setHasExpiration(false);
     }
-  }, [currentAnnouncement, mode]);
+  }, [currentAnnouncement, mode, timezone]);
 
   // Track changes for unsaved changes dialog
   useEffect(() => {
@@ -132,8 +133,8 @@ export const AnnouncementRecordPage = () => {
         content !== currentAnnouncement.content ||
         priority[0] !== getPriorityValue(currentAnnouncement.priority) ||
         isActive !== currentAnnouncement.is_active ||
-        publishDate?.toISOString().split('T')[0] !== currentAnnouncement.publish_date.split('T')[0] ||
-        (hasExpiration && expireDate ? expireDate.toISOString() : null) !== currentAnnouncement.expire_date
+        publishDate !== convertToUI(currentAnnouncement.publish_date, timezone, 'dateKey') ||
+        (hasExpiration && expireDate ? expireDate : '') !== (currentAnnouncement.expire_date ? convertToUI(currentAnnouncement.expire_date, timezone, 'dateKey') : '')
       ) : false);
     
     setHasUnsavedChanges(hasChanges);
@@ -166,8 +167,8 @@ export const AnnouncementRecordPage = () => {
         content,
         priority: priority[0] === 2 ? 8 : priority[0] === 1 ? 5 : 2,
         is_active: isActive,
-        publish_date: publishDate.toISOString(),
-        expire_date: hasExpiration && expireDate ? expireDate.toISOString() : null
+        publish_date: convertToUTC(publishDate, '12:00', timezone, { isAllDay: true }),
+        expire_date: hasExpiration && expireDate ? convertToUTC(expireDate, '12:00', timezone, { isAllDay: true }) : null
       };
 
       if (mode === 'create') {
@@ -375,23 +376,15 @@ export const AnnouncementRecordPage = () => {
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">
-                      {publishDate ? format(publishDate, 'PPP') : 'Not set'}
+                      {publishDate ? format(new Date(publishDate), 'PPP') : 'Not set'}
                     </div>
                   ) : (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className={cn("w-full justify-start text-left font-normal", !publishDate && "text-muted-foreground")}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {publishDate ? format(publishDate, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={publishDate} onSelect={setPublishDate} initialFocus />
-                      </PopoverContent>
-                    </Popover>
+                    <Input
+                      type="date"
+                      value={publishDate}
+                      onChange={(e) => setPublishDate(e.target.value)}
+                      required
+                    />
                   )}
                 </div>
               </div>
@@ -413,23 +406,14 @@ export const AnnouncementRecordPage = () => {
                   <div className="flex-1">
                     {mode === 'view' ? (
                       <div className="px-3 py-2 text-sm">
-                        {expireDate ? format(expireDate, 'PPP') : 'Not set'}
+                        {expireDate ? format(new Date(expireDate), 'PPP') : 'Not set'}
                       </div>
                     ) : (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className={cn("w-full justify-start text-left font-normal", !expireDate && "text-muted-foreground")}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {expireDate ? format(expireDate, "PPP") : <span>Pick a date</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar mode="single" selected={expireDate} onSelect={setExpireDate} initialFocus />
-                        </PopoverContent>
-                      </Popover>
+                      <Input
+                        type="date"
+                        value={expireDate}
+                        onChange={(e) => setExpireDate(e.target.value)}
+                      />
                     )}
                   </div>
                 </div>

@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer } from 'lucide-react';
 import { useResourceSchedule } from '@/hooks/competition-portal/useResourceSchedule';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
-import { getSchoolDateKey } from '@/utils/timezoneUtils';
+import { convertToUI, getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface ResourceScheduleViewProps {
   competitionId: string;
@@ -134,11 +133,11 @@ export const ResourceScheduleView = ({
                 const isNewDay = index === 0 || currentDateKey !== previousDateKey;
                 return [isNewDay && <tr key={`day-${index}`} className="bg-muted/50">
                         <td colSpan={timeline.locations.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
-                          {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
+                          {convertToUI(timeSlot, timezone, 'date')}
                         </td>
                       </tr>, <tr key={timeSlot.toISOString()} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
-                        {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                        {convertToUI(timeSlot, timezone, 'time')}
                       </td>
                       {timeline.locations.map(location => {
                     const resources = timeline.getResourcesForSlot(location, timeSlot);
@@ -176,10 +175,10 @@ export const ResourceScheduleView = ({
             <tbody>
               {filteredResourceAssignments.map((assignment, index) => <tr key={assignment.id} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                   <td className="p-3">
-                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.SHORT_DATE, timezone)}
+                    {convertToUI(assignment.start_time, timezone, 'date')}
                   </td>
                   <td className="p-3">
-                    {formatTimeForDisplay(assignment.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} - {formatTimeForDisplay(assignment.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                    {convertToUI(assignment.start_time, timezone, 'time')} - {convertToUI(assignment.end_time, timezone, 'time')}
                   </td>
                   <td className="p-3">{assignment.location}</td>
                   <td className="p-3">{assignment.assignment_details || '-'}</td>
