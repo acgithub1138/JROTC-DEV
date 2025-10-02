@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 
@@ -222,7 +222,7 @@ export const OpenCompetitionRecord: React.FC = () => {
         const isAvailable = !eventOccupiedSlots.has(timeString);
         slots.push({
           time: slotTime,
-          label: formatTimeForDisplay(slotTime, TIME_FORMATS.TIME_ONLY_24H, timezone),
+          label: convertToUI(slotTime, timezone, 'time'),
           available: isAvailable,
         });
       }

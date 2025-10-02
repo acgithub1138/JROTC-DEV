@@ -7,7 +7,7 @@ import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJ
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { formatPhoneNumber } from '@/utils/formatUtils';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface CompetitionJudgesTabProps {
   competitionId: string;
@@ -90,10 +90,10 @@ export const CompetitionJudgesTab = ({
                     {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
                   </TableCell>
                   <TableCell>
-                    {judge.start_time ? formatTimeForDisplay(judge.start_time, TIME_FORMATS.SHORT_DATETIME_24H, timezone) : '-'}
+                    {judge.start_time ? convertToUI(judge.start_time, timezone, 'datetime') : '-'}
                   </TableCell>
                   <TableCell>
-                    {judge.end_time ? formatTimeForDisplay(judge.end_time, TIME_FORMATS.SHORT_DATETIME_24H, timezone) : '-'}
+                    {judge.end_time ? convertToUI(judge.end_time, timezone, 'datetime') : '-'}
                   </TableCell>
                   <TableCell>{judge.event_name || '-'}</TableCell>
                   <TableCell>{judge.location || '-'}</TableCell>

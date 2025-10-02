@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
 import { useCompetitionSchedule } from '@/hooks/competition-portal/useCompetitionSchedule';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -305,8 +305,8 @@ export const ScheduleEditRecord = () => {
               Schedule for {event.event_name}
               <div className="text-sm font-normal text-muted-foreground mt-1">
                 {event.interval}-minute slots from {' '}
-                {formatTimeForDisplay(event.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} to {' '}
-                {formatTimeForDisplay(event.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                {convertToUI(event.start_time, timezone, 'time')} to {' '}
+                {convertToUI(event.end_time, timezone, 'time')}
               </div>
             </CardTitle>
           </CardHeader>
@@ -328,7 +328,7 @@ export const ScheduleEditRecord = () => {
                   return (
                     <div key={slot.time.toISOString()} className={`flex w-1/2 py-[4px] items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <div className="font-mono text-sm min-w-[80px]">
-                        {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                        {convertToUI(slot.time, timezone, 'time')}
                       </div>
 
                       <div className="flex-1">

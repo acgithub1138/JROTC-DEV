@@ -12,7 +12,7 @@ import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermis
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 // Modals removed - using page navigation instead
 import { ViewJudgesModal } from '@/components/competition-portal/modals/ViewJudgesModal';
 import { ViewEventSchoolsModal } from '@/components/competition-portal/modals/ViewEventSchoolsModal';
@@ -122,11 +122,11 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Start:</span>
-                      <p className="text-sm">{formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}</p>
+                      <p className="text-sm">{convertToUI(event.start_time, timezone, 'datetime')}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
-                      <p className="text-sm">{formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_24H, timezone)}</p>
+                      <p className="text-sm">{convertToUI(event.end_time, timezone, 'datetime')}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Registered:</span>
@@ -225,10 +225,10 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                    <TableCell className="font-medium py-[8px]">{event.event_name || 'N/A'}</TableCell>
                    <TableCell>{event.location || 'N/A'}</TableCell>
                     <TableCell>
-                      {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}
+                      {convertToUI(event.start_time, timezone, 'datetime')}
                     </TableCell>
                     <TableCell>
-                      {formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_24H, timezone)}
+                      {convertToUI(event.end_time, timezone, 'datetime')}
                     </TableCell>
                     <TableCell>
                       {event.registration_count !== undefined 

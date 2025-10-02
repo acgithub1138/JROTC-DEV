@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Calendar, MapPin, Users, Edit } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface ViewCompetitionDialogProps {
   open: boolean;
@@ -85,7 +85,7 @@ export const ViewCompetitionDialog: React.FC<ViewCompetitionDialogProps> = ({
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Date</label>
-                    <p className="text-base">{formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}</p>
+                    <p className="text-base">{convertToUI(competition.competition_date, 'UTC', 'date')}</p>
                   </div>
                 </div>
                 {competition.location && (

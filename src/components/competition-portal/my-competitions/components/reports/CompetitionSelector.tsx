@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface Competition {
   id: string;
@@ -84,7 +84,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
             {selectedCompetitionDetails.map((competition) => (
               <Badge key={competition.id} variant="secondary" className="flex items-center gap-1">
                 <span className="text-xs">
-                  {competition.name} - {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
+                  {competition.name} - {convertToUI(competition.competition_date, 'UTC', 'date')}
                 </span>
                 <Button
                   variant="ghost"
@@ -117,7 +117,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                 className="cursor-pointer"
               >
                 <span className="font-medium">
-                  {competition.name} - {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
+                  {competition.name} - {convertToUI(competition.competition_date, 'UTC', 'date')}
                 </span>
               </SelectItem>
             ))}
