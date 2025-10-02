@@ -16,7 +16,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { UniformInspectionBulkDialog } from './UniformInspectionBulkDialog';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -200,7 +200,7 @@ export const UniformInspectionTab = ({
                           </Badge>
                         )}
                         <span className="text-sm text-muted-foreground">
-                          {formatTimeForDisplay(inspection.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                          {convertToUI(inspection.date, timezone, 'date')}
                         </span>
                       </div>
                     </div>
@@ -274,7 +274,7 @@ export const UniformInspectionTab = ({
                         </Badge> : '-'}
                     </TableCell>
                     <TableCell>
-                      {formatTimeForDisplay(inspection.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                      {convertToUI(inspection.date, timezone, 'date')}
                     </TableCell>
                      <TableCell className="text-center">
                        {inspection.grade || '-'}

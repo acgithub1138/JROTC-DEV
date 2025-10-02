@@ -6,7 +6,7 @@ import { Eye, Mail, Clock, CheckCircle, XCircle, AlertCircle, Ban } from 'lucide
 import { format } from 'date-fns';
 import { useTaskEmailHistory } from '@/hooks/email/useTaskEmailHistory';
 import { EmailContentModal } from './EmailContentModal';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 interface EmailHistoryTabProps {
   recordId: string;
 }
@@ -85,15 +85,15 @@ export const EmailHistoryTab: React.FC<EmailHistoryTabProps> = ({
                  {email.email_templates && <Badge variant="outline" className="text-xs">
                      {email.email_templates.name}
                    </Badge>}
-                 {(email.sent_at || email.scheduled_at) && (
-                   <span className="text-xs text-muted-foreground ml-2">
-                     {formatTimeForDisplay(
-                       email.sent_at || email.scheduled_at,
-                       TIME_FORMATS.DATETIME_24H,
-                       'America/New_York'
-                     )}
-                   </span>
-                 )}
+                  {(email.sent_at || email.scheduled_at) && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {convertToUI(
+                        email.sent_at || email.scheduled_at,
+                        'America/New_York',
+                        'datetime'
+                      )}
+                    </span>
+                  )}
                </div>
                <Button variant="outline" size="sm" onClick={() => handleViewEmail(email)} className="h-7 px-2">
                  <Eye className="w-3 h-3 mr-1" />

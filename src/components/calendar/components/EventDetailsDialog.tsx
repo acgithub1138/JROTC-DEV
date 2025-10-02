@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { Event } from '../CalendarManagementPage';
 
 interface EventDetailsDialogProps {
@@ -27,9 +28,9 @@ export const EventDetailsDialog = ({
 
   const formatDateTime = (dateStr: string, isAllDay: boolean) => {
     if (isAllDay) {
-      return formatTimeForDisplay(dateStr, TIME_FORMATS.FULL_DATE, timezone);
+      return formatInTimeZone(new Date(dateStr), timezone, 'EEEE, MMMM dd, yyyy');
     }
-    return formatTimeForDisplay(dateStr, TIME_FORMATS.FULL_DATETIME_24H, timezone);
+    return formatInTimeZone(new Date(dateStr), timezone, 'EEEE, MMMM dd, yyyy HH:mm');
   };
 
   return (

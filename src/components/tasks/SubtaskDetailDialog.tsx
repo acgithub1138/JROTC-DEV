@@ -12,7 +12,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
 import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -392,7 +393,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
                     <span className="text-sm font-medium">
-                      {formatTimeForDisplay(currentSubtask.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+                      {formatInTimeZone(new Date(currentSubtask.created_at), timezone, 'EEEE, MMMM dd, yyyy')}
                     </span>
                  </div>
                  

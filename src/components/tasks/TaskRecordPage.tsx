@@ -23,7 +23,7 @@ import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
@@ -516,7 +516,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             case 'assigned_to':
               return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
             case 'due_date':
-              return `Due date changed to ${editedRecord.due_date ? formatTimeForDisplay(editedRecord.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}`;
+              return `Due date changed to ${editedRecord.due_date ? convertToUI(editedRecord.due_date, timezone, 'date') : 'No due date'}`;
             default:
               return `${field} updated`;
           }
@@ -758,13 +758,13 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     <div>
                         <span className="text-sm text-muted-foreground">Created</span>
                         <p className="font-medium">
-                          {formatTimeForDisplay(record.created_at, TIME_FORMATS.DATE_ONLY, timezone)}
+                          {convertToUI(record.created_at, timezone, 'date')}
                         </p>
                     </div>
                    <div>
-                     <span className="text-sm text-muted-foreground">Due Date</span>
+                      <span className="text-sm text-muted-foreground">Due Date</span>
                         {editingSummary ? <Input type="date" value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value + 'T12:00:00Z').toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
-                            {record.due_date ? formatTimeForDisplay(record.due_date, TIME_FORMATS.DATE_ONLY, timezone) : 'No due date'}
+                            {record.due_date ? convertToUI(record.due_date, timezone, 'date') : 'No due date'}
                           </p>}
                    </div>
                  </div>
@@ -892,10 +892,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                                      {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
                                    </span>
                                    {comment.is_system_comment ? <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge> : <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>}
-                                 </div>
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatTimeForDisplay(comment.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}
-                                  </span>
+                                  </div>
+                                   <span className="text-xs text-muted-foreground">
+                                     {convertToUI(comment.created_at, timezone, 'datetime')}
+                                   </span>
                                </div>
                                <div className="text-sm whitespace-pre-wrap">
                                  {comment.comment_text.startsWith('• ') || comment.comment_text.includes('\n• ') ? <div className="space-y-1">

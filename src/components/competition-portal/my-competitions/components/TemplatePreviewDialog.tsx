@@ -8,7 +8,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import type { CompetitionTemplate } from '../types';
 
 interface TemplatePreviewDialogProps {
@@ -67,7 +67,7 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
             <div>
               <Label className="text-sm font-medium text-muted-foreground">Created</Label>
               <p className="mt-1">
-                {formatTimeForDisplay(template.created_at, TIME_FORMATS.DATETIME_24H, 'UTC')}
+                {convertToUI(template.created_at, 'UTC', 'datetime')}
               </p>
             </div>
           </div>

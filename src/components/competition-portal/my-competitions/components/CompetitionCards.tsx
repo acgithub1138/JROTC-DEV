@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Edit, Trash2, Plus, Eye, Calendar, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface CompetitionCardsProps {
   competitions: any[];
@@ -124,7 +124,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                   )}
                   <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
+                    {convertToUI(competition.competition_date, 'UTC', 'date')}
                   </div>
                 </div>
                  <div className="flex gap-2 ml-4">

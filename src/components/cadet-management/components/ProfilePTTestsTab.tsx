@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendingUp } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 interface PTTest {
   id: string;
   date: string;
@@ -78,7 +78,7 @@ export const ProfilePTTestsTab = ({
         <TableBody>
           {ptTests.map(test => <TableRow key={test.id}>
               <TableCell className="font-medium py-[6px]">
-                {formatTimeForDisplay(test.date, TIME_FORMATS.DATE_ONLY, timezone)}
+                {convertToUI(test.date, timezone, 'date')}
               </TableCell>
               <TableCell>{test.push_ups || '-'}</TableCell>
               <TableCell>{test.sit_ups || '-'}</TableCell>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { Eye } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
@@ -213,11 +213,11 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <span>
-            {subtask.due_date ? formatTimeForDisplay(subtask.due_date, TIME_FORMATS.SHORT_DATE, timezone) : 'No due date'}
+            {subtask.due_date ? convertToUI(subtask.due_date, timezone, 'date') : 'No due date'}
           </span>
         </TableCell>
         <TableCell className="py-2">
-          {formatTimeForDisplay(subtask.created_at, TIME_FORMATS.SHORT_DATE, timezone)}
+          {convertToUI(subtask.created_at, timezone, 'date')}
         </TableCell>
         <TableCell className="py-2">
           <TableActionButtons

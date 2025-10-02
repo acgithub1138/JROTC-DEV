@@ -18,7 +18,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { usePTTestEdit } from '../hooks/usePTTestEdit';
 import { useIsMobile } from '@/hooks/use-mobile';
 interface PTTestsTabProps {
@@ -226,7 +226,7 @@ export const PTTestsTab = ({
                           </Badge>
                         )}
                         <span className="text-sm text-muted-foreground">
-                          {formatTimeForDisplay(test.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                          {convertToUI(test.date, timezone, 'date')}
                         </span>
                       </div>
                     </div>
@@ -348,7 +348,7 @@ export const PTTestsTab = ({
                         </Badge> : '-'}
                     </TableCell>
                     <TableCell>
-                      {formatTimeForDisplay(test.date, TIME_FORMATS.SHORT_DATE, timezone)}
+                      {convertToUI(test.date, timezone, 'date')}
                     </TableCell>
                     <TableCell className="text-center">
                       {test.push_ups || '-'}

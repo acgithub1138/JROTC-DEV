@@ -7,7 +7,7 @@ import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import type { ColumnPreference } from '@/hooks/useColumnPreferences';
 interface BasicCompetitionTableProps {
   competitions: any[];
@@ -144,7 +144,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                     </span>
                   </TableCell>}
                 {isColumnVisible('date') && <TableCell>
-                    {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
+                    {convertToUI(competition.competition_date, 'UTC', 'date')}
                   </TableCell>}
                 {isColumnVisible('overall_placement') && <TableCell><PlacementCell placement={competition.overall_placement} /></TableCell>}
                 {isColumnVisible('overall_armed_placement') && <TableCell><PlacementCell placement={competition.overall_armed_placement} /></TableCell>}

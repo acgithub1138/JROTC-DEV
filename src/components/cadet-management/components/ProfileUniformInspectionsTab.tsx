@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface ProfileUniformInspectionsTabProps {
   profileId: string;
@@ -73,7 +73,7 @@ export const ProfileUniformInspectionsTab = ({
               <TableBody>
                 {uniformInspections.map(inspection => <TableRow key={inspection.id}>
                     <TableCell className="py-[6px]">
-                      {formatTimeForDisplay(inspection.date, TIME_FORMATS.DATE_ONLY, timezone)}
+                      {convertToUI(inspection.date, timezone, 'date')}
                     </TableCell>
                     <TableCell>
                       {inspection.grade !== null ? <Badge className={getGradeColor(inspection.grade)}>

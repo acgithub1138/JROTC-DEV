@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 interface ProfileHistoryTabProps {
   profileId: string;
 }
@@ -94,7 +94,7 @@ export const ProfileHistoryTab = ({
                       <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
                     </p>
                     <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
-                      {formatTimeForDisplay(item.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}
+                      {convertToUI(item.created_at, timezone, 'datetime')}
                     </span>
                   </div>
                 </div>)}

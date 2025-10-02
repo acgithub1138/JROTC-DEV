@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface ProfileCommunityServiceTabProps {
   profileId: string;
@@ -70,7 +70,7 @@ export const ProfileCommunityServiceTab = ({
                 {communityService.map(record => <TableRow key={record.id}>
                     <TableCell>{record.event}</TableCell>
                     <TableCell className="py-[6px]">
-                      {formatTimeForDisplay(record.date, TIME_FORMATS.DATE_ONLY, timezone)}
+                      {convertToUI(record.date, timezone, 'date')}
                     </TableCell>
                     <TableCell>
                       {record.hours !== null ? <Badge variant="outline">

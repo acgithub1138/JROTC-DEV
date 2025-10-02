@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 
@@ -204,7 +204,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                 )}
               </div>
                <span className="text-xs text-gray-500">
-                 {formatTimeForDisplay(comment.created_at, TIME_FORMATS.DATETIME_24H, timezone)}
+                 {convertToUI(comment.created_at, timezone, 'datetime')}
                </span>
             </div>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">

@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Flag, Calendar as CalendarIcon, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { EditableField } from './EditableField';
 import { EditState } from '../types/TaskDetailTypes';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
@@ -102,7 +103,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
             <EditableField
               field="due_date"
               currentValue={task.due_date ? new Date(task.due_date) : null}
-              displayValue={task.due_date ? formatTimeForDisplay(task.due_date, TIME_FORMATS.FULL_DATE, timezone) : 'No due date'}
+              displayValue={task.due_date ? formatInTimeZone(new Date(task.due_date), timezone, 'EEEE, MMMM dd, yyyy') : 'No due date'}
               type="date"
               canEdit={canEdit}
               editState={editState}
@@ -164,7 +165,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
             <CalendarIcon className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Created:</span>
              <span className="text-sm font-medium">
-               {formatTimeForDisplay(task.created_at, TIME_FORMATS.FULL_DATE, timezone)}
+               {formatInTimeZone(new Date(task.created_at), timezone, 'EEEE, MMMM dd, yyyy')}
              </span>
           </div>
         </CardContent>

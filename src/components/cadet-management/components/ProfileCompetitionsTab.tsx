@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 interface ProfileCompetitionsTabProps {
   profileId: string;
 }
@@ -97,7 +97,7 @@ export const ProfileCompetitionsTab = ({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {formatTimeForDisplay(comp.competition.competition_date, TIME_FORMATS.SHORT_DATE, timezone)}
+                      {convertToUI(comp.competition.competition_date, timezone, 'date')}
                     </TableCell>
                   </TableRow>)}
               </TableBody>
