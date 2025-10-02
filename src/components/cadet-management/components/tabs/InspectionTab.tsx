@@ -12,7 +12,7 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({
   cadetId
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 50;
   
   const {
     data: inspections = [],
