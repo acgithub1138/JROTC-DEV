@@ -41,10 +41,10 @@ export const CompetitionScheduleTab = ({
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className={readOnly ? "grid w-full grid-cols-1" : "grid w-full grid-cols-3"}>
           <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="judges">Judges</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
+          {!readOnly && <TabsTrigger value="judges">Judges</TabsTrigger>}
+          {!readOnly && <TabsTrigger value="resources">Resources</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="events">
@@ -55,13 +55,17 @@ export const CompetitionScheduleTab = ({
           />
         </TabsContent>
 
-        <TabsContent value="judges">
-          <JudgeScheduleView competitionId={competitionId} />
-        </TabsContent>
+        {!readOnly && (
+          <TabsContent value="judges">
+            <JudgeScheduleView competitionId={competitionId} />
+          </TabsContent>
+        )}
 
-        <TabsContent value="resources">
-          <ResourceScheduleView competitionId={competitionId} />
-        </TabsContent>
+        {!readOnly && (
+          <TabsContent value="resources">
+            <ResourceScheduleView competitionId={competitionId} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
