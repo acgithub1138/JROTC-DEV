@@ -122,35 +122,40 @@ export const EventScheduleView = ({
           </h1>
         </div>
         
-        <div className="flex items-center justify-between gap-4 no-print w-full">
-          {/* Left side - dropdown */}
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
-            <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All schools" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All schools</SelectItem>
-                {registeredSchools?.map(school => (
-                  <SelectItem key={school.id} value={school.id}>
-                    {school.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        
-          {/* Right side - button */}
-          <Button 
-            variant="outline" 
-            onClick={handlePrint} 
-            className="flex items-center gap-2"
-          >
-            <Printer className="h-4 w-4" />
-            Print Schedule
-          </Button>
-        </div>
+<div className="flex items-center justify-between gap-4 no-print w-full">
+  {/* Left side - dropdown */}
+  <div className="flex items-center space-x-2 min-w-0">
+    <Label htmlFor="school-filter" className="text-sm whitespace-nowrap">
+      Filter by school:
+    </Label>
+    <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
+      <SelectTrigger className="w-48">
+        <SelectValue placeholder="All schools" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All schools</SelectItem>
+        {registeredSchools?.map(school => (
+          <SelectItem key={school.id} value={school.id}>
+            {school.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Right side - button */}
+  <div className="shrink-0">
+    <Button 
+      variant="outline" 
+      onClick={handlePrint} 
+      className="flex items-center gap-2"
+    >
+      <Printer className="h-4 w-4" />
+      Print Schedule
+    </Button>
+  </div>
+</div>
+
 
         <Card>
           <CardContent className="p-0">
