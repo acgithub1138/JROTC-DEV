@@ -87,7 +87,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
         {/* Print-only title */}
         <div className="print-only text-center mb-4">
           <h1 className="text-2xl font-bold">
-            Competition Schedule – {selectedJudge === 'all' ? 'All Judges' : selectedJudgeName}
+            Competition Schedule – {selectedJudge === 'all' ? 'All Judges' : selectedJudge}
           </h1>
         </div>
         
