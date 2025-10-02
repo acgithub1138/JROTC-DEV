@@ -16,7 +16,7 @@ import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import type { Database } from '@/integrations/supabase/types';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useAuth } from '@/contexts/AuthContext';
 
 type Competition = Database['public']['Tables']['competitions']['Row'];

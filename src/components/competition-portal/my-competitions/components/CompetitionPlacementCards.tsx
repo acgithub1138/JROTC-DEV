@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, Eye, X } from 'lucide-react';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
 import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
 import { useCompetitionEventTypes } from '@/components/competition-management/hooks/useCompetitionEventTypes';
