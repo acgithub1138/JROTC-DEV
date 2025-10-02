@@ -63,13 +63,13 @@ export const convertToUI = (
     case 'time':
       return formatInTimeZone(utcDate, timezone, 'HH:mm');
     case 'date':
-      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy');
+      return formatInTimeZone(utcDate, timezone, 'MM/dd/yyyy');
     case 'dateKey':
       return formatInTimeZone(utcDate, timezone, 'yyyy-MM-dd');
     case 'datetime':
-      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy HH:mm');
+      return formatInTimeZone(utcDate, timezone, 'MM/dd/yyyy HH:mm');
     default:
-      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy HH:mm');
+      return formatInTimeZone(utcDate, timezone, 'MM/dd/yyyy HH:mm');
   }
 };
 
