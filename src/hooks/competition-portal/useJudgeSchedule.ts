@@ -16,7 +16,7 @@ export interface JudgeAssignment {
 export interface JudgeTimeline {
   timeSlots: Date[];
   events: Array<{ id: string; name: string }>;
-  getJudgeForSlot: (eventId: string, timeSlot: Date) => { name: string; location?: string } | null;
+  getJudgesForSlot: (eventId: string, timeSlot: Date) => Array<{ name: string; location?: string }>;
   isEventActive: (eventId: string, timeSlot: Date) => boolean;
 }
 
@@ -90,14 +90,17 @@ export const useJudgeSchedule = (competitionId?: string) => {
         const judgeTimeline: JudgeTimeline = {
           timeSlots,
           events: uniqueEvents,
-          getJudgeForSlot: (eventId: string, timeSlot: Date) => {
-            const assignment = assignments.find(a => {
+          getJudgesForSlot: (eventId: string, timeSlot: Date) => {
+            const matchingAssignments = assignments.filter(a => {
               if (a.event_id !== eventId) return false;
               const start = new Date(a.start_time);
               const end = new Date(a.end_time);
               return timeSlot >= start && timeSlot < end;
             });
-            return assignment ? { name: assignment.judge_name, location: assignment.location } : null;
+            return matchingAssignments.map(a => ({ 
+              name: a.judge_name, 
+              location: a.location 
+            }));
           },
           isEventActive: (eventId: string, timeSlot: Date) => {
             return assignments.some(a => {

@@ -23,10 +23,8 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     const names = new Set<string>();
     timeline.timeSlots.forEach(timeSlot => {
       timeline.events.forEach(event => {
-        const judge = timeline.getJudgeForSlot(event.id, timeSlot);
-        if (judge) {
-          names.add(judge.name);
-        }
+        const judges = timeline.getJudgesForSlot(event.id, timeSlot);
+        judges.forEach(judge => names.add(judge.name));
       });
     });
     return Array.from(names).sort();
@@ -47,8 +45,8 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     
     return timeline.timeSlots.filter(timeSlot =>
       timeline.events.some(event => {
-        const judge = timeline.getJudgeForSlot(event.id, timeSlot);
-        return judge && judge.name === selectedJudge;
+        const judges = timeline.getJudgesForSlot(event.id, timeSlot);
+        return judges.some(judge => judge.name === selectedJudge);
       })
     );
   }, [timeline, selectedJudge]);
@@ -160,22 +158,25 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                       </td>
                       {timeline.events.map(event => {
                         const isEventActive = timeline.isEventActive(event.id, timeSlot);
-                        const judge = timeline.getJudgeForSlot(event.id, timeSlot);
-
-                        const showJudge = !judge || shouldShowJudge(judge.name);
+                        const judges = timeline.getJudgesForSlot(event.id, timeSlot);
+                        const filteredJudges = judges.filter(judge => shouldShowJudge(judge.name));
                         
                         return (
                           <td key={event.id} className="p-2 text-center">
                             {!isEventActive ? (
                               <div className="text-muted-foreground/50 text-xs">-</div>
-                            ) : judge && showJudge ? (
-                              <div className="text-xs text-foreground font-medium">
-                                {judge.name}
-                                {judge.location && (
-                                  <div className="text-[10px] text-muted-foreground mt-0.5">
-                                    ({judge.location})
+                            ) : filteredJudges.length > 0 ? (
+                              <div className="text-xs text-foreground font-medium space-y-1">
+                                {filteredJudges.map((judge, idx) => (
+                                  <div key={idx}>
+                                    {judge.name}
+                                    {judge.location && (
+                                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                                        ({judge.location})
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                ))}
                               </div>
                             ) : (
                               <div className="text-muted-foreground text-xs">-</div>
