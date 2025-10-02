@@ -187,6 +187,6 @@ export const ResourceScheduleView = ({
             </tbody>
           </table>
         </div>}
-    </div>;
-);
+    </div>
+  );
 };
