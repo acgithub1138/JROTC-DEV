@@ -155,7 +155,7 @@
   }
   
   @page {
-    size: portrait;
+    size: landscape;
     margin: 0.5in;
   }
   
@@ -202,6 +202,7 @@
     padding: 6px !important;
     text-align: left !important;
     background: white !important;
+    position: static !important;
   }
   
   .schedule-print-container th {

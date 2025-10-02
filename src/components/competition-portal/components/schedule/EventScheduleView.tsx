@@ -136,6 +136,12 @@ export const EventScheduleView = ({
   return (
     <TooltipProvider>
       <div className="schedule-print-container space-y-4">
+        {/* Print-only title */}
+        <div className="print-only text-center mb-4">
+          <h1 className="text-2xl font-bold">
+            Competition Schedule – {selectedSchoolFilter === 'all' ? 'All Schools' : selectedSchoolName}
+          </h1>
+        </div>
         <div className="flex items-center justify-between no-print">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
@@ -166,13 +172,13 @@ export const EventScheduleView = ({
                 <thead>
                   <tr className="border-b bg-muted/30">
                     <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
-                      Time Slots
+                      Time
                     </th>
                     {events.map(event => (
                       <th key={event.id} className="text-center p-4 min-w-[150px]">
                         <div className="flex items-center justify-center gap-2">
                           <div className="font-medium text-sm truncate" title={event.event_name}>
-                            {event.event_name}
+                            {event.event_name} {event.event_location ? `(${event.event_location})` : ''}
                           </div>
                           {!readOnly && canUpdate && (
                             <Tooltip>
@@ -181,7 +187,7 @@ export const EventScheduleView = ({
                                   variant="outline"
                                   size="icon"
                                   onClick={() => handleEditEvent(event)}
-                                  className="h-6 w-6"
+                                  className="h-6 w-6 no-print"
                                 >
                                   <Edit className="h-3 w-3" />
                                 </Button>
