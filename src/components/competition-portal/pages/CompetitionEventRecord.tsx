@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
@@ -54,6 +55,7 @@ export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile } = useAuth();
+  const queryClient = useQueryClient();
 
   // Extract competition ID from pathname since route isn't parameterized
   const competitionId = React.useMemo(() => {
@@ -394,12 +396,14 @@ export const CompetitionEventRecord: React.FC = () => {
         });
         if (error) throw error;
         toast.success('Event created successfully');
+        await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       } else if (isEditMode && eventId) {
         const {
           error
         } = await supabase.from('cp_comp_events').update(eventData).eq('id', eventId);
         if (error) throw error;
         toast.success('Event updated successfully');
+        await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       }
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
@@ -419,6 +423,7 @@ export const CompetitionEventRecord: React.FC = () => {
       } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
       if (error) throw error;
       toast.success('Event deleted successfully');
+      await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
       console.error('Error deleting event:', error);
