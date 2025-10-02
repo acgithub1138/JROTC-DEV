@@ -31,6 +31,7 @@ interface CadetTabsContentProps {
   onRefresh: () => void;
   onOpenPTTestDialog: () => void;
   searchTerm?: string;
+  onOpenDeactivateDialog: () => void;
 }
 export const CadetTabsContent = ({
   activeTab,
@@ -50,7 +51,8 @@ export const CadetTabsContent = ({
   onSelectAll,
   onRefresh,
   onOpenPTTestDialog,
-  searchTerm
+  searchTerm,
+  onOpenDeactivateDialog
 }: CadetTabsContentProps) => {
   const isMobile = useIsMobile();
   const {
@@ -128,6 +130,7 @@ export const CadetTabsContent = ({
                     canEdit={canUpdate} 
                     canDelete={canDelete} 
                     onRefresh={onRefresh} 
+                    onOpenDeactivateDialog={onOpenDeactivateDialog}
                   />
                 </div>
               )}
@@ -143,6 +146,7 @@ export const CadetTabsContent = ({
                     canEdit={canUpdate} 
                     canDelete={canDelete} 
                     onRefresh={onRefresh} 
+                    onOpenDeactivateDialog={onOpenDeactivateDialog}
                   />
                 </div>
               )}

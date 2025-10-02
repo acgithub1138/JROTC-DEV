@@ -206,7 +206,8 @@ const CadetManagementPage = () => {
             onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} 
             onRefresh={fetchProfiles} 
             onOpenPTTestDialog={() => navigate('/app/cadets/pt_test_create?mode=bulk')} 
-            searchTerm={searchTerm} 
+            searchTerm={searchTerm}
+            onOpenDeactivateDialog={() => setDeactivateDialogOpen(true)} 
           />
 
           {sortedProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">

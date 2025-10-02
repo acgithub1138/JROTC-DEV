@@ -16,6 +16,7 @@ interface BulkCadetActionsProps {
   canEdit: boolean;
   canDelete: boolean;
   onRefresh: () => void;
+  onOpenDeactivateDialog: () => void;
 }
 
 export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
@@ -23,7 +24,8 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
   onSelectionClear,
   canEdit,
   canDelete,
-  onRefresh
+  onRefresh,
+  onOpenDeactivateDialog
 }) => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
@@ -308,7 +310,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
           {canDelete && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleBulkDeactivate} className="text-red-600">
+              <DropdownMenuItem onClick={onOpenDeactivateDialog} className="text-red-600">
                 <UserX className="w-4 h-4 mr-2" />
                 Deactivate Cadets
               </DropdownMenuItem>
