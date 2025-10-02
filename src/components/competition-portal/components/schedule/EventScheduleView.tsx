@@ -12,30 +12,35 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-
 interface EventScheduleViewProps {
   competitionId: string;
   readOnly?: boolean;
   canUpdate?: boolean;
 }
-
 export const EventScheduleView = ({
   competitionId,
   readOnly = false,
   canUpdate = false
 }: EventScheduleViewProps) => {
   const navigate = useNavigate();
-  const { events, timeline, isLoading } = useCompetitionSchedule(competitionId);
-  const { timezone } = useSchoolTimezone();
+  const {
+    events,
+    timeline,
+    isLoading
+  } = useCompetitionSchedule(competitionId);
+  const {
+    timezone
+  } = useSchoolTimezone();
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
-
-  const { data: registeredSchools } = useQuery({
+  const {
+    data: registeredSchools
+  } = useQuery({
     queryKey: ['competition-registered-schools', competitionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('cp_comp_schools')
-        .select(`school_id, school_name, school_initials, schools(initials)`)
-        .eq('competition_id', competitionId);
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_schools').select(`school_id, school_name, school_initials, schools(initials)`).eq('competition_id', competitionId);
       if (error) throw error;
       return data.map(school => ({
         id: school.school_id,
@@ -44,18 +49,14 @@ export const EventScheduleView = ({
       }));
     }
   });
-
   const getAllTimeSlots = () => timeline?.timeSlots || [];
-
   const handleEditEvent = (event: ScheduleEvent) => {
     const currentPath = window.location.pathname;
     navigate(`${currentPath}/schedule_record?eventId=${event.id}`);
   };
-
   const getAssignedSchoolForSlot = (eventId: string, timeSlot: Date) => {
     return timeline?.getAssignedSchool(eventId, timeSlot) || null;
   };
-
   const shouldShowSlot = (eventId: string, timeSlot: Date) => {
     if (!timeline?.isEventActive(eventId, timeSlot)) return false;
     const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
@@ -64,16 +65,12 @@ export const EventScheduleView = ({
     }
     return true;
   };
-
   const allTimeSlots = getAllTimeSlots();
-  const filteredTimeSlots = allTimeSlots.filter(timeSlot =>
-    events.some(event => shouldShowSlot(event.id, timeSlot))
-  );
+  const filteredTimeSlots = allTimeSlots.filter(timeSlot => events.some(event => shouldShowSlot(event.id, timeSlot)));
 
   // Build linear schedule data for individual school print (before early returns)
   const linearScheduleData = useMemo(() => {
     if (selectedSchoolFilter === 'all' || !timeline) return [];
-    
     const scheduleItems: Array<{
       date: string;
       time: string;
@@ -81,7 +78,6 @@ export const EventScheduleView = ({
       location: string;
       sortKey: number;
     }> = [];
-
     const slots = getAllTimeSlots();
     events.forEach(event => {
       slots.forEach(timeSlot => {
@@ -97,44 +93,27 @@ export const EventScheduleView = ({
         }
       });
     });
-
-    return scheduleItems
-      .sort((a, b) => a.sortKey - b.sortKey)
-      .filter((item, index, self) => 
-        index === self.findIndex(t => 
-          t.date === item.date && t.time === item.time && t.eventName === item.eventName
-        )
-      );
+    return scheduleItems.sort((a, b) => a.sortKey - b.sortKey).filter((item, index, self) => index === self.findIndex(t => t.date === item.date && t.time === item.time && t.eventName === item.eventName));
   }, [selectedSchoolFilter, timeline, events, timezone]);
-
   const selectedSchoolName = useMemo(() => {
     if (selectedSchoolFilter === 'all') return '';
     return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
   }, [selectedSchoolFilter, registeredSchools]);
-
   const handlePrint = () => window.print();
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
+    return <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-muted-foreground">Loading schedule...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!events.length) {
-    return (
-      <div className="text-center p-8">
+    return <div className="text-center p-8">
         <p className="text-muted-foreground">No events found for this competition.</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <div className="schedule-print-container space-y-4">
         {/* Print-only title */}
         <div className="print-only text-center mb-4">
@@ -151,11 +130,9 @@ export const EventScheduleView = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All schools</SelectItem>
-                {registeredSchools?.map(school => (
-                  <SelectItem key={school.id} value={school.id}>
+                {registeredSchools?.map(school => <SelectItem key={school.id} value={school.id}>
                     {school.name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -174,85 +151,55 @@ export const EventScheduleView = ({
                     <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
                       Time
                     </th>
-                    {events.map(event => (
-                      <th key={event.id} className="text-center p-4">
+                    {events.map(event => <th key={event.id} className="text-center p-4">
                         <div className="flex items-center justify-center gap-2">
                           <div className="font-medium text-sm">
                             {event.event_name}
                           </div>
-                          {!readOnly && canUpdate && (
-                            <Tooltip>
+                          {!readOnly && canUpdate && <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => handleEditEvent(event)}
-                                  className="h-6 w-6 no-print"
-                                >
+                                <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6 no-print">
                                   <Edit className="h-3 w-3" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>Edit schedule for {event.event_name}</p>
                               </TooltipContent>
-                            </Tooltip>
-                          )}
+                            </Tooltip>}
                         </div>
-                      </th>
-                    ))}
+                      </th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTimeSlots.map((timeSlot, index) => {
-                    const currentDateKey = getSchoolDateKey(timeSlot, timezone);
-                    const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
-                    const isNewDay = index === 0 || currentDateKey !== previousDateKey;
-
-                    return [
-                      isNewDay && (
-                        <tr key={`day-${index}`} className="bg-muted/50">
+                  const currentDateKey = getSchoolDateKey(timeSlot, timezone);
+                  const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
+                  const isNewDay = index === 0 || currentDateKey !== previousDateKey;
+                  return [isNewDay && <tr key={`day-${index}`} className="bg-muted/50">
                           <td colSpan={events.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
                             {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
                           </td>
-                        </tr>
-                      ),
-                      <tr
-                        key={timeSlot.toISOString()}
-                        className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
-                      >
+                        </tr>, <tr key={timeSlot.toISOString()} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                         <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
                           {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                         </td>
                         {events.map(event => {
-                          const isEventActive = timeline?.isEventActive(event.id, timeSlot);
-                          const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
-                          const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                          const showSlot = shouldShowSlot(event.id, timeSlot);
-
-                          return (
-                            <td key={event.id} className="p-2 text-center">
-                              {!isEventActive ? (
-                                <div className="text-muted-foreground/50 text-xs">-</div>
-                              ) : isLunchSlot ? (
-                                <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
+                      const isEventActive = timeline?.isEventActive(event.id, timeSlot);
+                      const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
+                      const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                      const showSlot = shouldShowSlot(event.id, timeSlot);
+                      return <td key={event.id} className="p-2 text-center">
+                              {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
                                   Lunch Break
-                                </div>
-                              ) : assignedSchool && showSlot ? (
-                                <div
-                                  className="px-2 py-1 rounded text-xs text-white font-medium"
-                                  style={{ backgroundColor: assignedSchool.color || 'hsl(var(--primary))' }}
-                                >
+                                </div> : assignedSchool && showSlot ? <div className="px-2 py-1 rounded text-xs text-white font-medium" style={{
+                          backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
+                        }}>
                                   {selectedSchoolFilter === 'all' ? assignedSchool.initials || assignedSchool.name : assignedSchool.name}
-                                </div>
-                              ) : (
-                                <div className="text-muted-foreground text-xs">-</div>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ].filter(Boolean);
-                  })}
+                                </div> : <div className="text-muted-foreground text-xs">-</div>}
+                            </td>;
+                    })}
+                      </tr>].filter(Boolean);
+                })}
                 </tbody>
               </table>
             </div>
@@ -260,8 +207,7 @@ export const EventScheduleView = ({
         </Card>
 
         {/* Linear table for individual school print */}
-        {selectedSchoolFilter !== 'all' && linearScheduleData.length > 0 && (
-          <div className="print-only">
+        {selectedSchoolFilter !== 'all' && linearScheduleData.length > 0 && <div className="print-only">
             <h2 className="text-xl font-bold mb-4">School Schedule – {selectedSchoolName}</h2>
             <table className="w-full border-collapse">
               <thead>
@@ -273,19 +219,15 @@ export const EventScheduleView = ({
                 </tr>
               </thead>
               <tbody>
-                {linearScheduleData.map((item, index) => (
-                  <tr key={`${item.date}-${item.time}-${item.eventName}-${index}`} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                {linearScheduleData.map((item, index) => <tr key={`${item.date}-${item.time}-${item.eventName}-${index}`} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                     <td className="p-3">{item.date}</td>
                     <td className="p-3">{item.time}</td>
                     <td className="p-3">{item.eventName}</td>
                     <td className="p-3">{item.location}</td>
-                  </tr>
-                ))}
+                  </tr>)}
               </tbody>
             </table>
-          </div>
-        )}
+          </div>}
       </div>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
