@@ -134,18 +134,12 @@ export const EventScheduleView = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All schools</SelectItem>
-                {registeredSchools?.map(school => (
-                  <SelectItem key={school.id} value={school.id}>
+                {registeredSchools?.map(school => <SelectItem key={school.id} value={school.id}>
                     {school.name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
-            <Button 
-              variant="outline" 
-              onClick={handlePrint} 
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
+            <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
               <Printer className="h-4 w-4" />
               Print Schedule
             </Button>
@@ -161,7 +155,7 @@ export const EventScheduleView = ({
                     <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
                       Time
                     </th>
-                    {events.map(event => <th key={event.id} className="text-center p-4 max-w-[100px]">
+                    {events.map(event => <th key={event.id} className="text-center p-4 max-w-[100px] py-[4px] px-[4px]">
                         <div className="flex flex-col items-center justify-center gap-1">
                           <div className="font-medium text-sm whitespace-normal break-words w-full">
                             {event.event_name}
@@ -203,13 +197,10 @@ export const EventScheduleView = ({
                                   Lunch Break
                                 </div> : assignedSchool && showSlot ? <>
                                   {/* Colored version for screen */}
-                                  <div 
-                                    className="print:hidden px-2 py-1 rounded text-xs font-medium whitespace-normal break-words"
-                                    style={{ 
-                                      backgroundColor: assignedSchool.color || '#3B82F6',
-                                      color: '#ffffff'
-                                    }}
-                                  >
+                                  <div className="print:hidden px-2 py-1 rounded text-xs font-medium whitespace-normal break-words" style={{
+                            backgroundColor: assignedSchool.color || '#3B82F6',
+                            color: '#ffffff'
+                          }}>
                                     {assignedSchool.name}
                                   </div>
                                   {/* Plain text version for print */}
