@@ -152,10 +152,38 @@ export const CompetitionResourceRecord: React.FC = () => {
   };
 
   const handleSubmit = async (data: FormData) => {
-    if (!competitionId) return;
+    if (!competitionId || !userProfile?.school_id) return;
 
     setIsSubmitting(true);
     try {
+      // Save location to cp_resource_locations if it's a new location
+      if (data.location && !locations.includes(data.location)) {
+        try {
+          // Check if location already exists to avoid duplicate key errors
+          const { data: existing } = await supabase
+            .from('cp_resource_locations')
+            .select('location')
+            .eq('school_id', userProfile.school_id)
+            .eq('location', data.location)
+            .maybeSingle();
+          
+          if (!existing) {
+            // Insert into the view (which should have an INSTEAD OF trigger or be a table)
+            await supabase
+              .from('cp_resource_locations')
+              .insert({
+                school_id: userProfile.school_id,
+                location: data.location
+              } as any); // Type cast needed as this might be a view
+          }
+          // Refetch locations to update the dropdown
+          await refetchLocations();
+        } catch (locationError) {
+          console.error('Error saving new location:', locationError);
+          // Don't fail the whole save if location save fails
+        }
+      }
+
       let startTime = null;
       let endTime = null;
 
@@ -182,7 +210,7 @@ export const CompetitionResourceRecord: React.FC = () => {
         location: data.location,
         assignment_details: data.assignment_details,
         competition_id: competitionId,
-        school_id: userProfile?.school_id || '',
+        school_id: userProfile.school_id,
         start_time: startTime,
         end_time: endTime
       };
