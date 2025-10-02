@@ -169,7 +169,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                             {!isEventActive ? (
                               <div className="text-muted-foreground/50 text-xs">-</div>
                             ) : judge && showJudge ? (
-                              <div className="px-2 py-1 rounded text-xs bg-primary/10 text-primary font-medium">
+                              <div className="text-xs text-foreground font-medium">
                                 {judge.name}
                                 {judge.location && (
                                   <div className="text-[10px] text-muted-foreground mt-0.5">
