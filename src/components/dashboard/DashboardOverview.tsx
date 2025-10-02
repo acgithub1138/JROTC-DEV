@@ -15,10 +15,7 @@ import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyCadetsWidget } from './widgets/MyCadetsWidget';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
-import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
-import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCapacitor } from '@/hooks/useCapacitor';
 import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions, useAnnouncementPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
 import { AnnouncementDialog } from '@/components/announcements/AnnouncementDialog';
@@ -31,10 +28,6 @@ const DashboardOverview = () => {
   const {
     toast
   } = useToast();
-  const {
-    isNative,
-    platform
-  } = useCapacitor();
   const {
     canCreate: canCreateTasks
   } = useTaskPermissions();
@@ -54,8 +47,7 @@ const DashboardOverview = () => {
     canViewMyCadets,
     canViewUpcomingEvents,
     canViewQuickActions,
-    canViewAnnouncements,
-    canViewMobileFeatures
+    canViewAnnouncements
   } = useDashboardPermissions();
   const {
     canCreate: canCreateUsers
@@ -316,15 +308,10 @@ const DashboardOverview = () => {
       </Card>;
   };
   return <div className="p-6 space-y-6">
-      {/* Welcome Header with Mobile Status */}
+      {/* Welcome Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          
-          {isNative && <Badge variant="secondary" className="mt-2">
-              <Smartphone className="w-3 h-3 mr-1" />
-              Mobile App - {platform}
-            </Badge>}
         </div>
       </div>
 
@@ -365,14 +352,8 @@ const DashboardOverview = () => {
           {canViewQuickActions && renderQuickActionsWidget()}
         </div>
 
-        {/* Right Column: Mobile Features and Events */}
+        {/* Right Column: Events */}
         <div className="space-y-6">
-          {/* Mobile Notification Center */}
-          {isNative && canViewMobileFeatures && <MobileNotificationCenter />}
-          
-          {/* Mobile Features Widget */}
-          {isNative && canViewMobileFeatures && <MobileEnhancements />}
-          
           {/* Upcoming Events */}
           {canViewUpcomingEvents && <Card>
             <CardHeader>

@@ -1,7 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCapacitor } from '@/hooks/useCapacitor';
 import { TaskList } from '../TaskList';
 import { TaskTable } from '../TaskTable';
 import { TaskCards } from './TaskCards';
@@ -56,7 +55,6 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onTabChange
 }) => {
   const isMobile = useIsMobile();
-  const { isNative } = useCapacitor();
   const { customSortFn } = useTaskSorting();
   
   // Sort myActiveTasks BEFORE pagination
@@ -95,7 +93,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   
   // Memoize the rendering logic to prevent unnecessary re-renders
   const renderTaskContent = useCallback((tasks: (Task | Subtask)[], isAllTasksTab = false) => {
-    if (isNative || isMobile) {
+    if (isMobile) {
       return (
         <TaskCards 
           tasks={tasks}
@@ -103,7 +101,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
           onEdit={onEditTask}
           onDelete={() => {}}
           isMobile={isMobile}
-          isNative={isNative}
+          isNative={false}
         />
       );
     }
@@ -118,7 +116,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
         onRefresh={onRefresh}
       />
     );
-  }, [isMobile, isNative, onTaskSelect, onEditTask, overdueFilter, onOverdueFilterChange, onRefresh]);
+  }, [isMobile, onTaskSelect, onEditTask, overdueFilter, onOverdueFilterChange, onRefresh]);
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">

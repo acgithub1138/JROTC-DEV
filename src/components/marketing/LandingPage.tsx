@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ClipboardList, Trophy, HelpCircle, UserCheck, DollarSign, Package, Calendar, Contact, Mail, Shield, Building, Settings, ArrowRight, CheckCircle, Star } from "lucide-react";
-import { MobileSuggestionBanner } from "@/components/mobile/MobileSuggestionBanner";
 const LandingPage = () => {
   const modules = [{
     icon: Users,
@@ -126,9 +125,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-      
-      {/* Deferred: Load banner after hero renders */}
-      <MobileSuggestionBanner />
 
       {/* Problem/Solution */}
       <section className="py-16 bg-muted/30">

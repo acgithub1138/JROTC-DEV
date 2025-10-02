@@ -1,11 +1,9 @@
 import * as React from "react"
-import { useCapacitor } from '@/hooks/useCapacitor'
 
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean>(false)
-  const { isNative, platform, isLoading } = useCapacitor();
   
   React.useEffect(() => {
     const detectMobile = () => {
@@ -18,9 +16,6 @@ export function useIsMobile() {
       // Separate iPad detection - iPads should be treated as desktop when screen is large enough
       const isIpad = /ipad/i.test(userAgent);
       const isMobileUA = /android|webos|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
-      
-      // Check for touch support
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       
       // Final mobile detection - treat iPad as mobile only if screen width is small
       const detectedMobile = screenIsMobile || (isMobileUA && !isIpad) || (isIpad && screenIsMobile);
@@ -40,29 +35,5 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  // Handle loading state - make stable decisions based on screen size only
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isIpad = /ipad/i.test(userAgent);
-  const screenIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
-  
-  // If Capacitor is still loading, make decision based on screen size only
-  if (isLoading) {
-    // For iPads while loading, use screen size only
-    if (isIpad) {
-      return screenIsMobile;
-    }
-    // For other devices while loading, use screen size + user agent detection
-    const isMobileUA = /android|webos|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
-    return screenIsMobile || (isMobileUA && !isIpad);
-  }
-  
-  // For iPads, prioritize screen size over native detection
-  // If it's an iPad with large screen, treat as desktop regardless of native mode
-  if (isIpad) {
-    // For iPads, only use mobile mode if screen is actually small
-    return screenIsMobile;
-  }
-  
-  // For non-iPads, use the original logic
-  return isNative || isMobile;
+  return isMobile;
 }
