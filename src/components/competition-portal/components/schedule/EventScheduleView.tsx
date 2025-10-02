@@ -93,7 +93,7 @@ export const EventScheduleView = ({
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
+      <div className="schedule-print-container space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
