@@ -41,24 +41,16 @@ export const useJudgeSchedule = (competitionId?: string) => {
           location,
           start_time,
           end_time,
-          cp_judges!inner(name)
+          cp_judges!inner(name),
+          cp_comp_events!inner(
+            id,
+            event,
+            competition_event_types!inner(name)
+          )
         `)
         .eq('competition_id', competitionId);
 
       if (judgeError) throw judgeError;
-
-      // Fetch event types
-      const eventIds = judgeData?.map(j => j.event).filter(Boolean) || [];
-      const { data: eventTypesData, error: eventTypesError } = await supabase
-        .from('competition_event_types')
-        .select('id, name')
-        .in('id', eventIds);
-
-      if (eventTypesError) throw eventTypesError;
-
-      const eventTypesMap = new Map(
-        eventTypesData?.map(et => [et.id, et.name]) || []
-      );
 
       // Process judge assignments
       const assignments: JudgeAssignment[] = judgeData?.map(j => ({
@@ -66,7 +58,7 @@ export const useJudgeSchedule = (competitionId?: string) => {
         judge_id: j.judge,
         judge_name: (j.cp_judges as any)?.name || 'Unknown Judge',
         event_id: j.event || '',
-        event_name: eventTypesMap.get(j.event || '') || 'Unknown Event',
+        event_name: (j.cp_comp_events as any)?.competition_event_types?.name || 'Unknown Event',
         location: j.location,
         start_time: j.start_time || '',
         end_time: j.end_time || ''
