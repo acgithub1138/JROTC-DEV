@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { format } from 'date-fns';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface CompetitionResourcesTabProps {
   competitionId: string;
 }
@@ -24,6 +25,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     deleteResource
   } = useCompetitionResources(competitionId);
   const { canCreate, canEdit, canDelete, canView, canViewDetails } = useTablePermissions('cp_comp_resources');
+  const { timezone } = useSchoolTimezone();
   
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [sortField, setSortField] = useState<string>('');
@@ -132,11 +134,11 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Start:</span>
-                      <p className="text-sm">{resource.start_time ? format(new Date(resource.start_time), 'MMM, d yyyy HH:mm') : '-'}</p>
+                      <p className="text-sm">{resource.start_time ? convertToUI(resource.start_time, timezone, 'datetime') : '-'}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
-                      <p className="text-sm">{resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}</p>
+                      <p className="text-sm">{resource.end_time ? convertToUI(resource.end_time, timezone, 'datetime') : '-'}</p>
                     </div>
                      {(canViewDetails || canEdit || canDelete) && (
                        <div className="flex flex-wrap gap-2 pt-2">
@@ -256,10 +258,10 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                 </TableCell>
                 <TableCell>{resource.location || '-'}</TableCell>
                 <TableCell>
-                  {resource.start_time ? format(new Date(resource.start_time), 'MMM, d yyyy HH:mm') : '-'}
+                  {resource.start_time ? convertToUI(resource.start_time, timezone, 'datetime') : '-'}
                 </TableCell>
                 <TableCell>
-                  {resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}
+                  {resource.end_time ? convertToUI(resource.end_time, timezone, 'datetime') : '-'}
                 </TableCell>
                  {(canViewDetails || canEdit || canDelete) && <TableCell>
                      <div className="flex items-center justify-center gap-2">
