@@ -979,6 +979,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cp_comp_judges_judge_fkey"
+            columns: ["judge"]
+            isOneToOne: false
+            referencedRelation: "cp_judges"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cp_comp_judges_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -4028,6 +4035,21 @@ export type Database = {
             columns: ["score_sheet"]
             isOneToOne: false
             referencedRelation: "competition_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_resource_locations: {
+        Row: {
+          location: string | null
+          school_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_resources_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
