@@ -192,7 +192,7 @@
   .schedule-print-container table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 9pt !important;
+    font-size: 8px !important;
     margin: 0 !important;
     table-layout: fixed !important;
   }
@@ -200,13 +200,15 @@
   .schedule-print-container th,
   .schedule-print-container td {
     border: 1px solid #000 !important;
-    padding: 4px 6px !important;
+    padding: 3px 4px !important;
     background: white !important;
     position: static !important;
     white-space: normal !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     text-align: center !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
   }
   
   .schedule-print-container th {
@@ -216,8 +218,15 @@
   
   .schedule-print-container th:first-child,
   .schedule-print-container td:first-child {
-    width: 80px !important;
+    width: 70px !important;
+    min-width: 70px !important;
     text-align: left !important;
+  }
+  
+  .schedule-print-container th > div,
+  .schedule-print-container td > div {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
   }
   
   .schedule-print-container h2 {

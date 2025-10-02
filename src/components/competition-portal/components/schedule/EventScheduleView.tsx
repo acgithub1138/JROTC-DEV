@@ -191,9 +191,7 @@ export const EventScheduleView = ({
                       return <td key={event.id} className="p-2 text-center">
                               {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
                                   Lunch Break
-                                </div> : assignedSchool && showSlot ? <div className="px-2 py-1 rounded text-xs text-white font-medium" style={{
-                          backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
-                        }}>
+                                </div> : assignedSchool && showSlot ? <div className="text-xs font-medium">
                                   {selectedSchoolFilter === 'all' ? assignedSchool.initials || assignedSchool.name : assignedSchool.name}
                                 </div> : <div className="text-muted-foreground text-xs">-</div>}
                             </td>;
