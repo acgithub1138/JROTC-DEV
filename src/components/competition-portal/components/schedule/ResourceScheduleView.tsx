@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer } from 'lucide-react';
 import { useResourceSchedule } from '@/hooks/competition-portal/useResourceSchedule';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
@@ -14,6 +15,28 @@ interface ResourceScheduleViewProps {
 export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProps) => {
   const { timeline, isLoading } = useResourceSchedule(competitionId);
   const { timezone } = useSchoolTimezone();
+  const [selectedResource, setSelectedResource] = useState<string>('all');
+
+  // Get unique resource names
+  const resourceNames = useMemo(() => {
+    if (!timeline) return [];
+    const names = new Set<string>();
+    timeline.timeSlots.forEach(timeSlot => {
+      timeline.locations.forEach(location => {
+        const resources = timeline.getResourcesForSlot(location, timeSlot);
+        resources.forEach(resource => {
+          names.add(resource.name);
+        });
+      });
+    });
+    return Array.from(names).sort();
+  }, [timeline]);
+
+  // Filter function
+  const shouldShowResource = (resourceName: string) => {
+    if (selectedResource === 'all') return true;
+    return resourceName === selectedResource;
+  };
 
   const handlePrint = () => window.print();
 
@@ -38,7 +61,21 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Filter by Cadet:</label>
+          <Select value={selectedResource} onValueChange={setSelectedResource}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Cadets" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cadets</SelectItem>
+              {resourceNames.map(name => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
           <Printer className="h-4 w-4" />
           Print Resource Schedule
@@ -91,7 +128,7 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
                           <td key={location} className="p-2 text-center">
                             {resources.length > 0 ? (
                               <div className="space-y-1">
-                                {resources.map((resource, idx) => (
+                                {resources.filter(resource => shouldShowResource(resource.name)).map((resource, idx) => (
                                   <div key={idx} className="px-2 py-1 rounded text-xs bg-secondary/80 text-secondary-foreground font-medium">
                                     {resource.name}
                                     {resource.details && (

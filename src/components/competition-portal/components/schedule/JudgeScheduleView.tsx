@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer } from 'lucide-react';
 import { useJudgeSchedule } from '@/hooks/competition-portal/useJudgeSchedule';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
@@ -14,6 +15,28 @@ interface JudgeScheduleViewProps {
 export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => {
   const { timeline, isLoading } = useJudgeSchedule(competitionId);
   const { timezone } = useSchoolTimezone();
+  const [selectedJudge, setSelectedJudge] = useState<string>('all');
+
+  // Get unique judge names
+  const judgeNames = useMemo(() => {
+    if (!timeline) return [];
+    const names = new Set<string>();
+    timeline.timeSlots.forEach(timeSlot => {
+      timeline.events.forEach(event => {
+        const judge = timeline.getJudgeForSlot(event.id, timeSlot);
+        if (judge) {
+          names.add(judge.name);
+        }
+      });
+    });
+    return Array.from(names).sort();
+  }, [timeline]);
+
+  // Filter function
+  const shouldShowJudge = (judgeName: string | undefined) => {
+    if (selectedJudge === 'all') return true;
+    return judgeName === selectedJudge;
+  };
 
   const handlePrint = () => window.print();
 
@@ -38,7 +61,21 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Filter by Judge:</label>
+          <Select value={selectedJudge} onValueChange={setSelectedJudge}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Judges" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Judges</SelectItem>
+              {judgeNames.map(name => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
           <Printer className="h-4 w-4" />
           Print Judge Schedule
@@ -88,11 +125,13 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                         const isEventActive = timeline.isEventActive(event.id, timeSlot);
                         const judge = timeline.getJudgeForSlot(event.id, timeSlot);
 
+                        const showJudge = !judge || shouldShowJudge(judge.name);
+                        
                         return (
                           <td key={event.id} className="p-2 text-center">
                             {!isEventActive ? (
                               <div className="text-muted-foreground/50 text-xs">-</div>
-                            ) : judge ? (
+                            ) : judge && showJudge ? (
                               <div className="px-2 py-1 rounded text-xs bg-primary/10 text-primary font-medium">
                                 {judge.name}
                                 {judge.location && (
