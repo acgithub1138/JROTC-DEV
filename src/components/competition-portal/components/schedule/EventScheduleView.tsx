@@ -162,8 +162,8 @@ export const EventScheduleView = ({
                       Time
                     </th>
                     {events.map(event => <th key={event.id} className="text-center p-4 max-w-[100px]">
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="font-medium text-sm whitespace-normal break-words">
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          <div className="font-medium text-sm whitespace-normal break-words w-full">
                             {event.event_name}
                           </div>
                           {!readOnly && canUpdate && <Tooltip>
