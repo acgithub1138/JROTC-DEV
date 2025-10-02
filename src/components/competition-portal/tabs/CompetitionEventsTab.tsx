@@ -15,7 +15,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 // Modals removed - using page navigation instead
 import { ViewJudgesModal } from '@/components/competition-portal/modals/ViewJudgesModal';
-import { ViewResourcesModal } from '@/components/competition-portal/modals/ViewResourcesModal';
 import { ViewEventSchoolsModal } from '@/components/competition-portal/modals/ViewEventSchoolsModal';
 interface CompetitionEventsTabProps {
   competitionId: string;
@@ -48,7 +47,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   });
   // Modal states removed - using page navigation instead
   const [showJudgesModal, setShowJudgesModal] = useState(false);
-  const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [showSchoolsModal, setShowSchoolsModal] = useState(false);
   const [selectedEventForView, setSelectedEventForView] = useState<typeof events[0] | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -60,10 +58,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const handleViewJudges = (event: typeof events[0]) => {
     setSelectedEventForView(event);
     setShowJudgesModal(true);
-  };
-  const handleViewResources = (event: typeof events[0]) => {
-    setSelectedEventForView(event);
-    setShowResourcesModal(true);
   };
 
   const handleViewSchools = (event: typeof events[0]) => {
@@ -160,19 +154,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                       {canViewDetails && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handleViewResources(event)}>
-                              <Eye className="w-4 h-4 mr-1" />
-                              Resources
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View Resources</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                      {canViewDetails && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => handleViewSchools(event)}>
                               <Eye className="w-4 h-4 mr-1" />
                               Schools
@@ -235,7 +216,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     Registered
                   </SortableTableHead>
                   <TableHead className="text-center">Judges</TableHead>
-                  <TableHead className="text-center">Resources</TableHead>
                   <TableHead className="text-center">Schools</TableHead>
                   <TableHead className="text-center">Actions</TableHead>
                </TableRow>
@@ -272,22 +252,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                          )}
                        </div>
                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-center">
-                          {canViewDetails && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewResources(event)}>
-                                  <Eye className="w-3 h-3" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>View Resources</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
-                      </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-center">
                           {canViewDetails && (
@@ -335,7 +299,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
 
       {/* Modals removed - using page navigation instead */}
       <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} eventId={selectedEventForView?.id || null} />
-      <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} eventId={selectedEventForView?.id || null} />
       <ViewEventSchoolsModal open={showSchoolsModal} onOpenChange={setShowSchoolsModal} event={selectedEventForView} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
