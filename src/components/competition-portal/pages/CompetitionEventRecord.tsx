@@ -16,8 +16,8 @@ import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
-import { formatInSchoolTimezone, convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
@@ -189,10 +189,10 @@ export const CompetitionEventRecord: React.FC = () => {
   }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
   function convertEventToFormData(event: CompEvent): FormData {
     // Convert UTC times to school timezone Date objects
-    const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
-    const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
-    const lunchStartDate = (event as any).lunch_start_time ? convertToSchoolTimezone((event as any).lunch_start_time, timezone) : null;
-    const lunchEndDate = (event as any).lunch_end_time ? convertToSchoolTimezone((event as any).lunch_end_time, timezone) : null;
+    const startDate = event.start_time ? toZonedTime(new Date(event.start_time), timezone) : null;
+    const endDate = event.end_time ? toZonedTime(new Date(event.end_time), timezone) : null;
+    const lunchStartDate = (event as any).lunch_start_time ? toZonedTime(new Date((event as any).lunch_start_time), timezone) : null;
+    const lunchEndDate = (event as any).lunch_end_time ? toZonedTime(new Date((event as any).lunch_end_time), timezone) : null;
 
     // Find the matching event type by name or ID
     let matchingEventType = null;
@@ -251,8 +251,8 @@ export const CompetitionEventRecord: React.FC = () => {
       } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
       if (error) throw error;
       if (data?.start_date) {
-        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
-        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
+        const startDate = formatInTimeZone(new Date(data.start_date), timezone, 'yyyy-MM-dd');
+        const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, 'yyyy-MM-dd') : startDate;
         setFormData(prev => ({
           ...prev,
           start_date: startDate,
@@ -295,7 +295,7 @@ export const CompetitionEventRecord: React.FC = () => {
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
     if (!date || !hour || !minute || !timezone) return null;
     const schoolDateTime = new Date(`${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`);
-    const utcDateTime = convertFromSchoolTimezone(schoolDateTime, timezone);
+    const utcDateTime = fromZonedTime(schoolDateTime, timezone);
     return utcDateTime.toISOString();
   };
   const handleSubmit = async (e: React.FormEvent) => {

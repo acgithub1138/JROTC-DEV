@@ -16,8 +16,6 @@ import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
-import { TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';

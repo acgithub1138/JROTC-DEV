@@ -15,7 +15,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
-import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
@@ -82,10 +82,10 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   useEffect(() => {
     if (event && eventTypes.length > 0) {
       // Convert UTC times to school timezone Date objects
-      const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
-      const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
-      const lunchStartDate = (event as any).lunch_start_time ? convertToSchoolTimezone((event as any).lunch_start_time, timezone) : null;
-      const lunchEndDate = (event as any).lunch_end_time ? convertToSchoolTimezone((event as any).lunch_end_time, timezone) : null;
+      const startDate = event.start_time ? toZonedTime(new Date(event.start_time), timezone) : null;
+      const endDate = event.end_time ? toZonedTime(new Date(event.end_time), timezone) : null;
+      const lunchStartDate = (event as any).lunch_start_time ? toZonedTime(new Date((event as any).lunch_start_time), timezone) : null;
+      const lunchEndDate = (event as any).lunch_end_time ? toZonedTime(new Date((event as any).lunch_end_time), timezone) : null;
       
       // Format lunch times for display
       const lunchStartTime = lunchStartDate 
@@ -248,14 +248,14 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     try {
       // Convert school timezone to UTC for database storage
       const startDateTime = formData.start_date && formData.start_time_hour && formData.start_time_minute
-        ? convertFromSchoolTimezone(
+        ? fromZonedTime(
             new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`),
             timezone
           ).toISOString()
         : null;
       
       const endDateTime = formData.end_date && formData.end_time_hour && formData.end_time_minute
-        ? convertFromSchoolTimezone(
+        ? fromZonedTime(
             new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`),
             timezone
           ).toISOString()
@@ -263,14 +263,14 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
       // Convert lunch times from school timezone to UTC using the event's start date
       const lunchStartTime = formData.lunch_start_time && formData.start_date
-        ? convertFromSchoolTimezone(
+        ? fromZonedTime(
             new Date(`${formData.start_date}T${formData.lunch_start_time}:00`),
             timezone
           ).toISOString()
         : null;
         
       const lunchEndTime = formData.lunch_end_time && formData.start_date
-        ? convertFromSchoolTimezone(
+        ? fromZonedTime(
             new Date(`${formData.start_date}T${formData.lunch_end_time}:00`),
             timezone
           ).toISOString()

@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatInSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
+import { convertToUTC } from '@/utils/timezoneUtils';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
@@ -124,8 +125,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       if (error) throw error;
 
       if (data?.start_date && !timezoneLoading) {
-        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
-        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
+        const startDate = formatInTimeZone(new Date(data.start_date), timezone, 'yyyy-MM-dd');
+        const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, 'yyyy-MM-dd') : startDate;
         
         setFormData(prev => ({
           ...prev,
@@ -237,7 +238,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     const schoolDateTime = new Date(`${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`);
     
     // Convert from school timezone to UTC
-    const utcDateTime = convertFromSchoolTimezone(schoolDateTime, timezone);
+    const utcDateTime = fromZonedTime(schoolDateTime, timezone);
     
     return utcDateTime.toISOString();
   };

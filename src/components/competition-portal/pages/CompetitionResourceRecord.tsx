@@ -16,7 +16,7 @@ import { useCompetitionResources } from '@/hooks/competition-portal/useCompetiti
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { formatInSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -98,12 +98,12 @@ export const CompetitionResourceRecord: React.FC = () => {
   // Load existing resource data when available
   useEffect(() => {
     if (existingResource && (isEditMode || isViewMode)) {
-      const startDate = existingResource.start_time ? formatInSchoolTimezone(existingResource.start_time, 'yyyy-MM-dd', timezone) : '';
-      const startHour = existingResource.start_time ? formatInSchoolTimezone(existingResource.start_time, 'HH', timezone) : '09';
-      const startMinute = existingResource.start_time ? formatInSchoolTimezone(existingResource.start_time, 'mm', timezone) : '00';
-      const endDate = existingResource.end_time ? formatInSchoolTimezone(existingResource.end_time, 'yyyy-MM-dd', timezone) : '';
-      const endHour = existingResource.end_time ? formatInSchoolTimezone(existingResource.end_time, 'HH', timezone) : '10';
-      const endMinute = existingResource.end_time ? formatInSchoolTimezone(existingResource.end_time, 'mm', timezone) : '00';
+      const startDate = existingResource.start_time ? formatInTimeZone(new Date(existingResource.start_time), timezone, 'yyyy-MM-dd') : '';
+      const startHour = existingResource.start_time ? formatInTimeZone(new Date(existingResource.start_time), timezone, 'HH') : '09';
+      const startMinute = existingResource.start_time ? formatInTimeZone(new Date(existingResource.start_time), timezone, 'mm') : '00';
+      const endDate = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'yyyy-MM-dd') : '';
+      const endHour = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'HH') : '10';
+      const endMinute = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'mm') : '00';
       
       const updatedData: FormData = {
         resource: existingResource.resource || '',
@@ -140,8 +140,8 @@ export const CompetitionResourceRecord: React.FC = () => {
       if (error) throw error;
 
       if (data?.start_date) {
-        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
-        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
+        const startDate = formatInTimeZone(new Date(data.start_date), timezone, 'yyyy-MM-dd');
+        const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, 'yyyy-MM-dd') : startDate;
         
         form.setValue('start_date', startDate);
         form.setValue('end_date', endDate);
@@ -164,7 +164,7 @@ export const CompetitionResourceRecord: React.FC = () => {
         const [year, month, day] = data.start_date.split('-').map(Number);
         const startDateTime = new Date(year, month - 1, day, Number(data.start_time_hour), Number(data.start_time_minute), 0);
         // Convert from school timezone to UTC
-        const startTimeUTC = convertFromSchoolTimezone(startDateTime, timezone);
+        const startTimeUTC = fromZonedTime(startDateTime, timezone);
         startTime = startTimeUTC.toISOString();
       }
 
@@ -173,7 +173,7 @@ export const CompetitionResourceRecord: React.FC = () => {
         const [year, month, day] = data.end_date.split('-').map(Number);
         const endDateTime = new Date(year, month - 1, day, Number(data.end_time_hour), Number(data.end_time_minute), 0);
         // Convert from school timezone to UTC
-        const endTimeUTC = convertFromSchoolTimezone(endDateTime, timezone);
+        const endTimeUTC = fromZonedTime(endDateTime, timezone);
         endTime = endTimeUTC.toISOString();
       }
 

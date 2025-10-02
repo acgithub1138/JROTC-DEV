@@ -13,7 +13,8 @@ import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJ
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { convertToUTC } from '@/utils/timezoneUtils';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 interface JudgeFormData {
   judges: string[];
@@ -80,8 +81,8 @@ export const CompetitionJudgesRecord = () => {
       const judge = judges.find(j => j.id === judgeId);
       if (judge) {
         // Convert UTC times to school timezone for editing
-        const startInSchoolTz = judge.start_time ? convertToSchoolTimezone(new Date(judge.start_time), timezone) : null;
-        const endInSchoolTz = judge.end_time ? convertToSchoolTimezone(new Date(judge.end_time), timezone) : null;
+        const startInSchoolTz = judge.start_time ? toZonedTime(new Date(judge.start_time), timezone) : null;
+        const endInSchoolTz = judge.end_time ? toZonedTime(new Date(judge.end_time), timezone) : null;
         
         const startHour = startInSchoolTz ? startInSchoolTz.getHours().toString().padStart(2, '0') : '09';
         const startMinute = startInSchoolTz ? startInSchoolTz.getMinutes().toString().padStart(2, '0') : '00';
@@ -115,8 +116,8 @@ export const CompetitionJudgesRecord = () => {
       const startDateInSchoolTz = new Date(`${dateStr}T${data.start_time_hour}:${data.start_time_minute}:00`);
       const endDateInSchoolTz = new Date(`${dateStr}T${data.end_time_hour}:${data.end_time_minute}:00`);
       
-      const startTimeUTC = convertFromSchoolTimezone(startDateInSchoolTz, timezone);
-      const endTimeUTC = convertFromSchoolTimezone(endDateInSchoolTz, timezone);
+      const startTimeUTC = fromZonedTime(startDateInSchoolTz, timezone);
+      const endTimeUTC = fromZonedTime(endDateInSchoolTz, timezone);
       
       const startTime = startTimeUTC.toISOString();
       const endTime = endTimeUTC.toISOString();

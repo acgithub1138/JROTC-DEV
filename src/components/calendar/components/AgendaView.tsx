@@ -6,7 +6,8 @@ import { Event } from '../CalendarManagementPage';
 import { MapPin, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { getSchoolDateKey, formatInSchoolTimezone, isSameDayInSchoolTimezone, isDatePastInSchoolTimezone } from '@/utils/timezoneUtils';
+import { getSchoolDateKey, isSameDayInSchoolTimezone, isDatePastInSchoolTimezone } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface AgendaViewProps {
   currentDate: Date;
@@ -90,7 +91,7 @@ export const AgendaView = ({
                   isToday && "text-primary",
                   isPast && !isToday && "text-muted-foreground"
                 )}>
-                  {formatInSchoolTimezone(dateKey, 'EEEE, MMMM d, yyyy', timezone)}
+                  {formatInTimeZone(new Date(dateKey), timezone, 'EEEE, MMMM d, yyyy')}
                   {isToday && (
                     <Badge variant="outline" className="ml-2 text-primary border-primary">
                       Today
@@ -135,9 +136,9 @@ export const AgendaView = ({
                                  'All day'
                                ) : (
                                  <>
-                                    {formatInSchoolTimezone(event.start_date, 'HH:mm', timezone)}
-                                    {event.end_date && (
-                                      <span> - {formatInSchoolTimezone(event.end_date, 'HH:mm', timezone)}</span>
+                                    {formatInTimeZone(new Date(event.start_date), timezone, 'HH:mm')}
+                                     {event.end_date && (
+                                       <span> - {formatInTimeZone(new Date(event.end_date), timezone, 'HH:mm')}</span>
                                     )}
                                  </>
                                )}

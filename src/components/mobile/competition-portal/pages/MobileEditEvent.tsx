@@ -22,7 +22,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
-import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   competition_event_types?: { name: string } | null;
@@ -69,8 +69,8 @@ export const MobileEditEvent: React.FC = () => {
 
   useEffect(() => {
     if (event && events.length > 0) {
-      const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
-      const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
+      const startDate = event.start_time ? toZonedTime(new Date(event.start_time), timezone) : null;
+      const endDate = event.end_time ? toZonedTime(new Date(event.end_time), timezone) : null;
       
       const lunchStartTime = (event as any).lunch_start_time 
         ? convertToUI((event as any).lunch_start_time, timezone, 'time')
@@ -177,12 +177,12 @@ export const MobileEditEvent: React.FC = () => {
       const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
       const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
       
-      const startDateTime = convertFromSchoolTimezone(
+      const startDateTime = fromZonedTime(
         new Date(`${startDateStr} ${formData.start_time}`),
         timezone
       );
 
-      const endDateTime = convertFromSchoolTimezone(
+      const endDateTime = fromZonedTime(
         new Date(`${endDateStr} ${formData.end_time}`),
         timezone
       );
@@ -192,14 +192,14 @@ export const MobileEditEvent: React.FC = () => {
       let lunchEndTime = null;
       
       if (formData.lunch_start_time && formData.start_date) {
-        lunchStartTime = convertFromSchoolTimezone(
+        lunchStartTime = fromZonedTime(
           new Date(`${startDateStr} ${formData.lunch_start_time}`),
           timezone
         );
       }
       
       if (formData.lunch_end_time && formData.start_date) {
-        lunchEndTime = convertFromSchoolTimezone(
+        lunchEndTime = fromZonedTime(
           new Date(`${startDateStr} ${formData.lunch_end_time}`),
           timezone
         );

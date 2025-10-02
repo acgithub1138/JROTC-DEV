@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { convertToSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -170,7 +170,7 @@ export const useCompetitions = () => {
             if (!timeStr) return null;
             
             // Convert UTC time to school timezone to get the time of day
-            const originalTime = convertToSchoolTimezone(new Date(timeStr), timezone);
+            const originalTime = toZonedTime(new Date(timeStr), timezone);
             const hours = originalTime.getHours();
             const minutes = originalTime.getMinutes();
             const seconds = originalTime.getSeconds();
@@ -180,7 +180,7 @@ export const useCompetitions = () => {
             newDateTime.setHours(hours, minutes, seconds, 0);
             
             // Convert back to UTC for storage
-            return convertFromSchoolTimezone(newDateTime, timezone).toISOString();
+            return fromZonedTime(newDateTime, timezone).toISOString();
           };
 
           const { id, created_at, updated_at, updated_by, ...eventData } = event;
