@@ -83,8 +83,8 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
   
 
   return (
-    TEST
     <div className="schedule-print-container space-y-4">
+      test123
       <div className="flex-1 min-w-0 flex items-center gap-2">
 
           <label className="text-sm whitespace-nowrap">Filter by Judge:</label>
