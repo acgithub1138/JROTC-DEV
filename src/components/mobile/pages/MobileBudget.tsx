@@ -160,7 +160,7 @@ export const MobileBudget: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{transaction.item}</h4>
                         <p className="text-xs text-muted-foreground">
-                          {formatTypeDisplay(transaction.type)} • {new Date(transaction.date).toLocaleDateString()}
+                          {formatTypeDisplay(transaction.type)} • {transaction.date}
                         </p>
                         {transaction.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

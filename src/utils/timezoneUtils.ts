@@ -2,10 +2,85 @@ import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { format, parse } from 'date-fns';
 
 /**
- * Converts a UTC date to the school's timezone
- * @param date - Date in UTC
- * @param schoolTimezone - School's timezone (e.g., 'America/New_York')
- * @returns Date in school timezone
+ * ============================================================================
+ * CANONICAL TIMEZONE CONVERSION FUNCTIONS
+ * ============================================================================
+ * ALWAYS use these two functions for timezone conversion:
+ * - convertToUTC: When saving to database
+ * - convertToUI: When displaying to user
+ * ============================================================================
+ */
+
+/**
+ * Converts school-local date/time to UTC ISO string for database storage
+ * @param dateKey - Date in YYYY-MM-DD format (school timezone)
+ * @param timeHHmm - Time in HH:mm 24-hour format (school timezone)
+ * @param timezone - School's IANA timezone
+ * @param options - Optional flags (isAllDay: treat as all-day event)
+ * @returns UTC ISO string for database storage
+ * @example convertToUTC('2024-03-15', '14:30', 'America/New_York') // "2024-03-15T18:30:00.000Z"
+ */
+export const convertToUTC = (
+  dateKey: string,
+  timeHHmm: string,
+  timezone: string,
+  options?: { isAllDay?: boolean }
+): string => {
+  // For all-day events, use noon to avoid DST edge cases
+  const time = options?.isAllDay ? '12:00' : timeHHmm;
+  
+  // Parse date and time components
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const [hours, minutes] = time.split(':').map(Number);
+  
+  // Create date object in school timezone
+  const schoolDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+  
+  // Convert to UTC
+  const utcDate = fromZonedTime(schoolDate, timezone);
+  
+  return utcDate.toISOString();
+};
+
+/**
+ * Converts UTC timestamp to school timezone for UI display
+ * @param utc - UTC timestamp (ISO string or Date object)
+ * @param timezone - School's IANA timezone
+ * @param mode - Output format: 'time' (HH:mm), 'date' (YYYY-MM-DD), 'datetime' (YYYY-MM-DD HH:mm), 'dateKey' (YYYY-MM-DD)
+ * @returns Formatted string in school timezone
+ * @example convertToUI('2024-03-15T18:30:00Z', 'America/New_York', 'time') // "14:30"
+ */
+export const convertToUI = (
+  utc: string | Date | null,
+  timezone: string,
+  mode: 'time' | 'date' | 'datetime' | 'dateKey' = 'datetime'
+): string => {
+  if (!utc) return '-';
+  
+  const utcDate = typeof utc === 'string' ? new Date(utc) : utc;
+  
+  switch (mode) {
+    case 'time':
+      return formatInTimeZone(utcDate, timezone, 'HH:mm');
+    case 'date':
+      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy');
+    case 'dateKey':
+      return formatInTimeZone(utcDate, timezone, 'yyyy-MM-dd');
+    case 'datetime':
+      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy HH:mm');
+    default:
+      return formatInTimeZone(utcDate, timezone, 'M/d/yyyy HH:mm');
+  }
+};
+
+/**
+ * ============================================================================
+ * DEPRECATED FUNCTIONS - Use convertToUTC and convertToUI instead
+ * ============================================================================
+ */
+
+/**
+ * @deprecated Use convertToUI instead
  */
 export const convertToSchoolTimezone = (date: Date | string, schoolTimezone: string): Date => {
   const utcDate = typeof date === 'string' ? new Date(date) : date;
@@ -13,21 +88,14 @@ export const convertToSchoolTimezone = (date: Date | string, schoolTimezone: str
 };
 
 /**
- * Converts a date from school timezone to UTC
- * @param date - Date in school timezone
- * @param schoolTimezone - School's timezone
- * @returns Date in UTC
+ * @deprecated Use convertToUTC instead
  */
 export const convertFromSchoolTimezone = (date: Date, schoolTimezone: string): Date => {
   return fromZonedTime(date, schoolTimezone);
 };
 
 /**
- * Formats a date in the school's timezone
- * @param date - Date to format (UTC or local)
- * @param formatString - Format string (e.g., 'yyyy-MM-dd', 'M/d/yyyy')
- * @param schoolTimezone - School's timezone
- * @returns Formatted date string in school timezone
+ * @deprecated Use convertToUI instead
  */
 export const formatInSchoolTimezone = (
   date: Date | string,
@@ -35,7 +103,6 @@ export const formatInSchoolTimezone = (
   schoolTimezone: string
 ): string => {
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    // For YYYY-MM-DD strings, parse as local date in school timezone
     const [year, month, day] = date.split('-').map(Number);
     const localDate = new Date(year, month - 1, day);
     const utcDate = fromZonedTime(localDate, schoolTimezone);
@@ -52,7 +119,7 @@ export const formatInSchoolTimezone = (
  * @returns Date key in YYYY-MM-DD format in school timezone
  */
 export const getSchoolDateKey = (date: Date | string, schoolTimezone: string): string => {
-  return formatInSchoolTimezone(date, 'yyyy-MM-dd', schoolTimezone);
+  return convertToUI(date, schoolTimezone, 'dateKey');
 };
 
 /**

@@ -23,16 +23,13 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { getSchoolDateKey, convertToSchoolTimezone } from '@/utils/timezoneUtils';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI, convertToUTC } from '@/utils/timezoneUtils';
 
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
   type: z.enum(['fundraiser', 'donation', 'other']),
   description: z.string().optional(),
-  date: z.date({
-    required_error: 'Date is required'
-  }),
+  date: z.string().min(1, 'Date is required'),
   amount: z.number().min(0.01, 'Amount must be greater than 0')
 });
 
@@ -81,7 +78,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
     item: currentRecord?.item || '',
     type: (currentRecord?.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
     description: currentRecord?.description || '',
-    date: currentRecord?.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
+    date: currentRecord?.date || format(new Date(), 'yyyy-MM-dd'),
     amount: currentRecord?.amount || 0
   };
 
@@ -109,7 +106,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         item: currentRecord.item || '',
         type: (currentRecord.type as 'fundraiser' | 'donation' | 'other') || 'other' as const,
         description: currentRecord.description || '',
-        date: currentRecord.date ? new Date(currentRecord.date + 'T00:00:00') : new Date(),
+        date: currentRecord.date || format(new Date(), 'yyyy-MM-dd'),
         amount: currentRecord.amount || 0
       };
       form.reset(newDefaults);
@@ -196,7 +193,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
         category: 'income' as const,
         type: data.type,
         description: data.description,
-        date: getSchoolDateKey(data.date, timezone),
+        date: data.date, // Already in YYYY-MM-DD format
         amount: data.amount,
         archive: false
       };
@@ -380,38 +377,16 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                         <FormItem className="flex items-center gap-4">
                           <FormLabel className="w-32 text-right shrink-0">Date *</FormLabel>
                           <div className="flex-1">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
-                                    className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, "PPP")
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) =>
-                                    date > new Date() || date < new Date("1900-01-01")
-                                  }
-                                  initialFocus
-                                  className={cn("p-3 pointer-events-auto")}
-                                />
-                              </PopoverContent>
-                            </Popover>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                max={format(new Date(), 'yyyy-MM-dd')}
+                                min="1900-01-01"
+                                value={field.value}
+                                onChange={field.onChange}
+                                className="w-full"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </div>
                         </FormItem>
@@ -542,7 +517,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                   <div>
                     <h3 className="font-medium text-sm text-muted-foreground mb-1">Date</h3>
                     <p className="text-sm">
-                      {currentRecord?.date ? formatTimeForDisplay(currentRecord.date, TIME_FORMATS.FULL_DATE, timezone) : 'N/A'}
+                      {currentRecord?.date || 'N/A'}
                     </p>
                   </div>
                   <div>

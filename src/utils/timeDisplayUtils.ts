@@ -1,7 +1,8 @@
-import { formatInSchoolTimezone } from './timezoneUtils';
+import { convertToUI } from './timezoneUtils';
 
 /**
  * Common date/time format strings for consistent display
+ * @deprecated Use convertToUI with mode parameter instead
  */
 export const TIME_FORMATS = {
   DATE_ONLY: 'M/d/yyyy',
@@ -15,11 +16,7 @@ export const TIME_FORMATS = {
 } as const;
 
 /**
- * Formats a date/time for display in the school's timezone
- * @param date - Date to format (UTC or local)
- * @param format - Format string to use
- * @param schoolTimezone - School's timezone
- * @returns Formatted date string in school timezone
+ * @deprecated Use convertToUI instead
  */
 export const formatTimeForDisplay = (
   date: Date | string | null,
@@ -27,7 +24,11 @@ export const formatTimeForDisplay = (
   schoolTimezone: string
 ): string => {
   if (!date) return '-';
-  return formatInSchoolTimezone(date, format, schoolTimezone);
+  // Map common formats to convertToUI modes
+  if (format === 'M/d/yyyy') return convertToUI(date, schoolTimezone, 'date');
+  if (format === 'HH:mm') return convertToUI(date, schoolTimezone, 'time');
+  if (format === 'yyyy-MM-dd') return convertToUI(date, schoolTimezone, 'dateKey');
+  return convertToUI(date, schoolTimezone, 'datetime');
 };
 
 /**
