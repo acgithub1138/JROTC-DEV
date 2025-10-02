@@ -18,36 +18,14 @@ export const useResourceLocations = (competitionId?: string) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('cp_comp_resources')
+        .from('cp_resource_locations')
         .select('location')
         .eq('school_id', userProfile.school_id)
-        .not('location', 'is', null)
-        .neq('location', '')
         .order('location', { ascending: true });
 
       if (error) throw error;
 
-      // Robust unique locations (normalize unicode, collapse spaces, trim, case-insensitive)
-      const canonicalize = (s: string) =>
-        s
-          .normalize('NFKC')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .toLowerCase();
-
-      const locationMap = new Map<string, string>();
-      data.forEach((item) => {
-        if (item.location) {
-          const normalized = item.location.normalize('NFKC').replace(/\s+/g, ' ').trim();
-          if (normalized.length === 0) return;
-          const key = canonicalize(item.location);
-          if (!locationMap.has(key)) {
-            locationMap.set(key, normalized);
-          }
-        }
-      });
-
-      const uniqueLocations = Array.from(locationMap.values()).sort((a, b) => a.localeCompare(b));
+      const uniqueLocations = data.map(item => item.location);
       setLocations(uniqueLocations);
     } catch (error) {
       console.error('Error fetching locations:', error);
