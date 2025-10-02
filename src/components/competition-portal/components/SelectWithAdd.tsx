@@ -61,7 +61,13 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
           onKeyDown={handleKeyDown}
           onBlur={() => {
             if (!skipBlurCommit.current) {
-              handleAddNew();
+              if (newValue.trim()) {
+                handleAddNew();
+              } else {
+                // Cancel if blur without typing
+                setIsAdding(false);
+                setNewValue('');
+              }
             }
             skipBlurCommit.current = false;
           }}
