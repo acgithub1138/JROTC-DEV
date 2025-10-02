@@ -161,7 +161,7 @@ export const EventScheduleView = ({
                     <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
                       Time
                     </th>
-                    {events.map(event => <th key={event.id} className="text-center p-4 max-w-[150px]">
+                    {events.map(event => <th key={event.id} className="text-center p-4 max-w-[100px]">
                         <div className="flex items-center justify-center gap-2">
                           <div className="font-medium text-sm whitespace-normal break-words">
                             {event.event_name}
