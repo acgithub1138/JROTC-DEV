@@ -85,7 +85,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
   return (
     <div className="schedule-print-container space-y-4">
       <div className="flex items-center justify-between no-print">
-        <div className="flex items-center gap-2">
+
           <label className="text-sm font-medium">Filter by Judge:</label>
           <Select value={selectedJudge} onValueChange={setSelectedJudge}>
             <SelectTrigger className="w-[200px]">
@@ -98,7 +98,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
               ))}
             </SelectContent>
           </Select>
-        </div>
+
         <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
           <Printer className="h-4 w-4" />
           Print Judge Schedule
