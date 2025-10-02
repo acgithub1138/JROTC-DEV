@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState('');
+  const skipBlurCommit = useRef(false);
 
   const handleAddNew = () => {
     if (newValue.trim()) {
@@ -58,6 +59,12 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
           value={newValue}
           onChange={(e) => setNewValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          onBlur={() => {
+            if (!skipBlurCommit.current) {
+              handleAddNew();
+            }
+            skipBlurCommit.current = false;
+          }}
           placeholder="Enter new location..."
           autoFocus
           disabled={disabled}
@@ -65,6 +72,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
         <Button
           type="button"
           size="sm"
+          onMouseDown={() => { skipBlurCommit.current = true; }}
           onClick={handleAddNew}
           disabled={!newValue.trim() || disabled}
         >
@@ -74,6 +82,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
           type="button"
           size="sm"
           variant="outline"
+          onMouseDown={() => { skipBlurCommit.current = true; }}
           onClick={() => {
             setIsAdding(false);
             setNewValue('');
