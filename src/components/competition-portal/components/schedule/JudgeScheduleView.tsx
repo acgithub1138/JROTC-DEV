@@ -40,6 +40,19 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
 
   const handlePrint = () => window.print();
 
+  // Filter time slots based on selected judge
+  const filteredTimeSlots = useMemo(() => {
+    if (!timeline) return [];
+    if (selectedJudge === 'all') return timeline.timeSlots;
+    
+    return timeline.timeSlots.filter(timeSlot =>
+      timeline.events.some(event => {
+        const judge = timeline.getJudgeForSlot(event.id, timeSlot);
+        return judge && judge.name === selectedJudge;
+      })
+    );
+  }, [timeline, selectedJudge]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -101,9 +114,9 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                 </tr>
               </thead>
               <tbody>
-                {timeline.timeSlots.map((timeSlot, index) => {
+                {filteredTimeSlots.map((timeSlot, index) => {
                   const currentDateKey = getSchoolDateKey(timeSlot, timezone);
-                  const previousDateKey = index > 0 ? getSchoolDateKey(timeline.timeSlots[index - 1], timezone) : null;
+                  const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
                   const isNewDay = index === 0 || currentDateKey !== previousDateKey;
 
                   return [

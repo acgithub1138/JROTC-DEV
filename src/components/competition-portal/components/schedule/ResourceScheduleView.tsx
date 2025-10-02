@@ -40,6 +40,19 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
 
   const handlePrint = () => window.print();
 
+  // Filter time slots based on selected resource
+  const filteredTimeSlots = useMemo(() => {
+    if (!timeline) return [];
+    if (selectedResource === 'all') return timeline.timeSlots;
+    
+    return timeline.timeSlots.filter(timeSlot =>
+      timeline.locations.some(location => {
+        const resources = timeline.getResourcesForSlot(location, timeSlot);
+        return resources.some(resource => resource.name === selectedResource);
+      })
+    );
+  }, [timeline, selectedResource]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -101,9 +114,9 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
                 </tr>
               </thead>
               <tbody>
-                {timeline.timeSlots.map((timeSlot, index) => {
+                {filteredTimeSlots.map((timeSlot, index) => {
                   const currentDateKey = getSchoolDateKey(timeSlot, timezone);
-                  const previousDateKey = index > 0 ? getSchoolDateKey(timeline.timeSlots[index - 1], timezone) : null;
+                  const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
                   const isNewDay = index === 0 || currentDateKey !== previousDateKey;
 
                   return [
