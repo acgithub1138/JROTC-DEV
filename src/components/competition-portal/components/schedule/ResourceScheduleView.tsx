@@ -74,33 +74,41 @@ export const ResourceScheduleView = ({
       </div>;
   }
   
-  return <div className="schedule-print-container space-y-4">
-  <div className="flex items-center gap-2 no-print w-full">
-    {/* Left side - dropdown */}
-    <div className="flex-1 min-w-0 flex items-center gap-2">
+  return (
+      <div className="schedule-print-container space-y-4">
+      {/* Print-only title */}
+      <div className="print-only text-center mb-4">
+        <h1 className="text-2xl font-bold">
+      	Competition Schedule – {selectedResource === 'all' ? 'All Schools' : selectedResource}
+        </h1>
+      </div>
       
-  	<label htmlFor="judge-filter" className="text-sm whitespace-nowrap">
-        Filter by Cadet:
-      </label>
-      
-  	<Select value={selectedResource} onValueChange={setSelectedResource}>
-  		<SelectTrigger className="w-40 sm:w-48">
-  		<SelectValue placeholder="All Cadets" />
-  		</SelectTrigger>
-  		<SelectContent>
-  		  <SelectItem value="all">All Cadets</SelectItem>
-  			{resourceNames.map(name => <SelectItem key={name} value={name}>{name}
-  		  </SelectItem>)}
-  		</SelectContent>
-  	</Select>
-  	
-      <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
-        <Printer className="h-4 w-4" />
-        Print Resource Schedule
-      </Button>
-    
-    </div>
-</div>
+      <div className="flex items-center gap-2 no-print w-full">
+        {/* Left side - dropdown */}
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          
+      	<label htmlFor="judge-filter" className="text-sm whitespace-nowrap">
+            Filter by Cadet:
+          </label>
+          
+      	<Select value={selectedResource} onValueChange={setSelectedResource}>
+      		<SelectTrigger className="w-40 sm:w-48">
+      		<SelectValue placeholder="All Cadets" />
+      		</SelectTrigger>
+      		<SelectContent>
+      		  <SelectItem value="all">All Cadets</SelectItem>
+      			{resourceNames.map(name => <SelectItem key={name} value={name}>{name}
+      		  </SelectItem>)}
+      		</SelectContent>
+      	</Select>
+      	
+          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
+            <Printer className="h-4 w-4" />
+            Print Resource Schedule
+          </Button>
+        
+        </div>
+      </div>
 
       {/* Grid view for screen and "All Cadets" print */}
       <Card className={selectedResource !== 'all' ? 'no-print' : ''}>
@@ -180,4 +188,5 @@ export const ResourceScheduleView = ({
           </table>
         </div>}
     </div>;
+);
 };
