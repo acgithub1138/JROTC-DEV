@@ -92,7 +92,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
       if (error) throw error;
 
       // Invalidate queries to refetch with updated data
-      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       toast.success('Event added successfully');
       return data;
     } catch (error) {
@@ -117,7 +117,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
       if (error) throw error;
 
       // Invalidate queries to refetch with updated data
-      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       toast.success('Event updated successfully');
       return data;
     } catch (error) {
@@ -137,7 +137,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
       if (error) throw error;
 
       // Invalidate queries to refetch with updated data
-      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId] });
+      queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       toast.success('Event deleted successfully');
     } catch (error) {
       console.error('Error deleting competition event:', error);
