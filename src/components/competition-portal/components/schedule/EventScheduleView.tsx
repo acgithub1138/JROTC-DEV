@@ -194,7 +194,7 @@ export const EventScheduleView = ({
                                   className="px-2 py-1 rounded text-xs text-white font-medium"
                                   style={{ backgroundColor: assignedSchool.color || 'hsl(var(--primary))' }}
                                 >
-                                  {assignedSchool.name}
+                                  {selectedSchoolFilter === 'all' ? assignedSchool.initials || assignedSchool.name : assignedSchool.name}
                                 </div>
                               ) : (
                                 <div className="text-muted-foreground text-xs">-</div>
