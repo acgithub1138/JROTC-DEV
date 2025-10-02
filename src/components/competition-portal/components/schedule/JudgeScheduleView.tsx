@@ -83,14 +83,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
   
 
   return (
-      <div className="schedule-print-container space-y-4">
-        {/* Print-only title */}
-        <div className="print-only text-center mb-4">
-          <h1 className="text-2xl font-bold">
-            Competition Schedule – {selectedJudge === 'all' ? 'All Judges' : selectedJudge}
-          </h1>
-        </div>
-        
+    <div className="schedule-print-container space-y-4">
       <div className="flex items-center gap-2 no-print w-full">
         {/* Left side - dropdown */}
         <div className="flex-1 min-w-0 flex items-center gap-2">

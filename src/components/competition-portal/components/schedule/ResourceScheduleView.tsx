@@ -73,34 +73,25 @@ export const ResourceScheduleView = ({
         <p className="text-muted-foreground">No resource assignments found for this competition.</p>
       </div>;
   }
-  
   return <div className="schedule-print-container space-y-4">
-  <div className="flex items-center gap-2 no-print w-full">
-    {/* Left side - dropdown */}
-    <div className="flex-1 min-w-0 flex items-center gap-2">
-      
-  	<label htmlFor="judge-filter" className="text-sm whitespace-nowrap">
-        Filter by Cadet:
-      </label>
-      
-  	<Select value={selectedResource} onValueChange={setSelectedResource}>
-  		<SelectTrigger className="w-40 sm:w-48">
-  		<SelectValue placeholder="All Cadets" />
-  		</SelectTrigger>
-  		<SelectContent>
-  		  <SelectItem value="all">All Cadets</SelectItem>
-  			{resourceNames.map(name => <SelectItem key={name} value={name}>{name}
-  		  </SelectItem>)}
-  		</SelectContent>
-  	</Select>
-  	
-      <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
-        <Printer className="h-4 w-4" />
-        Print Resource Schedule
-      </Button>
-    
-    </div>
-</div>
+      <div className="flex items-center justify-between flex-nowrap gap-4 no-print">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Filter by Cadet:</label>
+          <Select value={selectedResource} onValueChange={setSelectedResource}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Cadets" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cadets</SelectItem>
+              {resourceNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
+          <Printer className="h-4 w-4" />
+          Print Resource Schedule
+        </Button>
+      </div>
 
       {/* Grid view for screen and "All Cadets" print */}
       <Card className={selectedResource !== 'all' ? 'no-print' : ''}>
