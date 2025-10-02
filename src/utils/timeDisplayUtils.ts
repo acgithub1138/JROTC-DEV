@@ -7,9 +7,9 @@ export const TIME_FORMATS = {
   DATE_ONLY: 'MM/dd/yyyy',
   TIME_ONLY_24H: 'HH:mm',
   DATETIME_24H: 'MM/dd/yyyy HH:mm',
-  DATETIME_12H: 'MM/dd/yyyy h:mm a',
+  DATETIME_12H: 'MM/dd/yyyy hh:mm a',
   FULL_DATE: 'EEEE, MMMM dd, yyyy',
-  FULL_DATETIME_24H: 'EEEE, MMMM dd, yyyy HH:mm',
+  FULL_DATETIME_24H: 'EEEE, MMMM d, yyyy HH:mm',
   SHORT_DATE: 'MMM dd, yyyy',
   SHORT_DATETIME_24H: 'MMM dd, yyyy HH:mm',
 } as const;
