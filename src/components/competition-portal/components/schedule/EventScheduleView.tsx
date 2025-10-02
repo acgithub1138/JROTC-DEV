@@ -204,7 +204,7 @@ export const EventScheduleView = ({
                                 </div> : assignedSchool && showSlot ? <>
                                   {/* Colored version for screen */}
                                   <div 
-                                    className="print:hidden px-2 py-1 rounded text-xs font-medium"
+                                    className="print:hidden px-2 py-1 rounded text-xs font-medium whitespace-normal break-words"
                                     style={{ 
                                       backgroundColor: assignedSchool.color || '#3B82F6',
                                       color: '#ffffff'
