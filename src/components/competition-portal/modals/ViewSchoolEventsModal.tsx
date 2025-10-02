@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface ViewSchoolEventsModalProps {
   open: boolean;
@@ -101,10 +101,10 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
                     {registration.cp_comp_events?.location || '-'}
                   </TableCell>
                   <TableCell>
-                    {formatTimeForDisplay(
+                    {convertToUI(
                       registration.cp_comp_events?.start_time,
-                      TIME_FORMATS.DATETIME_24H,
-                      timezone
+                      timezone,
+                      'datetime'
                     )}
                   </TableCell>
                   <TableCell>

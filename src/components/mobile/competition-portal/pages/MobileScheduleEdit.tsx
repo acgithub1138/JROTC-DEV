@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Clock, X } from 'lucide-react';
 import { useCompetitionSchedule } from '@/hooks/competition-portal/useCompetitionSchedule';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -316,8 +316,8 @@ export const MobileScheduleEdit: React.FC = () => {
               <h3 className="font-semibold text-foreground">{event.event_name}</h3>
               <div className="text-sm text-muted-foreground">
                 {event.interval}-minute slots from{' '}
-                {formatTimeForDisplay(event.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} to{' '}
-                {formatTimeForDisplay(event.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                {convertToUI(event.start_time, timezone, 'time')} to{' '}
+                {convertToUI(event.end_time, timezone, 'time')}
               </div>
             </div>
           </CardContent>
@@ -342,7 +342,7 @@ export const MobileScheduleEdit: React.FC = () => {
                   return (
                     <div key={slot.time.toISOString()} className={`flex items-center gap-3 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <div className="font-mono text-sm min-w-[60px]">
-                        {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                        {convertToUI(slot.time, timezone, 'time')}
                       </div>
 
                       <div className="flex-1">

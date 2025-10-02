@@ -17,7 +17,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { formatInSchoolTimezone, convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
@@ -204,10 +204,10 @@ export const CompetitionEventRecord: React.FC = () => {
     return {
       event: matchingEventType?.id || '',
       location: event.location || '',
-      start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
+      start_date: startDate ? convertToUI(startDate, timezone, 'dateKey') : '',
       start_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
       start_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
-      end_date: endDate ? formatTimeForDisplay(endDate, 'yyyy-MM-dd', timezone) : '',
+      end_date: endDate ? convertToUI(endDate, timezone, 'dateKey') : '',
       end_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
       end_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
       lunch_start_hour: lunchStartDate ? lunchStartDate.getHours().toString().padStart(2, '0') : '12',

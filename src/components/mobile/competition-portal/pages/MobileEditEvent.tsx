@@ -21,7 +21,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
@@ -73,10 +73,10 @@ export const MobileEditEvent: React.FC = () => {
       const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
       
       const lunchStartTime = (event as any).lunch_start_time 
-        ? formatTimeForDisplay((event as any).lunch_start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+        ? convertToUI((event as any).lunch_start_time, timezone, 'time')
         : '';
       const lunchEndTime = (event as any).lunch_end_time 
-        ? formatTimeForDisplay((event as any).lunch_end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+        ? convertToUI((event as any).lunch_end_time, timezone, 'time')
         : '';
 
       const newFormData = {

@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { isSameDay, format } from 'date-fns';
 
 // Stable filters object to prevent re-renders
@@ -58,11 +59,7 @@ export const MobileCalendar: React.FC = () => {
   };
 
   const formatEventDate = (startDate: string, isAllDay: boolean) => {
-    const date = new Date(startDate);
-    if (isAllDay) {
-      return formatTimeForDisplay(date, TIME_FORMATS.SHORT_DATE, timezone);
-    }
-    return formatTimeForDisplay(date, TIME_FORMATS.SHORT_DATE, timezone);
+    return formatInTimeZone(new Date(startDate), timezone, 'MMM dd, yyyy');
   };
 
   const stateAbbreviations: Record<string, string> = {
@@ -181,8 +178,8 @@ export const MobileCalendar: React.FC = () => {
   const formatEventTime = (startDate: string, endDate: string, isAllDay: boolean) => {
     if (isAllDay) return 'All day';
     
-    const start = formatTimeForDisplay(startDate, TIME_FORMATS.TIME_ONLY_24H, timezone);
-    const end = formatTimeForDisplay(endDate, TIME_FORMATS.TIME_ONLY_24H, timezone);
+    const start = convertToUI(startDate, timezone, 'time');
+    const end = convertToUI(endDate, timezone, 'time');
     return `${start} - ${end}`;
   };
 

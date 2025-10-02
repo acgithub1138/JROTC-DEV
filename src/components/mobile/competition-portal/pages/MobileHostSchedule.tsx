@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Settings } from 'lucide-react';
 import { useCompetitionSchedule } from '@/hooks/competition-portal/useCompetitionSchedule';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export const MobileHostSchedule: React.FC = () => {
@@ -84,7 +84,7 @@ export const MobileHostSchedule: React.FC = () => {
                     <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
                       <div className="flex items-center">
                         <Clock size={12} className="mr-1" />
-                        {formatTimeForDisplay(event.start_time, 'h:mm a', timezone)} - {formatTimeForDisplay(event.end_time, 'h:mm a', timezone)}
+                        {formatInTimeZone(new Date(event.start_time), timezone, 'h:mm a')} - {formatInTimeZone(new Date(event.end_time), timezone, 'h:mm a')}
                       </div>
                       <div className="flex items-center">
                         <Users size={12} className="mr-1" />
@@ -112,7 +112,7 @@ export const MobileHostSchedule: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <Clock size={12} className="text-muted-foreground" />
                           <span className="font-mono">
-                            {formatTimeForDisplay(slot.time.toISOString(), 'h:mm a', timezone)}
+                            {formatInTimeZone(slot.time, timezone, 'h:mm a')}
                           </span>
                         </div>
                         

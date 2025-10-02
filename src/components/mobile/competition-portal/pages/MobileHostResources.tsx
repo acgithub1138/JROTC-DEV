@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Users, Clock, MapPin, Plus, Settings } from 'lucide-react';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 export const MobileHostResources: React.FC = () => {
   const navigate = useNavigate();
@@ -80,11 +81,11 @@ export const MobileHostResources: React.FC = () => {
                   <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                     {resource.start_time && <div className="flex items-center">
                         <Clock size={12} className="mr-1" />
-                        {formatTimeForDisplay(resource.start_time, TIME_FORMATS.DATETIME_12H, timezone)}
+                        {formatInTimeZone(new Date(resource.start_time), timezone, 'M/d/yyyy h:mm a')}
                       </div>}
                     {resource.end_time && <div className="flex items-center">
                         <Clock size={12} className="mr-1" />
-                        to {formatTimeForDisplay(resource.end_time, TIME_FORMATS.DATETIME_12H, timezone)}
+                        to {formatInTimeZone(new Date(resource.end_time), timezone, 'M/d/yyyy h:mm a')}
                       </div>}
                   </div>
 

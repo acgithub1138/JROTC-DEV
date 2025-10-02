@@ -14,7 +14,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertToUI } from '@/utils/timezoneUtils';
 import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 
@@ -114,10 +114,10 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       const newFormData = {
         event: matchingEventType?.id || '',
         location: event.location || '',
-        start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
+        start_date: startDate ? convertToUI(startDate, timezone, 'dateKey') : '',
         start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
         start_time_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
-        end_date: endDate ? formatTimeForDisplay(endDate, 'yyyy-MM-dd', timezone) : '',
+        end_date: endDate ? convertToUI(endDate, timezone, 'dateKey') : '',
         end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
         end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
         lunch_start_time: lunchStartTime,
