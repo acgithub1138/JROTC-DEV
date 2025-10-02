@@ -143,7 +143,7 @@ export const ResourceScheduleView = ({
                     const resources = timeline.getResourcesForSlot(location, timeSlot);
                     return <td key={location} className="p-2 text-center">
                             {resources.length > 0 ? <div className="space-y-1">
-                                {resources.filter(resource => shouldShowResource(resource.name)).map((resource, idx) => <div key={idx} className="px-2 py-1 rounded text-xs bg-secondary/80 text-secondary-foreground font-medium">
+                                {resources.filter(resource => shouldShowResource(resource.name)).map((resource, idx) => <div key={idx} className="px-2 py-1 rounded text-xs font-medium">
                                     {resource.name}
                                     {resource.details && <div className="text-[10px] text-muted-foreground mt-0.5">
                                         {resource.details}
