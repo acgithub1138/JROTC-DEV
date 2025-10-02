@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export interface JudgeAssignment {
   id: string;
@@ -24,6 +26,7 @@ export const useJudgeSchedule = (competitionId?: string) => {
   const [judgeAssignments, setJudgeAssignments] = useState<JudgeAssignment[]>([]);
   const [timeline, setTimeline] = useState<JudgeTimeline | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { timezone } = useSchoolTimezone();
 
   const fetchJudgeSchedule = useCallback(async () => {
     if (!competitionId) return;
@@ -68,8 +71,8 @@ export const useJudgeSchedule = (competitionId?: string) => {
 
       // Generate timeline
       if (assignments.length > 0) {
-        const startTimes = assignments.map(a => new Date(a.start_time));
-        const endTimes = assignments.map(a => new Date(a.end_time));
+        const startTimes = assignments.map(a => convertToSchoolTimezone(a.start_time, timezone));
+        const endTimes = assignments.map(a => convertToSchoolTimezone(a.end_time, timezone));
 
         const timelineStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
         const timelineEnd = new Date(Math.max(...endTimes.map(t => t.getTime())));
@@ -93,8 +96,8 @@ export const useJudgeSchedule = (competitionId?: string) => {
           getJudgesForSlot: (eventId: string, timeSlot: Date) => {
             const matchingAssignments = assignments.filter(a => {
               if (a.event_id !== eventId) return false;
-              const start = new Date(a.start_time);
-              const end = new Date(a.end_time);
+              const start = convertToSchoolTimezone(a.start_time, timezone);
+              const end = convertToSchoolTimezone(a.end_time, timezone);
               return timeSlot >= start && timeSlot < end;
             });
             return matchingAssignments.map(a => ({ 
@@ -105,8 +108,8 @@ export const useJudgeSchedule = (competitionId?: string) => {
           isEventActive: (eventId: string, timeSlot: Date) => {
             return assignments.some(a => {
               if (a.event_id !== eventId) return false;
-              const start = new Date(a.start_time);
-              const end = new Date(a.end_time);
+              const start = convertToSchoolTimezone(a.start_time, timezone);
+              const end = convertToSchoolTimezone(a.end_time, timezone);
               return timeSlot >= start && timeSlot < end;
             });
           }
@@ -120,7 +123,7 @@ export const useJudgeSchedule = (competitionId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [competitionId]);
+  }, [competitionId, timezone]);
 
   useEffect(() => {
     if (competitionId) {

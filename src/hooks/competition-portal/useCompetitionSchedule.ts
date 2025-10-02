@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useDebouncedValue } from '@/hooks/useDebounce';
+import { convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export interface ScheduleSlot {
   id: string;
@@ -51,6 +53,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const debouncedCompetitionId = useDebouncedValue(competitionId, 300);
+  const { timezone } = useSchoolTimezone();
 
   const fetchScheduleData = useCallback(async () => {
     if (!debouncedCompetitionId) return;
@@ -152,8 +155,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       // Generate unified competition timeline
       if (processedEvents.length > 0) {
         // Find competition-wide time boundaries
-        const startTimes = processedEvents.map(e => new Date(e.start_time));
-        const endTimes = processedEvents.map(e => new Date(e.end_time));
+        const startTimes = processedEvents.map(e => convertToSchoolTimezone(e.start_time, timezone));
+        const endTimes = processedEvents.map(e => convertToSchoolTimezone(e.end_time, timezone));
         const intervals = processedEvents.map(e => e.interval);
         
         const competitionStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
@@ -177,7 +180,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           getAssignedSchool: (eventId: string, timeSlot: Date) => {
             const scheduleForSlot = schedulesData?.find(
               s => s.event_id === eventId && 
-                   Math.abs(new Date(s.scheduled_time).getTime() - timeSlot.getTime()) < 1000
+                   Math.abs(convertToSchoolTimezone(s.scheduled_time, timezone).getTime() - timeSlot.getTime()) < 1000
             );
             const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
             
@@ -193,8 +196,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             const event = processedEvents.find(e => e.id === eventId);
             if (!event) return false;
             
-            const eventStart = new Date(event.start_time);
-            const eventEnd = new Date(event.end_time);
+            const eventStart = convertToSchoolTimezone(event.start_time, timezone);
+            const eventEnd = convertToSchoolTimezone(event.end_time, timezone);
             return timeSlot >= eventStart && timeSlot < eventEnd;
           },
           
@@ -202,8 +205,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             const event = processedEvents.find(e => e.id === eventId);
             if (!event || !event.lunch_start_time || !event.lunch_end_time) return false;
             
-            const lunchStart = new Date(event.lunch_start_time);
-            const lunchEnd = new Date(event.lunch_end_time);
+            const lunchStart = convertToSchoolTimezone(event.lunch_start_time, timezone);
+            const lunchEnd = convertToSchoolTimezone(event.lunch_end_time, timezone);
             return timeSlot >= lunchStart && timeSlot < lunchEnd;
           }
         };
@@ -223,7 +226,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  }, [debouncedCompetitionId]);
+  }, [debouncedCompetitionId, timezone]);
 
   const updateScheduleSlot = async (eventId: string, timeSlot: Date, schoolId: string | null) => {
     if (!debouncedCompetitionId) return;
