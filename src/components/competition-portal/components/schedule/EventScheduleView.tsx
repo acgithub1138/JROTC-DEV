@@ -142,7 +142,7 @@ export const EventScheduleView = ({
             Competition Schedule – {selectedSchoolFilter === 'all' ? 'All Schools' : selectedSchoolName}
           </h1>
         </div>
-        <div className="flex items-center justify-between no-print">
+        <div className="flex items-center justify-between flex-nowrap gap-4 no-print">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">Filter by school:</Label>
             <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
