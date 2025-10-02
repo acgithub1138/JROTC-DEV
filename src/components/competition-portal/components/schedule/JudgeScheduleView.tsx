@@ -53,6 +53,14 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     );
   }, [timeline, selectedJudge]);
 
+  // Get filtered judge assignments for individual print (must be before any early returns)
+  const filteredJudgeAssignments = useMemo(() => {
+    if (selectedJudge === 'all' || !judgeAssignments) return [];
+    return judgeAssignments
+      .filter(assignment => assignment.judge_name === selectedJudge)
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }, [judgeAssignments, selectedJudge]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -72,13 +80,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     );
   }
 
-  // Get filtered judge assignments for individual print
-  const filteredJudgeAssignments = useMemo(() => {
-    if (selectedJudge === 'all' || !judgeAssignments) return [];
-    return judgeAssignments
-      .filter(assignment => assignment.judge_name === selectedJudge)
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-  }, [judgeAssignments, selectedJudge]);
+  
 
   return (
     <div className="schedule-print-container space-y-4">

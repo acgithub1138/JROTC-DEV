@@ -65,33 +65,12 @@ export const EventScheduleView = ({
     return true;
   };
 
-  const handlePrint = () => window.print();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading schedule...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!events.length) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-muted-foreground">No events found for this competition.</p>
-      </div>
-    );
-  }
-
   const allTimeSlots = getAllTimeSlots();
   const filteredTimeSlots = allTimeSlots.filter(timeSlot =>
     events.some(event => shouldShowSlot(event.id, timeSlot))
   );
 
-  // Build linear schedule data for individual school print
+  // Build linear schedule data for individual school print (before early returns)
   const linearScheduleData = useMemo(() => {
     if (selectedSchoolFilter === 'all' || !timeline) return [];
     
@@ -133,6 +112,73 @@ export const EventScheduleView = ({
     return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
   }, [selectedSchoolFilter, registeredSchools]);
 
+  const handlePrint = () => window.print();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading schedule...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!events.length) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-muted-foreground">No events found for this competition.</p>
+      </div>
+    );
+  }
+
+  const allTimeSlots = getAllTimeSlots();
+  const filteredTimeSlots = allTimeSlots.filter(timeSlot =>
+    events.some(event => shouldShowSlot(event.id, timeSlot))
+  );
+
+  // Build linear schedule data for individual school print (before early returns)
+  const linearScheduleData = useMemo(() => {
+    if (selectedSchoolFilter === 'all' || !timeline) return [];
+    
+    const scheduleItems: Array<{
+      date: string;
+      time: string;
+      eventName: string;
+      location: string;
+      sortKey: number;
+    }> = [];
+
+    const slots = getAllTimeSlots();
+    events.forEach(event => {
+      slots.forEach(timeSlot => {
+        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+        if (assignedSchool?.id === selectedSchoolFilter && timeline.isEventActive(event.id, timeSlot)) {
+          scheduleItems.push({
+            date: formatTimeForDisplay(timeSlot, TIME_FORMATS.SHORT_DATE, timezone),
+            time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+            eventName: event.event_name,
+            location: event.event_location || '-',
+            sortKey: new Date(timeSlot).getTime()
+          });
+        }
+      });
+    });
+
+    return scheduleItems
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .filter((item, index, self) => 
+        index === self.findIndex(t => 
+          t.date === item.date && t.time === item.time && t.eventName === item.eventName
+        )
+      );
+  }, [selectedSchoolFilter, timeline, events, timezone]);
+
+  const selectedSchoolName = useMemo(() => {
+    if (selectedSchoolFilter === 'all') return '';
+    return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
+  }, [selectedSchoolFilter, registeredSchools]);
   return (
     <TooltipProvider>
       <div className="schedule-print-container space-y-4">

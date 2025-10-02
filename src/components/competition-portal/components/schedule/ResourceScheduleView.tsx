@@ -53,6 +53,14 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
     );
   }, [timeline, selectedResource]);
 
+  // Get filtered resource assignments for individual print (before early returns)
+  const filteredResourceAssignments = useMemo(() => {
+    if (selectedResource === 'all' || !resourceAssignments) return [];
+    return resourceAssignments
+      .filter(assignment => assignment.resource_name === selectedResource)
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }, [resourceAssignments, selectedResource]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -72,13 +80,7 @@ export const ResourceScheduleView = ({ competitionId }: ResourceScheduleViewProp
     );
   }
 
-  // Get filtered resource assignments for individual print
-  const filteredResourceAssignments = useMemo(() => {
-    if (selectedResource === 'all' || !resourceAssignments) return [];
-    return resourceAssignments
-      .filter(assignment => assignment.resource_name === selectedResource)
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-  }, [resourceAssignments, selectedResource]);
+  
 
   return (
     <div className="schedule-print-container space-y-4">
