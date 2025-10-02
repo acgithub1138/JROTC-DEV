@@ -396,15 +396,18 @@ export const CompetitionEventRecord: React.FC = () => {
         });
         if (error) throw error;
         toast.success('Event created successfully');
-        await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       } else if (isEditMode && eventId) {
         const {
           error
         } = await supabase.from('cp_comp_events').update(eventData).eq('id', eventId);
         if (error) throw error;
         toast.success('Event updated successfully');
-        await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
       }
+      
+      // Invalidate and refetch the events list before navigating
+      await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
+      await queryClient.refetchQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
+      
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
@@ -423,7 +426,11 @@ export const CompetitionEventRecord: React.FC = () => {
       } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
       if (error) throw error;
       toast.success('Event deleted successfully');
+      
+      // Invalidate and refetch the events list before navigating
       await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
+      await queryClient.refetchQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
+      
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
       console.error('Error deleting event:', error);
