@@ -1,68 +1,50 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
 import { useRolePermissionMap } from '@/hooks/useRolePermissionMap';
 import { useDynamicRoles } from '@/hooks/useDynamicRoles';
-import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, RotateCcw } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 import { AddRoleDialog } from './AddRoleDialog';
-import { PortalPermissionsTable } from './PortalPermissionsTable';
-import { DashboardWidgetsTable } from './DashboardWidgetsTable';
 import { UserRolesTable } from './UserRolesTable';
 import ModulesManagement from './ModulesManagement';
 import { ActionsManagement } from './ActionsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
-// Helper function to get role colors
-const getRoleColor = (roleName: string): string => {
-  const colorMap: Record<string, string> = {
-    instructor: 'bg-purple-100 text-purple-800',
-    command_staff: 'bg-blue-100 text-blue-800',
-    cadet: 'bg-green-100 text-green-800'
-  };
-  return colorMap[roleName] || 'bg-gray-100 text-gray-800';
-};
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
-  // Optimistic state removed: rely on DB + role-scoped refetch for truth
+  const { hasPermission } = usePermissionContext();
   
   const {
     modules,
     actions,
-    getRolePermissions,
     updatePermission,
     resetToDefaults,
     isUpdating,
     isResetting,
     refreshData
   } = useRoleManagement();
+  
   const {
     allRoles,
     isLoadingAllRoles,
     error: rolesError
   } = useDynamicRoles();
-  const {
-    data: permissionTest
-  } = usePermissionTest();
-  const {
-    toast
-  } = useToast();
+  
+  const { toast } = useToast();
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('Role Management Page - Permission Test:', permissionTest);
-    console.log('Role Management Page - All Roles:', allRoles);
-    console.log('Role Management Page - Roles Error:', rolesError);
-  }, [permissionTest, allRoles, rolesError]);
+  // Permission checks
+  const canUpdatePermission = hasPermission('permissions', 'update');
 
-  // Convert dynamic roles to the expected format, excluding admin and parent for role management UI
+  // Convert dynamic roles to the expected format
   const availableRoles = useMemo(() => {
     if (!allRoles?.length) {
-      console.log('No roles available, using fallback');
       return [{
         value: 'instructor' as UserRole,
         label: 'Instructor'
@@ -74,64 +56,59 @@ export const RoleManagementPage: React.FC = () => {
         label: 'Cadet'
       }];
     }
-    const roles = allRoles.map(role => ({
-      value: role.role_name as UserRole,
-      label: role.role_label
-    }));
-    console.log('Available roles for management:', roles);
-    return roles;
+    return allRoles
+      .filter(role => role.role_name !== 'admin')
+      .map(role => ({
+        value: role.role_name as UserRole,
+        label: role.role_label
+      }));
   }, [allRoles]);
 
   // Use role-scoped permissions map as the source of truth
   const { rolePermissionsMap, refetch: refetchRolePerms, setOptimisticPermission } = useRolePermissionMap(selectedRole);
-  const rolePermissions = rolePermissionsMap;
+  const [permissionsLoadingState, setPermissionsLoading] = useState(false);
   
-  const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
-    const module = modules.find(m => m.id === moduleId);
-    const action = actions.find(a => a.id === actionId);
-    if (!module || !action) {
-      console.error('Module or action not found:', { moduleId, actionId });
-      return;
-    }
-    
+  const handleRoleSelect = async (roleId: string) => {
+    setSelectedRole(roleId as UserRole);
+    setPermissionsLoading(true);
+    await refetchRolePerms();
+    setPermissionsLoading(false);
+  };
+
+  const getPermissionValue = (moduleId: string, actionId: string): boolean => {
+    return rolePermissionsMap?.[moduleId]?.[actionId] ?? false;
+  };
+
+  const togglePermission = (moduleId: string, actionId: string, checked: boolean) => {
     // Apply optimistic update immediately
-    setOptimisticPermission(moduleId, actionId, enabled);
+    setOptimisticPermission(moduleId, actionId, checked);
     
     // Update database in background
-    updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
+    updatePermission({ role: selectedRole, moduleId, actionId, enabled: checked }, {
       onError: error => {
         console.error('Permission update error:', error);
         // Revert optimistic update on error
         refetchRolePerms();
-        toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
-      }
-    });
-  };
-  const handleResetToDefaults = () => {
-    console.log('Resetting permissions to defaults for role:', selectedRole);
-    resetToDefaults(selectedRole, {
-      onError: error => {
-        console.error('Reset permissions error:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to reset permissions. Please try again.',
-          variant: 'destructive'
+        toast({ 
+          title: 'Error', 
+          description: 'Failed to update permission. Please try again.', 
+          variant: 'destructive' 
         });
+      },
+      onSuccess: () => {
+        // Refresh to ensure UI is in sync
+        refetchRolePerms();
       }
     });
   };
 
-  // Show error state if there's an issue with roles
   if (rolesError) {
-    return <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Role Management</h1>
-          <p className="text-gray-600">Configure permissions for each user role and manage role definitions.</p>
-        </div>
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-red-600 mb-4">Error loading roles: {rolesError.message}</p>
+              <p className="text-destructive mb-4">Error loading roles: {rolesError.message}</p>
               <Button onClick={refreshData}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Retry
@@ -139,111 +116,85 @@ export const RoleManagementPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>;
-  }
-
-  // Check permission test results with proper type checking
-  const hasPermissionTestError = permissionTest && 'error' in permissionTest;
-  if (hasPermissionTestError) {
-    console.warn('Permission system may have issues:', permissionTest.error);
-  }
-  return <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Role Management</h1>
-        <p className="text-gray-600">
-          Configure permissions for each user role and manage role definitions.
-        </p>
-        {permissionTest && <div className="mt-2 text-sm text-gray-500">
-            System Status: {'success' in permissionTest && permissionTest.success ? '✅ Working' : '❌ Error'} | 
-            Current Role: {'userRole' in permissionTest ? permissionTest.userRole : 'Unknown'} | 
-            Can Read Users: {'canReadUsers' in permissionTest ? permissionTest.canReadUsers ? '✅' : '❌' : '❌'} | 
-            Can Create Users: {'canCreateUsers' in permissionTest ? permissionTest.canCreateUsers ? '✅' : '❌' : '❌'}
-          </div>}
       </div>
-
-      <Tabs defaultValue="permissions" className="w-full py-[2px]">
+    );
+  }
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <Tabs defaultValue="permissions" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
-          <TabsTrigger value="roles">Manage Roles</TabsTrigger>
+          <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          <TabsTrigger value="roles">Roles</TabsTrigger>
           <TabsTrigger value="modules">Modules</TabsTrigger>
           <TabsTrigger value="actions">Actions</TabsTrigger>
         </TabsList>
         
         <TabsContent value="permissions">
-          <Card className="mb-6">
-            <CardHeader className="py-0">
-              <CardTitle className="flex items-center justify-between py-0">
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Role
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {isLoadingAllRoles ? <SelectItem value="loading" disabled>
-                            Loading roles...
-                          </SelectItem> : availableRoles.map(role => <SelectItem key={role.value} value={role.value}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>{role.label}</span>
-                              </div>
-                            </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Permissions</CardTitle>
+                  <CardDescription>Manage Role Permissions</CardDescription>
                 </div>
-                
-                <div className="flex items-center gap-4">
-                  <AddRoleDialog />
-                  <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    Refresh
-                  </Button>
-                </div>
-              </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="ccc" className="w-full">
-                <TabsList className="mb-6">
-                  <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
-                  <TabsTrigger value="competition">Comp Portal Permissions</TabsTrigger>
-                  <TabsTrigger value="dashboard">Dashboard Widgets</TabsTrigger>
-                </TabsList>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="role-select">Select Role</Label>
+                <Select value={selectedRole} onValueChange={handleRoleSelect}>
+                  <SelectTrigger id="role-select" className="w-full md:w-[300px]">
+                    <SelectValue placeholder="Choose a role to configure" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {availableRoles.map(role => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <TabsContent value="ccc">
-                  <PortalPermissionsTable 
-                    portal="ccc" 
-                    modules={modules} 
-                    actions={actions} 
-                    rolePermissions={rolePermissions} 
-                    isUpdating={isUpdating} 
-                    handlePermissionChange={handlePermissionChange} 
-                  />
-                </TabsContent>
-
-                <TabsContent value="competition">
-                  <PortalPermissionsTable 
-                    portal="competition" 
-                    modules={modules} 
-                    actions={actions} 
-                    rolePermissions={rolePermissions} 
-                    isUpdating={isUpdating} 
-                    handlePermissionChange={handlePermissionChange} 
-                  />
-                </TabsContent>
-
-                <TabsContent value="dashboard">
-                  <DashboardWidgetsTable
-                    modules={modules} 
-                    actions={actions} 
-                    rolePermissions={rolePermissions} 
-                    isUpdating={isUpdating} 
-                    handlePermissionChange={handlePermissionChange} 
-                  />
-                </TabsContent>
-              </Tabs>
+              {selectedRole && (
+                permissionsLoadingState ? (
+                  <p className="text-muted-foreground">Loading permissions...</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[200px]">Module</TableHead>
+                          {actions.map(action => (
+                            <TableHead key={action.id} className="text-center">
+                              {action.label}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {modules.map(module => (
+                          <TableRow key={module.id}>
+                            <TableCell className="font-medium py-2">{module.label}</TableCell>
+                            {actions.map(action => {
+                              const value = getPermissionValue(module.id, action.id);
+                              return (
+                                <TableCell key={action.id} className="text-center py-2">
+                                  <Switch 
+                                    checked={value}
+                                    onCheckedChange={(checked) => togglePermission(module.id, action.id, checked)}
+                                    disabled={!canUpdatePermission}
+                                  />
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -260,5 +211,6 @@ export const RoleManagementPage: React.FC = () => {
           <ActionsManagement />
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
