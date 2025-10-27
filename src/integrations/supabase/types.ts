@@ -1464,6 +1464,81 @@ export type Database = {
           },
         ]
       }
+      cp_judge_competition_registrations: {
+        Row: {
+          availability_notes: string | null
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          decline_reason: string | null
+          id: string
+          judge_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          availability_notes?: string | null
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          decline_reason?: string | null
+          id?: string
+          judge_id: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          availability_notes?: string | null
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          decline_reason?: string | null
+          id?: string
+          judge_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_judge_competition_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_judge_competition_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_judge_competition_registrations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_judge_competition_registrations_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "cp_judges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_judge_competition_registrations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cp_judges: {
         Row: {
           available: boolean
@@ -1473,8 +1548,9 @@ export type Database = {
           id: string
           name: string
           phone: string | null
-          school_id: string
+          school_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           available?: boolean
@@ -1484,8 +1560,9 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
-          school_id: string
+          school_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           available?: boolean
@@ -1495,8 +1572,9 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
-          school_id?: string
+          school_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1504,6 +1582,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_judges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
