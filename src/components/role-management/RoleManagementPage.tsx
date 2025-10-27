@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ const getRoleColor = (roleName: string): string => {
 };
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
-  // Optimistic state removed: rely on DB + role-scoped refetch for truth
+  const [localPermissions, setLocalPermissions] = useState<Record<string, Record<string, boolean>>>({});
   
   const {
     modules,
@@ -83,8 +83,12 @@ export const RoleManagementPage: React.FC = () => {
   }, [allRoles]);
 
   // Use role-scoped permissions map as the source of truth
-  const { rolePermissionsMap, refetch: refetchRolePerms, setOptimisticPermission } = useRolePermissionMap(selectedRole);
-  const rolePermissions = rolePermissionsMap;
+  const { rolePermissionsMap, refetch: refetchRolePerms } = useRolePermissionMap(selectedRole);
+  
+  // Sync local permissions with fetched permissions whenever they change
+  useEffect(() => {
+    setLocalPermissions(rolePermissionsMap);
+  }, [rolePermissionsMap]);
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
     const module = modules.find(m => m.id === moduleId);
@@ -94,14 +98,24 @@ export const RoleManagementPage: React.FC = () => {
       return;
     }
     
-    // Apply optimistic update immediately
-    setOptimisticPermission(moduleId, actionId, enabled);
+    // Update local state immediately for instant UI feedback
+    setLocalPermissions(prev => ({
+      ...prev,
+      [moduleId]: {
+        ...(prev[moduleId] || {}),
+        [actionId]: enabled
+      }
+    }));
     
     // Update database in background
     updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
+      onSuccess: () => {
+        // Refetch to ensure consistency with database
+        refetchRolePerms();
+      },
       onError: error => {
         console.error('Permission update error:', error);
-        // Revert optimistic update on error
+        // Revert to database state on error
         refetchRolePerms();
         toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
       }
@@ -217,7 +231,7 @@ export const RoleManagementPage: React.FC = () => {
                     portal="ccc" 
                     modules={modules} 
                     actions={actions} 
-                    rolePermissions={rolePermissions} 
+                    rolePermissions={localPermissions} 
                     isUpdating={isUpdating} 
                     handlePermissionChange={handlePermissionChange} 
                   />
@@ -228,7 +242,7 @@ export const RoleManagementPage: React.FC = () => {
                     portal="competition" 
                     modules={modules} 
                     actions={actions} 
-                    rolePermissions={rolePermissions} 
+                    rolePermissions={localPermissions} 
                     isUpdating={isUpdating} 
                     handlePermissionChange={handlePermissionChange} 
                   />
@@ -238,7 +252,7 @@ export const RoleManagementPage: React.FC = () => {
                   <DashboardWidgetsTable
                     modules={modules} 
                     actions={actions} 
-                    rolePermissions={rolePermissions} 
+                    rolePermissions={localPermissions} 
                     isUpdating={isUpdating} 
                     handlePermissionChange={handlePermissionChange} 
                   />
