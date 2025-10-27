@@ -101,9 +101,9 @@ serve(async (req) => {
       .insert({
         name,
         initials,
-        contact_person,
-        contact_email,
-        contact_phone,
+        contact: contact_person,
+        email: contact_email,
+        phone: contact_phone,
         jrotc_program,
         timezone,
         referred_by,
