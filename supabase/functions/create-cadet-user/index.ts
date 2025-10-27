@@ -284,6 +284,40 @@ serve(async (req) => {
       }
     }
 
+    // Queue welcome email for non-judge users with school_id
+    if (finalRoleName !== 'judge' && school_id) {
+      console.log('Queueing welcome email for user:', authUser.user!.id)
+      
+      // Find active welcome email template for this school
+      const { data: welcomeTemplate, error: templateError } = await supabaseAdmin
+        .from('email_templates')
+        .select('id')
+        .eq('school_id', school_id)
+        .eq('source_table', 'profiles')
+        .ilike('name', '%welcome%')
+        .eq('is_active', true)
+        .single()
+      
+      if (welcomeTemplate && !templateError) {
+        const { data: queueResult, error: queueError } = await supabaseAdmin
+          .rpc('queue_email', {
+            template_id_param: welcomeTemplate.id,
+            recipient_email_param: email,
+            source_table_param: 'profiles',
+            record_id_param: authUser.user!.id,
+            school_id_param: school_id
+          })
+        
+        if (queueError) {
+          console.error('Failed to queue welcome email:', queueError)
+        } else {
+          console.log('Welcome email queued successfully:', queueResult)
+        }
+      } else {
+        console.log('No active welcome email template found for school:', school_id)
+      }
+    }
+
     const response = new Response(
       JSON.stringify({ 
         success: true, 
