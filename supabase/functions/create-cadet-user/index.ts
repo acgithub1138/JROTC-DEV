@@ -13,6 +13,7 @@ interface CreateCadetRequest {
   password?: string
   first_name: string
   last_name: string
+  phone?: string
   role?: string // Use string instead of hardcoded roles
   role_id?: string // Accept role_id as string (like "command staff") 
   grade?: string
@@ -20,7 +21,7 @@ interface CreateCadetRequest {
   flight?: string
   cadet_year?: string
   start_year?: number
-  school_id: string
+  school_id?: string | null // Optional for judges
 }
 
 // Initialize Supabase admin client
@@ -45,11 +46,6 @@ serve(async (req) => {
   try {
     console.log('Function started')
     
-    // Validate authentication using shared utility
-    const { profile: actorProfile } = await validateAuthentication(req)
-    
-    console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
-
     const requestBody = await req.json()
     console.log('Request body:', JSON.stringify(requestBody))
 
@@ -57,7 +53,8 @@ serve(async (req) => {
       email, 
       password,
       first_name, 
-      last_name, 
+      last_name,
+      phone,
       role,
       role_id, // Accept role_id as alternative to role
       grade, 
@@ -124,27 +121,44 @@ serve(async (req) => {
       console.log('Defaulting to cadet role')
     }
 
-    // Validate input parameters
-    if (!email || !first_name || !last_name || !school_id) {
-      throw new Error('Required fields missing: email, first_name, last_name, school_id')
+    // Judge self-registration is allowed without authentication
+    let actorProfile = null
+    if (finalRoleName !== 'judge') {
+      // Validate authentication for non-judge roles using shared utility
+      const authResult = await validateAuthentication(req)
+      actorProfile = authResult.profile
+      
+      console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
+
+      // Check permissions using database instead of hardcoded roles
+      const { data: hasCreatePermission, error: permissionError } = await supabaseAdmin
+        .rpc('check_user_permission', {
+          user_id: actorProfile.id,
+          module_name: 'cadets',
+          action_name: 'create'
+        })
+      
+      if (permissionError || !hasCreatePermission) {
+        console.error('Permission check error:', permissionError)
+        throw new Error('You do not have permission to create users')
+      }
+      
+      // Non-admin users can only create users for their own school
+      if (actorProfile.role !== 'admin' && actorProfile.school_id !== school_id) {
+        throw new Error('You can only create users for your own school')
+      }
+    } else {
+    console.log('Judge self-registration - skipping authentication check')
     }
 
-    // Check permissions using database instead of hardcoded roles
-    const { data: hasCreatePermission, error: permissionError } = await supabaseAdmin
-      .rpc('check_user_permission', {
-        user_id: actorProfile.id,
-        module_name: 'cadets',
-        action_name: 'create'
-      })
-    
-    if (permissionError || !hasCreatePermission) {
-      console.error('Permission check error:', permissionError)
-      throw new Error('You do not have permission to create users')
+    // Validate input parameters
+    // For judges, school_id is optional (should be null)
+    if (!email || !first_name || !last_name) {
+      throw new Error('Required fields missing: email, first_name, last_name')
     }
     
-    // Non-admin users can only create users for their own school
-    if (actorProfile.role !== 'admin' && actorProfile.school_id !== school_id) {
-      throw new Error('You can only create users for your own school')
+    if (!school_id && finalRoleName !== 'judge') {
+      throw new Error('school_id is required for non-judge roles')
     }
 
     console.log('Creating user:', email, 'with role:', finalRoleName, 'role_id:', finalRoleId, 'in school:', school_id)
@@ -160,6 +174,7 @@ serve(async (req) => {
       user_metadata: {
         first_name,
         last_name,
+        phone: phone || null,
         role: finalRoleName,
         role_id: finalRoleId,
         school_id,
@@ -207,6 +222,7 @@ serve(async (req) => {
       email,
       first_name,
       last_name,
+      phone: phone || null,
       role: finalRoleName,
       role_id: finalRoleId,
       school_id,
@@ -245,6 +261,28 @@ serve(async (req) => {
     }
     
     console.log('Profile created successfully for user:', authUser.user!.id)
+
+    // If role is judge, also create cp_judges record
+    if (finalRoleName === 'judge') {
+      console.log('Creating cp_judges record for judge user:', authUser.user!.id)
+      const { error: judgeError } = await supabaseAdmin
+        .from('cp_judges')
+        .insert({
+          user_id: authUser.user!.id,
+          name: `${last_name}, ${first_name}`,
+          email: email,
+          phone: profileInsert.phone || null,
+          available: true,
+          school_id: null
+        })
+        
+      if (judgeError) {
+        console.error('Failed to create cp_judges record:', judgeError)
+        // Don't fail the whole operation, just log it
+      } else {
+        console.log('Judge record created successfully in cp_judges table')
+      }
+    }
 
     const response = new Response(
       JSON.stringify({ 

@@ -61,45 +61,29 @@ export const JudgesAuthPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
-      // Get judge role_id from user_roles table
-      const { data: judgeRole, error: roleError } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('role_name', 'judge')
-        .single();
-
-      if (roleError || !judgeRole) {
-        toast.error('Judge role not found. Please contact an administrator.');
-        setIsLoading(false);
-        return;
-      }
-
-      const redirectUrl = `${window.location.origin}/app/judges-portal`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone,
-            role: 'judge',
-            role_id: judgeRole.id
-          }
+      // Call the existing create-cadet-user edge function with role: 'judge'
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          role: 'judge',
+          school_id: null  // Judges don't belong to a school
         }
       });
 
       if (error) throw error;
 
-      if (data.user) {
-        toast.success('Account created successfully! Please check your email to verify your account.');
-        // Switch to sign in mode
-        setIsSignUp(false);
+      if (data?.error) {
+        throw new Error(data.error);
       }
+
+      toast.success('Your judge account has been created successfully! You can now sign in.');
+      setIsSignUp(false);
     } catch (error: any) {
       console.error('Sign up error:', error);
       toast.error(error.message || 'Failed to create account');
