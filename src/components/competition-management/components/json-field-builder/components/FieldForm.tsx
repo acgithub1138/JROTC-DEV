@@ -110,7 +110,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               </>}
           </>}
 
-        {currentField.type !== 'bold_gray' && currentField.type !== 'section_header' && currentField.type !== 'text' && <div className="flex items-center space-x-2">
+        {currentField.type !== 'bold_gray' && currentField.type !== 'section_header' && currentField.type !== 'text' && currentField.type !== 'penalty' && <div className="flex items-center space-x-2">
             <Switch id="pauseField" checked={currentField.pauseField || false} onCheckedChange={checked => onFieldUpdate('pauseField', checked)} />
             <Label htmlFor="pauseField">Bold and Grey</Label>
           </div>}
