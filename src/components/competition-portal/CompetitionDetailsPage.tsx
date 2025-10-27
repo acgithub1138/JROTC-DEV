@@ -11,6 +11,7 @@ import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
 import { CompetitionScheduleTab } from './tabs/CompetitionScheduleTab';
 import { CompetitionResultsTab } from './tabs/CompetitionResultsTab';
 import { CompetitionJudgesTab } from './tabs/CompetitionJudgesTab';
+import { CompetitionJudgeApplicationsTab } from './tabs/CompetitionJudgeApplicationsTab';
 export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,6 +67,11 @@ export const CompetitionDetailsPage = () => {
     label: 'Judges',
     canAccess: judgesPermissions.canAccess
   }, {
+    id: 'judge-applications',
+    name: 'cp_judge_applications',
+    label: 'Judge Applications',
+    canAccess: judgesPermissions.canAccess // Reuse judges permission for now
+  }, {
     id: 'resources',
     name: 'cp_comp_resources',
     label: 'Resources',
@@ -91,6 +97,7 @@ export const CompetitionDetailsPage = () => {
   const urlToTabMap: { [key: string]: string } = {
     'events': 'cp_comp_events',
     'judges': 'cp_comp_judges',
+    'judge-applications': 'cp_judge_applications',
     'resources': 'cp_comp_resources', 
     'schools': 'cp_comp_schools',
     'schedule': 'cp_schedules',
@@ -135,6 +142,7 @@ export const CompetitionDetailsPage = () => {
                   {/* Render tab content based on tab name */}
                   {tab.name === 'cp_comp_events' && <CompetitionEventsTab competitionId={competitionId} />}
                   {tab.name === 'cp_comp_judges' && <CompetitionJudgesTab competitionId={competitionId} />}
+                  {tab.name === 'cp_judge_applications' && <CompetitionJudgeApplicationsTab competitionId={competitionId} />}
                   {tab.name === 'cp_comp_resources' && <CompetitionResourcesTab competitionId={competitionId} />}
                   {tab.name === 'cp_comp_schools' && <CompetitionSchoolsTab competitionId={competitionId} />}
                   {tab.name === 'cp_schedules' && <div className="schedule-print-wrapper">
