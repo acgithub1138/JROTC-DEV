@@ -29,7 +29,7 @@ export const useAvailableCompetitions = () => {
         .from('cp_competitions')
         .select('*')
         .eq('is_public', true)
-        .eq('status', 'published')
+        .eq('status', 'open')
         .gte('start_date', new Date().toISOString())
         .order('start_date', { ascending: true });
       
