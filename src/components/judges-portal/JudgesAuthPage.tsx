@@ -60,33 +60,50 @@ export const JudgesAuthPage = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     setIsLoading(true);
-    
+
     try {
-      // Call the existing create-cadet-user edge function with role: 'judge'
-      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
-        body: {
-          email: formData.email,
-          password: formData.password,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          role: 'judge',
-          school_id: null  // Judges don't belong to a school
+      // Look up the judge role ID
+      const { data: judgeRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', 'judge')
+        .single();
+
+      if (roleError) {
+        console.error('Error fetching judge role:', roleError);
+        throw new Error('Failed to fetch judge role');
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone || null,
+            role: 'judge',
+            role_id: judgeRole.id,
+            school_id: null
+          },
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
 
       if (error) throw error;
 
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      toast.success('Your judge account has been created successfully! You can now sign in.');
+      toast.success("Account created successfully! Please sign in.");
       setIsSignUp(false);
+      setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
     } catch (error: any) {
       console.error('Sign up error:', error);
-      toast.error(error.message || 'Failed to create account');
+      toast.error(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
