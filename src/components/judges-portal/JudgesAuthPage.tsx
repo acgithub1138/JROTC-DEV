@@ -68,35 +68,21 @@ export const JudgesAuthPage = () => {
     setIsLoading(true);
 
     try {
-      // Look up the judge role ID
-      const { data: judgeRole, error: roleError } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('role_name', 'judge')
-        .single();
-
-      if (roleError) {
-        console.error('Error fetching judge role:', roleError);
-        throw new Error('Failed to fetch judge role');
-      }
-
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone || null,
-            role: 'judge',
-            role_id: judgeRole.id,
-            school_id: null
-          },
-          emailRedirectTo: `${window.location.origin}/`
+      const { data, error } = await supabase.functions.invoke('create-judge-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone || null
         }
       });
 
       if (error) throw error;
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast.success("Account created successfully! Please sign in.");
       setIsSignUp(false);

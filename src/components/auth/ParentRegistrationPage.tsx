@@ -162,81 +162,36 @@ const ParentRegistrationPage = () => {
       // Generate secure password for parent
       const { generateSecurePassword } = await import('@/lib/password-utils');
       const tempPassword = generateSecurePassword(12);
-      
-      // Hardcoded parent role ID (never changes)  
-      const parentRoleId = 'f8134411-7778-4c37-a39a-e727cfa197c8';
 
-      // Create parent user account using signUp with generated password
-      const redirectUrl = `${window.location.origin}/`;
-      const { data: signUpRes, error: authError } = await supabase.auth.signUp({
-        email: parentData.email,
-        password: tempPassword,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: parentData.firstName,
-            last_name: parentData.lastName,
-            phone: parentData.phone,
-            cadet_id: cadetProfile.cadet_id,
-            school_id: cadetProfile.school_id,
-            role: 'parent',
-            role_id: parentRoleId,
-            generated_password: tempPassword,
-            password_change_required: true,
-            temp_pswd: tempPassword
-          }
+      // Create parent user account using the edge function
+      const { data, error: createError } = await supabase.functions.invoke('create-parent-user', {
+        body: {
+          email: parentData.email,
+          password: tempPassword,
+          first_name: parentData.firstName,
+          last_name: parentData.lastName,
+          phone: parentData.phone,
+          cadet_id: cadetProfile.cadet_id
         }
       });
 
-      if (authError) {
+      if (createError) {
         toast({
           title: "Registration Failed",
-          description: authError.message || "Failed to create parent account",
+          description: createError.message || "Failed to create parent account",
           variant: "destructive"
         });
         return;
       }
 
-      // Ensure the profile exists, then set password_change_required before signing out
-      const newUserId = signUpRes?.user?.id;
-      let profileId: string | null = null;
-
-      if (newUserId) {
-        for (let i = 0; i < 10; i++) {
-          const { data: profileRow } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', newUserId)
-            .single();
-          if (profileRow?.id) {
-            profileId = profileRow.id;
-            break;
-          }
-          await new Promise((r) => setTimeout(r, 300));
-        }
+      if (data?.error) {
+        toast({
+          title: "Registration Failed",
+          description: data.error || "Failed to create parent account",
+          variant: "destructive"
+        });
+        return;
       }
-
-      if (!profileId) {
-        const { data: newParentProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', parentData.email)
-          .single();
-        profileId = newParentProfile?.id ?? null;
-      }
-
-      if (profileId) {
-        const { error: updateErr } = await supabase
-          .from('profiles')
-          .update({ password_change_required: true, temp_pswd: tempPassword })
-          .eq('id', profileId);
-        if (updateErr) {
-          console.error('Failed to set password_change_required:', updateErr);
-        }
-      }
-
-      // Now sign out to prevent auto-login to the new parent account
-      await supabase.auth.signOut();
       toast({
         title: "Registration Successful",
         description: "Your parent account has been created. Please check your email for your password. Please sign in to access your cadet's school calendar."
