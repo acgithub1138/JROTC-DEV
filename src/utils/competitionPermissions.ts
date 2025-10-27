@@ -30,6 +30,11 @@ export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
   
   // Both flags allow access to score sheets (can be accessed from either section)
   { moduleId: 'cp_score_sheets', requiresCompetitionModule: true, requiresCompetitionPortal: true },
+  
+  // Judges Portal sections (competition_portal = true)
+  { moduleId: 'judges_portal', requiresCompetitionPortal: true },
+  { moduleId: 'cp_judge_applications', requiresCompetitionPortal: true },
+  { moduleId: 'open_comps_open', requiresCompetitionPortal: true },
 ];
 
 /**
