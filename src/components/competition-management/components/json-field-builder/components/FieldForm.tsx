@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
 import { JsonField } from '../types';
 
@@ -174,6 +175,107 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </div>
         )}
       </div>
+
+      {/* Field Preview */}
+      {currentField.name && (
+        <div className="border rounded-lg p-4 bg-muted/30 space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Preview:</p>
+          <div className="bg-background rounded-md p-3 border">
+            {currentField.type === 'section_header' && (
+              <h3 className="text-lg font-bold text-primary">{currentField.name}</h3>
+            )}
+            
+            {(currentField.type === 'label' || currentField.type === 'bold_gray') && (
+              <div>
+                <p className={currentField.type === 'bold_gray' ? 'font-bold text-muted-foreground' : 'text-foreground'}>
+                  {currentField.name}
+                </p>
+                {currentField.fieldInfo && (
+                  <p className="text-xs text-muted-foreground mt-1">{currentField.fieldInfo}</p>
+                )}
+              </div>
+            )}
+            
+            {currentField.type === 'text' && (
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                {currentField.textType === 'notes' ? (
+                  <Textarea placeholder="Notes..." disabled className="resize-none" />
+                ) : (
+                  <Input placeholder="Short text..." disabled />
+                )}
+                {currentField.fieldInfo && (
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
+                )}
+              </div>
+            )}
+            
+            {currentField.type === 'number' && (
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                <Input type="number" placeholder={`Max: ${currentField.maxValue || 100}`} disabled />
+                {currentField.fieldInfo && (
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
+                )}
+              </div>
+            )}
+            
+            {currentField.type === 'dropdown' && (
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                <Select disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an option..." />
+                  </SelectTrigger>
+                </Select>
+                {currentField.fieldInfo && (
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
+                )}
+              </div>
+            )}
+            
+            {currentField.type === 'penalty' && (
+              <div className="space-y-1">
+                <Label className="text-destructive font-medium">{currentField.name}</Label>
+                {currentField.penaltyType === 'points' && (
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="0" disabled className="w-20" />
+                    <span className="text-sm text-muted-foreground">× {currentField.pointValue || -10} pts</span>
+                  </div>
+                )}
+                {currentField.penaltyType === 'minor_major' && (
+                  <Select disabled>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select penalty..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minor">Minor (-20)</SelectItem>
+                      <SelectItem value="major">Major (-50)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                {currentField.penaltyType === 'split' && (
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="0" disabled className="w-20" />
+                    <span className="text-sm text-muted-foreground">
+                      1st: {currentField.splitFirstValue || -5} pts, 2+: {currentField.splitSubsequentValue || -25} pts
+                    </span>
+                  </div>
+                )}
+                {currentField.fieldInfo && (
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <Button type="button" onClick={onAddField} className="w-full" disabled={!currentField.name}>
         <Plus className="w-4 h-4 mr-2" />
