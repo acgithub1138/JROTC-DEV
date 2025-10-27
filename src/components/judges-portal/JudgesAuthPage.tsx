@@ -62,6 +62,19 @@ export const JudgesAuthPage = () => {
     setIsLoading(true);
 
     try {
+      // Get judge role_id from user_roles table
+      const { data: judgeRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', 'judge')
+        .single();
+
+      if (roleError || !judgeRole) {
+        toast.error('Judge role not found. Please contact an administrator.');
+        setIsLoading(false);
+        return;
+      }
+
       const redirectUrl = `${window.location.origin}/app/judges-portal`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -72,7 +85,8 @@ export const JudgesAuthPage = () => {
           data: {
             name: formData.name,
             phone: formData.phone,
-            role: 'judge'
+            role: 'judge',
+            role_id: judgeRole.id
           }
         }
       });

@@ -4367,6 +4367,10 @@ export type Database = {
         }
         Returns: string
       }
+      can_judge_access: {
+        Args: { action_name: string; module_name: string }
+        Returns: boolean
+      }
       can_manage_user_role: {
         Args: { target_role_name: string }
         Returns: boolean
@@ -4405,6 +4409,10 @@ export type Database = {
           school_id: string
           stuck_count: number
         }[]
+      }
+      check_judge_permission: {
+        Args: { action_name: string; module_name: string; user_id: string }
+        Returns: boolean
       }
       check_user_permission: {
         Args: { action_name: string; module_name: string; user_id: string }
