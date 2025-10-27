@@ -217,17 +217,19 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
               );
             })}
             
-            <Button
-              variant="outline"
-              className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100"
-              onClick={() => {
-                handleReturnToCCC();
-                setSidebarOpen?.(false);
-              }}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Return to CCC
-            </Button>
+            {userProfile?.role !== 'external' && (
+              <Button
+                variant="outline"
+                className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100"
+                onClick={() => {
+                  handleReturnToCCC();
+                  setSidebarOpen?.(false);
+                }}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Return to CCC
+              </Button>
+            )}
           </div>
         </SheetContent>
       </Sheet>
@@ -285,30 +287,32 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
         </div>
       </ScrollArea>
 
-      {/* Return to CCC Button */}
-      <div className="p-3 border-t border-gray-700">
-        <Button 
-          variant="outline" 
-          className="w-full justify-start text-left font-normal" 
-          style={{
-            borderColor: currentTheme.link_text,
-            color: currentTheme.link_text,
-            backgroundColor: 'transparent'
-          }} 
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-            e.currentTarget.style.color = '#ffffff';
-          }} 
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = currentTheme.link_text;
-          }} 
-          onClick={handleReturnToCCC}
-        >
-          <ArrowLeft className="w-4 h-4 mr-3" />
-          Return to CCC
-        </Button>
-      </div>
+      {/* Return to CCC Button - Hidden for external users */}
+      {userProfile?.role !== 'external' && (
+        <div className="p-3 border-t border-gray-700">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start text-left font-normal" 
+            style={{
+              borderColor: currentTheme.link_text,
+              color: currentTheme.link_text,
+              backgroundColor: 'transparent'
+            }} 
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+              e.currentTarget.style.color = '#ffffff';
+            }} 
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = currentTheme.link_text;
+            }} 
+            onClick={handleReturnToCCC}
+          >
+            <ArrowLeft className="w-4 h-4 mr-3" />
+            Return to CCC
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
