@@ -77,7 +77,7 @@ export const MyApplicationsPage = () => {
           <p className="text-muted-foreground mb-4">
             You need to create a judge profile before you can apply to competitions.
           </p>
-          <Button onClick={() => navigate('/judges-portal/profile')}>
+          <Button onClick={() => navigate('/app/judges-portal/profile')}>
             Create Profile
           </Button>
         </Card>
@@ -147,7 +147,7 @@ export const MyApplicationsPage = () => {
         <div className="flex flex-col gap-2">
           <Button
             variant="outline"
-            onClick={() => navigate(`/judges-portal/competitions/${application.competition_id}`)}
+            onClick={() => navigate(`/app/judges-portal/competitions/${application.competition_id}`)}
           >
             View Competition
           </Button>
@@ -177,7 +177,7 @@ export const MyApplicationsPage = () => {
       {applications && applications.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground mb-4">You haven't applied to any competitions yet.</p>
-          <Button onClick={() => navigate('/judges-portal/competitions')}>
+          <Button onClick={() => navigate('/app/judges-portal/open-competitions')}>
             Browse Competitions
           </Button>
         </Card>

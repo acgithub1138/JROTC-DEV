@@ -23,13 +23,8 @@ export const JudgesOpenCompetitionsPage = () => {
     return application?.status;
   };
 
-  const handleApply = async (competitionId: string) => {
-    if (!judgeProfile?.id) return;
-    await applyToCompetition({
-      judgeId: judgeProfile.id,
-      competitionId,
-      availabilityNotes: ''
-    });
+  const handleApply = (competitionId: string) => {
+    navigate(`/app/judges-portal/competitions/${competitionId}/apply`);
   };
 
   const handleViewDetails = (competitionId: string) => {

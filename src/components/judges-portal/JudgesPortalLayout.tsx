@@ -6,6 +6,8 @@ import { JudgesPortalDashboard } from '@/pages/JudgesPortalDashboard';
 import { JudgesOpenCompetitionsPage } from '@/pages/JudgesOpenCompetitionsPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { ApplyToCompetitionPage } from './ApplyToCompetitionPage';
+import { MyApplicationsPage } from './MyApplicationsPage';
+import { JudgeProfilePage } from './JudgeProfilePage';
 import type { User } from '@supabase/supabase-js';
 
 export const JudgesPortalLayout = () => {
@@ -64,6 +66,8 @@ export const JudgesPortalLayout = () => {
           <Route path="open-competitions" element={<JudgesOpenCompetitionsPage />} />
           <Route path="competitions/:competitionId" element={<CompetitionDetailsPage />} />
           <Route path="competitions/:competitionId/apply" element={<ApplyToCompetitionPage />} />
+          <Route path="applications" element={<MyApplicationsPage />} />
+          <Route path="profile" element={<JudgeProfilePage />} />
         </Routes>
       </main>
     </div>

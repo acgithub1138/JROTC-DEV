@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Gavel, LogOut, LayoutDashboard, Trophy } from 'lucide-react';
+import { Gavel, LogOut, LayoutDashboard, Trophy, FileText, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,16 @@ export const JudgesPortalSidebar = () => {
       title: 'Open Competitions',
       icon: Trophy,
       href: '/app/judges-portal/open-competitions',
+    },
+    {
+      title: 'My Applications',
+      icon: FileText,
+      href: '/app/judges-portal/applications',
+    },
+    {
+      title: 'Profile',
+      icon: User,
+      href: '/app/judges-portal/profile',
     },
   ];
 

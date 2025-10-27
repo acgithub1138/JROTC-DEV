@@ -45,7 +45,7 @@ export const ApplyToCompetitionPage = () => {
       availabilityNotes: availabilityNotes.trim() || undefined
     }, {
       onSuccess: () => {
-        navigate('/judges-portal/applications');
+        navigate('/app/judges-portal/open-competitions');
       }
     });
   };
@@ -58,14 +58,36 @@ export const ApplyToCompetitionPage = () => {
     );
   }
 
-  if (!competition || !judgeProfile) {
+  if (!competition) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="p-6">
-          <p>Unable to load application form</p>
-          <Button onClick={() => navigate('/judges-portal/competitions')} className="mt-4">
+          <p>Unable to load competition details</p>
+          <Button onClick={() => navigate('/app/judges-portal/open-competitions')} className="mt-4">
             Back to Competitions
           </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!judgeProfile) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Create Your Judge Profile First</h2>
+          <p className="text-muted-foreground mb-6">
+            You need to create a judge profile before you can apply to competitions. 
+            This helps competition organizers learn about your experience and availability.
+          </p>
+          <div className="flex gap-3">
+            <Button onClick={() => navigate('/app/judges-portal/profile')}>
+              Create Profile
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/app/judges-portal/open-competitions')}>
+              Back to Competitions
+            </Button>
+          </div>
         </Card>
       </div>
     );
@@ -75,7 +97,7 @@ export const ApplyToCompetitionPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Button
         variant="ghost"
-        onClick={() => navigate(`/judges-portal/competitions/${competitionId}`)}
+        onClick={() => navigate(`/app/judges-portal/competitions/${competitionId}`)}
         className="mb-6"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -130,7 +152,7 @@ export const ApplyToCompetitionPage = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/judges-portal/competitions/${competitionId}`)}
+              onClick={() => navigate(`/app/judges-portal/competitions/${competitionId}`)}
               disabled={isApplying}
             >
               Cancel

@@ -99,7 +99,7 @@ export const CompetitionDetailsPage = () => {
             {!applicationStatus && judgeProfile && (
               <Button
                 size="lg"
-                onClick={() => navigate(`/judges-portal/competitions/${competitionId}/apply`)}
+                onClick={() => navigate(`/app/judges-portal/competitions/${competitionId}/apply`)}
               >
                 Apply to Judge
               </Button>
