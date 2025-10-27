@@ -93,29 +93,34 @@ export const JudgesAuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Gavel className="h-6 w-6 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-judge/5 via-background to-judge/10 p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      <div className="absolute top-20 left-20 w-72 h-72 bg-judge/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
+      <Card className="w-full max-w-md shadow-2xl border-judge/20 backdrop-blur-sm bg-card/95 relative z-10">
+        <CardHeader className="space-y-3 text-center pb-8">
+          <div className="flex justify-center mb-2">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg shadow-judge/30 ring-4 ring-judge/10 transition-transform hover:scale-105">
+              <Gavel className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-br from-judge to-judge/70 bg-clip-text text-transparent">
             {isSignUp ? 'Create Judge Account' : 'Judge Sign In'}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base">
             {isSignUp 
               ? 'Register to apply for judging opportunities' 
               : 'Sign in to access your judge portal'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
+        <CardContent className="px-8 pb-8">
+          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5">
             {isSignUp && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                <div className="space-y-2.5">
+                  <Label htmlFor="name" className="text-sm font-semibold">Full Name</Label>
                   <Input
                     id="name"
                     name="name"
@@ -125,10 +130,11 @@ export const JudgesAuthPage = () => {
                     onChange={handleChange}
                     required
                     disabled={isLoading}
+                    className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                <div className="space-y-2.5">
+                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -137,13 +143,14 @@ export const JudgesAuthPage = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     disabled={isLoading}
+                    className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
                   />
                 </div>
               </>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-2.5">
+              <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -153,11 +160,12 @@ export const JudgesAuthPage = () => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-2.5">
+              <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
               <Input
                 id="password"
                 name="password"
@@ -168,23 +176,33 @@ export const JudgesAuthPage = () => {
                 required
                 disabled={isLoading}
                 minLength={6}
+                className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full h-11 bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 text-white font-semibold shadow-lg shadow-judge/30 transition-all hover:shadow-xl hover:shadow-judge/40 hover:scale-[1.02] mt-6"
               disabled={isLoading}
             >
               {isLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+
+          <div className="text-center">
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
+              className="text-sm font-medium text-judge hover:text-judge/80 transition-colors hover:underline"
               disabled={isLoading}
             >
               {isSignUp 
