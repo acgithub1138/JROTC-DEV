@@ -84,27 +84,27 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
             </Button>
           </div>
         </CardHeader>
-        {!showPreview && (
-          <CardContent>
-            <FieldForm
-              currentField={currentField}
-              dropdownValues={dropdownValues}
-              editingFieldId={editingFieldId}
-              onFieldUpdate={updateCurrentField}
-              onDropdownValuesChange={setDropdownValues}
-              onAddField={addField}
-              onCancelEdit={cancelEdit}
-            />
-          </CardContent>
-        )}
+        <CardContent>
+          <FieldForm
+            currentField={currentField}
+            dropdownValues={dropdownValues}
+            editingFieldId={editingFieldId}
+            onFieldUpdate={updateCurrentField}
+            onDropdownValuesChange={setDropdownValues}
+            onAddField={addField}
+            onCancelEdit={cancelEdit}
+          />
+        </CardContent>
       </Card>
 
-      <FieldList
-        fields={fields}
-        onEditField={editField}
-        onRemoveField={removeField}
-        onReorderFields={reorderFields}
-      />
+      {!showPreview && (
+        <FieldList
+          fields={fields}
+          onEditField={editField}
+          onRemoveField={removeField}
+          onReorderFields={reorderFields}
+        />
+      )}
 
       <ScoreSheetPreview
         fields={fields}
