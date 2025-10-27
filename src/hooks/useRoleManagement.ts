@@ -155,6 +155,10 @@ export const useRoleManagement = () => {
       console.log('Permission upserted successfully:', data);
       return data;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-permissions'] });
+    },
     onError: (error, variables) => {
       console.error('updatePermissionMutation error:', error, 'Variables:', variables);
     },
