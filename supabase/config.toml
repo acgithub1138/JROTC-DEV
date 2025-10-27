@@ -8,3 +8,9 @@ verify_jwt = true
 
 [functions.delete-contact]
 verify_jwt = true
+
+[functions.create-parent-user]
+verify_jwt = false
+
+[functions.create-judge-user]
+verify_jwt = false
