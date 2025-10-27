@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { JudgesPortalSidebar } from './JudgesPortalSidebar';
 import { JudgesPortalDashboard } from '@/pages/JudgesPortalDashboard';
+import { JudgesOpenCompetitionsPage } from '@/pages/JudgesOpenCompetitionsPage';
 import type { User } from '@supabase/supabase-js';
 
 export const JudgesPortalLayout = () => {
@@ -58,6 +59,7 @@ export const JudgesPortalLayout = () => {
       <main className="flex-1 overflow-auto bg-background">
         <Routes>
           <Route index element={<JudgesPortalDashboard />} />
+          <Route path="open-competitions" element={<JudgesOpenCompetitionsPage />} />
         </Routes>
       </main>
     </div>
