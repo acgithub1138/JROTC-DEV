@@ -57,7 +57,6 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="bold_gray">Bold and Grey</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="label">Label</SelectItem>
               <SelectItem value="number">Number</SelectItem>
@@ -182,122 +181,94 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           <p className="text-sm font-medium text-muted-foreground">Preview:</p>
           <div className="bg-background rounded-md p-3 border">
             {currentField.type === 'section_header' && (
-              <h3 className="font-bold text-primary border-b-2 border-primary pb-2">
-                {currentField.name}
-              </h3>
+              <h3 className="text-lg font-bold text-primary">{currentField.name}</h3>
             )}
             
             {(currentField.type === 'label' || currentField.type === 'bold_gray') && (
-              <div className="py-2">
-                <span className={currentField.pauseField ? 'bg-muted px-3 py-2 rounded font-bold' : 'font-medium'}>
+              <div>
+                <p className={currentField.type === 'bold_gray' ? 'font-bold text-muted-foreground' : 'text-foreground'}>
                   {currentField.name}
-                </span>
+                </p>
                 {currentField.fieldInfo && (
-                  <p className="text-sm text-muted-foreground mt-2">{currentField.fieldInfo}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{currentField.fieldInfo}</p>
                 )}
               </div>
             )}
             
             {currentField.type === 'text' && (
-              <div className="border-b space-y-2 py-[2px]">
-                <div className="flex items-center justify-between">
-                  <Label className={currentField.pauseField ? 'bg-muted px-3 py-2 rounded font-bold' : 'font-medium'}>
-                    {currentField.name}
-                  </Label>
-                  <Input 
-                    className="w-32" 
-                    placeholder={currentField.textType === 'notes' ? 'Notes...' : 'Text...'} 
-                    disabled
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                {currentField.textType === 'notes' ? (
+                  <Textarea placeholder="Notes..." disabled className="resize-none" />
+                ) : (
+                  <Input placeholder="Short text..." disabled />
+                )}
                 {currentField.fieldInfo && (
-                  <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
                 )}
               </div>
             )}
             
             {currentField.type === 'number' && (
-              <div className="border-b space-y-2 py-[2px]">
-                <div className="flex items-center justify-between">
-                  <Label className={currentField.pauseField ? 'bg-muted px-3 py-2 rounded font-bold' : 'font-medium'}>
-                    {currentField.name}
-                  </Label>
-                  <Input 
-                    type="number" 
-                    className="w-32" 
-                    placeholder="0" 
-                    disabled
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                <Input type="number" placeholder={`Max: ${currentField.maxValue || 100}`} disabled />
                 {currentField.fieldInfo && (
-                  <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
                 )}
               </div>
             )}
             
             {currentField.type === 'dropdown' && (
-              <div className="border-b space-y-2 py-[2px]">
-                <div className="flex items-center justify-between">
-                  <Label className={currentField.pauseField ? 'bg-muted px-3 py-2 rounded font-bold' : 'font-medium'}>
-                    {currentField.name}
-                  </Label>
-                  <Select disabled>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                  </Select>
-                </div>
+              <div className="space-y-1">
+                <Label className={currentField.pauseField ? 'font-bold text-muted-foreground' : ''}>
+                  {currentField.name}
+                </Label>
+                <Select disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an option..." />
+                  </SelectTrigger>
+                </Select>
                 {currentField.fieldInfo && (
-                  <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
                 )}
               </div>
             )}
             
             {currentField.type === 'penalty' && (
-              <div className="py-2 border-b space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="font-medium text-destructive">{currentField.name}</Label>
-                  {currentField.penaltyType === 'points' && (
-                    <Input 
-                      type="number" 
-                      className="w-32" 
-                      placeholder="Number of violations" 
-                      disabled
-                    />
-                  )}
-                  {currentField.penaltyType === 'minor_major' && (
-                    <Select disabled>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="minor">Minor (-20)</SelectItem>
-                        <SelectItem value="major">Major (-50)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {currentField.penaltyType === 'split' && (
-                    <Input 
-                      type="number" 
-                      className="w-32" 
-                      placeholder="Number of violations" 
-                      disabled
-                    />
-                  )}
-                </div>
-                {currentField.penaltyType === 'points' && currentField.pointValue && (
-                  <p className="text-xs text-destructive">
-                    {currentField.pointValue} points per violation
-                  </p>
+              <div className="space-y-1">
+                <Label className="text-destructive font-medium">{currentField.name}</Label>
+                {currentField.penaltyType === 'points' && (
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="0" disabled className="w-20" />
+                    <span className="text-sm text-muted-foreground">× {currentField.pointValue || -10} pts</span>
+                  </div>
+                )}
+                {currentField.penaltyType === 'minor_major' && (
+                  <Select disabled>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select penalty..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minor">Minor (-20)</SelectItem>
+                      <SelectItem value="major">Major (-50)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
                 {currentField.penaltyType === 'split' && (
-                  <p className="text-xs text-destructive">
-                    1st: {currentField.splitFirstValue || -5} pts, 2+: {currentField.splitSubsequentValue || -25} pts
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="0" disabled className="w-20" />
+                    <span className="text-sm text-muted-foreground">
+                      1st: {currentField.splitFirstValue || -5} pts, 2+: {currentField.splitSubsequentValue || -25} pts
+                    </span>
+                  </div>
                 )}
                 {currentField.fieldInfo && (
-                  <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>
+                  <p className="text-xs text-muted-foreground">{currentField.fieldInfo}</p>
                 )}
               </div>
             )}
