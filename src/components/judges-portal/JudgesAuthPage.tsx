@@ -15,7 +15,8 @@ export const JudgesAuthPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
+    firstName: '',
+    lastName: '',
     phone: ''
   });
 
@@ -83,7 +84,8 @@ export const JudgesAuthPage = () => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            name: formData.name,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
             phone: formData.phone,
             role: 'judge',
             role_id: judgeRole.id
@@ -134,13 +136,13 @@ export const JudgesAuthPage = () => {
             {isSignUp && (
               <>
                 <div className="space-y-2.5">
-                  <Label htmlFor="name" className="text-sm font-semibold">Full Name</Label>
+                  <Label htmlFor="firstName" className="text-sm font-semibold">First Name *</Label>
                   <Input
-                    id="name"
-                    name="name"
+                    id="firstName"
+                    name="firstName"
                     type="text"
-                    placeholder="Last, First"
-                    value={formData.name}
+                    placeholder="First"
+                    value={formData.firstName}
                     onChange={handleChange}
                     required
                     disabled={isLoading}
@@ -148,7 +150,21 @@ export const JudgesAuthPage = () => {
                   />
                 </div>
                 <div className="space-y-2.5">
-                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
+                  <Label htmlFor="lastName" className="text-sm font-semibold">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    placeholder="Last"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number *</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -156,6 +172,7 @@ export const JudgesAuthPage = () => {
                     placeholder="(555) 555-5555"
                     value={formData.phone}
                     onChange={handleChange}
+                    required
                     disabled={isLoading}
                     className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
                   />
@@ -164,7 +181,7 @@ export const JudgesAuthPage = () => {
             )}
             
             <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
               <Input
                 id="email"
                 name="email"
@@ -179,7 +196,7 @@ export const JudgesAuthPage = () => {
             </div>
             
             <div className="space-y-2.5">
-              <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
+              <Label htmlFor="password" className="text-sm font-semibold">Password *</Label>
               <Input
                 id="password"
                 name="password"
