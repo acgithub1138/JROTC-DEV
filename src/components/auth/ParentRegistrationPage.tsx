@@ -176,6 +176,8 @@ const ParentRegistrationPage = () => {
           data: {
             first_name: parentData.firstName,
             last_name: parentData.lastName,
+            phone: parentData.phone,
+            cadet_id: cadetProfile.cadet_id,
             school_id: cadetProfile.school_id,
             role: 'parent',
             role_id: parentRoleId,
@@ -230,21 +232,6 @@ const ParentRegistrationPage = () => {
           .eq('id', profileId);
         if (updateErr) {
           console.error('Failed to set password_change_required:', updateErr);
-        }
-
-        // Create contact record linking parent to cadet
-        const { error: contactError } = await supabase.from('contacts').insert({
-          name: `${parentData.firstName} ${parentData.lastName}`,
-          email: parentData.email,
-          phone: parentData.phone || null,
-          type: 'parent',
-          status: 'active',
-          cadet_id: cadetProfile.cadet_id,
-          school_id: cadetProfile.school_id,
-          created_by: profileId
-        });
-        if (contactError) {
-          console.error('Failed to create contact record:', contactError);
         }
       }
 
