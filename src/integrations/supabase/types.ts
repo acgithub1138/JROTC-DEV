@@ -4311,7 +4311,7 @@ export type Database = {
         Returns: boolean
       }
       check_email_queue_health: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           failed_count: number
           health_status: string
@@ -4325,42 +4325,48 @@ export type Database = {
         Args: { action_name: string; module_name: string; user_id: string }
         Returns: boolean
       }
-      clear_password_change_requirement: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      clear_stale_email_processing_locks: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      clear_password_change_requirement: { Args: never; Returns: undefined }
+      clear_stale_email_processing_locks: { Args: never; Returns: number }
       create_email_rules_for_school: {
         Args: { school_uuid: string }
         Returns: undefined
       }
-      crosstab: {
-        Args: { "": string }
-        Returns: Record<string, unknown>[]
-      }
+      crosstab: { Args: { "": string }; Returns: Record<string, unknown>[] }
       crosstab2: {
         Args: { "": string }
         Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_2"][]
+        SetofOptions: {
+          from: "*"
+          to: "tablefunc_crosstab_2"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       crosstab3: {
         Args: { "": string }
         Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_3"][]
+        SetofOptions: {
+          from: "*"
+          to: "tablefunc_crosstab_3"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       crosstab4: {
         Args: { "": string }
         Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_4"][]
+        SetofOptions: {
+          from: "*"
+          to: "tablefunc_crosstab_4"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       current_user_has_permission: {
         Args: { action_name: string; module_name: string }
         Returns: boolean
       }
-      deactivate_expired_announcements: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      deactivate_expired_announcements: { Args: never; Returns: Json }
       find_similar_criteria: {
         Args: { criteria_text: string; event_type_param: string }
         Returns: {
@@ -4371,12 +4377,9 @@ export type Database = {
           usage_count: number
         }[]
       }
-      generate_incident_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_incident_number: { Args: never; Returns: string }
       get_all_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           can_be_assigned: boolean
           role_label: string
@@ -4384,7 +4387,7 @@ export type Database = {
         }[]
       }
       get_assignable_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           can_be_assigned: boolean
           role_label: string
@@ -4399,27 +4402,18 @@ export type Database = {
           school_id: string
         }[]
       }
-      get_current_user_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_current_user_school_id_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_id: { Args: never; Returns: string }
+      get_current_user_role: { Args: never; Returns: string }
+      get_current_user_school_id_safe: { Args: never; Returns: string }
       get_incident_category_values: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           label: string
           value: string
         }[]
       }
       get_incident_status_values: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           label: string
           value: string
@@ -4429,10 +4423,7 @@ export type Database = {
         Args: { school_uuid: string }
         Returns: string
       }
-      get_next_task_number: {
-        Args: { school_uuid: string }
-        Returns: string
-      }
+      get_next_task_number: { Args: { school_uuid: string }; Returns: string }
       get_permission_modules_simple: {
         Args: {
           is_active_param?: boolean
@@ -4471,18 +4462,12 @@ export type Database = {
           data_type: string
         }[]
       }
-      get_user_school_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_user_school_id: { Args: never; Returns: string }
       increment_mapping_usage: {
         Args: { mapping_id: string }
         Returns: undefined
       }
-      is_current_user_admin_role: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_current_user_admin_role: { Args: never; Returns: boolean }
       is_user_in_school: {
         Args: { target_school_id: string }
         Returns: boolean
@@ -4501,10 +4486,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      populate_comp_schools_names: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      populate_comp_schools_names: { Args: never; Returns: undefined }
       process_comment_email_notification: {
         Args: {
           commenter_id_param: string
@@ -4514,10 +4496,7 @@ export type Database = {
         }
         Returns: Json
       }
-      process_delayed_comp_registration_emails: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      process_delayed_comp_registration_emails: { Args: never; Returns: Json }
       process_email_batch: {
         Args: { batch_size?: number }
         Returns: {
@@ -4539,14 +4518,8 @@ export type Database = {
         Args: { record_data: Json; template_content: string }
         Returns: string
       }
-      process_overdue_task_reminders: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      queue_delayed_comp_registration_email: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      process_overdue_task_reminders: { Args: never; Returns: Json }
+      queue_delayed_comp_registration_email: { Args: never; Returns: undefined }
       queue_email: {
         Args: {
           recipient_email_param: string
@@ -4601,10 +4574,7 @@ export type Database = {
         Args: { priority_value: string }
         Returns: boolean
       }
-      validate_task_status: {
-        Args: { status_value: string }
-        Returns: boolean
-      }
+      validate_task_status: { Args: { status_value: string }; Returns: boolean }
       verify_cadet_email_exists: {
         Args: { email_param: string }
         Returns: boolean
