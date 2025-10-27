@@ -149,6 +149,11 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                   <Input type="number" className="w-32" placeholder="0" disabled />
                 </div>
                 {currentField.fieldInfo && <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>}
+                <Textarea 
+                  className="w-full min-h-[80px] text-sm" 
+                  placeholder="Add notes..." 
+                  disabled 
+                />
               </div>}
             
             {currentField.type === 'dropdown' && <div className="border-b space-y-2 py-[2px]">
@@ -163,6 +168,11 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                   </Select>
                 </div>
                 {currentField.fieldInfo && <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>}
+                <Textarea 
+                  className="w-full min-h-[80px] text-sm" 
+                  placeholder="Add notes..." 
+                  disabled 
+                />
               </div>}
             
             {currentField.type === 'penalty' && <div className="py-2 border-b space-y-2">
@@ -188,6 +198,11 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                     1st: {currentField.splitFirstValue || -5} pts, 2+: {currentField.splitSubsequentValue || -25} pts
                   </p>}
                 {currentField.fieldInfo && <p className="text-sm text-muted-foreground">{currentField.fieldInfo}</p>}
+                <Textarea 
+                  className="w-full min-h-[80px] text-sm" 
+                  placeholder="Add notes..." 
+                  disabled 
+                />
               </div>}
           </div>
         </div>}

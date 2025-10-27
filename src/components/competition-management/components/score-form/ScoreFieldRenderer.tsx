@@ -59,6 +59,13 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+            <Textarea 
+              id={`${field.id}_notes`}
+              value={value?.[`${field.id}_notes`] || ''}
+              onChange={e => onChange(`${field.id}_notes`, e.target.value)}
+              placeholder="Add notes..."
+              className="min-h-[80px] resize-y w-full text-sm"
+            />
           </div>;
       case 'dropdown':
         return <div className="py-2 border-b space-y-2">
@@ -86,6 +93,13 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+            <Textarea 
+              id={`${field.id}_notes`}
+              value={value?.[`${field.id}_notes`] || ''}
+              onChange={e => onChange(`${field.id}_notes`, e.target.value)}
+              placeholder="Add notes..."
+              className="min-h-[80px] resize-y w-full text-sm"
+            />
           </div>;
       case 'penalty':
         // Handle penalty types
@@ -115,6 +129,13 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                 1st occurrence: {field.splitFirstValue} points | 2+ occurrences: {field.splitSubsequentValue} each
               </p>
             )}
+            <Textarea 
+              id={`${field.id}_notes`}
+              value={value?.[`${field.id}_notes`] || ''}
+              onChange={e => onChange(`${field.id}_notes`, e.target.value)}
+              placeholder="Add notes..."
+              className="min-h-[80px] resize-y w-full text-sm"
+            />
           </div>;
       case 'text':
         return <div className="py-2 border-b space-y-2">
@@ -158,6 +179,13 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             {field.penaltyValue && <p className="text-xs text-destructive">Each penalty: -{field.penaltyValue} points</p>}
+            <Textarea 
+              id={`${field.id}_notes`}
+              value={value?.[`${field.id}_notes`] || ''}
+              onChange={e => onChange(`${field.id}_notes`, e.target.value)}
+              placeholder="Add notes..."
+              className="min-h-[80px] resize-y w-full text-sm"
+            />
           </div>;
       case 'scoring_scale':
         return <div className="border-b space-y-2 py-px">
@@ -191,6 +219,13 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                 <div>Exceptional: {field.scaleRanges.exceptional.min}-{field.scaleRanges.exceptional.max}</div>
               </div>
             )}
+            <Textarea 
+              id={`${field.id}_notes`}
+              value={value?.[`${field.id}_notes`] || ''}
+              onChange={e => onChange(`${field.id}_notes`, e.target.value)}
+              placeholder="Add notes..."
+              className="min-h-[80px] resize-y w-full text-sm"
+            />
           </div>;
       default:
         return null;

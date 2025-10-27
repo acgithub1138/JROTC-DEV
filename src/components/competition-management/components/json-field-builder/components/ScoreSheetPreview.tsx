@@ -45,6 +45,11 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({
                     </div>
                     {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
                     {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+                    <textarea 
+                      className="border rounded px-2 py-1 w-full min-h-[80px] text-sm" 
+                      disabled 
+                      placeholder="Add notes..."
+                    />
                   </div>;
             }
             return <div key={field.id} className="border-b space-y-2 py-[2px]">
@@ -57,6 +62,11 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({
                       </div>
                     </div>
                   {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+                  <textarea 
+                    className="border rounded px-2 py-1 w-full min-h-[80px] text-sm" 
+                    disabled 
+                    placeholder="Add notes..."
+                  />
                 </div>;
           })}
           </div>
