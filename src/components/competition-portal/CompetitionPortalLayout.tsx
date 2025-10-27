@@ -35,6 +35,7 @@ import { CompetitionDetailsPage as JudgeCompetitionDetailsPage } from '@/compone
 import { ApplyToCompetitionPage } from '@/components/judges-portal/ApplyToCompetitionPage';
 import { MyApplicationsPage } from '@/components/judges-portal/MyApplicationsPage';
 import { JudgeProfilePage } from '@/components/judges-portal/JudgeProfilePage';
+import { JudgesAuthPage } from '@/components/judges-portal/JudgesAuthPage';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
