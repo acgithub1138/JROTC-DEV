@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RefreshCw } from 'lucide-react';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 const ColumnHeader: React.FC<{
   action: any;
@@ -45,7 +45,7 @@ interface PortalPermissionsTableProps {
   modules: any[];
   actions: any[];
   rolePermissions: any;
-  isUpdating: boolean;
+  isCellPending: (moduleId: string, actionId: string) => boolean;
   handlePermissionChange: (moduleId: string, actionId: string, enabled: boolean) => void;
 }
 export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
@@ -53,7 +53,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
   modules,
   actions,
   rolePermissions,
-  isUpdating,
+  isCellPending,
   handlePermissionChange
 }) => {
   // Filter modules based on portal
@@ -94,7 +94,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
             return <td key={action.id} className="p-3 text-center px-[4px] py-[4px]">
                     <Checkbox 
                       checked={isEnabled} 
-                      disabled={isUpdating} 
+                      disabled={isCellPending(module.id, action.id)} 
                       onCheckedChange={(checked) => {
                         console.log('Checkbox changed:', {
                           module: module.name,
@@ -113,10 +113,5 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
             </tr>)}
         </tbody>
       </table>
-
-      {isUpdating && <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
-          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-          Updating permissions...
-        </div>}
     </div>;
 };

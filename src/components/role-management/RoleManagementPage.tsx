@@ -29,6 +29,10 @@ const getRoleColor = (roleName: string): string => {
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const [localPermissions, setLocalPermissions] = useState<Record<string, Record<string, boolean>>>({});
+  // Track pending updates per cell to avoid global redraw/flicker
+  const [pendingCells, setPendingCells] = useState<Set<string>>(new Set());
+  const cellKey = (moduleId: string, actionId: string) => `${moduleId}:${actionId}`;
+  const isCellPending = (moduleId: string, actionId: string) => pendingCells.has(cellKey(moduleId, actionId));
   
   const {
     modules,
@@ -91,10 +95,12 @@ export const RoleManagementPage: React.FC = () => {
   }, [rolePermissionsMap]);
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
+    const key = cellKey(moduleId, actionId);
     // Snapshot previous state to allow instant revert on error
     const previous = localPermissions;
 
-    // Update local state immediately for instant UI feedback
+    // Mark this cell as pending and update local state for instant feedback
+    setPendingCells(prev => new Set(prev).add(key));
     setLocalPermissions(prev => ({
       ...prev,
       [moduleId]: {
@@ -104,14 +110,30 @@ export const RoleManagementPage: React.FC = () => {
     }));
 
     // Persist in background
-    updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
-      onError: error => {
-        console.error('Permission update error:', error);
-        // Revert to previous local state on error (no refetch needed)
-        setLocalPermissions(previous);
-        toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
+    updatePermission(
+      { role: selectedRole, moduleId, actionId, enabled },
+      {
+        onSuccess: () => {
+          // Clear pending state for this cell
+          setPendingCells(prev => {
+            const next = new Set(prev);
+            next.delete(key);
+            return next;
+          });
+        },
+        onError: error => {
+          console.error('Permission update error:', error);
+          // Revert to previous local state and clear pending
+          setLocalPermissions(previous);
+          setPendingCells(prev => {
+            const next = new Set(prev);
+            next.delete(key);
+            return next;
+          });
+          toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
+        }
       }
-    });
+    );
   };
   const handleResetToDefaults = () => {
     console.log('Resetting permissions to defaults for role:', selectedRole);
@@ -224,7 +246,7 @@ export const RoleManagementPage: React.FC = () => {
                     modules={modules} 
                     actions={actions} 
                     rolePermissions={localPermissions} 
-                    isUpdating={isUpdating} 
+                    isCellPending={isCellPending}
                     handlePermissionChange={handlePermissionChange} 
                   />
                 </TabsContent>
@@ -235,7 +257,7 @@ export const RoleManagementPage: React.FC = () => {
                     modules={modules} 
                     actions={actions} 
                     rolePermissions={localPermissions} 
-                    isUpdating={isUpdating} 
+                    isCellPending={isCellPending}
                     handlePermissionChange={handlePermissionChange} 
                   />
                 </TabsContent>
@@ -245,7 +267,7 @@ export const RoleManagementPage: React.FC = () => {
                     modules={modules} 
                     actions={actions} 
                     rolePermissions={localPermissions} 
-                    isUpdating={isUpdating} 
+                    isCellPending={isCellPending}
                     handlePermissionChange={handlePermissionChange} 
                   />
                 </TabsContent>

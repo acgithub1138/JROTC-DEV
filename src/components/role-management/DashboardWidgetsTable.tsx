@@ -129,7 +129,7 @@ interface DashboardWidgetsTableProps {
   modules: any[];
   actions: any[];
   rolePermissions: { [module: string]: { [action: string]: boolean } };
-  isUpdating: boolean;
+  isCellPending: (moduleId: string, actionId: string) => boolean;
   handlePermissionChange: (moduleId: string, actionId: string, enabled: boolean) => void;
 }
 
@@ -137,7 +137,7 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
   modules,
   actions,
   rolePermissions,
-  isUpdating,
+  isCellPending,
   handlePermissionChange
 }) => {
   // Find the dashboard module
@@ -223,7 +223,7 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
                       <div className="flex justify-center">
                         <Checkbox
                           checked={isEnabled}
-                          disabled={isUpdating}
+                          disabled={isCellPending(dashboardModule.id, action.id)}
                           onCheckedChange={(checked) =>
                             handlePermissionChange(dashboardModule.id, action.id, !!checked)
                           }
