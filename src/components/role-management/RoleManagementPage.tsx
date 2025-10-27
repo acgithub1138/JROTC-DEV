@@ -91,32 +91,24 @@ export const RoleManagementPage: React.FC = () => {
   }, [rolePermissionsMap]);
   
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
-    const module = modules.find(m => m.id === moduleId);
-    const action = actions.find(a => a.id === actionId);
-    if (!module || !action) {
-      console.error('Module or action not found:', { moduleId, actionId });
-      return;
-    }
-    
+    // Snapshot previous state to allow instant revert on error
+    const previous = localPermissions;
+
     // Update local state immediately for instant UI feedback
     setLocalPermissions(prev => ({
       ...prev,
       [moduleId]: {
         ...(prev[moduleId] || {}),
-        [actionId]: enabled
-      }
-    }));
-    
-    // Update database in background
-    updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
-      onSuccess: () => {
-        // Refetch to ensure consistency with database
-        refetchRolePerms();
+        [actionId]: enabled,
       },
+    }));
+
+    // Persist in background
+    updatePermission({ role: selectedRole, moduleId, actionId, enabled }, {
       onError: error => {
         console.error('Permission update error:', error);
-        // Revert to database state on error
-        refetchRolePerms();
+        // Revert to previous local state on error (no refetch needed)
+        setLocalPermissions(previous);
         toast({ title: 'Error', description: 'Failed to update permission. Please try again.', variant: 'destructive' });
       }
     });
