@@ -30,12 +30,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getDefaultCompetitionModule, canAccessCompetitionModule } from '@/utils/competitionPermissions';
-import { AvailableCompetitionsPage } from '@/components/judges-portal/AvailableCompetitionsPage';
-import { CompetitionDetailsPage as JudgeCompetitionDetailsPage } from '@/components/judges-portal/CompetitionDetailsPage';
-import { ApplyToCompetitionPage } from '@/components/judges-portal/ApplyToCompetitionPage';
-import { MyApplicationsPage } from '@/components/judges-portal/MyApplicationsPage';
-import { JudgeProfilePage } from '@/components/judges-portal/JudgeProfilePage';
-import { JudgesAuthPage } from '@/components/judges-portal/JudgesAuthPage';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
@@ -187,16 +181,6 @@ const CompetitionPortalLayout = () => {
       return <OpenCompetitionRecord />;
     } else if (path === '/app/competition-portal/open-competitions') {
       return <OpenCompetitionsPage />;
-    } else if (path === '/app/competition-portal/judges-portal/profile') {
-      return <JudgeProfilePage />;
-    } else if (path === '/app/competition-portal/judges-portal/applications') {
-      return <MyApplicationsPage />;
-    } else if (path.startsWith('/app/competition-portal/judges-portal/competitions/') && path.includes('/apply')) {
-      return <ApplyToCompetitionPage />;
-    } else if (path.startsWith('/app/competition-portal/judges-portal/competitions/')) {
-      return <JudgeCompetitionDetailsPage />;
-    } else if (path === '/app/competition-portal/judges-portal/competitions' || path === '/app/competition-portal/judges-portal') {
-      return <AvailableCompetitionsPage />;
     }
     
     console.log('CompetitionPortalLayout - Defaulting to CompetitionDashboard');

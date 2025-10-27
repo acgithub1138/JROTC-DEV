@@ -29,6 +29,7 @@ const ExternalSchoolRegistration = lazy(() => import("@/components/external/Exte
 // Lazy load main application
 const MainApplication = lazy(() => import("@/components/MainApplication"));
 const JudgesAuthPage = lazy(() => import("@/components/judges-portal/JudgesAuthPage").then(m => ({ default: m.JudgesAuthPage })));
+const JudgesPortalLayout = lazy(() => import("@/components/judges-portal/JudgesPortalLayout").then(m => ({ default: m.JudgesPortalLayout })));
 
 
 // Loading fallback component
@@ -80,6 +81,16 @@ const App = () => (
 
               {/* Judges Portal Auth Route - Public */}
               <Route path="/app/judges/auth" element={<Suspense fallback={<PageLoader />}><JudgesAuthPage /></Suspense>} />
+
+              {/* Judges Portal Routes - Protected */}
+              <Route 
+                path="/app/judges-portal/*" 
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <JudgesPortalLayout />
+                  </Suspense>
+                } 
+              />
 
               {/* Redirect /app/login to /app/auth */}
               <Route path="/app/login" element={<Navigate to="/app/auth" replace />} />

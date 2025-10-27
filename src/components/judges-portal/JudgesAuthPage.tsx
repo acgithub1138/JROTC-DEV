@@ -23,7 +23,7 @@ export const JudgesAuthPage = () => {
     // Check if already authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/app/competition-portal/judges-portal');
+        navigate('/app/judges-portal');
       }
     });
   }, [navigate]);
@@ -48,7 +48,7 @@ export const JudgesAuthPage = () => {
       if (error) throw error;
 
       toast.success('Signed in successfully');
-      navigate('/app/competition-portal/judges-portal');
+      navigate('/app/judges-portal');
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast.error(error.message || 'Failed to sign in');
@@ -62,7 +62,7 @@ export const JudgesAuthPage = () => {
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/app/competition-portal/judges-portal`;
+      const redirectUrl = `${window.location.origin}/app/judges-portal`;
       
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
