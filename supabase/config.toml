@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.create-judge-user]
 verify_jwt = false
+
+[functions.create-school-admin]
+verify_jwt = false

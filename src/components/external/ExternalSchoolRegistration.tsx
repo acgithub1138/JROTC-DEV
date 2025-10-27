@@ -14,8 +14,12 @@ interface SchoolFormData {
   name: string;
   initials: string;
   contact_person: string;
+  first_name: string;
+  last_name: string;
   contact_email: string;
   contact_phone: string;
+  password: string;
+  confirm_password: string;
   jrotc_program: string;
   timezone: string;
   referred_by: string;
@@ -31,8 +35,12 @@ export const ExternalSchoolRegistration = () => {
     name: '',
     initials: '',
     contact_person: '',
+    first_name: '',
+    last_name: '',
     contact_email: '',
     contact_phone: '',
+    password: '',
+    confirm_password: '',
     jrotc_program: 'army',
     timezone: '',
     referred_by: ''
@@ -71,12 +79,24 @@ export const ExternalSchoolRegistration = () => {
     if (!formData.name) newErrors.name = 'School name is required';
     if (!formData.initials) newErrors.initials = 'School initials are required';
     if (!formData.contact_person) newErrors.contact_person = 'Contact person is required';
+    if (!formData.first_name) newErrors.first_name = 'First name is required';
+    if (!formData.last_name) newErrors.last_name = 'Last name is required';
     if (!formData.contact_email) {
       newErrors.contact_email = 'Contact email is required';
     } else if (!validateEmail(formData.contact_email)) {
       newErrors.contact_email = 'Please enter a valid email address';
     }
     if (!formData.contact_phone) newErrors.contact_phone = 'Contact phone is required';
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+    if (!formData.confirm_password) {
+      newErrors.confirm_password = 'Please confirm your password';
+    } else if (formData.password !== formData.confirm_password) {
+      newErrors.confirm_password = 'Passwords do not match';
+    }
     if (!formData.jrotc_program) newErrors.jrotc_program = 'JROTC program is required';
     if (!formData.timezone) newErrors.timezone = 'Time zone is required';
     
@@ -92,7 +112,7 @@ export const ExternalSchoolRegistration = () => {
     }
     
     try {
-      const { data, error } = await supabase.functions.invoke('external-school-registration', {
+      const { data, error } = await supabase.functions.invoke('create-school-admin', {
         body: formData
       });
       
@@ -189,7 +209,7 @@ export const ExternalSchoolRegistration = () => {
                   Your school has been registered successfully.
                 </p>
                 <p className="text-foreground font-medium">
-                  Please check your email for login instructions.
+                  You can now log in with your credentials.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Redirecting to login page in a few seconds...
@@ -251,20 +271,48 @@ export const ExternalSchoolRegistration = () => {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="contact_person">Contact Person *</Label>
+                <Input 
+                  id="contact_person" 
+                  value={formData.contact_person} 
+                  onChange={e => handleInputChange('contact_person', e.target.value)} 
+                  placeholder="Primary contact name" 
+                  required 
+                  className={errors.contact_person ? 'border-red-500' : ''}
+                />
+                {errors.contact_person && <p className="text-sm text-red-500">{errors.contact_person}</p>}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact_person">Contact Person *</Label>
+                  <Label htmlFor="first_name">First Name *</Label>
                   <Input 
-                    id="contact_person" 
-                    value={formData.contact_person} 
-                    onChange={e => handleInputChange('contact_person', e.target.value)} 
-                    placeholder="Primary contact name" 
+                    id="first_name" 
+                    value={formData.first_name} 
+                    onChange={e => handleInputChange('first_name', e.target.value)} 
+                    placeholder="First name" 
                     required 
-                    className={errors.contact_person ? 'border-red-500' : ''}
+                    className={errors.first_name ? 'border-red-500' : ''}
                   />
-                  {errors.contact_person && <p className="text-sm text-red-500">{errors.contact_person}</p>}
+                  {errors.first_name && <p className="text-sm text-red-500">{errors.first_name}</p>}
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="last_name">Last Name *</Label>
+                  <Input 
+                    id="last_name" 
+                    value={formData.last_name} 
+                    onChange={e => handleInputChange('last_name', e.target.value)} 
+                    placeholder="Last name" 
+                    required 
+                    className={errors.last_name ? 'border-red-500' : ''}
+                  />
+                  {errors.last_name && <p className="text-sm text-red-500">{errors.last_name}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact_email">Contact Email *</Label>
                   <Input 
@@ -278,9 +326,7 @@ export const ExternalSchoolRegistration = () => {
                   />
                   {errors.contact_email && <p className="text-sm text-red-500">{errors.contact_email}</p>}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact_phone">Contact Phone *</Label>
                   <Input 
@@ -294,7 +340,39 @@ export const ExternalSchoolRegistration = () => {
                   />
                   {errors.contact_phone && <p className="text-sm text-red-500">{errors.contact_phone}</p>}
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={formData.password} 
+                    onChange={e => handleInputChange('password', e.target.value)} 
+                    placeholder="At least 8 characters" 
+                    required 
+                    className={errors.password ? 'border-red-500' : ''}
+                  />
+                  {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirm_password">Confirm Password *</Label>
+                  <Input 
+                    id="confirm_password" 
+                    type="password" 
+                    value={formData.confirm_password} 
+                    onChange={e => handleInputChange('confirm_password', e.target.value)} 
+                    placeholder="Re-enter password" 
+                    required 
+                    className={errors.confirm_password ? 'border-red-500' : ''}
+                  />
+                  {errors.confirm_password && <p className="text-sm text-red-500">{errors.confirm_password}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="jrotc_program">JROTC Program *</Label>
                   <Select value={formData.jrotc_program} onValueChange={value => handleInputChange('jrotc_program', value)} required>
