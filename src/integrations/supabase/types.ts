@@ -3009,7 +3009,7 @@ export type Database = {
           rank: string | null
           role: string
           role_id: string | null
-          school_id: string
+          school_id: string | null
           start_year: number | null
           temp_pswd: string | null
           updated_at: string
@@ -3030,7 +3030,7 @@ export type Database = {
           rank?: string | null
           role: string
           role_id?: string | null
-          school_id: string
+          school_id?: string | null
           start_year?: number | null
           temp_pswd?: string | null
           updated_at?: string
@@ -3051,7 +3051,7 @@ export type Database = {
           rank?: string | null
           role?: string
           role_id?: string | null
-          school_id?: string
+          school_id?: string | null
           start_year?: number | null
           temp_pswd?: string | null
           updated_at?: string
