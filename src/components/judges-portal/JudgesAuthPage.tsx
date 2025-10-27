@@ -135,33 +135,35 @@ export const JudgesAuthPage = () => {
           <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5">
             {isSignUp && (
               <>
-                <div className="space-y-2.5">
-                  <Label htmlFor="firstName" className="text-sm font-semibold">First Name *</Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="First"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  <Label htmlFor="lastName" className="text-sm font-semibold">Last Name *</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Last"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2.5">
+                    <Label htmlFor="firstName" className="text-sm font-semibold">First Name *</Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="First"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="lastName" className="text-sm font-semibold">Last Name *</Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      placeholder="Last"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2.5">
                   <Label htmlFor="phone" className="text-sm font-semibold">Phone Number *</Label>
