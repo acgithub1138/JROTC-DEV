@@ -72,17 +72,6 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       <Card ref={formSectionRef}>
         <CardHeader>
           <CardTitle>Score Sheet Builder</CardTitle>
-          <div className="flex gap-2 mt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowPreview(!showPreview)}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              {showPreview ? 'Hide' : 'Show'} Preview
-            </Button>
-          </div>
         </CardHeader>
         <CardContent>
           <FieldForm
@@ -96,6 +85,18 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
           />
         </CardContent>
       </Card>
+
+      <div className="flex justify-center">
+        <Button 
+          type="button" 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setShowPreview(!showPreview)}
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          {showPreview ? 'Hide' : 'Show'} Preview
+        </Button>
+      </div>
 
       {!showPreview && (
         <FieldList
