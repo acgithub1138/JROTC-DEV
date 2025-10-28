@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Clock, ClipboardCheck } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const MyAssignmentsWidget = () => {
   const { competitions, isLoading, error } = useMyAssignments();
   const { timezone } = useSchoolTimezone();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -120,7 +122,12 @@ export const MyAssignmentsWidget = () => {
                     {assignment.event_id && (
                       <Button
                         size="sm"
-                        onClick={() => navigate(`/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`)}
+                        onClick={() => {
+                          const path = isMobile 
+                            ? `/app/judges-portal/m_judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`
+                            : `/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`;
+                          navigate(path);
+                        }}
                         className="shrink-0"
                       >
                         <ClipboardCheck className="h-4 w-4 mr-1" />
