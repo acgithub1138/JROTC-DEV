@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
-import { CadetSelector } from '@/components/competition-portal/my-competitions/components/add-event/CadetSelector';
 import { useCompetitionTemplates } from '@/components/competition-portal/my-competitions/hooks/useCompetitionTemplates';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -27,13 +26,15 @@ export const JudgeScoreEntryForm: React.FC<JudgeScoreEntryFormProps> = ({
 }) => {
   const { templates } = useCompetitionTemplates();
   const [judgeNumber, setJudgeNumber] = useState('');
-  const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
-  const [isCadetsOpen, setIsCadetsOpen] = useState(false);
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const template = templates.find(t => t.id === templateId);
+  
+  // Generate judge number options based on template
+  const maxJudges = template?.judges ? Number(template.judges) : 4;
+  const judgeOptions = Array.from({ length: maxJudges }, (_, i) => `Judge ${i + 1}`);
 
   const handleScoreChange = (newScores: Record<string, any>, newTotal: number) => {
     setScores(newScores);
@@ -64,7 +65,7 @@ export const JudgeScoreEntryForm: React.FC<JudgeScoreEntryFormProps> = ({
             calculated_at: new Date().toISOString()
           },
           total_points: totalPoints,
-          cadet_ids: selectedCadetIds
+          cadet_ids: []
         }]);
 
       if (error) throw error;
@@ -73,7 +74,6 @@ export const JudgeScoreEntryForm: React.FC<JudgeScoreEntryFormProps> = ({
       
       // Reset form
       setJudgeNumber('');
-      setSelectedCadetIds([]);
       setScores({});
       setTotalPoints(0);
       
@@ -107,22 +107,19 @@ export const JudgeScoreEntryForm: React.FC<JudgeScoreEntryFormProps> = ({
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="judgeNumber">Judge Number</Label>
-          <Input
-            id="judgeNumber"
-            value={judgeNumber}
-            onChange={(e) => setJudgeNumber(e.target.value)}
-            placeholder="Enter judge number"
-            className="max-w-xs"
-          />
+          <Select value={judgeNumber} onValueChange={setJudgeNumber}>
+            <SelectTrigger className="max-w-xs">
+              <SelectValue placeholder="Select judge number" />
+            </SelectTrigger>
+            <SelectContent className="bg-background">
+              {judgeOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        <CadetSelector
-          selectedCadetIds={selectedCadetIds}
-          judgeNumber={judgeNumber}
-          isCadetsOpen={isCadetsOpen}
-          onSelectedCadetsChange={setSelectedCadetIds}
-          onToggleOpen={setIsCadetsOpen}
-        />
 
         <EventScoreForm
           templateScores={template.scores as Record<string, any>}
