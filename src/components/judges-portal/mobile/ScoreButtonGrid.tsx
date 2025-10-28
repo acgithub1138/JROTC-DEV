@@ -18,8 +18,8 @@ export const ScoreButtonGrid = ({
   // For 0-7: 2 columns, For 8+: 4 columns
   const columns = maxValue <= 7 ? 2 : 4;
   
-  // Generate array of values
-  const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => i + startFrom);
+  // Generate array of values from high to low
+  const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => maxValue - i);
   
   return (
     <div 
