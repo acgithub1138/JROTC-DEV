@@ -113,18 +113,20 @@ export const QuestionStep = ({
   const nextDisabled = isInputRequired && !isAnswered;
   return <div className="min-h-screen bg-background flex flex-col pb-24">
       <div className="flex-1 flex flex-col">
-        {/* Score Selection Area - Top 2/3 */}
-        <div className="flex-[2] p-6 overflow-y-auto py-[8px]">
+        {/* Score Selection Area - Fixed height for 5 rows */}
+        <div className="p-6 py-[8px]">
           <div className="mb-6">
             <h1 className="text-2xl font-bold mb-2">{field.name}</h1>
             {field.fieldInfo && <p className="text-muted-foreground">{field.fieldInfo}</p>}
           </div>
           
-          {renderScoreInput()}
+          <div className="max-h-[460px] overflow-y-auto">
+            {renderScoreInput()}
+          </div>
         </div>
 
-        {/* Notes Area - Bottom 1/3 */}
-        <div className="flex-1 p-6 border-t bg-muted/30 py-[8px]">
+        {/* Notes Area */}
+        <div className="p-6 border-t bg-muted/30 py-[8px]">
           <label className="block text-sm font-medium mb-2">Notes (Optional)</label>
           <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="h-24 text-base" />
         </div>
