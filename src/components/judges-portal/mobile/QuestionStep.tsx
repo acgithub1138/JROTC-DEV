@@ -125,8 +125,8 @@ export const QuestionStep = ({
           {renderScoreInput()}
         </div>
 
-        {/* Notes Area - 1/3 of content space */}
-        <div className="px-4 py-4 border-t bg-muted/30 flex flex-col" style={{ flex: '1' }}>
+        {/* Notes Area - reduced by 1/3 */}
+        <div className="px-4 py-4 border-t bg-muted/30 flex flex-col" style={{ flex: '0.67' }}>
           <label className="block text-sm font-medium mb-2 shrink-0">Notes (Optional)</label>
           <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="flex-1 min-h-0 text-base resize-none" />
         </div>
