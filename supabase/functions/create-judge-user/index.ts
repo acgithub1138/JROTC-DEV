@@ -172,7 +172,7 @@ serve(async (req) => {
           recipient_email_param: email,
           source_table_param: 'profiles',
           record_id_param: authUser.user!.id,
-          school_id_param: '00000000-0000-0000-0000-000000000000' // Dummy UUID for global template
+          school_id_param: 'c0bae42f-9369-4575-b158-926246145b0a' // Use same school_id as profile creation
         })
       console.log('create-judge-user: Welcome email queued:', queueId)
     }
