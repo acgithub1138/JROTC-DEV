@@ -1,8 +1,6 @@
 import { MyAssignmentsWidget } from '@/components/judges-portal/MyAssignmentsWidget';
-
 export const JudgesPortalDashboard = () => {
-  return (
-    <div className="p-8">
+  return <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-br from-judge to-judge/70 bg-clip-text text-transparent">
@@ -26,15 +24,9 @@ export const JudgesPortalDashboard = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
-              <h3 className="font-semibold text-lg mb-2">My History</h3>
-              <p className="text-sm text-muted-foreground">
-                View your past judging history
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
