@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { JudgesPortalSidebar } from './JudgesPortalSidebar';
 import { JudgesPortalDashboard } from '@/pages/JudgesPortalDashboard';
 import { JudgesOpenCompetitionsPage } from '@/pages/JudgesOpenCompetitionsPage';
@@ -8,12 +10,15 @@ import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { ApplyToCompetitionPage } from './ApplyToCompetitionPage';
 import { MyApplicationsPage } from './MyApplicationsPage';
 import { JudgeProfilePage } from './JudgeProfilePage';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { User } from '@supabase/supabase-js';
 
 export const JudgesPortalLayout = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check authentication
@@ -53,23 +58,38 @@ export const JudgesPortalLayout = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 shrink-0">
-        <JudgesPortalSidebar />
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-auto bg-background">
-        <Routes>
-          <Route index element={<JudgesPortalDashboard />} />
-          <Route path="open-competitions" element={<JudgesOpenCompetitionsPage />} />
-          <Route path="competitions/:competitionId" element={<CompetitionDetailsPage />} />
-          <Route path="competitions/:competitionId/apply" element={<ApplyToCompetitionPage />} />
-          <Route path="applications" element={<MyApplicationsPage />} />
-          <Route path="profile" element={<JudgeProfilePage />} />
-        </Routes>
-      </main>
+    <div className="min-h-screen bg-background">
+      <JudgesPortalSidebar 
+        isMobile={isMobile}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
+      
+      <div className={isMobile ? "ml-0" : "ml-64"}>
+        {isMobile && (
+          <header className="h-16 border-b bg-background flex items-center px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+            <h1 className="ml-4 text-lg font-semibold">Judges Portal</h1>
+          </header>
+        )}
+        
+        <main className={isMobile ? "min-h-[calc(100vh-4rem)]" : "min-h-screen"}>
+          <Routes>
+            <Route index element={<JudgesPortalDashboard />} />
+            <Route path="open-competitions" element={<JudgesOpenCompetitionsPage />} />
+            <Route path="competitions/:competitionId" element={<CompetitionDetailsPage />} />
+            <Route path="competitions/:competitionId/apply" element={<ApplyToCompetitionPage />} />
+            <Route path="applications" element={<MyApplicationsPage />} />
+            <Route path="profile" element={<JudgeProfilePage />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 };
