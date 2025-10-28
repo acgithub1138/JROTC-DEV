@@ -290,6 +290,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile(null);
       lastFetchedUserIdRef.current = null;
       profileFetchingRef.current = false;
+      window.location.href = '/app/user-type';
     } catch (error) {
       console.error('Sign out error:', error);
     }

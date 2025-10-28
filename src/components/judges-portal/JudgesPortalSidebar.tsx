@@ -15,7 +15,7 @@ export const JudgesPortalSidebar = () => {
       return;
     }
     toast.success('Signed out successfully');
-    navigate('/app/judges/auth');
+    navigate('/app/user-type');
   };
 
   const navItems = [
