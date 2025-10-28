@@ -77,7 +77,7 @@ export const CompetitionJudgesTab = ({
 
           {judges.length === 0 ? <div className="text-center py-8 text-muted-foreground">
               No judges assigned yet. Click "Assign Judge" to get started.
-            </div> : <div className="border rounded-lg">
+            </div> : <div className="border rounded-lg py-[4px]">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -92,22 +92,22 @@ export const CompetitionJudgesTab = ({
                 </TableHeader>
                 <TableBody>
                   {judges.map(judge => <TableRow key={judge.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium py-[4px]">
                         {judge.judge_profile?.name || 'Unknown'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-[4px]">
                         {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-[4px]">
                         {judge.start_time ? convertToUI(judge.start_time, timezone, 'datetime') : '-'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-[4px]">
                         {judge.end_time ? convertToUI(judge.end_time, timezone, 'datetime') : '-'}
                       </TableCell>
-                      <TableCell>{judge.event_name || '-'}</TableCell>
-                      <TableCell>{judge.location || '-'}</TableCell>
+                      <TableCell className="py-[4px]">{judge.event_name || '-'}</TableCell>
+                      <TableCell className="py-[4px]">{judge.location || '-'}</TableCell>
                       {(canUpdate || canDelete) && <TableCell className="text-right">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-2 py-[4px]">
                             {canUpdate && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(judge.id)}>
                                 <Edit className="h-3 w-3" />
                               </Button>}
