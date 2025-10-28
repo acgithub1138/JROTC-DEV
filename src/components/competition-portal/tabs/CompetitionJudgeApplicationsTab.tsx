@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User, Mail, Phone, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { useSchoolJudgeApplications } from '@/hooks/judges-portal/useSchoolJudgeApplications';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { formatPhoneNumber } from '@/utils/formatUtils';
 interface CompetitionJudgeApplicationsTabProps {
   competitionId: string;
 }
@@ -96,75 +98,103 @@ export const CompetitionJudgeApplicationsTab = ({
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
   }
-  const ApplicationCard = ({
-    application
-  }: {
-    application: any;
-  }) => <Card key={application.id} className="p-6 py-[8px]">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Column 1 - Basic Info */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <User className="h-5 w-5 text-muted-foreground" />
-            {application.cp_judges?.name || 'Unknown Judge'}
-          </h3>
-          
-          {/* Contact Information */}
-          <div className="space-y-2">
-            {application.cp_judges?.email && <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <a href={`mailto:${application.cp_judges.email}`} className="text-primary hover:underline">
-                  {application.cp_judges.email}
-                </a>
-              </div>}
-            
-            {application.cp_judges?.phone && <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <a href={`tel:${application.cp_judges.phone}`} className="text-primary hover:underline">
-                  {application.cp_judges.phone}
-                </a>
-              </div>}
-          </div>
+  const renderApplicationsTable = (applications: any[]) => {
+    if (applications.length === 0) return null;
 
-          <p className="text-xs text-muted-foreground">
-            Applied on {format(new Date(application.created_at), 'MMM d, yyyy h:mm a')}
-          </p>
-        </div>
-
-        {/* Column 2 - Availability Notes */}
-        <div>
-          {application.availability_notes && <div className="bg-muted p-3 rounded-lg h-fit">
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-medium">Availability & Notes:</p>
-              </div>
-              <p className="text-sm text-muted-foreground">{application.availability_notes}</p>
-            </div>}
-        </div>
-
-        {/* Column 3 - Status & Actions */}
-        <div className="flex flex-col gap-3">
-          {getStatusBadge(application.status)}
-          
-          {/* Decline Reason */}
-          {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg">
-              <p className="text-sm font-medium text-destructive mb-1">Decline Reason:</p>
-              <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
-            </div>}
-          
-          {application.status === 'pending' && <div className="flex flex-col gap-2">
-              <Button onClick={() => handleApproveClick(application)} disabled={isApproving} className="whitespace-nowrap">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Approve
-              </Button>
-              <Button variant="destructive" onClick={() => handleDeclineClick(application)} disabled={isDeclining} className="whitespace-nowrap">
-                <XCircle className="h-4 w-4 mr-2" />
-                Decline
-              </Button>
-            </div>}
-        </div>
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Judge Name</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Applied</TableHead>
+              <TableHead>Availability Notes</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {applications.map((application) => (
+              <TableRow key={application.id}>
+                <TableCell className="font-medium">
+                  {application.cp_judges?.name || 'Unknown Judge'}
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    {application.cp_judges?.email && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-3 w-3 text-muted-foreground" />
+                        <a href={`mailto:${application.cp_judges.email}`} className="text-primary hover:underline">
+                          {application.cp_judges.email}
+                        </a>
+                      </div>
+                    )}
+                    {application.cp_judges?.phone && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="h-3 w-3 text-muted-foreground" />
+                        <a href={`tel:${application.cp_judges.phone}`} className="text-primary hover:underline">
+                          {formatPhoneNumber(application.cp_judges.phone)}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {format(new Date(application.created_at), 'MMM d, yyyy')}
+                </TableCell>
+                <TableCell>
+                  {application.availability_notes ? (
+                    <div className="max-w-xs">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {application.availability_notes}
+                      </p>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-2">
+                    {getStatusBadge(application.status)}
+                    {application.decline_reason && (
+                      <div className="bg-destructive/10 p-2 rounded text-xs max-w-xs">
+                        <p className="font-medium text-destructive mb-1">Decline Reason:</p>
+                        <p className="text-muted-foreground">{application.decline_reason}</p>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  {application.status === 'pending' && (
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        size="sm"
+                        onClick={() => handleApproveClick(application)} 
+                        disabled={isApproving}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button 
+                        size="sm"
+                        variant="destructive" 
+                        onClick={() => handleDeclineClick(application)} 
+                        disabled={isDeclining}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Decline
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-    </Card>;
+    );
+  };
   return <div className="space-y-6">
       {applications && applications.length === 0 ? <Card className="p-8 text-center">
           <p className="text-muted-foreground">No judge applications received yet.</p>
@@ -172,33 +202,25 @@ export const CompetitionJudgeApplicationsTab = ({
           {/* Pending Applications */}
           {groupedApplications.pending.length > 0 && <div>
               <h3 className="text-lg font-semibold mb-4">Pending Review ({groupedApplications.pending.length})</h3>
-              <div className="space-y-4">
-                {groupedApplications.pending.map(app => <ApplicationCard key={app.id} application={app} />)}
-              </div>
+              {renderApplicationsTable(groupedApplications.pending)}
             </div>}
 
           {/* Approved Applications */}
           {groupedApplications.approved.length > 0 && <div>
               <h3 className="text-lg font-semibold mb-4">Approved ({groupedApplications.approved.length})</h3>
-              <div className="space-y-4">
-                {groupedApplications.approved.map(app => <ApplicationCard key={app.id} application={app} />)}
-              </div>
+              {renderApplicationsTable(groupedApplications.approved)}
             </div>}
 
           {/* Declined Applications */}
           {groupedApplications.declined.length > 0 && <div>
               <h3 className="text-lg font-semibold mb-4">Declined ({groupedApplications.declined.length})</h3>
-              <div className="space-y-4">
-                {groupedApplications.declined.map(app => <ApplicationCard key={app.id} application={app} />)}
-              </div>
+              {renderApplicationsTable(groupedApplications.declined)}
             </div>}
 
           {/* Withdrawn Applications */}
           {groupedApplications.withdrawn.length > 0 && <div>
               <h3 className="text-lg font-semibold mb-4">Withdrawn ({groupedApplications.withdrawn.length})</h3>
-              <div className="space-y-4">
-                {groupedApplications.withdrawn.map(app => <ApplicationCard key={app.id} application={app} />)}
-              </div>
+              {renderApplicationsTable(groupedApplications.withdrawn)}
             </div>}
         </>}
 
