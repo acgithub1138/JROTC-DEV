@@ -126,7 +126,7 @@ export const QuestionStep = ({
         </div>
 
         {/* Notes Area */}
-        <div className="px-4 py-[8px] border-t bg-muted/30">
+        <div className="px-4 py-4 border-t bg-muted/30">
           <label className="block text-sm font-medium mb-2">Notes (Optional)</label>
           <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="h-24 text-base" />
         </div>
