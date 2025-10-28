@@ -153,7 +153,7 @@ const MarketingNav = () => {
                 Contact
               </Link>
               <div className="pt-2 border-t">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/app/user-type" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full justify-start">Sign In</Button>
                 </Link>
               </div>
