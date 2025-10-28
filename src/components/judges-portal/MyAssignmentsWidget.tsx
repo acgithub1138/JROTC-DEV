@@ -2,12 +2,15 @@ import { useMyAssignments } from '@/hooks/judges-portal/useMyAssignments';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin, Clock, ClipboardCheck } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useNavigate } from 'react-router-dom';
 
 export const MyAssignmentsWidget = () => {
   const { competitions, isLoading, error } = useMyAssignments();
   const { timezone } = useSchoolTimezone();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -86,31 +89,45 @@ export const MyAssignmentsWidget = () => {
                   key={assignment.assignment_id} 
                   className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                 >
-                  <div className="font-medium text-sm">
-                    {assignment.event_name || 'Event Assignment'}
-                  </div>
-                  {assignment.event_start_time && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <Clock className="h-3 w-3" />
-                      <span>
-                        {convertToUI(assignment.event_start_time, timezone, 'time')}
-                        {assignment.event_end_time && 
-                          ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
-                        }
-                      </span>
-                      {assignment.event_location && (
-                        <>
-                          <span>•</span>
-                          <span>{assignment.event_location}</span>
-                        </>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">
+                        {assignment.event_name || 'Event Assignment'}
+                      </div>
+                      {assignment.event_start_time && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            {convertToUI(assignment.event_start_time, timezone, 'time')}
+                            {assignment.event_end_time && 
+                              ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
+                            }
+                          </span>
+                          {assignment.event_location && (
+                            <>
+                              <span>•</span>
+                              <span>{assignment.event_location}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {assignment.assignment_details && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {assignment.assignment_details}
+                        </p>
                       )}
                     </div>
-                  )}
-                  {assignment.assignment_details && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {assignment.assignment_details}
-                    </p>
-                  )}
+                    {assignment.event_id && (
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`)}
+                        className="shrink-0"
+                      >
+                        <ClipboardCheck className="h-4 w-4 mr-1" />
+                        Judge Event
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
