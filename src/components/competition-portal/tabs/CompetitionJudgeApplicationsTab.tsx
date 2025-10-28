@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Mail, Phone, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { useSchoolJudgeApplications } from '@/hooks/judges-portal/useSchoolJudgeApplications';
 import { format } from 'date-fns';
@@ -199,31 +200,51 @@ export const CompetitionJudgeApplicationsTab = ({
   return <div className="space-y-6">
       {applications && applications.length === 0 ? <Card className="p-8 text-center">
           <p className="text-muted-foreground">No judge applications received yet.</p>
-        </Card> : <>
-          {/* Pending Applications */}
-          {groupedApplications.pending.length > 0 && <div>
-              <h3 className="text-lg font-semibold mb-4">Pending Review ({groupedApplications.pending.length})</h3>
-              {renderApplicationsTable(groupedApplications.pending)}
-            </div>}
+        </Card> : (
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pending">
+              Pending ({groupedApplications.pending.length})
+            </TabsTrigger>
+            <TabsTrigger value="approved">
+              Approved ({groupedApplications.approved.length})
+            </TabsTrigger>
+            <TabsTrigger value="declined">
+              Declined ({groupedApplications.declined.length})
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Approved Applications */}
-          {groupedApplications.approved.length > 0 && <div>
-              <h3 className="text-lg font-semibold mb-4">Approved ({groupedApplications.approved.length})</h3>
-              {renderApplicationsTable(groupedApplications.approved)}
-            </div>}
+          <TabsContent value="pending" className="mt-6">
+            {groupedApplications.pending.length > 0 ? (
+              renderApplicationsTable(groupedApplications.pending)
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No pending applications.</p>
+              </Card>
+            )}
+          </TabsContent>
 
-          {/* Declined Applications */}
-          {groupedApplications.declined.length > 0 && <div>
-              <h3 className="text-lg font-semibold mb-4">Declined ({groupedApplications.declined.length})</h3>
-              {renderApplicationsTable(groupedApplications.declined)}
-            </div>}
+          <TabsContent value="approved" className="mt-6">
+            {groupedApplications.approved.length > 0 ? (
+              renderApplicationsTable(groupedApplications.approved)
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No approved applications.</p>
+              </Card>
+            )}
+          </TabsContent>
 
-          {/* Withdrawn Applications */}
-          {groupedApplications.withdrawn.length > 0 && <div>
-              <h3 className="text-lg font-semibold mb-4">Withdrawn ({groupedApplications.withdrawn.length})</h3>
-              {renderApplicationsTable(groupedApplications.withdrawn)}
-            </div>}
-        </>}
+          <TabsContent value="declined" className="mt-6">
+            {groupedApplications.declined.length > 0 ? (
+              renderApplicationsTable(groupedApplications.declined)
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No declined applications.</p>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
 
       {/* Approve Dialog */}
       <AlertDialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
