@@ -141,11 +141,11 @@ serve(async (req) => {
     const { error: judgeRecordError } = await supabaseAdmin
       .from('cp_judges')
       .insert({
-        id: authUser.user!.id,
-        first_name,
-        last_name,
+        user_id: authUser.user!.id,
+        name: `${last_name}, ${first_name}`,
         email,
-        phone: phone || null
+        phone: phone || null,
+        available: true
       })
 
     if (judgeRecordError) {
