@@ -111,7 +111,7 @@ export const QuestionStep = ({
   const isInputRequired = ['number', 'dropdown', 'text'].includes(field.type) || field.type === 'penalty' && judgeNumber === '1' || field.type === 'penalty_checkbox' && judgeNumber === '1' || field.type === 'scoring_scale';
   const isAnswered = localValue !== null && localValue !== undefined && localValue !== '';
   const nextDisabled = isInputRequired && !isAnswered;
-  return <div className="h-screen bg-background flex flex-col overflow-hidden">
+  return <div className="h-[calc(100dvh-4rem)] bg-background flex flex-col overflow-hidden">
       {/* Header with Question */}
       <div className="px-4 py-4 shrink-0">
         <h1 className="text-2xl font-bold mb-2">{field.name}</h1>
