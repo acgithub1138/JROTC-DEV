@@ -44,6 +44,7 @@ export const EditScoreSheetPage = () => {
       setScoreSheet(data);
       const scoreSheetData = data.score_sheet as any;
       setScores(scoreSheetData?.scores || {});
+      // Use the stored total_points from database instead of recalculating
       setTotalPoints(data.total_points || 0);
     } catch (error) {
       console.error('Error loading score sheet:', error);

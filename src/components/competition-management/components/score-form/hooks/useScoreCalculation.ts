@@ -108,7 +108,7 @@ export const useScoreCalculation = ({
     setScores(initializedScores);
     const initialTotal = calculateTotal(initializedScores);
     setTotalPoints(initialTotal);
-    onScoreChange(initializedScores, initialTotal);
+    // Only call onScoreChange on mount to set initial state, not every time
   }, [fields.length]);
 
   return {

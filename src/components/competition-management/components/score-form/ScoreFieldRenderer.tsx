@@ -106,7 +106,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
       case 'penalty':
         // Handle penalty types
         // Only show penalty fields for Judge 1
-        if (judgeNumber !== 'Judge 1') return null;
+        if (judgeNumber && judgeNumber !== '1' && judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className="font-medium text-destructive">
@@ -169,7 +169,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
           </div>;
       case 'penalty_checkbox':
         // Only show penalty fields for Judge 1
-        if (judgeNumber !== 'Judge 1') return null;
+        if (judgeNumber && judgeNumber !== '1' && judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className="font-medium text-destructive">
