@@ -144,7 +144,7 @@ export default function MobileJudgeEventPage() {
         .from('competition_events')
         .insert([{
           school_id: selectedSchoolId,
-          event: eventId,
+          event: eventDetails.event_id,
           competition_id: null,
           source_competition_id: competitionId,
           source_type: 'portal',
