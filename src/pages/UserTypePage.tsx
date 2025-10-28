@@ -1,0 +1,71 @@
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Users, UserCircle, School, Gavel } from "lucide-react";
+
+export default function UserTypePage() {
+  const navigate = useNavigate();
+
+  const userTypes = [
+    {
+      title: "Instructor / Cadet",
+      description: "Access the full JROTC Command Center",
+      icon: Users,
+      path: "/app/auth",
+      variant: "default" as const,
+    },
+    {
+      title: "Parent",
+      description: "View your cadet's progress and information",
+      icon: UserCircle,
+      path: "/app/auth",
+      variant: "default" as const,
+    },
+    {
+      title: "Free Account",
+      description: "Register for competitions as an external school",
+      icon: School,
+      path: "/external/auth",
+      variant: "secondary" as const,
+    },
+    {
+      title: "Judge",
+      description: "Access the judges portal for scoring",
+      icon: Gavel,
+      path: "/app/judges/auth",
+      variant: "outline" as const,
+    },
+  ];
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <Card className="w-full max-w-4xl">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-3xl font-bold">Welcome to JROTC Command Center</CardTitle>
+          <CardDescription className="text-base">
+            Select your account type to continue
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+          {userTypes.map((type) => {
+            const Icon = type.icon;
+            return (
+              <Button
+                key={type.path}
+                variant={type.variant}
+                className="h-auto flex-col gap-3 p-6 hover:scale-105 transition-transform"
+                onClick={() => navigate(type.path)}
+              >
+                <Icon className="h-12 w-12" />
+                <div className="text-center space-y-1">
+                  <div className="font-semibold text-lg">{type.title}</div>
+                  <div className="text-sm opacity-90 font-normal">{type.description}</div>
+                </div>
+              </Button>
+            );
+          })}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

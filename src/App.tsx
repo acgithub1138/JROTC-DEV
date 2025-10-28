@@ -26,6 +26,7 @@ const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const ParentRegistrationPage = lazy(() => import("@/components/auth/ParentRegistrationPage"));
 const ExternalSchoolRegistration = lazy(() => import("@/components/external/ExternalSchoolRegistration").then(m => ({ default: m.ExternalSchoolRegistration })));
 const ExternalSchoolAuthPage = lazy(() => import("@/components/external/ExternalSchoolAuthPage").then(m => ({ default: m.ExternalSchoolAuthPage })));
+const UserTypePage = lazy(() => import("@/pages/UserTypePage"));
 
 // Lazy load main application
 const MainApplication = lazy(() => import("@/components/MainApplication"));
@@ -70,6 +71,9 @@ const App = () => (
                 <Route path="products/task-management" element={<Suspense fallback={<PageLoader />}><ProductPage module="task" /></Suspense>} />
                 <Route path="products/competition-management" element={<Suspense fallback={<PageLoader />}><ProductPage module="competition" /></Suspense>} />
               </Route>
+
+              {/* User Type Selection Route */}
+              <Route path="/app/user-type" element={<Suspense fallback={<PageLoader />}><UserTypePage /></Suspense>} />
 
               {/* Password Reset Route - Now inside AuthProvider */}
               <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>} />
