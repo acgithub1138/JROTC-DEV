@@ -51,7 +51,7 @@ export default function UserTypePage() {
             const Icon = type.icon;
             return (
               <Button
-                key={type.path}
+                key={type.title}
                 variant={type.variant}
                 className="h-auto flex-col gap-3 p-6 hover:scale-105 transition-transform"
                 onClick={() => navigate(type.path)}
