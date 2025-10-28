@@ -16,6 +16,7 @@ interface SchoolSelectionStepProps {
   onSelect: (schoolId: string) => void;
   onNext: () => void;
   onPrevious: () => void;
+  isTransitioning?: boolean;
 }
 
 export const SchoolSelectionStep = ({
@@ -23,7 +24,8 @@ export const SchoolSelectionStep = ({
   selectedSchoolId,
   onSelect,
   onNext,
-  onPrevious
+  onPrevious,
+  isTransitioning = false
 }: SchoolSelectionStepProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -85,7 +87,7 @@ export const SchoolSelectionStep = ({
         onNext={onNext}
         onPrevious={onPrevious}
         showPrevious
-        nextDisabled={!selectedSchoolId}
+        nextDisabled={!selectedSchoolId || isTransitioning}
       />
     </div>
   );

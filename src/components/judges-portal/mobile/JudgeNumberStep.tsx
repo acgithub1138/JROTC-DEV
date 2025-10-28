@@ -8,6 +8,7 @@ interface JudgeNumberStepProps {
   onSelect: (judgeNumber: string) => void;
   onNext: () => void;
   onPrevious: () => void;
+  isTransitioning?: boolean;
 }
 
 export const JudgeNumberStep = ({
@@ -15,7 +16,8 @@ export const JudgeNumberStep = ({
   selectedJudgeNumber,
   onSelect,
   onNext,
-  onPrevious
+  onPrevious,
+  isTransitioning = false
 }: JudgeNumberStepProps) => {
   const judges = Array.from({ length: judgeCount }, (_, i) => (i + 1).toString());
   
@@ -58,7 +60,7 @@ export const JudgeNumberStep = ({
         onNext={onNext}
         onPrevious={onPrevious}
         showPrevious
-        nextDisabled={!selectedJudgeNumber}
+        nextDisabled={!selectedJudgeNumber || isTransitioning}
       />
     </div>
   );

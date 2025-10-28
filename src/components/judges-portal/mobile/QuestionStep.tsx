@@ -16,6 +16,7 @@ interface QuestionStepProps {
   onNotesChange: (notes: string) => void;
   onNext: () => void;
   onPrevious: () => void;
+  isTransitioning?: boolean;
 }
 export const QuestionStep = ({
   field,
@@ -25,7 +26,8 @@ export const QuestionStep = ({
   onValueChange,
   onNotesChange,
   onNext,
-  onPrevious
+  onPrevious,
+  isTransitioning = false
 }: QuestionStepProps) => {
   const [localValue, setLocalValue] = useState(value);
   const [localNotes, setLocalNotes] = useState(notes);
@@ -136,6 +138,6 @@ export const QuestionStep = ({
         </div>
       </div>
       
-      <MobileNavButtons onNext={onNext} onPrevious={onPrevious} showPrevious nextDisabled={nextDisabled} />
+      <MobileNavButtons onNext={onNext} onPrevious={onPrevious} showPrevious nextDisabled={nextDisabled || isTransitioning} />
     </div>;
 };

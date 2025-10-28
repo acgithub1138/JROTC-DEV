@@ -26,6 +26,7 @@ export default function MobileJudgeEventPage() {
   const [selectedJudgeNumber, setSelectedJudgeNumber] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch template
   const { data: template } = useQuery({
@@ -86,16 +87,26 @@ export default function MobileJudgeEventPage() {
     return total;
   }, [answers, fields]);
 
+  // Reset transition state when step changes
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => setIsTransitioning(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, isTransitioning]);
+
   // Handle navigation
   const handleNext = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep < totalSteps && !isTransitioning) {
+      setIsTransitioning(true);
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep > 0) {
+    if (currentStep > 0 && !isTransitioning) {
+      setIsTransitioning(true);
       setCurrentStep(currentStep - 1);
       window.scrollTo(0, 0);
     }
@@ -201,6 +212,7 @@ export default function MobileJudgeEventPage() {
           onSelect={setSelectedSchoolId}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          isTransitioning={isTransitioning}
         />
       )}
 
@@ -212,6 +224,7 @@ export default function MobileJudgeEventPage() {
           onSelect={setSelectedJudgeNumber}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          isTransitioning={isTransitioning}
         />
       )}
 
@@ -226,6 +239,7 @@ export default function MobileJudgeEventPage() {
           onNotesChange={(notes) => handleNotesChange(questionFields[currentStep - 3].id, notes)}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          isTransitioning={isTransitioning}
         />
       )}
 
