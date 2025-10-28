@@ -18,11 +18,9 @@ type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row']
   paid: boolean;
   color: string;
 };
-
 interface CompetitionSchoolsTabProps {
   competitionId: string;
 }
-
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
@@ -42,7 +40,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
     canUpdate,
     canDelete
   } = useCompetitionSchoolsPermissions();
-  
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string>('school_name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -54,18 +51,14 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       setSortDirection('asc');
     }
   };
-
   const getSortIcon = (field: string) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
     return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
-
   const sortedSchools = schools.sort((a, b) => {
     if (!sortField) return 0;
-    
     let aValue: any = '';
     let bValue: any = '';
-    
     switch (sortField) {
       case 'school_name':
         aValue = (a.school_name || 'unknown school').toLowerCase();
@@ -86,12 +79,10 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       default:
         return 0;
     }
-    
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
-
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
       await updateSchoolRegistration(schoolId, {
@@ -101,13 +92,11 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       console.error('Error updating school color:', error);
     }
   };
-
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
       </div>;
   }
-
   return <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
@@ -117,20 +106,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
           </Button>}
       </div>
 
-      {!canView ? (
-        <div className="text-center py-8 text-muted-foreground">
+      {!canView ? <div className="text-center py-8 text-muted-foreground">
           <p>You don't have permission to view schools</p>
-        </div>
-      ) : schools.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        </div> : schools.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No schools registered for this competition</p>
-        </div>
-      ) : (
-        <TooltipProvider>
-          {isMobile ? (
-            <div className="space-y-4">
-              {sortedSchools.map((school: CompSchoolWithPaid) => (
-                <Card key={school.id}>
+        </div> : <TooltipProvider>
+          {isMobile ? <div className="space-y-4">
+              {sortedSchools.map((school: CompSchoolWithPaid) => <Card key={school.id}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">{school.school_name || 'Unknown School'}</CardTitle>
                   </CardHeader>
@@ -154,14 +136,12 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-muted-foreground">Color:</span>
-                        <div 
-                          className="w-6 h-6 rounded border border-border" 
-                          style={{ backgroundColor: school.color || '#3B82F6' }}
-                        />
+                        <div className="w-6 h-6 rounded border border-border" style={{
+                  backgroundColor: school.color || '#3B82F6'
+                }} />
                       </div>
                       <div className="flex flex-wrap gap-2 pt-2">
-                        {canViewDetails && (
-                          <Tooltip>
+                        {canViewDetails && <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEvents(school.id)}>
                                 <Eye className="w-4 h-4 mr-1" />
@@ -171,17 +151,11 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                             <TooltipContent>
                               <p>View registered events</p>
                             </TooltipContent>
-                          </Tooltip>
-                        )}
-                        {canUpdate && (
-                          <>
+                          </Tooltip>}
+                        {canUpdate && <>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}
-                                >
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}>
                                   <Plus className="w-4 h-4 mr-1" />
                                   Add Score
                                 </Button>
@@ -201,50 +175,34 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                 <p>Edit school registration</p>
                               </TooltipContent>
                             </Tooltip>
-                          </>
-                        )}
+                          </>}
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
+                </Card>)}
+            </div> : <Card>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>
-                        <button 
-                          onClick={() => handleSort('school_name')}
-                          className="flex items-center gap-2 hover:text-foreground font-medium"
-                        >
+                        <button onClick={() => handleSort('school_name')} className="flex items-center gap-2 hover:text-foreground font-medium">
                           School Name {getSortIcon('school_name')}
                         </button>
                       </TableHead>
                       <TableHead>Events</TableHead>
                       <TableHead>
-                        <button 
-                          onClick={() => handleSort('status')}
-                          className="flex items-center gap-2 hover:text-foreground font-medium"
-                        >
+                        <button onClick={() => handleSort('status')} className="flex items-center gap-2 hover:text-foreground font-medium">
                           Status {getSortIcon('status')}
                         </button>
                       </TableHead>
                       <TableHead>
-                        <button 
-                          onClick={() => handleSort('paid')}
-                          className="flex items-center gap-2 hover:text-foreground font-medium"
-                        >
+                        <button onClick={() => handleSort('paid')} className="flex items-center gap-2 hover:text-foreground font-medium">
                           Paid {getSortIcon('paid')}
                         </button>
                       </TableHead>
                       <TableHead>
-                        <button 
-                          onClick={() => handleSort('fee')}
-                          className="flex items-center gap-2 hover:text-foreground font-medium"
-                        >
+                        <button onClick={() => handleSort('fee')} className="flex items-center gap-2 hover:text-foreground font-medium">
                           Fee {getSortIcon('fee')}
                         </button>
                       </TableHead>
@@ -258,8 +216,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                           {school.school_name || 'Unknown School'}
                         </TableCell>
                         <TableCell>
-                          {canViewDetails && (
-                            <Tooltip>
+                          {canViewDetails && <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
                                   <Eye className="w-3 h-3" />
@@ -268,8 +225,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                               <TooltipContent>
                                 <p>View registered events</p>
                               </TooltipContent>
-                            </Tooltip>
-                          )}
+                            </Tooltip>}
                         </TableCell>                        
                         <TableCell>
                           <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
@@ -285,25 +241,16 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                           $ {school.total_fee}
                         </TableCell>
                          <TableCell>
-                           <div 
-                             className="w-6 h-6 rounded border border-border" 
-                             style={{ backgroundColor: school.color || '#3B82F6' }}
-                           />
+                           <div className="w-6 h-6 rounded border border-border" style={{
+                    backgroundColor: school.color || '#3B82F6'
+                  }} />
                          </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
-                            {canUpdate && (
-                              <>
+                            {canUpdate && <>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </Button>
+                                    
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Add event score sheet</p>
@@ -319,18 +266,15 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                     <p>Edit school registration</p>
                                   </TooltipContent>
                                 </Tooltip>
-                              </>
-                            )}
+                              </>}
                           </div>
                         </TableCell>
                       </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
-            </Card>
-          )}
-        </TooltipProvider>
-      )}
+            </Card>}
+        </TooltipProvider>}
 
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
     </div>;
