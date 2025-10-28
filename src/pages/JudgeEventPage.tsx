@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { useJudgeEventDetails } from '@/hooks/judges-portal/useJudgeEventDetails';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SchoolSelector } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/SchoolSelector';
-import { ScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
+import { JudgeScoreEntryForm } from '@/components/judges-portal/JudgeScoreEntryForm';
 import { ArrowLeft, Clock, MapPin } from 'lucide-react';
 
 export const JudgeEventPage = () => {
@@ -28,58 +27,6 @@ export const JudgeEventPage = () => {
       setSelectedSchoolId(registeredSchools[0].school_id);
     }
   }, [registeredSchools, selectedSchoolId]);
-
-  // Fetch score sheets for the selected school and event
-  const { data: rawEvents = [], isLoading: isLoadingEvents, refetch } = useQuery({
-    queryKey: ['judge-event-score-sheets', selectedSchoolId, competitionId, eventDetails?.event_id],
-    enabled: !!selectedSchoolId && !!competitionId && !!eventDetails?.event_id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('competition_events')
-        .select('*')
-        .eq('school_id', selectedSchoolId as string)
-        .or(`competition_id.eq.${competitionId},source_competition_id.eq.${competitionId}`)
-        .eq('event', eventDetails?.event_id as string)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-    staleTime: 0,
-    refetchOnMount: true,
-  });
-
-  // Ensure events have template_id in their score_sheet for proper rendering
-  const events = rawEvents.length > 0 
-    ? rawEvents.map(event => {
-        const scoreSheet = event.score_sheet && typeof event.score_sheet === 'object' && !Array.isArray(event.score_sheet)
-          ? event.score_sheet as Record<string, any>
-          : {};
-        
-        return {
-          ...event,
-          score_sheet: {
-            ...scoreSheet,
-            template_id: scoreSheet.template_id || eventDetails?.score_sheet
-          }
-        };
-      })
-    : eventDetails?.score_sheet 
-      ? [{
-          id: 'placeholder',
-          school_id: selectedSchoolId,
-          event: eventDetails.event_id,
-          competition_id: competitionId,
-          score_sheet: {
-            template_id: eventDetails.score_sheet,
-            scores: {}
-          },
-          total_points: 0,
-          cadet_ids: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } as any]
-      : [];
 
   if (isLoading) {
     return (
@@ -172,24 +119,16 @@ export const JudgeEventPage = () => {
               </CardContent>
             </Card>
 
-            {selectedSchoolId && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Score Sheets</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingEvents ? (
-                    <Skeleton className="h-64 w-full" />
-                  ) : (
-                    <ScoreSheetTable
-                      events={events}
-                      onEventsRefresh={refetch}
-                      competitionId={competitionId || ''}
-                      isInternal={false}
-                    />
-                  )}
-                </CardContent>
-              </Card>
+            {selectedSchoolId && eventDetails?.score_sheet && (
+              <JudgeScoreEntryForm
+                templateId={eventDetails.score_sheet}
+                schoolId={selectedSchoolId}
+                eventId={eventDetails.event_id}
+                competitionId={competitionId || ''}
+                onSuccess={() => {
+                  toast.success('Score sheet submitted successfully');
+                }}
+              />
             )}
           </div>
         )}
