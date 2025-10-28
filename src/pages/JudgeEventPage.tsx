@@ -34,15 +34,26 @@ export const JudgeEventPage = () => {
     queryKey: ['judge-event-score-sheets', selectedSchoolId, competitionId, eventDetails?.event_id],
     enabled: !!selectedSchoolId && !!competitionId && !!eventDetails?.event_id,
     queryFn: async () => {
+      console.log('Fetching score sheets with:', {
+        school_id: selectedSchoolId,
+        source_competition_id: competitionId,
+        event: eventDetails?.event_id
+      });
+
       const { data, error } = await supabase
         .from('competition_events')
         .select('*')
         .eq('school_id', selectedSchoolId as string)
-        .eq('source_competition_id', competitionId as string)
+        .or(`source_competition_id.eq.${competitionId},competition_id.eq.${competitionId}`)
         .eq('event', eventDetails?.event_id as string)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching score sheets:', error);
+        throw error;
+      }
+
+      console.log('Score sheets found:', data?.length || 0);
       return data || [];
     },
     staleTime: 0,
