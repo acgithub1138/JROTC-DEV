@@ -59,7 +59,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
           <ScoreFieldRenderer
             key={field.id}
             field={field}
-            value={scores[field.id]}
+            scores={scores}
             onChange={handleFieldChange}
             judgeNumber={judgeNumber}
           />

@@ -7,16 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { JsonField } from '../json-field-builder/types';
 interface ScoreFieldRendererProps {
   field: JsonField;
-  value: any;
+  scores: Record<string, any>;
   onChange: (fieldId: string, value: any) => void;
   judgeNumber?: string;
 }
 export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
   field,
-  value,
+  scores,
   onChange,
   judgeNumber
 }) => {
+  const value = scores[field.id];
+  const notesValue = scores[`${field.id}_notes`] || '';
   const renderField = () => {
     switch (field.type) {
       case 'section_header':
@@ -61,7 +63,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             <Textarea 
               id={`${field.id}_notes`}
-              value={value?.[`${field.id}_notes`] || ''}
+              value={notesValue}
               onChange={e => onChange(`${field.id}_notes`, e.target.value)}
               placeholder="Add notes..."
               className="min-h-[80px] resize-y w-full text-sm"
@@ -95,7 +97,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             <Textarea 
               id={`${field.id}_notes`}
-              value={value?.[`${field.id}_notes`] || ''}
+              value={notesValue}
               onChange={e => onChange(`${field.id}_notes`, e.target.value)}
               placeholder="Add notes..."
               className="min-h-[80px] resize-y w-full text-sm"
@@ -131,7 +133,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             )}
             <Textarea 
               id={`${field.id}_notes`}
-              value={value?.[`${field.id}_notes`] || ''}
+              value={notesValue}
               onChange={e => onChange(`${field.id}_notes`, e.target.value)}
               placeholder="Add notes..."
               className="min-h-[80px] resize-y w-full text-sm"
@@ -181,7 +183,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.penaltyValue && <p className="text-xs text-destructive">Each penalty: -{field.penaltyValue} points</p>}
             <Textarea 
               id={`${field.id}_notes`}
-              value={value?.[`${field.id}_notes`] || ''}
+              value={notesValue}
               onChange={e => onChange(`${field.id}_notes`, e.target.value)}
               placeholder="Add notes..."
               className="min-h-[80px] resize-y w-full text-sm"
@@ -221,7 +223,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             )}
             <Textarea 
               id={`${field.id}_notes`}
-              value={value?.[`${field.id}_notes`] || ''}
+              value={notesValue}
               onChange={e => onChange(`${field.id}_notes`, e.target.value)}
               placeholder="Add notes..."
               className="min-h-[80px] resize-y w-full text-sm"
