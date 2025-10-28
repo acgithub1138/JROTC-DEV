@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +16,7 @@ import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionE
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUTC } from '@/utils/timezoneUtils';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { supabase } from '@/integrations/supabase/client';
 
 interface JudgeFormData {
   judges: string[];
@@ -38,9 +40,35 @@ export const CompetitionJudgesRecord = () => {
   const judgeId = location.state?.judgeId;
   const isEditMode = !!judgeId;
   const {
-    judges: availableJudges,
+    judges: allJudges,
     isLoading: judgesLoading
   } = useJudges();
+  
+  // Fetch approved judge applications for this competition
+  const { data: approvedApplications = [] } = useQuery({
+    queryKey: ['approved-judge-applications', competitionId],
+    queryFn: async () => {
+      if (!competitionId) return [];
+      
+      const { data, error } = await supabase
+        .from('cp_judge_competition_registrations')
+        .select('judge_id, cp_judges(*)')
+        .eq('competition_id', competitionId)
+        .eq('status', 'approved');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!competitionId,
+  });
+  
+  // Filter to only show approved judges for this competition
+  const availableJudges = React.useMemo(() => {
+    if (!competitionId) return allJudges;
+    
+    const approvedJudgeIds = new Set(approvedApplications.map(app => app.judge_id));
+    return allJudges.filter(judge => approvedJudgeIds.has(judge.id));
+  }, [allJudges, approvedApplications, competitionId]);
   const {
     judges,
     createJudge,
