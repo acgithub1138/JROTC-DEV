@@ -1,0 +1,105 @@
+import { useMyAssignments } from '@/hooks/judges-portal/useMyAssignments';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar, MapPin, Clock } from 'lucide-react';
+
+export const MyAssignmentsWidget = () => {
+  const { competitions, isLoading } = useMyAssignments();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>My Assignments</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (competitions.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>My Assignments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            No upcoming judging assignments
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>My Assignments</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {competitions.map((competition) => (
+          <div key={competition.competition_id} className="space-y-3">
+            <div className="border-l-4 border-judge pl-3">
+              <h3 className="font-semibold text-lg">{competition.competition_name}</h3>
+              <div className="flex flex-col gap-1 text-sm text-muted-foreground mt-1">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>
+                    {convertToUI(competition.competition_start_date, 'UTC', 'date')}
+                    {competition.competition_start_date !== competition.competition_end_date && 
+                      ` - ${convertToUI(competition.competition_end_date, 'UTC', 'date')}`
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>{competition.competition_location}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="ml-4 space-y-2">
+              {competition.assignments.map((assignment) => (
+                <div 
+                  key={assignment.assignment_id} 
+                  className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="font-medium text-sm">
+                    {assignment.event_name || 'Event Assignment'}
+                  </div>
+                  {assignment.event_start_time && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                      <Clock className="h-3 w-3" />
+                      <span>
+                        {convertToUI(assignment.event_start_time, 'UTC', 'time')}
+                        {assignment.event_end_time && 
+                          ` - ${convertToUI(assignment.event_end_time, 'UTC', 'time')}`
+                        }
+                      </span>
+                      {assignment.event_location && (
+                        <>
+                          <span>•</span>
+                          <span>{assignment.event_location}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {assignment.assignment_details && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {assignment.assignment_details}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+};

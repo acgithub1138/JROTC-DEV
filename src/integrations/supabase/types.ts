@@ -4168,6 +4168,63 @@ export type Database = {
           },
         ]
       }
+      judge_assignments_view: {
+        Row: {
+          assignment_details: string | null
+          assignment_id: string | null
+          competition_end_date: string | null
+          competition_id: string | null
+          competition_location: string | null
+          competition_name: string | null
+          competition_start_date: string | null
+          competition_status: string | null
+          created_at: string | null
+          event_end_time: string | null
+          event_id: string | null
+          event_location: string | null
+          event_name: string | null
+          event_start_time: string | null
+          judge_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_judges_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_event_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_event_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events_detailed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_judges_judge_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "cp_judges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parent_cadet_tasks: {
         Row: {
           cadet_id: string | null

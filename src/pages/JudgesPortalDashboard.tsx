@@ -1,3 +1,5 @@
+import { MyAssignmentsWidget } from '@/components/judges-portal/MyAssignmentsWidget';
+
 export const JudgesPortalDashboard = () => {
   return (
     <div className="p-8">
@@ -11,26 +13,25 @@ export const JudgesPortalDashboard = () => {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
-            <h3 className="font-semibold text-lg mb-2">My Assignments</h3>
-            <p className="text-sm text-muted-foreground">
-              View your upcoming judging assignments
-            </p>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <MyAssignmentsWidget />
           </div>
 
-          <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
-            <h3 className="font-semibold text-lg mb-2">Score Sheets</h3>
-            <p className="text-sm text-muted-foreground">
-              Access and complete competition score sheets
-            </p>
-          </div>
+          <div className="space-y-6">
+            <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
+              <h3 className="font-semibold text-lg mb-2">Score Sheets</h3>
+              <p className="text-sm text-muted-foreground">
+                Access and complete competition score sheets
+              </p>
+            </div>
 
-          <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
-            <h3 className="font-semibold text-lg mb-2">My History</h3>
-            <p className="text-sm text-muted-foreground">
-              View your past judging history
-            </p>
+            <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
+              <h3 className="font-semibold text-lg mb-2">My History</h3>
+              <p className="text-sm text-muted-foreground">
+                View your past judging history
+              </p>
+            </div>
           </div>
         </div>
       </div>
