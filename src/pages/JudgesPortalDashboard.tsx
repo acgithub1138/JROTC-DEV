@@ -1,4 +1,6 @@
 import { MyAssignmentsWidget } from '@/components/judges-portal/MyAssignmentsWidget';
+import { AllAssignmentsTable } from '@/components/judges-portal/AllAssignmentsTable';
+
 export const JudgesPortalDashboard = () => {
   return <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -27,6 +29,8 @@ export const JudgesPortalDashboard = () => {
             
           </div>
         </div>
+
+        <AllAssignmentsTable />
       </div>
     </div>;
 };
