@@ -19,8 +19,9 @@ export const JudgeNumberStep = ({
 }: JudgeNumberStepProps) => {
   const judges = Array.from({ length: judgeCount }, (_, i) => (i + 1).toString());
   
-  // Calculate grid columns (max 3)
-  const columns = Math.min(judgeCount, 3);
+  // Calculate grid columns using same logic as score grid
+  // For 1-6: 2 columns, For 7+: 3 columns
+  const columns = judgeCount <= 6 ? 2 : 3;
   
   return (
     <div className="min-h-screen bg-background flex flex-col pb-24">
@@ -33,9 +34,7 @@ export const JudgeNumberStep = ({
         <div 
           className={cn(
             "grid gap-4 max-w-md mx-auto w-full",
-            columns === 1 && "grid-cols-1",
-            columns === 2 && "grid-cols-2",
-            columns === 3 && "grid-cols-3"
+            columns === 2 ? "grid-cols-2" : "grid-cols-3"
           )}
         >
           {judges.map((judge) => (
