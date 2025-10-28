@@ -21,7 +21,7 @@ export const MobileNavButtons = ({
   nextLabel = "Next"
 }: MobileNavButtonsProps) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex justify-between gap-4 safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex justify-between gap-4 safe-area-bottom z-50">
       {showExit && onExit && (
         <Button
           variant="outline"
