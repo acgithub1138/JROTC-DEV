@@ -72,7 +72,16 @@ export const QuestionStep = ({
               <p>This field is only for Judge 1</p>
             </div>;
         }
-        return <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />;
+        const penaltyValue = localValue ? -Math.abs(Number(localValue)) : null;
+        return <div className="space-y-4">
+            <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />
+            {penaltyValue !== null && (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
+                <p className="text-3xl font-bold text-destructive">{penaltyValue} points</p>
+              </div>
+            )}
+          </div>;
       case 'scoring_scale':
         const ranges = field.scaleRanges || {
           poor: {

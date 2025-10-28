@@ -44,14 +44,24 @@ export const ReviewSubmitStep = ({
           const fieldValue = answers[field.id];
           const fieldNotes = answers[`${field.id}_notes`];
           const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+          const isPenalty = ['penalty', 'penalty_checkbox'].includes(field.type);
+          const penaltyDeduction = isPenalty && fieldValue ? -Math.abs(Number(fieldValue)) : null;
+          
           return <Card key={field.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium mb-1">{field.name}</p>
                     {hasAnswer ? <>
-                        <p className="text-lg font-semibold text-primary text-center">
-                          {fieldValue}
-                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <p className="text-lg font-semibold text-primary">
+                            {fieldValue}
+                          </p>
+                          {penaltyDeduction !== null && (
+                            <p className="text-lg font-semibold text-destructive">
+                              ({penaltyDeduction})
+                            </p>
+                          )}
+                        </div>
                         {fieldNotes && <p className="text-sm text-muted-foreground mt-2 italic">
                             Note: {fieldNotes}
                           </p>}
