@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Edit, Trash2, Eye, Phone, Mail } from 'lucide-react';
 import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -26,9 +26,6 @@ interface JudgesTableProps {
   onView: (judge: Judge) => void;
   onEdit: (judge: Judge) => void;
   onDelete: (judge: Judge) => void;
-  selectedJudges: string[];
-  onSelectJudge: (judgeId: string, checked: boolean) => void;
-  onSelectAll: (checked: boolean) => void;
   sortField: string;
   sortDirection: 'asc' | 'desc';
   onSort: (field: string) => void;
@@ -40,9 +37,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
   onView,
   onEdit,
   onDelete,
-  selectedJudges,
-  onSelectJudge,
-  onSelectAll,
   sortField,
   sortDirection,
   onSort,
@@ -61,9 +55,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
     cancelEdit,
     saveEdit,
   } = useJudgeTableLogic();
-  
-  const isAllSelected = judges.length > 0 && selectedJudges.length === judges.length;
-  const isIndeterminate = selectedJudges.length > 0 && selectedJudges.length < judges.length;
   if (isLoading) {
     return <div className="text-center py-8">Loading judges...</div>;
   }
@@ -77,36 +68,15 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
   if (isMobile) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              checked={isAllSelected}
-              onCheckedChange={onSelectAll}
-              aria-label="Select all judges"
-              className={isIndeterminate ? "data-[state=checked]:bg-primary data-[state=checked]:opacity-50" : ""}
-            />
-            <span className="text-sm text-muted-foreground">
-              {selectedJudges.length > 0 ? `${selectedJudges.length} selected` : 'Select all'}
-            </span>
-          </div>
-        </div>
-        
         {judges.map((judge) => (
           <Card key={judge.id} className="p-4">
             <CardContent className="p-0">
               <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={selectedJudges.includes(judge.id)}
-                    onCheckedChange={(checked) => onSelectJudge(judge.id, checked as boolean)}
-                    aria-label={`Select ${judge.name}`}
-                  />
-                  <div>
-                    <h3 className="font-medium">{judge.name}</h3>
-                    <Badge variant={judge.available ? "default" : "secondary"} className="mt-1">
-                      {judge.available ? 'Available' : 'Unavailable'}
-                    </Badge>
-                  </div>
+                <div>
+                  <h3 className="font-medium">{judge.name}</h3>
+                  <Badge variant={judge.available ? "default" : "secondary"} className="mt-1">
+                    {judge.available ? 'Available' : 'Unavailable'}
+                  </Badge>
                 </div>
                 <div className="flex space-x-1">
                   {canEdit && (
@@ -158,14 +128,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-12">
-              <Checkbox
-                checked={isAllSelected}
-                onCheckedChange={onSelectAll}
-                aria-label="Select all judges"
-                className={isIndeterminate ? "data-[state=checked]:bg-primary data-[state=checked]:opacity-50" : ""}
-              />
-            </TableHead>
             <TableHead>
               <button 
                 onClick={() => onSort('name')}
@@ -203,13 +165,6 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
         </TableHeader>
         <TableBody>
           {judges.map(judge => <TableRow key={judge.id} className="group">
-              <TableCell>
-                <Checkbox
-                  checked={selectedJudges.includes(judge.id)}
-                  onCheckedChange={(checked) => onSelectJudge(judge.id, checked as boolean)}
-                  aria-label={`Select ${judge.name}`}
-                />
-              </TableCell>
               <TableCell className="font-medium py-[8px]">{judge.name}</TableCell>
               <TableCell>{judge.phone || '-'}</TableCell>
               <TableCell>{judge.email || '-'}</TableCell>

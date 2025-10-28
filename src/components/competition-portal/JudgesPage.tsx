@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Search, Upload, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Search, Upload, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
 
 import { useJudges } from '@/hooks/competition-portal/useJudges';
@@ -19,14 +19,11 @@ export const JudgesPage: React.FC = () => {
   const {
     judges,
     isLoading,
-    deleteJudge,
-    bulkUpdateStatus,
-    isBulkUpdating
+    deleteJudge
   } = useJudges();
   
   const [deleteConfirmJudge, setDeleteConfirmJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (field: string) => {
@@ -64,29 +61,6 @@ export const JudgesPage: React.FC = () => {
       await deleteJudge(deleteConfirmJudge.id);
       setDeleteConfirmJudge(null);
     }
-  };
-
-  const handleSelectJudge = (judgeId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedJudges(prev => [...prev, judgeId]);
-    } else {
-      setSelectedJudges(prev => prev.filter(id => id !== judgeId));
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedJudges(filteredAndSortedJudges.map(judge => judge.id));
-    } else {
-      setSelectedJudges([]);
-    }
-  };
-
-  const handleBulkStatusUpdate = async (available: boolean) => {
-    if (selectedJudges.length === 0) return;
-    
-    await bulkUpdateStatus({ judgeIds: selectedJudges, available });
-    setSelectedJudges([]);
   };
 
   // Filter and sort judges based on search term and sort options
@@ -165,39 +139,12 @@ export const JudgesPage: React.FC = () => {
         )}
       </div>
 
-      {/* Search Filter & Bulk Actions */}
+      {/* Search Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search judges..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
-              </div>
-            </div>
-            {selectedJudges.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {selectedJudges.length} selected
-                </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" disabled={isBulkUpdating}>
-                      Bulk Actions
-                      <ChevronDown className="w-4 h-4 ml-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate(true)}>
-                      Mark as Available
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate(false)}>
-                      Mark as Unavailable
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search judges..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
         </CardContent>
       </Card>
@@ -217,9 +164,6 @@ export const JudgesPage: React.FC = () => {
               onView={handleView}
               onEdit={handleEdit} 
               onDelete={handleDeleteClick}
-              selectedJudges={selectedJudges}
-              onSelectJudge={handleSelectJudge}
-              onSelectAll={handleSelectAll}
               sortField={sortField}
               sortDirection={sortDirection}
               onSort={handleSort}
