@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 
 export const MyAssignmentsWidget = () => {
-  const { competitions, isLoading } = useMyAssignments();
+  const { competitions, isLoading, error } = useMyAssignments();
 
   if (isLoading) {
     return (
@@ -16,6 +16,21 @@ export const MyAssignmentsWidget = () => {
         <CardContent className="space-y-4">
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>My Assignments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-destructive">
+            Error loading assignments: {error.message}
+          </p>
         </CardContent>
       </Card>
     );

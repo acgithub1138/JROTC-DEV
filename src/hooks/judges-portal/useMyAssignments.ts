@@ -40,16 +40,27 @@ export const useMyAssignments = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      console.debug('[useMyAssignments] Fetching for user_id:', user.id);
+
       const { data, error } = await supabase
         .from('cp_judge_assignment_view')
         .select('*')
         .eq('user_id', user.id)
         .order('competition_start_date', { ascending: true })
-        .order('event_start_time', { ascending: true });
+        .order('event_start_time', { ascending: true })
+        .returns<JudgeAssignment[]>();
       
-      if (error) throw error;
-      return data as JudgeAssignment[];
-    }
+      if (error) {
+        console.error('[useMyAssignments] Query error:', error);
+        throw error;
+      }
+
+      console.debug('[useMyAssignments] Found assignments:', data?.length || 0, data);
+      return data || [];
+    },
+    enabled: true,
+    refetchOnMount: true,
+    staleTime: 0
   });
 
   // Group assignments by competition
