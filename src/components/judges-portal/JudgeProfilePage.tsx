@@ -91,6 +91,7 @@ export const JudgeProfilePage = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="john@example.com"
                 className="pl-9"
+                readOnly
               />
             </div>
             <p className="text-sm text-muted-foreground">
