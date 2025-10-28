@@ -70,8 +70,8 @@ export const MyScoreSheetsWidget = () => {
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-sm">{sheet.competition_name}</h3>
-                  <p className="text-xs text-muted-foreground">{sheet.event_name}</p>
+                  <h3 className="font-semibold text-sm">{sheet.event_name}</h3>
+                  <p className="text-xs text-muted-foreground">{sheet.competition_name}</p>
                 </div>
                 {sheet.total_points !== null && (
                   <div className="flex items-center gap-1 text-sm font-medium text-judge">
@@ -88,12 +88,6 @@ export const MyScoreSheetsWidget = () => {
                     {convertToUI(sheet.competition_start_date, timezone, 'date')}
                   </span>
                 </div>
-                {sheet.competition_location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3" />
-                    <span>{sheet.competition_location}</span>
-                  </div>
-                )}
                 {sheet.school_name && (
                   <div className="flex items-center gap-2">
                     <School className="h-3 w-3" />
