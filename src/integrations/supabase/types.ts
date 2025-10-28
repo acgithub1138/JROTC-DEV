@@ -285,6 +285,7 @@ export type Database = {
           cadet_ids: string[] | null
           competition_id: string | null
           created_at: string
+          created_by: string | null
           event: string
           id: string
           school_id: string
@@ -301,6 +302,7 @@ export type Database = {
           cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
+          created_by?: string | null
           event: string
           id?: string
           school_id: string
@@ -317,6 +319,7 @@ export type Database = {
           cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
+          created_by?: string | null
           event?: string
           id?: string
           school_id?: string
