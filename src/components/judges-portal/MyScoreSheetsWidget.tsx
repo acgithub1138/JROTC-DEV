@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, School, Trophy, Pencil, Trash2 } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useNavigate } from 'react-router-dom';
-
 export const MyScoreSheetsWidget = () => {
   const navigate = useNavigate();
-  const { scoreSheets, isLoading, error } = useMyScoreSheets();
-  const { timezone } = useSchoolTimezone();
-
+  const {
+    scoreSheets,
+    isLoading,
+    error
+  } = useMyScoreSheets();
+  const {
+    timezone
+  } = useSchoolTimezone();
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>My Score Sheets</CardTitle>
         </CardHeader>
@@ -22,13 +25,10 @@ export const MyScoreSheetsWidget = () => {
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (error) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>My Score Sheets</CardTitle>
         </CardHeader>
@@ -37,13 +37,10 @@ export const MyScoreSheetsWidget = () => {
             Error loading score sheets: {error.message}
           </p>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (scoreSheets.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>My Score Sheets</CardTitle>
         </CardHeader>
@@ -52,36 +49,25 @@ export const MyScoreSheetsWidget = () => {
             No score sheets submitted yet
           </p>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle>My Score Sheets</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {scoreSheets.slice(0, 5).map((sheet) => (
-          <div
-            key={sheet.id}
-            className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-          >
+        {scoreSheets.slice(0, 5).map(sheet => <div key={sheet.id} className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">{sheet.event_name}</h3>
-                  {sheet.school_name && (
-                    <p className="text-xs text-muted-foreground">{sheet.school_name}</p>
-                  )}
+                  {sheet.school_name && <p className="font-semibold text-sm">{sheet.school_name}</p>}
                   <p className="text-xs text-muted-foreground">{sheet.competition_name}</p>
                 </div>
-                {sheet.total_points !== null && (
-                  <div className="flex items-center gap-1 text-sm font-medium text-judge">
+                {sheet.total_points !== null && <div className="flex items-center gap-1 text-sm font-medium text-judge">
                     <Trophy className="h-3.5 w-3.5" />
                     {sheet.total_points}
-                  </div>
-                )}
+                  </div>}
               </div>
 
               <div className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -94,39 +80,23 @@ export const MyScoreSheetsWidget = () => {
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                {sheet.team_name ? (
-                  <div className="text-xs">
+                {sheet.team_name ? <div className="text-xs">
                     <span className="font-medium">Team:</span> {sheet.team_name}
-                  </div>
-                ) : (
-                  <div />
-                )}
+                  </div> : <div />}
                 <div className="flex items-center gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7"
-                    onClick={() => navigate(`/app/judges-portal/edit-score-sheet?id=${sheet.id}`)}
-                  >
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/app/judges-portal/edit-score-sheet?id=${sheet.id}`)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-destructive hover:text-destructive"
-                    onClick={() => {
-                      // TODO: Implement delete functionality
-                      console.log('Delete score sheet:', sheet.id);
-                    }}
-                  >
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => {
+                // TODO: Implement delete functionality
+                console.log('Delete score sheet:', sheet.id);
+              }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          </div>)}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
