@@ -119,7 +119,7 @@ export const QuestionStep = ({
       </div>
 
       {/* Content Area - flex to fill remaining space */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden pb-24">
         {/* Score Selection Area - 2/3 of content space */}
         <div className="px-4 overflow-y-auto overflow-x-hidden" style={{ flex: '2' }}>
           {renderScoreInput()}
