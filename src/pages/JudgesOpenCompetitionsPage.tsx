@@ -1,15 +1,18 @@
-import { Trophy, Calendar, MapPin, Building2 } from 'lucide-react';
+import { Trophy, Calendar, MapPin, Building2, Search } from 'lucide-react';
 import { useAvailableCompetitions } from '@/hooks/judges-portal/useAvailableCompetitions';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
 import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export const JudgesOpenCompetitionsPage = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
   const { competitions, isLoading, error } = useAvailableCompetitions();
   const { judgeProfile } = useJudgeProfile();
   const { applications, applyToCompetition, isApplying } = useJudgeApplications(judgeProfile?.id);
@@ -30,6 +33,17 @@ export const JudgesOpenCompetitionsPage = () => {
   const handleViewDetails = (competitionId: string) => {
     navigate(`/app/judges-portal/competitions/${competitionId}`);
   };
+
+  const filteredCompetitions = competitions.filter((comp) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      comp.name.toLowerCase().includes(searchLower) ||
+      comp.location.toLowerCase().includes(searchLower) ||
+      (comp.hosting_school?.toLowerCase() || '').includes(searchLower) ||
+      format(new Date(comp.start_date), 'MMM d, yyyy').toLowerCase().includes(searchLower) ||
+      format(new Date(comp.end_date), 'MMM d, yyyy').toLowerCase().includes(searchLower)
+    );
+  });
 
   if (isLoading) {
     return (
@@ -70,17 +84,29 @@ export const JudgesOpenCompetitionsPage = () => {
           </div>
         </div>
 
-        {competitions.length === 0 ? (
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, location, school, or date..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {filteredCompetitions.length === 0 ? (
           <div className="rounded-lg border bg-card p-12 text-center">
             <Trophy className="h-16 w-16 mx-auto text-judge/50 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Open Competitions</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {searchTerm ? 'No Matching Competitions' : 'No Open Competitions'}
+            </h3>
             <p className="text-muted-foreground">
-              Check back later for new competition opportunities
+              {searchTerm ? 'Try adjusting your search criteria' : 'Check back later for new competition opportunities'}
             </p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {competitions.map((competition) => {
+            {filteredCompetitions.map((competition) => {
               const applied = isAlreadyApplied(competition.id);
               const status = getApplicationStatus(competition.id);
               
