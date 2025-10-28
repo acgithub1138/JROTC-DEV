@@ -5,8 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, School, Trophy, Pencil, Trash2 } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useNavigate } from 'react-router-dom';
 
 export const MyScoreSheetsWidget = () => {
+  const navigate = useNavigate();
   const { scoreSheets, isLoading, error } = useMyScoreSheets();
   const { timezone } = useSchoolTimezone();
 
@@ -113,10 +115,7 @@ export const MyScoreSheetsWidget = () => {
                     size="icon"
                     variant="ghost"
                     className="h-7 w-7"
-                    onClick={() => {
-                      // TODO: Implement edit functionality
-                      console.log('Edit score sheet:', sheet.id);
-                    }}
+                    onClick={() => navigate(`/app/judges-portal/edit-score-sheet?id=${sheet.id}`)}
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
