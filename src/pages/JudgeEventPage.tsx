@@ -30,7 +30,7 @@ export const JudgeEventPage = () => {
   }, [registeredSchools, selectedSchoolId]);
 
   // Fetch score sheets for the selected school and event
-  const { data: events = [], isLoading: isLoadingEvents, refetch } = useQuery({
+  const { data: rawEvents = [], isLoading: isLoadingEvents, refetch } = useQuery({
     queryKey: ['judge-event-score-sheets', selectedSchoolId, competitionId, eventDetails?.event_id],
     enabled: !!selectedSchoolId && !!competitionId && !!eventDetails?.event_id,
     queryFn: async () => {
@@ -48,6 +48,38 @@ export const JudgeEventPage = () => {
     staleTime: 0,
     refetchOnMount: true,
   });
+
+  // Ensure events have template_id in their score_sheet for proper rendering
+  const events = rawEvents.length > 0 
+    ? rawEvents.map(event => {
+        const scoreSheet = event.score_sheet && typeof event.score_sheet === 'object' && !Array.isArray(event.score_sheet)
+          ? event.score_sheet as Record<string, any>
+          : {};
+        
+        return {
+          ...event,
+          score_sheet: {
+            ...scoreSheet,
+            template_id: scoreSheet.template_id || eventDetails?.score_sheet
+          }
+        };
+      })
+    : eventDetails?.score_sheet 
+      ? [{
+          id: 'placeholder',
+          school_id: selectedSchoolId,
+          event: eventDetails.event_id,
+          competition_id: competitionId,
+          score_sheet: {
+            template_id: eventDetails.score_sheet,
+            scores: {}
+          },
+          total_points: 0,
+          cadet_ids: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as any]
+      : [];
 
   if (isLoading) {
     return (
