@@ -14,6 +14,8 @@ export interface AvailableCompetition {
   status: string;
   is_public: boolean;
   school_id: string;
+  judges_needed: number;
+  judges_approved: number;
 }
 
 export const useAvailableCompetitions = () => {
@@ -25,7 +27,7 @@ export const useAvailableCompetitions = () => {
     queryKey: ['available-competitions'],
     queryFn: async () => {
       // Get public competitions that are published and upcoming
-      const { data, error } = await supabase
+      const { data: comps, error: compsError } = await supabase
         .from('cp_competitions')
         .select('*')
         .eq('is_public', true)
@@ -33,8 +35,35 @@ export const useAvailableCompetitions = () => {
         .gte('start_date', new Date().toISOString())
         .order('start_date', { ascending: true });
       
-      if (error) throw error;
-      return data as AvailableCompetition[];
+      if (compsError) throw compsError;
+      
+      // For each competition, get judges needed and approved count
+      const competitionsWithJudges = await Promise.all(
+        comps.map(async (comp) => {
+          // Get total judges needed from events
+          const { data: events } = await supabase
+            .from('cp_comp_events')
+            .select('*')
+            .eq('competition_id', comp.id);
+          
+          const judgesNeeded = events?.reduce((sum: number, event: any) => sum + (Number(event.judges_needed) || 0), 0) || 0;
+          
+          // Get approved judge applications count
+          const { count: approvedCount } = await supabase
+            .from('cp_judge_competition_registrations')
+            .select('*', { count: 'exact', head: true })
+            .eq('competition_id', comp.id)
+            .eq('status', 'approved');
+          
+          return {
+            ...comp,
+            judges_needed: judgesNeeded,
+            judges_approved: approvedCount || 0
+          };
+        })
+      );
+      
+      return competitionsWithJudges as AvailableCompetition[];
     }
   });
 

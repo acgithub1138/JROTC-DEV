@@ -144,6 +144,10 @@ export const JudgesOpenCompetitionsPage = () => {
                         <span>{competition.hosting_school}</span>
                       </div>
                     )}
+                    <div className="flex items-center gap-2 text-sm">
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                      <span>Judges: {competition.judges_approved}/{competition.judges_needed}</span>
+                    </div>
                     {competition.registration_deadline && (
                       <div className="text-sm text-muted-foreground">
                         Register by: {format(new Date(competition.registration_deadline), 'MMM d, yyyy')}
