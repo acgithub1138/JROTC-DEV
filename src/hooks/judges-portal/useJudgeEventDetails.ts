@@ -35,10 +35,10 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
       let eventName = 'Unknown Event';
       if (eventData.event) {
         const { data: eventType } = await supabase
-          .from("cp_events")
+          .from("competition_event_types")
           .select("name")
           .eq("id", eventData.event)
-          .single();
+          .maybeSingle();
         
         if (eventType) {
           eventName = eventType.name;

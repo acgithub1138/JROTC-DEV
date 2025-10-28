@@ -38,7 +38,7 @@ export const JudgeEventPage = () => {
         .from('competition_events')
         .select('*')
         .eq('school_id', selectedSchoolId as string)
-        .eq('source_competition_id', competitionId as string)
+        .or(`competition_id.eq.${competitionId},source_competition_id.eq.${competitionId}`)
         .eq('event', eventDetails?.event_id as string)
         .order('created_at', { ascending: false });
 
