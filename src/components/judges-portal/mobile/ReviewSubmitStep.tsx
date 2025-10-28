@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Edit2 } from 'lucide-react';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
-
 interface ReviewSubmitStepProps {
   fields: JsonField[];
   answers: Record<string, any>;
@@ -13,7 +12,6 @@ interface ReviewSubmitStepProps {
   onSubmit: () => void;
   onPrevious: () => void;
 }
-
 export const ReviewSubmitStep = ({
   fields,
   answers,
@@ -24,12 +22,8 @@ export const ReviewSubmitStep = ({
   onPrevious
 }: ReviewSubmitStepProps) => {
   // Filter out non-input fields for review
-  const reviewFields = fields.filter(field => 
-    !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type)
-  );
-
-  return (
-    <div className="min-h-screen bg-background pb-32">
+  const reviewFields = fields.filter(field => !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type));
+  return <div className="min-h-screen bg-background pb-32">
       <div className="p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Review & Submit</h1>
@@ -47,64 +41,39 @@ export const ReviewSubmitStep = ({
         {/* Answers Review */}
         <div className="space-y-4">
           {reviewFields.map((field, index) => {
-            const fieldValue = answers[field.id];
-            const fieldNotes = answers[`${field.id}_notes`];
-            const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
-
-            return (
-              <Card key={field.id} className="p-4">
+          const fieldValue = answers[field.id];
+          const fieldNotes = answers[`${field.id}_notes`];
+          const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+          return <Card key={field.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium mb-1">{field.name}</p>
-                    {hasAnswer ? (
-                      <>
-                        <p className="text-lg font-semibold text-primary">
+                    {hasAnswer ? <>
+                        <p className="text-lg font-semibold text-primary text-center">
                           {fieldValue}
                         </p>
-                        {fieldNotes && (
-                          <p className="text-sm text-muted-foreground mt-2 italic">
+                        {fieldNotes && <p className="text-sm text-muted-foreground mt-2 italic">
                             Note: {fieldNotes}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-muted-foreground italic">Not answered</p>
-                    )}
+                          </p>}
+                      </> : <p className="text-muted-foreground italic">Not answered</p>}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(index)}
-                    className="shrink-0"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(index)} className="shrink-0">
                     <Edit2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
       </div>
 
       {/* Fixed Submit Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 space-y-3">
-        <Button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="w-full h-14 text-lg"
-          size="lg"
-        >
+        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full h-14 text-lg" size="lg">
           {isSubmitting ? "Submitting..." : "Submit Score Sheet"}
         </Button>
-        <Button
-          onClick={onPrevious}
-          variant="outline"
-          className="w-full h-12"
-          disabled={isSubmitting}
-        >
+        <Button onClick={onPrevious} variant="outline" className="w-full h-12" disabled={isSubmitting}>
           Back to Last Question
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
