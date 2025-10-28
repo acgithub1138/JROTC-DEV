@@ -101,18 +101,13 @@ export const CompetitionJudgeApplicationsTab = ({
   }: {
     application: any;
   }) => <Card key={application.id} className="p-6 py-[8px]">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <User className="h-5 w-5 text-muted-foreground" />
-                {application.cp_judges?.name || 'Unknown Judge'}
-              </h3>
-            </div>
-            {getStatusBadge(application.status)}
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Column 1 - Basic Info */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <User className="h-5 w-5 text-muted-foreground" />
+            {application.cp_judges?.name || 'Unknown Judge'}
+          </h3>
           
           {/* Contact Information */}
           <div className="space-y-2">
@@ -131,18 +126,33 @@ export const CompetitionJudgeApplicationsTab = ({
               </div>}
           </div>
 
+          <p className="text-xs text-muted-foreground">
+            Applied on {format(new Date(application.created_at), 'MMM d, yyyy h:mm a')}
+          </p>
+
           {/* Decline Reason */}
           {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg">
               <p className="text-sm font-medium text-destructive mb-1">Decline Reason:</p>
               <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
             </div>}
+        </div>
 
-          <p className="text-xs text-muted-foreground">
-            Applied on {format(new Date(application.created_at), 'MMM d, yyyy h:mm a')}
-          </p>
+        {/* Column 2 - Availability Notes */}
+        <div>
+          {application.availability_notes && <div className="bg-muted p-3 rounded-lg h-fit">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Availability & Notes:</p>
+              </div>
+              <p className="text-sm text-muted-foreground">{application.availability_notes}</p>
+            </div>}
+        </div>
 
-          {/* Action Buttons */}
-          {application.status === 'pending' && <div className="flex gap-2">
+        {/* Column 3 - Status & Actions */}
+        <div className="flex flex-col gap-3">
+          {getStatusBadge(application.status)}
+          
+          {application.status === 'pending' && <div className="flex flex-col gap-2">
               <Button onClick={() => handleApproveClick(application)} disabled={isApproving} className="whitespace-nowrap">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Approve
@@ -153,15 +163,6 @@ export const CompetitionJudgeApplicationsTab = ({
               </Button>
             </div>}
         </div>
-
-        {/* Right Column - Availability Notes */}
-        {application.availability_notes && <div className="bg-muted p-3 rounded-lg h-fit">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-medium">Availability & Notes:</p>
-            </div>
-            <p className="text-sm text-muted-foreground">{application.availability_notes}</p>
-          </div>}
       </div>
     </Card>;
   return <div className="space-y-6">
