@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PasswordChangeDialog from './auth/PasswordChangeDialog';
 import ParentSetupModal from './auth/ParentSetupModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,11 +24,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, userProfile, loading, refreshProfile } = useAuth();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
   const queryClient = useQueryClient();
   const parentSetupCheckRef = useRef<boolean>(false);
+
+  // Redirect external users to competition portal if they try to access CCC routes
+  useEffect(() => {
+    if (userProfile?.role === 'external' && 
+        location.pathname.startsWith('/app') && 
+        !location.pathname.startsWith('/app/competition-portal')) {
+      navigate('/app/competition-portal/open-competitions', { replace: true });
+    }
+  }, [userProfile?.role, location.pathname, navigate]);
 
   // Memoized password change check
   const passwordChangeRequired = useMemo(() => {

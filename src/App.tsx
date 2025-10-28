@@ -25,6 +25,7 @@ const TermsConditionsPage = lazy(() => import("@/components/marketing/TermsCondi
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const ParentRegistrationPage = lazy(() => import("@/components/auth/ParentRegistrationPage"));
 const ExternalSchoolRegistration = lazy(() => import("@/components/external/ExternalSchoolRegistration").then(m => ({ default: m.ExternalSchoolRegistration })));
+const ExternalSchoolAuthPage = lazy(() => import("@/components/external/ExternalSchoolAuthPage").then(m => ({ default: m.ExternalSchoolAuthPage })));
 
 // Lazy load main application
 const MainApplication = lazy(() => import("@/components/MainApplication"));
@@ -78,6 +79,7 @@ const App = () => (
               
               {/* External Competition Registration Routes */}
               <Route path="/external/register" element={<Suspense fallback={<PageLoader />}><ExternalSchoolRegistration /></Suspense>} />
+              <Route path="/external/auth" element={<Suspense fallback={<PageLoader />}><ExternalSchoolAuthPage /></Suspense>} />
 
               {/* Judges Portal Auth Route - Public */}
               <Route path="/app/judges/auth" element={<Suspense fallback={<PageLoader />}><JudgesAuthPage /></Suspense>} />
