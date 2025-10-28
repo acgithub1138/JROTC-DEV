@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JudgesPortalSidebar } from './JudgesPortalSidebar';
 import { JudgesPortalDashboard } from '@/pages/JudgesPortalDashboard';
+import { JudgesMyScoreSheetsPage } from '@/pages/JudgesMyScoreSheetsPage';
 import { JudgesOpenCompetitionsPage } from '@/pages/JudgesOpenCompetitionsPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { ApplyToCompetitionPage } from './ApplyToCompetitionPage';
@@ -84,6 +85,7 @@ export const JudgesPortalLayout = () => {
         <main className={isMobile ? "min-h-[calc(100vh-4rem)]" : "min-h-screen"}>
           <Routes>
             <Route index element={<JudgesPortalDashboard />} />
+            <Route path="score-sheets" element={<JudgesMyScoreSheetsPage />} />
             <Route path="open-competitions" element={<JudgesOpenCompetitionsPage />} />
             <Route path="competitions/:competitionId" element={<CompetitionDetailsPage />} />
             <Route path="competitions/:competitionId/apply" element={<ApplyToCompetitionPage />} />
