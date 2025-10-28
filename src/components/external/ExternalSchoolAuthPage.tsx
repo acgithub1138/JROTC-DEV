@@ -195,37 +195,38 @@ export const ExternalSchoolAuthPage = () => {
           <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5">
             {isSignUp && (
               <>
-                <div className="space-y-2.5">
-                  <Label htmlFor="schoolName" className="text-sm font-semibold">School Name *</Label>
-                  <Input
-                    id="schoolName"
-                    name="schoolName"
-                    type="text"
-                    placeholder="Lincoln High School"
-                    value={formData.schoolName}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
-                  />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-2.5">
+                    <Label htmlFor="schoolName" className="text-sm font-semibold">School Name *</Label>
+                    <Input
+                      id="schoolName"
+                      name="schoolName"
+                      type="text"
+                      placeholder="Lincoln High School"
+                      value={formData.schoolName}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="schoolInitials" className="text-sm font-semibold">School Initials</Label>
+                    <Input
+                      id="schoolInitials"
+                      name="schoolInitials"
+                      type="text"
+                      placeholder="LHS"
+                      value={formData.schoolInitials}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                      maxLength={10}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  <Label htmlFor="schoolInitials" className="text-sm font-semibold">School Initials</Label>
-                  <Input
-                    id="schoolInitials"
-                    name="schoolInitials"
-                    type="text"
-                    placeholder="LHS"
-                    value={formData.schoolInitials}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
-                    maxLength={10}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="space-y-2.5">
                     <Label htmlFor="firstName" className="text-sm font-semibold">First Name *</Label>
                     <Input
@@ -256,58 +257,75 @@ export const ExternalSchoolAuthPage = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="(555) 555-5555"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
-                  />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-2.5">
+                    <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="(555) 555-5555"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="contact@school.edu"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  <Label htmlFor="jrotcProgram" className="text-sm font-semibold">JROTC Program</Label>
-                  <Select 
-                    value={formData.jrotcProgram} 
-                    onValueChange={(value) => handleSelectChange('jrotcProgram', value)}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select program" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {JROTC_PROGRAMS.map(program => (
-                        <SelectItem key={program} value={program}>
-                          {program}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2.5">
-                  <Label htmlFor="timezone" className="text-sm font-semibold">Timezone</Label>
-                  <Select 
-                    value={formData.timezone} 
-                    onValueChange={(value) => handleSelectChange('timezone', value)}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TIMEZONES.map(tz => (
-                        <SelectItem key={tz} value={tz}>
-                          {tz}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-2.5">
+                    <Label htmlFor="jrotcProgram" className="text-sm font-semibold">JROTC Program</Label>
+                    <Select 
+                      value={formData.jrotcProgram} 
+                      onValueChange={(value) => handleSelectChange('jrotcProgram', value)}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Select program" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {JROTC_PROGRAMS.map(program => (
+                          <SelectItem key={program} value={program}>
+                            {program}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="timezone" className="text-sm font-semibold">Timezone</Label>
+                    <Select 
+                      value={formData.timezone} 
+                      onValueChange={(value) => handleSelectChange('timezone', value)}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Select timezone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIMEZONES.map(tz => (
+                          <SelectItem key={tz} value={tz}>
+                            {tz}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2.5">
@@ -326,46 +344,32 @@ export const ExternalSchoolAuthPage = () => {
               </>
             )}
             
-            <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="contact@school.edu"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
-              />
-            </div>
-            
-            <div className="space-y-2.5">
-              <Label htmlFor="password" className="text-sm font-semibold">Password *</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                minLength={6}
-                className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
-              />
-            </div>
-
-            {isSignUp && (
+            {!isSignUp && (
               <div className="space-y-2.5">
-                <Label htmlFor="confirmPassword" className="text-sm font-semibold">Confirm Password *</Label>
+                <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
                 <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="contact@school.edu"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                  className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                />
+              </div>
+            )}
+            
+            <div className={isSignUp ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : "space-y-2.5"}>
+              <div className="space-y-2.5">
+                <Label htmlFor="password" className="text-sm font-semibold">Password *</Label>
+                <Input
+                  id="password"
+                  name="password"
                   type="password"
                   placeholder="••••••••"
-                  value={formData.confirmPassword}
+                  value={formData.password}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
@@ -373,7 +377,25 @@ export const ExternalSchoolAuthPage = () => {
                   className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
                 />
               </div>
-            )}
+
+              {isSignUp && (
+                <div className="space-y-2.5">
+                  <Label htmlFor="confirmPassword" className="text-sm font-semibold">Confirm Password *</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    minLength={6}
+                    className="h-11 transition-all focus:ring-primary/50 focus:border-primary"
+                  />
+                </div>
+              )}
+            </div>
 
             <Button 
               type="submit" 
