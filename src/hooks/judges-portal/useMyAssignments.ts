@@ -41,7 +41,7 @@ export const useMyAssignments = () => {
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
-        .from('judge_assignments_view')
+        .from('cp_judge_assignment_view')
         .select('*')
         .eq('user_id', user.id)
         .order('competition_start_date', { ascending: true })

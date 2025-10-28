@@ -982,15 +982,15 @@ export type Database = {
             foreignKeyName: "cp_comp_judges_judge_fkey"
             columns: ["judge"]
             isOneToOne: false
-            referencedRelation: "cp_judges"
-            referencedColumns: ["id"]
+            referencedRelation: "cp_judge_assignment_view"
+            referencedColumns: ["judge_id"]
           },
           {
             foreignKeyName: "cp_comp_judges_judge_fkey"
             columns: ["judge"]
             isOneToOne: false
-            referencedRelation: "judge_assignments_view"
-            referencedColumns: ["judge_id"]
+            referencedRelation: "cp_judges"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cp_comp_judges_school_id_fkey"
@@ -1534,15 +1534,15 @@ export type Database = {
             foreignKeyName: "cp_judge_competition_registrations_judge_id_fkey"
             columns: ["judge_id"]
             isOneToOne: false
-            referencedRelation: "cp_judges"
-            referencedColumns: ["id"]
+            referencedRelation: "cp_judge_assignment_view"
+            referencedColumns: ["judge_id"]
           },
           {
             foreignKeyName: "cp_judge_competition_registrations_judge_id_fkey"
             columns: ["judge_id"]
             isOneToOne: false
-            referencedRelation: "judge_assignments_view"
-            referencedColumns: ["judge_id"]
+            referencedRelation: "cp_judges"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cp_judge_competition_registrations_updated_by_fkey"
@@ -4138,51 +4138,7 @@ export type Database = {
           },
         ]
       }
-      cp_resource_locations: {
-        Row: {
-          location: string | null
-          school_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cp_comp_resources_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      dashboard_stats: {
-        Row: {
-          active_incidents: number | null
-          active_tasks: number | null
-          community_service_hours: number | null
-          community_service_records: number | null
-          in_stock_count: number | null
-          net_budget: number | null
-          out_of_stock_count: number | null
-          overdue_incidents: number | null
-          overdue_tasks: number | null
-          school_id: string | null
-          total_cadets: number | null
-          total_expenses: number | null
-          total_income: number | null
-          total_inventory: number | null
-          total_issued: number | null
-          urgent_critical_incidents: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      judge_assignments_view: {
+      cp_judge_assignment_view: {
         Row: {
           assignment_details: string | null
           assignment_id: string | null
@@ -4236,6 +4192,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_resource_locations: {
+        Row: {
+          location: string | null
+          school_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_resources_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_stats: {
+        Row: {
+          active_incidents: number | null
+          active_tasks: number | null
+          community_service_hours: number | null
+          community_service_records: number | null
+          in_stock_count: number | null
+          net_budget: number | null
+          out_of_stock_count: number | null
+          overdue_incidents: number | null
+          overdue_tasks: number | null
+          school_id: string | null
+          total_cadets: number | null
+          total_expenses: number | null
+          total_income: number | null
+          total_inventory: number | null
+          total_issued: number | null
+          urgent_critical_incidents: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
