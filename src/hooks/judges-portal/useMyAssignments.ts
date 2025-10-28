@@ -44,7 +44,7 @@ export const useMyAssignments = () => {
     };
   }, []);
 
-  console.error("TEST:", userId);
+  console.log("****AC_TEST:", userId);
 
   const {
     data: assignments = [],
@@ -64,6 +64,7 @@ export const useMyAssignments = () => {
 
       if (error) throw error;
       return data || [];
+      console.log("****AC_TEST:", data);
     },
     staleTime: 0,
     refetchOnMount: true,
