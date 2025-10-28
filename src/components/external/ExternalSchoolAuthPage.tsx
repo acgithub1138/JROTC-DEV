@@ -175,7 +175,7 @@ export const ExternalSchoolAuthPage = () => {
       <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       
-      <Card className="w-full max-w-md shadow-2xl border-primary/20 backdrop-blur-sm bg-card/95 relative z-10">
+      <Card className="w-full max-w-md lg:max-w-none lg:w-3/4 shadow-2xl border-primary/20 backdrop-blur-sm bg-card/95 relative z-10">
         <CardHeader className="space-y-3 text-center pb-8">
           <div className="flex justify-center mb-2">
             <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-primary/10 transition-transform hover:scale-105">
