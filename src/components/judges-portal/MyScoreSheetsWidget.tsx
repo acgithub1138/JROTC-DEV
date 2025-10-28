@@ -88,12 +88,6 @@ export const MyScoreSheetsWidget = () => {
                     {convertToUI(sheet.competition_start_date, timezone, 'date')}
                   </span>
                 </div>
-                {sheet.competition_location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3" />
-                    <span>{sheet.competition_location}</span>
-                  </div>
-                )}
                 {sheet.school_name && (
                   <div className="flex items-center gap-2">
                     <School className="h-3 w-3" />
