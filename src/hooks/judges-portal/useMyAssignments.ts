@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 
 export interface JudgeAssignment {
   user_id: string;
@@ -30,37 +31,38 @@ export interface CompetitionWithAssignments {
 }
 
 export const useMyAssignments = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Resolve user once before querying
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (mounted) setUserId(user?.id ?? null);
+    });
+    return () => { mounted = false; };
+  }, []);
+
   const {
     data: assignments = [],
     isLoading,
     error
   } = useQuery({
-    queryKey: ['judge-assignments'],
+    queryKey: ['judge-assignments', userId],
+    enabled: !!userId,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      console.debug('[useMyAssignments] Fetching for user_id:', user.id);
-
       const { data, error } = await supabase
         .from('cp_judge_assignment_view')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId as string)
         .order('competition_start_date', { ascending: true })
         .order('event_start_time', { ascending: true })
         .returns<JudgeAssignment[]>();
       
-      if (error) {
-        console.error('[useMyAssignments] Query error:', error);
-        throw error;
-      }
-
-      console.debug('[useMyAssignments] Found assignments:', data?.length || 0, data);
+      if (error) throw error;
       return data || [];
     },
-    enabled: true,
+    staleTime: 0,
     refetchOnMount: true,
-    staleTime: 0
   });
 
   // Group assignments by competition
