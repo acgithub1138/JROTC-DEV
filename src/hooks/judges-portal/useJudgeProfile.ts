@@ -35,14 +35,35 @@ export const useJudgeProfile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // First try by user_id
       const { data, error } = await supabase
         .from('cp_judges')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
-      
       if (error) throw error;
-      return data as JudgeProfile | null;
+
+      if (data) return data as JudgeProfile | null;
+
+      // Fallback: legacy records may not have user_id set; try matching by email
+      const { data: byEmail, error: emailErr } = await supabase
+        .from('cp_judges')
+        .select('*')
+        .eq('email', user.email)
+        .maybeSingle();
+      if (emailErr) throw emailErr;
+
+      // Best-effort backfill of user_id for future queries
+      if (byEmail && !byEmail.user_id) {
+        try {
+          await supabase.from('cp_judges').update({ user_id: user.id }).eq('id', byEmail.id);
+          byEmail.user_id = user.id;
+        } catch (e) {
+          console.warn('Failed to backfill user_id on cp_judges', e);
+        }
+      }
+
+      return byEmail as JudgeProfile | null;
     }
   });
 
