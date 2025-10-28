@@ -9,6 +9,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatPhoneNumber } from '@/utils/formatUtils';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CompetitionJudgeApplicationsTab } from './CompetitionJudgeApplicationsTab';
 interface CompetitionJudgesTabProps {
   competitionId: string;
 }
@@ -55,76 +57,89 @@ export const CompetitionJudgesTab = ({
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">Loading judges...</div>;
   }
-  return <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-muted-foreground">
-          Manage judge assignments for this competition
-        </p>
-        {canCreate && <Button onClick={handleCreateJudge}>
-            <Plus className="h-4 w-4 mr-2" />
-            Assign Judge
-          </Button>}
-      </div>
+  return <Tabs defaultValue="assigned" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="assigned">Assigned</TabsTrigger>
+        <TabsTrigger value="applications">Applications</TabsTrigger>
+      </TabsList>
 
-      {judges.length === 0 ? <div className="text-center py-8 text-muted-foreground">
-          No judges assigned yet. Click "Assign Judge" to get started.
-        </div> : <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Judge Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Start Time</TableHead>
-                <TableHead>End Time</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Location</TableHead>
-                {(canUpdate || canDelete) && <TableHead className="text-center">Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {judges.map(judge => <TableRow key={judge.id}>
-                  <TableCell className="font-medium">
-                    {judge.judge_profile?.name || 'Unknown'}
-                  </TableCell>
-                  <TableCell>
-                    {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {judge.start_time ? convertToUI(judge.start_time, timezone, 'datetime') : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {judge.end_time ? convertToUI(judge.end_time, timezone, 'datetime') : '-'}
-                  </TableCell>
-                  <TableCell>{judge.event_name || '-'}</TableCell>
-                  <TableCell>{judge.location || '-'}</TableCell>
-                  {(canUpdate || canDelete) && <TableCell className="text-right">
-                      <div className="flex items-center justify-center gap-2">
-                        {canUpdate && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(judge.id)}>
-                            <Edit className="h-3 w-3" />
-                          </Button>}
-                        {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>}
-                      </div>
-                    </TableCell>}
-                </TableRow>)}
-            </TableBody>
-          </Table>
-        </div>}
+      <TabsContent value="assigned" className="mt-4">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="text-muted-foreground">
+              Manage judge assignments for this competition
+            </p>
+            {canCreate && <Button onClick={handleCreateJudge}>
+                <Plus className="h-4 w-4 mr-2" />
+                Assign Judge
+              </Button>}
+          </div>
 
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this judge assignment? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>;
+          {judges.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+              No judges assigned yet. Click "Assign Judge" to get started.
+            </div> : <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Judge Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Start Time</TableHead>
+                    <TableHead>End Time</TableHead>
+                    <TableHead>Event</TableHead>
+                    <TableHead>Location</TableHead>
+                    {(canUpdate || canDelete) && <TableHead className="text-center">Actions</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {judges.map(judge => <TableRow key={judge.id}>
+                      <TableCell className="font-medium">
+                        {judge.judge_profile?.name || 'Unknown'}
+                      </TableCell>
+                      <TableCell>
+                        {judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {judge.start_time ? convertToUI(judge.start_time, timezone, 'datetime') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {judge.end_time ? convertToUI(judge.end_time, timezone, 'datetime') : '-'}
+                      </TableCell>
+                      <TableCell>{judge.event_name || '-'}</TableCell>
+                      <TableCell>{judge.location || '-'}</TableCell>
+                      {(canUpdate || canDelete) && <TableCell className="text-right">
+                          <div className="flex items-center justify-center gap-2">
+                            {canUpdate && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(judge.id)}>
+                                <Edit className="h-3 w-3" />
+                              </Button>}
+                            {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
+                                <Trash2 className="h-3 w-3" />
+                              </Button>}
+                          </div>
+                        </TableCell>}
+                    </TableRow>)}
+                </TableBody>
+              </Table>
+            </div>}
+
+          <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to remove this judge assignment? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="applications" className="mt-4">
+        <CompetitionJudgeApplicationsTab competitionId={competitionId} />
+      </TabsContent>
+    </Tabs>;
 };
