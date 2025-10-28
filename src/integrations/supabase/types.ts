@@ -986,6 +986,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cp_comp_judges_judge_fkey"
+            columns: ["judge"]
+            isOneToOne: false
+            referencedRelation: "judge_assignments_view"
+            referencedColumns: ["judge_id"]
+          },
+          {
             foreignKeyName: "cp_comp_judges_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -1529,6 +1536,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cp_judges"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_judge_competition_registrations_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "judge_assignments_view"
+            referencedColumns: ["judge_id"]
           },
           {
             foreignKeyName: "cp_judge_competition_registrations_updated_by_fkey"
@@ -4186,6 +4200,7 @@ export type Database = {
           event_start_time: string | null
           judge_id: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Relationships: [
           {
@@ -4217,10 +4232,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cp_comp_judges_judge_fkey"
-            columns: ["judge_id"]
+            foreignKeyName: "cp_judges_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "cp_judges"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

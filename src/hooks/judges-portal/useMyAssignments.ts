@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface JudgeAssignment {
+  user_id: string;
+  judge_id: string;
   assignment_id: string;
   competition_id: string;
   competition_name: string;
@@ -41,7 +43,7 @@ export const useMyAssignments = () => {
       const { data, error } = await supabase
         .from('judge_assignments_view')
         .select('*')
-        .eq('judge_id', user.id)
+        .eq('user_id', user.id)
         .order('competition_start_date', { ascending: true })
         .order('event_start_time', { ascending: true });
       
