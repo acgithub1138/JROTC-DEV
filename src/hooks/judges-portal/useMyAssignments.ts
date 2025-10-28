@@ -44,8 +44,6 @@ export const useMyAssignments = () => {
     };
   }, []);
 
-  console.log("****AC_TEST:", userId);
-
   const {
     data: assignments = [],
     isLoading,
@@ -64,7 +62,6 @@ export const useMyAssignments = () => {
 
       if (error) throw error;
       return data || [];
-      console.log("****AC_TEST:", data);
     },
     staleTime: 0,
     refetchOnMount: true,
