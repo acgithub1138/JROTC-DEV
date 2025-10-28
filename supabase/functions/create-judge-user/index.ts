@@ -101,7 +101,7 @@ serve(async (req) => {
 
     console.log('create-judge-user: Auth user created:', authUser.user!.id)
 
-    // Create profile (no school_id for judges)
+    // Create profile with temporary school_id (will be set to null by trigger)
     const profileInsert = {
       id: authUser.user!.id,
       email,
@@ -109,7 +109,7 @@ serve(async (req) => {
       last_name,
       role: judgeRole.role_name,
       role_id: judgeRole.id,
-      school_id: null,
+      school_id: 'c0bae42f-9369-4575-b158-926246145b0a',
       phone: phone || null,
       active: true,
       temp_pswd: null,
