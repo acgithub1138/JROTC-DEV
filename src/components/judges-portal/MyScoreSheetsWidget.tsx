@@ -71,6 +71,9 @@ export const MyScoreSheetsWidget = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">{sheet.event_name}</h3>
+                  {sheet.school_name && (
+                    <p className="text-xs text-muted-foreground">{sheet.school_name}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">{sheet.competition_name}</p>
                 </div>
                 {sheet.total_points !== null && (
@@ -88,12 +91,6 @@ export const MyScoreSheetsWidget = () => {
                     {convertToUI(sheet.competition_start_date, timezone, 'date')}
                   </span>
                 </div>
-                {sheet.school_name && (
-                  <div className="flex items-center gap-2">
-                    <School className="h-3 w-3" />
-                    <span>{sheet.school_name}</span>
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center justify-between gap-2">
