@@ -55,7 +55,7 @@ export const JudgeScoreEntryForm: React.FC<JudgeScoreEntryFormProps> = ({
         .insert([{
           school_id: schoolId,
           event: eventId,
-          competition_id: competitionId,
+          competition_id: null, // NULL for portal competitions
           source_competition_id: competitionId,
           source_type: 'portal' as const,
           score_sheet: {
