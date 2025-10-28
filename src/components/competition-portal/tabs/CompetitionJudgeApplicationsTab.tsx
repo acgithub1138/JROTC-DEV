@@ -101,9 +101,10 @@ export const CompetitionJudgeApplicationsTab = ({
   }: {
     application: any;
   }) => <Card key={application.id} className="p-6 py-[8px]">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <User className="h-5 w-5 text-muted-foreground" />
@@ -114,7 +115,7 @@ export const CompetitionJudgeApplicationsTab = ({
           </div>
           
           {/* Contact Information */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2">
             {application.cp_judges?.email && <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <a href={`mailto:${application.cp_judges.email}`} className="text-primary hover:underline">
@@ -130,17 +131,8 @@ export const CompetitionJudgeApplicationsTab = ({
               </div>}
           </div>
 
-          {/* Availability Notes */}
-          {application.availability_notes && <div className="bg-muted p-3 rounded-lg mb-3">
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-medium">Availability & Notes:</p>
-              </div>
-              <p className="text-sm text-muted-foreground">{application.availability_notes}</p>
-            </div>}
-
           {/* Decline Reason */}
-          {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg mb-3">
+          {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg">
               <p className="text-sm font-medium text-destructive mb-1">Decline Reason:</p>
               <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
             </div>}
@@ -148,18 +140,27 @@ export const CompetitionJudgeApplicationsTab = ({
           <p className="text-xs text-muted-foreground">
             Applied on {format(new Date(application.created_at), 'MMM d, yyyy h:mm a')}
           </p>
+
+          {/* Action Buttons */}
+          {application.status === 'pending' && <div className="flex gap-2">
+              <Button onClick={() => handleApproveClick(application)} disabled={isApproving} className="whitespace-nowrap">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Approve
+              </Button>
+              <Button variant="destructive" onClick={() => handleDeclineClick(application)} disabled={isDeclining} className="whitespace-nowrap">
+                <XCircle className="h-4 w-4 mr-2" />
+                Decline
+              </Button>
+            </div>}
         </div>
-        
-        {/* Action Buttons */}
-        {application.status === 'pending' && <div className="flex flex-col gap-2">
-            <Button onClick={() => handleApproveClick(application)} disabled={isApproving} className="whitespace-nowrap">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Approve
-            </Button>
-            <Button variant="destructive" onClick={() => handleDeclineClick(application)} disabled={isDeclining} className="whitespace-nowrap">
-              <XCircle className="h-4 w-4 mr-2" />
-              Decline
-            </Button>
+
+        {/* Right Column - Availability Notes */}
+        {application.availability_notes && <div className="bg-muted p-3 rounded-lg h-fit">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium">Availability & Notes:</p>
+            </div>
+            <p className="text-sm text-muted-foreground">{application.availability_notes}</p>
           </div>}
       </div>
     </Card>;
