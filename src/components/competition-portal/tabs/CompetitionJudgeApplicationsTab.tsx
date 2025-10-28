@@ -111,7 +111,7 @@ export const CompetitionJudgeApplicationsTab = ({
               <TableHead>Applied</TableHead>
               <TableHead>Availability Notes</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Decline Reason</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,35 +157,36 @@ export const CompetitionJudgeApplicationsTab = ({
                 <TableCell>
                   <div className="space-y-2">
                     {getStatusBadge(application.status)}
-                    {application.decline_reason && (
-                      <div className="bg-destructive/10 p-2 rounded text-xs max-w-xs">
-                        <p className="font-medium text-destructive mb-1">Decline Reason:</p>
-                        <p className="text-muted-foreground">{application.decline_reason}</p>
+                    {application.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm"
+                          onClick={() => handleApproveClick(application)} 
+                          disabled={isApproving}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive" 
+                          onClick={() => handleDeclineClick(application)} 
+                          disabled={isDeclining}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Decline
+                        </Button>
                       </div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  {application.status === 'pending' && (
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        size="sm"
-                        onClick={() => handleApproveClick(application)} 
-                        disabled={isApproving}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button 
-                        size="sm"
-                        variant="destructive" 
-                        onClick={() => handleDeclineClick(application)} 
-                        disabled={isDeclining}
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Decline
-                      </Button>
+                <TableCell>
+                  {application.decline_reason ? (
+                    <div className="bg-destructive/10 p-2 rounded text-sm max-w-xs">
+                      <p className="text-muted-foreground">{application.decline_reason}</p>
                     </div>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
                   )}
                 </TableCell>
               </TableRow>
