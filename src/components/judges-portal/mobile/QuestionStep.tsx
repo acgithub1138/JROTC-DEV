@@ -111,22 +111,25 @@ export const QuestionStep = ({
   const isInputRequired = ['number', 'dropdown', 'text'].includes(field.type) || field.type === 'penalty' && judgeNumber === '1' || field.type === 'penalty_checkbox' && judgeNumber === '1' || field.type === 'scoring_scale';
   const isAnswered = localValue !== null && localValue !== undefined && localValue !== '';
   const nextDisabled = isInputRequired && !isAnswered;
-  return <div className="h-screen bg-background flex flex-col">
+  return <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Header with Question */}
       <div className="px-4 py-4 shrink-0">
         <h1 className="text-2xl font-bold mb-2">{field.name}</h1>
         {field.fieldInfo && <p className="text-muted-foreground">{field.fieldInfo}</p>}
       </div>
 
-      {/* Score Selection Area - 2/3 of available space */}
-      <div className="px-4 overflow-y-auto overflow-x-hidden" style={{ height: 'calc((100vh - 200px) * 2 / 3)' }}>
-        {renderScoreInput()}
-      </div>
+      {/* Content Area - flex to fill remaining space */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Score Selection Area - 2/3 of content space */}
+        <div className="px-4 overflow-y-auto overflow-x-hidden" style={{ flex: '2' }}>
+          {renderScoreInput()}
+        </div>
 
-      {/* Notes Area - 1/3 of available space */}
-      <div className="px-4 py-4 border-t bg-muted/30 flex flex-col" style={{ height: 'calc((100vh - 200px) * 1 / 3)' }}>
-        <label className="block text-sm font-medium mb-2 shrink-0">Notes (Optional)</label>
-        <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="flex-1 min-h-0 text-base resize-none" />
+        {/* Notes Area - 1/3 of content space */}
+        <div className="px-4 py-4 border-t bg-muted/30 flex flex-col" style={{ flex: '1' }}>
+          <label className="block text-sm font-medium mb-2 shrink-0">Notes (Optional)</label>
+          <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="flex-1 min-h-0 text-base resize-none" />
+        </div>
       </div>
       
       <MobileNavButtons onNext={onNext} onPrevious={onPrevious} showPrevious nextDisabled={nextDisabled} />
