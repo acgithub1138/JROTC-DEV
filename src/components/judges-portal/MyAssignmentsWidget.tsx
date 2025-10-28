@@ -3,9 +3,11 @@ import { convertToUI } from '@/utils/timezoneUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, MapPin, Clock } from 'lucide-react';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export const MyAssignmentsWidget = () => {
   const { competitions, isLoading, error } = useMyAssignments();
+  const { timezone } = useSchoolTimezone();
 
   if (isLoading) {
     return (
@@ -65,9 +67,9 @@ export const MyAssignmentsWidget = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>
-                    {convertToUI(competition.competition_start_date, 'UTC', 'date')}
+                    {convertToUI(competition.competition_start_date, timezone, 'date')}
                     {competition.competition_start_date !== competition.competition_end_date && 
-                      ` - ${convertToUI(competition.competition_end_date, 'UTC', 'date')}`
+                      ` - ${convertToUI(competition.competition_end_date, timezone, 'date')}`
                     }
                   </span>
                 </div>
@@ -91,9 +93,9 @@ export const MyAssignmentsWidget = () => {
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                       <Clock className="h-3 w-3" />
                       <span>
-                        {convertToUI(assignment.event_start_time, 'UTC', 'time')}
+                        {convertToUI(assignment.event_start_time, timezone, 'time')}
                         {assignment.event_end_time && 
-                          ` - ${convertToUI(assignment.event_end_time, 'UTC', 'time')}`
+                          ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
                         }
                       </span>
                       {assignment.event_location && (
