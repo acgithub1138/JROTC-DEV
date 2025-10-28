@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export interface JudgeAssignment {
   user_id: string;
@@ -39,25 +39,27 @@ export const useMyAssignments = () => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (mounted) setUserId(user?.id ?? null);
     });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const {
     data: assignments = [],
     isLoading,
-    error
+    error,
   } = useQuery({
-    queryKey: ['judge-assignments', userId],
+    queryKey: ["judge-assignments", userId],
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('cp_judge_assignment_view')
-        .select('*')
-        .eq('user_id', userId as string)
-        .order('competition_start_date', { ascending: true })
-        .order('event_start_time', { ascending: true })
+        .from("cp_judge_assignment_view")
+        .select("*")
+        //.eq('user_id', userId as string)
+        .order("competition_start_date", { ascending: true })
+        .order("event_start_time", { ascending: true })
         .returns<JudgeAssignment[]>();
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -67,8 +69,8 @@ export const useMyAssignments = () => {
 
   // Group assignments by competition
   const groupedAssignments: CompetitionWithAssignments[] = assignments.reduce((acc, assignment) => {
-    const existing = acc.find(c => c.competition_id === assignment.competition_id);
-    
+    const existing = acc.find((c) => c.competition_id === assignment.competition_id);
+
     if (existing) {
       existing.assignments.push(assignment);
     } else {
@@ -79,16 +81,16 @@ export const useMyAssignments = () => {
         competition_end_date: assignment.competition_end_date,
         competition_status: assignment.competition_status,
         competition_location: assignment.competition_location,
-        assignments: [assignment]
+        assignments: [assignment],
       });
     }
-    
+
     return acc;
   }, [] as CompetitionWithAssignments[]);
 
   return {
     competitions: groupedAssignments,
     isLoading,
-    error
+    error,
   };
 };
