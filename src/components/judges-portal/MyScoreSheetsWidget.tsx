@@ -6,8 +6,27 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, School, Trophy, Pencil, Trash2 } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 export const MyScoreSheetsWidget = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [sheetToDelete, setSheetToDelete] = useState<{ id: string; event_name: string } | null>(null);
+  
   const {
     scoreSheets,
     isLoading,
@@ -16,6 +35,44 @@ export const MyScoreSheetsWidget = () => {
   const {
     timezone
   } = useSchoolTimezone();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (scoreSheetId: string) => {
+      const { error } = await supabase
+        .from('judge_score_sheets' as any)
+        .delete()
+        .eq('id', scoreSheetId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['judge-score-sheets'] });
+      toast({
+        title: 'Score sheet deleted',
+        description: 'The score sheet has been successfully deleted.',
+      });
+      setDeleteDialogOpen(false);
+      setSheetToDelete(null);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error deleting score sheet',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteClick = (sheet: { id: string; event_name: string }) => {
+    setSheetToDelete(sheet);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (sheetToDelete) {
+      deleteMutation.mutate(sheetToDelete.id);
+    }
+  };
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -87,10 +144,12 @@ export const MyScoreSheetsWidget = () => {
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/app/judges-portal/edit-score-sheet?id=${sheet.id}`)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => {
-                // TODO: Implement delete functionality
-                console.log('Delete score sheet:', sheet.id);
-              }}>
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-7 w-7 text-destructive hover:text-destructive" 
+                    onClick={() => handleDeleteClick({ id: sheet.id, event_name: sheet.event_name })}
+                  >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -98,5 +157,27 @@ export const MyScoreSheetsWidget = () => {
             </div>
           </div>)}
       </CardContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Score Sheet</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the score sheet for <strong>{sheetToDelete?.event_name}</strong>? 
+              This action cannot be undone and all scoring data will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Score Sheet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>;
 };
