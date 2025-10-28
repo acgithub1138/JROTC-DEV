@@ -48,6 +48,7 @@ interface FormData {
   max_participants: string;
   fee: string;
   interval: string;
+  judges_needed: string;
   notes: string;
   score_sheet: string;
 }
@@ -104,6 +105,7 @@ export const CompetitionEventRecord: React.FC = () => {
     max_participants: '',
     fee: '',
     interval: '',
+    judges_needed: '',
     notes: '',
     score_sheet: ''
   };
@@ -219,6 +221,7 @@ export const CompetitionEventRecord: React.FC = () => {
       max_participants: event.max_participants?.toString() || '',
       fee: (event as any).fee?.toString() || '',
       interval: (event as any).interval?.toString() || '',
+      judges_needed: (event as any).judges_needed?.toString() || '',
       notes: event.notes || '',
       score_sheet: (event as any).score_sheet || ''
     };
@@ -383,6 +386,7 @@ export const CompetitionEventRecord: React.FC = () => {
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         interval: formData.interval ? parseInt(formData.interval) : null,
+        judges_needed: formData.judges_needed ? parseInt(formData.judges_needed) : null,
         notes: formData.notes || null,
         score_sheet: formData.score_sheet || null
       };
@@ -757,6 +761,15 @@ export const CompetitionEventRecord: React.FC = () => {
 
 
 
+
+            {/* Judges Needed */}
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+              <Label htmlFor="judges_needed" className="text-right">Judges Needed</Label>
+              <Input id="judges_needed" type="number" min="0" value={formData.judges_needed} onChange={e => setFormData(prev => ({
+                ...prev,
+                judges_needed: e.target.value
+              }))} placeholder="Number of judges needed" disabled={isViewMode} />
+            </div>
 
             {/* Notes */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
