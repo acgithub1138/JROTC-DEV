@@ -2,7 +2,8 @@ import { useMyScoreSheets } from '@/hooks/judges-portal/useMyScoreSheets';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, MapPin, School, Trophy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin, School, Trophy, Pencil, Trash2 } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export const MyScoreSheetsWidget = () => {
@@ -99,11 +100,39 @@ export const MyScoreSheetsWidget = () => {
                 )}
               </div>
 
-              {sheet.team_name && (
-                <div className="text-xs">
-                  <span className="font-medium">Team:</span> {sheet.team_name}
+              <div className="flex items-center justify-between gap-2">
+                {sheet.team_name ? (
+                  <div className="text-xs">
+                    <span className="font-medium">Team:</span> {sheet.team_name}
+                  </div>
+                ) : (
+                  <div />
+                )}
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => {
+                      // TODO: Implement edit functionality
+                      console.log('Edit score sheet:', sheet.id);
+                    }}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-destructive hover:text-destructive"
+                    onClick={() => {
+                      // TODO: Implement delete functionality
+                      console.log('Delete score sheet:', sheet.id);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         ))}
