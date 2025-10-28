@@ -22,25 +22,33 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
     queryKey: ["judge-event-details", eventId],
     enabled: !!eventId,
     queryFn: async () => {
-      // Get event details with joined event type name
+      // First get the event details
       const { data: eventData, error: eventError } = await supabase
         .from("cp_comp_events")
-        .select(`
-          *,
-          event_type:cp_events!cp_comp_events_event_fkey(id, name)
-        `)
+        .select("*")
         .eq("id", eventId as string)
-        .maybeSingle();
+        .single();
 
       if (eventError) throw eventError;
-      if (!eventData) throw new Error('Event not found');
 
-      const eventType = eventData.event_type as any;
+      // Then get the event type name
+      let eventName = 'Unknown Event';
+      if (eventData.event) {
+        const { data: eventType } = await supabase
+          .from("cp_events")
+          .select("name")
+          .eq("id", eventData.event)
+          .single();
+        
+        if (eventType) {
+          eventName = eventType.name;
+        }
+      }
       
       return {
         id: eventData.id,
         event_id: eventData.event || '',
-        event_name: eventType?.name || 'Unknown Event',
+        event_name: eventName,
         event_start_time: eventData.start_time,
         event_end_time: eventData.end_time,
         event_location: eventData.location,
