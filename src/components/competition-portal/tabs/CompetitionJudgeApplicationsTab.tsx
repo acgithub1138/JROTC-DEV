@@ -129,12 +129,6 @@ export const CompetitionJudgeApplicationsTab = ({
           <p className="text-xs text-muted-foreground">
             Applied on {format(new Date(application.created_at), 'MMM d, yyyy h:mm a')}
           </p>
-
-          {/* Decline Reason */}
-          {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg">
-              <p className="text-sm font-medium text-destructive mb-1">Decline Reason:</p>
-              <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
-            </div>}
         </div>
 
         {/* Column 2 - Availability Notes */}
@@ -151,6 +145,12 @@ export const CompetitionJudgeApplicationsTab = ({
         {/* Column 3 - Status & Actions */}
         <div className="flex flex-col gap-3">
           {getStatusBadge(application.status)}
+          
+          {/* Decline Reason */}
+          {application.decline_reason && <div className="bg-destructive/10 p-3 rounded-lg">
+              <p className="text-sm font-medium text-destructive mb-1">Decline Reason:</p>
+              <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
+            </div>}
           
           {application.status === 'pending' && <div className="flex flex-col gap-2">
               <Button onClick={() => handleApproveClick(application)} disabled={isApproving} className="whitespace-nowrap">
