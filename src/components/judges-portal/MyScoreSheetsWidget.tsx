@@ -39,7 +39,7 @@ export const MyScoreSheetsWidget = () => {
   const deleteMutation = useMutation({
     mutationFn: async (scoreSheetId: string) => {
       const { error } = await supabase
-        .from('judge_score_sheets' as any)
+        .from('competition_events')
         .delete()
         .eq('id', scoreSheetId);
       
