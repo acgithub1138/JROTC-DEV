@@ -109,7 +109,7 @@ export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, set
 
   // Desktop view
   return (
-    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
+    <div className="fixed left-0 top-0 h-screen w-64 flex flex-col bg-sidebar border-r border-sidebar-border">
       {/* Header */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
