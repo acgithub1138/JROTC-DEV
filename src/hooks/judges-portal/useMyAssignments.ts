@@ -44,6 +44,8 @@ export const useMyAssignments = () => {
     };
   }, []);
 
+  console.error("TEST:", userId);
+
   const {
     data: assignments = [],
     isLoading,
@@ -55,7 +57,7 @@ export const useMyAssignments = () => {
       const { data, error } = await supabase
         .from("cp_judge_assignment_view")
         .select("*")
-        //.eq('user_id', userId as string)
+        .eq("user_id", userId as string)
         .order("competition_start_date", { ascending: true })
         .order("event_start_time", { ascending: true })
         .returns<JudgeAssignment[]>();
