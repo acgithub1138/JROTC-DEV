@@ -56,7 +56,7 @@ export const JudgesMyScoreSheetsPage = () => {
               .from('cp_competitions')
               .select('name, start_date, location, status')
               .eq('id', sheet.source_competition_id)
-              .eq('status', 'active')
+              .in('status', ['in_progress', 'open'])
               .maybeSingle();
 
             if (compData) {
