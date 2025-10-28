@@ -44,8 +44,31 @@ export const ReviewSubmitStep = ({
           const fieldValue = answers[field.id];
           const fieldNotes = answers[`${field.id}_notes`];
           const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+          // Calculate actual penalty deduction using field configuration
           const isPenalty = ['penalty', 'penalty_checkbox'].includes(field.type);
-          const penaltyDeduction = isPenalty && fieldValue ? -Math.abs(Number(fieldValue)) : null;
+          const computePenaltyDeduction = () => {
+            if (!isPenalty || !hasAnswer) return null;
+            const num = typeof fieldValue === 'number' ? fieldValue : Number(fieldValue);
+
+            if (field.penaltyType === 'split' && field.splitFirstValue && field.splitSubsequentValue) {
+              if (isNaN(num) || num <= 0) return null;
+              const total = field.splitFirstValue + Math.max(0, num - 1) * field.splitSubsequentValue;
+              return -Math.abs(total);
+            }
+
+            if (field.penaltyType === 'points' && field.pointValue) {
+              if (typeof fieldValue === 'boolean') return fieldValue ? -Math.abs(field.pointValue) : null;
+              if (isNaN(num) || num <= 0) return null;
+              return -Math.abs(field.pointValue * num);
+            }
+
+            if (field.penaltyValue) {
+              if (typeof fieldValue === 'boolean') return fieldValue ? -Math.abs(field.penaltyValue) : null;
+              if (!isNaN(num) && num > 0) return -Math.abs(field.penaltyValue * num);
+            }
+            return null;
+          };
+          const penaltyDeduction = computePenaltyDeduction();
           
           return <Card key={field.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
