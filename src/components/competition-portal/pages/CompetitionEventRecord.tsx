@@ -512,10 +512,26 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
-                <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  score_sheet: value
-                }))} disabled={isViewMode}>
+                <Select value={formData.score_sheet} onValueChange={async value => {
+                  setFormData(prev => ({
+                    ...prev,
+                    score_sheet: value
+                  }));
+                  
+                  // Auto-fill judges_needed from template
+                  const { data: template } = await supabase
+                    .from('competition_templates')
+                    .select('judges')
+                    .eq('id', value)
+                    .single();
+                  
+                  if (template?.judges) {
+                    setFormData(prev => ({
+                      ...prev,
+                      judges_needed: template.judges.toString()
+                    }));
+                  }
+                }} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a score template" />
                   </SelectTrigger>
