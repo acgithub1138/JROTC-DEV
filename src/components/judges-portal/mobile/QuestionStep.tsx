@@ -72,13 +72,29 @@ export const QuestionStep = ({
               <p>This field is only for Judge 1</p>
             </div>;
         }
-        const penaltyValue = localValue ? -Math.abs(Number(localValue)) : null;
+        
+        // Calculate actual penalty deduction
+        let calculatedPenalty = 0;
+        const numValue = Number(localValue) || 0;
+        
+        if (numValue > 0) {
+          if (field.penaltyType === 'split' && field.splitFirstValue && field.splitSubsequentValue) {
+            // First occurrence uses splitFirstValue, subsequent use splitSubsequentValue
+            calculatedPenalty = field.splitFirstValue + ((numValue - 1) * field.splitSubsequentValue);
+          } else if (field.pointValue) {
+            // Standard points-based penalty
+            calculatedPenalty = field.pointValue * numValue;
+          }
+        }
+        
+        const penaltyDeduction = calculatedPenalty !== 0 ? -Math.abs(calculatedPenalty) : null;
+        
         return <div className="space-y-4">
             <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />
-            {penaltyValue !== null && (
+            {penaltyDeduction !== null && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
-                <p className="text-3xl font-bold text-destructive">{penaltyValue} points</p>
+                <p className="text-3xl font-bold text-destructive">{penaltyDeduction} points</p>
               </div>
             )}
           </div>;
