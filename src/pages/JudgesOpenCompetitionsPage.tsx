@@ -128,6 +128,12 @@ export const JudgesOpenCompetitionsPage = () => {
                     )}
                   </CardHeader>
                   <CardContent className="flex-1 space-y-3">
+                    {competition.hosting_school && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>{competition.hosting_school}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>
@@ -138,12 +144,6 @@ export const JudgesOpenCompetitionsPage = () => {
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span>{competition.location}</span>
                     </div>
-                    {competition.hosting_school && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span>{competition.hosting_school}</span>
-                      </div>
-                    )}
                     <div className="flex items-center gap-2 text-sm">
                       <Trophy className="h-4 w-4 text-muted-foreground" />
                       <span>Judges: {competition.judges_approved}/{competition.judges_needed}</span>
