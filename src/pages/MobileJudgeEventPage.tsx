@@ -170,11 +170,17 @@ export default function MobileJudgeEventPage() {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
     
     // Auto-advance if in auto mode and we're on a question step
+    // BUT skip auto-advance for penalty fields (they need manual confirmation)
     if (scoringMode === 'auto' && currentStep > 2 && currentStep < 3 + questionFields.length) {
-      // Small delay to show selection before advancing
-      setTimeout(() => {
-        handleNext();
-      }, 150);
+      const currentField = questionFields[currentStep - 3];
+      const isPenaltyField = currentField?.type === 'penalty' || currentField?.type === 'penalty_checkbox';
+      
+      if (!isPenaltyField) {
+        // Small delay to show selection before advancing
+        setTimeout(() => {
+          handleNext();
+        }, 150);
+      }
     }
   };
 
