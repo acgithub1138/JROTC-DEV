@@ -112,7 +112,7 @@ export const AudioPlaybackControls = ({
             type="button"
             variant="outline"
             onClick={() => setShowPlayback(!showPlayback)}
-            className="h-12"
+            className="h-12 text-xs"
           >
             {showPlayback ? (
               <ChevronUp className="h-4 w-4 mr-2" />
@@ -125,7 +125,7 @@ export const AudioPlaybackControls = ({
             type="button"
             variant={isRecording ? "destructive" : "outline"}
             onClick={isRecording ? onPauseRecording : onContinueRecording}
-            className="h-12"
+            className="h-12 text-xs"
           >
             {isRecording ? (
               <Pause className="h-4 w-4 mr-2" />
@@ -138,7 +138,7 @@ export const AudioPlaybackControls = ({
             type="button"
             variant="outline"
             onClick={handleDelete}
-            className="h-12 text-destructive hover:text-destructive"
+            className="h-12 text-xs text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete
