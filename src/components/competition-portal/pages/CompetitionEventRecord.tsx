@@ -72,6 +72,7 @@ export const CompetitionEventRecord: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [competitionProgram, setCompetitionProgram] = useState<string | null>(null);
   const [scoreSheets, setScoreSheets] = useState<Array<{
     id: string;
     template_name: string;
@@ -88,7 +89,7 @@ export const CompetitionEventRecord: React.FC = () => {
   const {
     events: eventsWithTemplates,
     isLoading: eventsWithTemplatesLoading
-  } = useEventsWithTemplates();
+  } = useEventsWithTemplates(competitionProgram || undefined);
   const {
     canCreate,
     canEdit,
@@ -155,8 +156,11 @@ export const CompetitionEventRecord: React.FC = () => {
     }
   }, [existingEvent, isEditMode, isViewMode, eventTypes, timezone]);
 
-  // Fetch competition date on component mount for create mode
+  // Fetch competition program and date on component mount
   useEffect(() => {
+    if (competitionId) {
+      fetchCompetitionProgram();
+    }
     if (isCreateMode && competitionId && !timezoneLoading && timezone) {
       fetchCompetitionDate();
     }
@@ -252,6 +256,22 @@ export const CompetitionEventRecord: React.FC = () => {
       setIsLoading(false);
     }
   };
+  const fetchCompetitionProgram = async () => {
+    if (!competitionId) return;
+    try {
+      const { data, error } = await supabase
+        .from('cp_competitions')
+        .select('program')
+        .eq('id', competitionId)
+        .single();
+      
+      if (error) throw error;
+      setCompetitionProgram(data?.program || null);
+    } catch (error) {
+      console.error('Error fetching competition program:', error);
+    }
+  };
+
   const fetchCompetitionDate = async () => {
     if (!competitionId || !timezone) return;
     try {
