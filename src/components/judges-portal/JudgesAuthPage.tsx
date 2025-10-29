@@ -1,38 +1,38 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { Gavel } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Gavel } from "lucide-react";
 
 export const JudgesAuthPage = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    phone: ''
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
   });
 
   useEffect(() => {
     // Check if already authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/app/judges-portal');
+        navigate("/app/judges-portal");
       }
     });
   }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -48,11 +48,11 @@ export const JudgesAuthPage = () => {
 
       if (error) throw error;
 
-      toast.success('Signed in successfully');
-      navigate('/app/judges-portal');
+      toast.success("Signed in successfully");
+      navigate("/app/judges-portal");
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      toast.error(error.message || 'Failed to sign in');
+      console.error("Sign in error:", error);
+      toast.error(error.message || "Failed to sign in");
     } finally {
       setIsLoading(false);
     }
@@ -68,27 +68,27 @@ export const JudgesAuthPage = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-judge-user', {
+      const { data, error } = await supabase.functions.invoke("create-judge-user", {
         body: {
           email: formData.email,
           password: formData.password,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          phone: formData.phone || null
-        }
+          phone: formData.phone || null,
+        },
       });
 
       if (error) throw error;
-      
+
       if (data?.error) {
         throw new Error(data.error);
       }
 
       toast.success("Account created successfully! Please sign in.");
       setIsSignUp(false);
-      setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
+      setFormData({ email: "", password: "", firstName: "", lastName: "", phone: "" });
     } catch (error: any) {
-      console.error('Sign up error:', error);
+      console.error("Sign up error:", error);
       toast.error(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
@@ -100,22 +100,23 @@ export const JudgesAuthPage = () => {
       {/* Decorative background elements */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       <div className="absolute top-20 left-20 w-72 h-72 bg-judge/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      
+      <div
+        className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"
+        style={{ animationDelay: "1s" }}
+      />
+
       <Card className="w-full max-w-md shadow-2xl border-judge/20 backdrop-blur-sm bg-card/95 relative z-10">
         <CardHeader className="space-y-3 text-center pb-8">
           <div className="flex justify-center mb-2">
             <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg shadow-judge/30 ring-4 ring-judge/10 transition-transform hover:scale-105">
-              <Gavel className="h-8 w-8 text-white" />
+              <Gavel className="h-8 w-8 text-black" />
             </div>
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-br from-judge to-judge/70 bg-clip-text text-transparent">
-            {isSignUp ? 'Create Judge Account' : 'Judge Sign In'}
+            {isSignUp ? "Create Judge Account" : "Judge Sign In"}
           </CardTitle>
           <CardDescription className="text-base">
-            {isSignUp 
-              ? 'Register to apply for judging opportunities' 
-              : 'Sign in to access your judge portal'}
+            {isSignUp ? "Register to apply for judging opportunities" : "Sign in to access your judge portal"}
           </CardDescription>
         </CardHeader>
         <CardContent className="px-8 pb-8">
@@ -124,7 +125,9 @@ export const JudgesAuthPage = () => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2.5">
-                    <Label htmlFor="firstName" className="text-sm font-semibold">First Name *</Label>
+                    <Label htmlFor="firstName" className="text-sm font-semibold">
+                      First Name *
+                    </Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -138,7 +141,9 @@ export const JudgesAuthPage = () => {
                     />
                   </div>
                   <div className="space-y-2.5">
-                    <Label htmlFor="lastName" className="text-sm font-semibold">Last Name *</Label>
+                    <Label htmlFor="lastName" className="text-sm font-semibold">
+                      Last Name *
+                    </Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -153,7 +158,9 @@ export const JudgesAuthPage = () => {
                   </div>
                 </div>
                 <div className="space-y-2.5">
-                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-sm font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -168,9 +175,11 @@ export const JudgesAuthPage = () => {
                 </div>
               </>
             )}
-            
+
             <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
+              <Label htmlFor="email" className="text-sm font-semibold">
+                Email *
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -183,9 +192,11 @@ export const JudgesAuthPage = () => {
                 className="h-11 transition-all focus:ring-judge/50 focus:border-judge"
               />
             </div>
-            
+
             <div className="space-y-2.5">
-              <Label htmlFor="password" className="text-sm font-semibold">Password *</Label>
+              <Label htmlFor="password" className="text-sm font-semibold">
+                Password *
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -200,12 +211,12 @@ export const JudgesAuthPage = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-11 bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 text-white font-semibold shadow-lg shadow-judge/30 transition-all hover:shadow-xl hover:shadow-judge/40 hover:scale-[1.02] mt-6"
               disabled={isLoading}
             >
-              {isLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {isLoading ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
@@ -225,9 +236,7 @@ export const JudgesAuthPage = () => {
               className="text-sm font-medium text-judge hover:text-judge/80 transition-colors hover:underline"
               disabled={isLoading}
             >
-              {isSignUp 
-                ? 'Already have an account? Sign in' 
-                : "Don't have an account? Sign up"}
+              {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
             </button>
           </div>
         </CardContent>
