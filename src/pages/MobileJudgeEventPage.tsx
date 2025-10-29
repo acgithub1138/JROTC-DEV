@@ -26,7 +26,11 @@ export default function MobileJudgeEventPage() {
   const { user } = useAuth();
 
   const { eventDetails, registeredSchools, isLoading } = useJudgeEventDetails(eventId, competitionId);
-  const { data: submittedSchoolIds = new Set(), isLoading: isLoadingSubmissions } = useEventScoreSheets(eventId, competitionId, user?.id);
+  const { data: submittedSchoolIds = new Set(), isLoading: isLoadingSubmissions } = useEventScoreSheets(
+    eventDetails?.event_id, 
+    competitionId, 
+    user?.id
+  );
 
   // State management with per-user localStorage persistence
   const [currentStep, setCurrentStep] = useState(0);
