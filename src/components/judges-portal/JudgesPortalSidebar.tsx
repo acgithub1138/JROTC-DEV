@@ -159,11 +159,13 @@ export const JudgesPortalSidebar = ({
       {/* Footer */}
       <div className="border-t border-sidebar-border">
         {userProfile && (
-          <div className="p-4 border-b border-sidebar-border">
-            {userProfile.last_name}, {userProfile.first_name}
+          <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
+            <div>
+              {userProfile.last_name}, {userProfile.first_name}
+            </div>
             <Badge
               variant="secondary"
-              className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit mt-1`}
+              className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit`}
             >
               {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
               {(userProfile.user_roles?.role_name || userProfile.role)
