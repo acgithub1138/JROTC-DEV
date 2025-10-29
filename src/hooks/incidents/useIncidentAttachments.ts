@@ -45,6 +45,24 @@ export const useIncidentAttachments = (incidentId: string) => {
       if (uploadError) throw uploadError;
 
       // Create attachment record
+      // Get school_id from user metadata or profile
+      let schoolId = user.user_metadata?.school_id;
+      
+      if (!schoolId) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('school_id')
+          .eq('id', user.id)
+          .single();
+          
+        if (profileError) throw new Error('Could not retrieve user school information');
+        schoolId = profileData?.school_id;
+      }
+      
+      if (!schoolId) {
+        throw new Error('User does not have a school assigned');
+      }
+
       const { data, error } = await supabase
         .from('attachments')
         .insert({
@@ -55,12 +73,7 @@ export const useIncidentAttachments = (incidentId: string) => {
           file_size: file.size,
           file_type: file.type,
           uploaded_by: user.id,
-          school_id: user.user_metadata?.school_id || (await supabase
-            .from('profiles')
-            .select('school_id')
-            .eq('id', user.id)
-            .single()
-          ).data?.school_id,
+          school_id: schoolId,
         })
         .select()
         .single();
