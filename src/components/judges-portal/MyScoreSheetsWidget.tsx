@@ -3,6 +3,7 @@ import { convertToUI } from '@/utils/timezoneUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, School, Trophy, Pencil, Trash2 } from 'lucide-react';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useNavigate } from 'react-router-dom';
@@ -137,9 +138,18 @@ export const MyScoreSheetsWidget = () => {
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                {sheet.team_name ? <div className="text-xs">
-                    <span className="font-medium">Team:</span> {sheet.team_name}
-                  </div> : <div />}
+                <div className="flex items-center gap-2">
+                  {sheet.score_sheet?.judge_number && (
+                    <Badge variant="secondary" className="text-xs">
+                      Judge {sheet.score_sheet.judge_number}
+                    </Badge>
+                  )}
+                  {sheet.team_name && (
+                    <div className="text-xs">
+                      <span className="font-medium">Team:</span> {sheet.team_name}
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-1">
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/app/judges-portal/edit-score-sheet?id=${sheet.id}`)}>
                     <Pencil className="h-3.5 w-3.5" />
