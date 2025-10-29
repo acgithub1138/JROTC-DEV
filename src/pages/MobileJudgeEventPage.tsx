@@ -15,6 +15,7 @@ import { ReviewSubmitStep } from '@/components/judges-portal/mobile/ReviewSubmit
 import { ProgressIndicator } from '@/components/judges-portal/mobile/ProgressIndicator';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import { calculateTotalScore } from '@/utils/scoreCalculations';
+import type { ScoringMode } from '@/components/judges-portal/mobile/ScoringModeSelector';
 
 export default function MobileJudgeEventPage() {
   const { eventId } = useParams();
@@ -33,6 +34,7 @@ export default function MobileJudgeEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [audioMode, setAudioMode] = useState<AudioMode>('none');
+  const [scoringMode, setScoringMode] = useState<ScoringMode>('manual');
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   // Audio recording
@@ -166,6 +168,14 @@ export default function MobileJudgeEventPage() {
   // Handle answer changes
   const handleValueChange = (fieldId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
+    
+    // Auto-advance if in auto mode and we're on a question step
+    if (scoringMode === 'auto' && currentStep > 2 && currentStep < 3 + questionFields.length) {
+      // Small delay to show selection before advancing
+      setTimeout(() => {
+        handleNext();
+      }, 150);
+    }
   };
 
   const handleNotesChange = (fieldId: string, notes: string) => {
@@ -325,6 +335,8 @@ export default function MobileJudgeEventPage() {
           isTransitioning={isTransitioning}
           audioMode={audioMode}
           onAudioModeChange={handleAudioModeChange}
+          scoringMode={scoringMode}
+          onScoringModeChange={setScoringMode}
         />
       )}
 
