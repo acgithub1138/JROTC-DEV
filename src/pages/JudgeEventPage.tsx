@@ -59,32 +59,39 @@ export const JudgeEventPage = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5 p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-br from-judge to-judge/70 bg-clip-text text-transparent">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">
               Judge Event
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground text-lg">
               Score sheets for {eventDetails.event_name}
             </p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/app/judges-portal')}>
+          <Button variant="outline" onClick={() => navigate('/app/judges-portal')} className="shadow-sm hover:shadow-md transition-all">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Assignments
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{eventDetails.event_name}</CardTitle>
+        <Card className="border-judge/20 hover:border-judge/40 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-judge/10">
+          <CardHeader className="bg-gradient-to-br from-card to-judge/5 border-b">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
+                <Clock className="h-5 w-5 text-primary-foreground" />
+              </div>
+              {eventDetails.event_name}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4 pt-6">
             {eventDetails.event_start_time && (
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-sm flex-shrink-0">
+                  <Clock className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm font-medium">
                   {convertToUI(eventDetails.event_start_time, timezone, 'time')}
                   {eventDetails.event_end_time && 
                     ` - ${convertToUI(eventDetails.event_end_time, timezone, 'time')}`
@@ -93,23 +100,28 @@ export const JudgeEventPage = () => {
               </div>
             )}
             {eventDetails.event_location && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{eventDetails.event_location}</span>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-sm flex-shrink-0">
+                  <MapPin className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm font-medium">{eventDetails.event_location}</span>
               </div>
             )}
           </CardContent>
         </Card>
 
         {registeredSchools.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">No schools registered for this event.</p>
+          <Card className="border-judge/20">
+            <CardContent className="pt-6 text-center py-12">
+              <p className="text-muted-foreground text-lg">No schools registered for this event.</p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-6">
-            <Card>
+            <Card className="border-judge/20 hover:border-judge/40 transition-all duration-300 shadow-lg">
+              <CardHeader className="bg-gradient-to-br from-card to-judge/5 border-b">
+                <CardTitle className="text-lg">Select School</CardTitle>
+              </CardHeader>
               <CardContent className="pt-6">
                 <SchoolSelector
                   schools={registeredSchools.map(s => ({ id: s.school_id, name: s.school_name }))}
