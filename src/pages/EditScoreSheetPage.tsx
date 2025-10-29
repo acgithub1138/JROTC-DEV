@@ -216,25 +216,12 @@ export const EditScoreSheetPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={togglePlayback}
-              >
-                {isPlaying ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-              </Button>
-              <audio
-                ref={audioRef}
-                src={audioUrl || scoreSheet?.judge_transcript}
-                className="flex-1"
-                controls
-              />
-            </div>
+            <audio
+              ref={audioRef}
+              src={audioUrl || scoreSheet?.judge_transcript}
+              className="w-full"
+              controls
+            />
           </CardContent>
         </Card>
       )}
