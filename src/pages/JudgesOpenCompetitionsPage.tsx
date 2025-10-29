@@ -80,10 +80,10 @@ export const JudgesOpenCompetitionsPage = () => {
           <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg shadow-judge/20">
-                <Trophy className="h-8 w-8 text-black" />
+                <Trophy className="h-6 w-6 text-black" />
               </div>
               <div>
-                <h1 className="text-5xl font-bold text-foreground">
+                <h1 className="font-bold text-foreground text-4xl">
                   Open Competitions
                 </h1>
                 <p className="text-muted-foreground mt-2 text-lg">
