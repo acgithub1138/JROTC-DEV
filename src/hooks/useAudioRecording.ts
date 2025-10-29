@@ -68,28 +68,42 @@ export const useAudioRecording = (mode: AudioMode) => {
   }, [duration]);
 
   const pauseRecording = useCallback(() => {
-    if (mediaRecorderRef.current && recordingState === 'recording') {
-      mediaRecorderRef.current.pause();
-      setRecordingState('paused');
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+    try {
+      if (mediaRecorderRef.current && recordingState === 'recording') {
+        console.log('[Audio] pauseRecording');
+        mediaRecorderRef.current.pause();
+        setRecordingState('paused');
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
       }
+    } catch (err) {
+      console.error('Error pausing recording:', err);
     }
   }, [recordingState]);
 
-  const resumeRecording = useCallback(() => {
-    if (mediaRecorderRef.current && recordingState === 'paused') {
-      mediaRecorderRef.current.resume();
-      setRecordingState('recording');
-      
-      // Resume duration timer
-      const startTime = Date.now() - (duration * 1000);
-      timerRef.current = window.setInterval(() => {
-        setDuration(Math.floor((Date.now() - startTime) / 1000));
-      }, 1000);
+  const resumeRecording = useCallback(async () => {
+    try {
+      if (mediaRecorderRef.current && recordingState === 'paused') {
+        console.log('[Audio] resumeRecording');
+        mediaRecorderRef.current.resume();
+        setRecordingState('recording');
+        
+        // Resume duration timer
+        const startTime = Date.now() - (duration * 1000);
+        timerRef.current = window.setInterval(() => {
+          setDuration(Math.floor((Date.now() - startTime) / 1000));
+        }, 1000);
+      } else if (recordingState === 'paused' || recordingState === 'idle') {
+        console.warn('[Audio] resume fallback to startRecording');
+        await startRecording();
+      }
+    } catch (err) {
+      console.error('Error resuming recording:', err);
+      await startRecording();
     }
-  }, [recordingState, duration]);
+  }, [recordingState, duration, startRecording]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && (recordingState === 'recording' || recordingState === 'paused')) {
