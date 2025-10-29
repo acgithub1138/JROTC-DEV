@@ -313,7 +313,8 @@ export default function MobileJudgeEventPage() {
           onSubmit={handleSubmit}
           onPrevious={handlePrevious}
           audioBlob={audioBlob}
-          isRecording={recordingState === 'recording'}
+          recordingState={recordingState}
+          recordingDuration={recordingDuration}
           onContinueRecording={resumeRecording}
           onPauseRecording={pauseRecording}
           onDeleteRecording={deleteRecording}
