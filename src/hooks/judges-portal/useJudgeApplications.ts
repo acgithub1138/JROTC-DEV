@@ -69,6 +69,32 @@ export const useJudgeApplications = (judgeId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Check if there's an existing withdrawn application
+      const { data: existingApp } = await supabase
+        .from('cp_judge_competition_registrations')
+        .select('id, status')
+        .eq('judge_id', judgeId)
+        .eq('competition_id', competitionId)
+        .maybeSingle();
+
+      // If withdrawn application exists, update it
+      if (existingApp && existingApp.status === 'withdrawn') {
+        const { data, error } = await supabase
+          .from('cp_judge_competition_registrations')
+          .update({
+            status: 'pending',
+            availability_notes: availabilityNotes,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingApp.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
+
+      // Otherwise, insert new application
       const { data, error } = await supabase
         .from('cp_judge_competition_registrations')
         .insert({
