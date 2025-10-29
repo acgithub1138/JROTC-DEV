@@ -1,11 +1,11 @@
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Edit2 } from 'lucide-react';
-import { AudioPlaybackControls } from './AudioPlaybackControls';
-import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
-import type { RecordingState } from '@/hooks/useAudioRecording';
-import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Edit2 } from "lucide-react";
+import { AudioRecordingControls } from "./AudioPlaybackControls";
+import type { JsonField } from "@/components/competition-management/components/json-field-builder/types";
+import type { RecordingState } from "@/hooks/useAudioRecording";
+import { formatPenaltyDeduction } from "@/utils/scoreCalculations";
 
 interface ReviewSubmitStepProps {
   fields: JsonField[];
@@ -37,11 +37,14 @@ export const ReviewSubmitStep = ({
   onStartRecording,
   onResumeRecording,
   onPauseRecording,
-  onDeleteRecording
+  onDeleteRecording,
 }: ReviewSubmitStepProps) => {
   // Filter out non-input fields for review
-  const reviewFields = fields.filter(field => !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type));
-  return <div className="min-h-screen bg-background pb-32">
+  const reviewFields = fields.filter(
+    (field) => !["section_header", "label", "pause", "bold_gray", "calculated"].includes(field.type),
+  );
+  return (
+    <div className="min-h-screen bg-background pb-32">
       <div className="p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Review & Submit</h1>
@@ -59,42 +62,40 @@ export const ReviewSubmitStep = ({
         {/* Answers Review */}
         <div className="space-y-4">
           {reviewFields.map((field, index) => {
-          const fieldValue = answers[field.id];
-          const fieldNotes = answers[`${field.id}_notes`];
-          const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
-          
-          // Use shared penalty calculation utility
-          const isPenalty = ['penalty', 'penalty_checkbox'].includes(field.type);
-          const penaltyDeduction = isPenalty && hasAnswer 
-            ? formatPenaltyDeduction(field, fieldValue) 
-            : null;
-          
-          return <Card key={field.id} className="p-4">
+            const fieldValue = answers[field.id];
+            const fieldNotes = answers[`${field.id}_notes`];
+            const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== "";
+
+            // Use shared penalty calculation utility
+            const isPenalty = ["penalty", "penalty_checkbox"].includes(field.type);
+            const penaltyDeduction = isPenalty && hasAnswer ? formatPenaltyDeduction(field, fieldValue) : null;
+
+            return (
+              <Card key={field.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium mb-1">{field.name}</p>
-                    {hasAnswer ? <>
+                    {hasAnswer ? (
+                      <>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="text-lg font-semibold text-primary">
-                            {fieldValue}
-                          </p>
+                          <p className="text-lg font-semibold text-primary">{fieldValue}</p>
                           {penaltyDeduction !== null && (
-                            <p className="text-lg font-semibold text-destructive">
-                              ({penaltyDeduction})
-                            </p>
+                            <p className="text-lg font-semibold text-destructive">({penaltyDeduction})</p>
                           )}
                         </div>
-                        {fieldNotes && <p className="text-sm text-muted-foreground mt-2 italic">
-                            Note: {fieldNotes}
-                          </p>}
-                      </> : <p className="text-muted-foreground italic">Not answered</p>}
+                        {fieldNotes && <p className="text-sm text-muted-foreground mt-2 italic">Note: {fieldNotes}</p>}
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground italic">Not answered</p>
+                    )}
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => onEdit(index)} className="shrink-0">
                     <Edit2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </Card>;
-        })}
+              </Card>
+            );
+          })}
         </div>
 
         {/* Audio Playback Controls */}
@@ -118,5 +119,6 @@ export const ReviewSubmitStep = ({
           Back to Last Question
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
