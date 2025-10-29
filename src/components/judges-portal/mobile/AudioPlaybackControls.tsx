@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, RotateCw, Square, Trash2, Mic, AudioLines } from "lucide-react";
+import { Pause, Trash2, Mic } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,60 +41,11 @@ export const AudioPlaybackControls = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [showPlayback, setShowPlayback] = useState(false);
+  
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (audioBlob) {
-      // Revoke old URL if it exists
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-      // Create new URL
-      audioUrlRef.current = URL.createObjectURL(audioBlob);
-      if (audioRef.current) {
-        audioRef.current.src = audioUrlRef.current;
-      }
-    }
-    return () => {
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-    };
-  }, [audioBlob]);
-  const handlePlayPause = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-  const handleStop = () => {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    setIsPlaying(false);
-  };
-  const handleRewind = () => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
-  };
-  const handleFastForward = () => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = Math.min(audioRef.current.duration, audioRef.current.currentTime + 10);
-  };
-  const handleDelete = () => {
-    setShowDeleteDialog(true);
-  };
+
   const confirmDelete = () => {
-    handleStop();
     onDelete();
-    setShowPlayback(false);
     setShowDeleteDialog(false);
   };
   if (!hasRecording) {
@@ -106,10 +57,7 @@ export const AudioPlaybackControls = ({
         <h3 className="font-semibold mb-4 text-center">Audio Recording</h3>
 
         {/* Main Controls */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <Button type="button" variant="outline" onClick={() => setShowPlayback(!showPlayback)} className="h-12">
-            <AudioLines className="h-5 w-5" />
-          </Button>
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <Button
             type="button"
             variant={isRecording ? "destructive" : "default"}
@@ -122,14 +70,14 @@ export const AudioPlaybackControls = ({
                 onStartRecording();
               }
             }}
-            className="h-12 rounded-full p-0"
+            className="h-12 rounded-full"
           >
             {isRecording ? <Pause className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
           </Button>
           <Button
             type="button"
             variant="outline"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteDialog(true)}
             className="h-12 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-5 w-5" />
@@ -137,36 +85,10 @@ export const AudioPlaybackControls = ({
         </div>
 
         {/* Recording Duration */}
-        <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="flex items-center justify-center gap-2">
           {isRecording && <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />}
           <span className="text-sm font-medium tabular-nums">{formatDuration(recordingDuration)}</span>
         </div>
-
-        {/* Playback Controls */}
-        {showPlayback && (
-          <div className="grid grid-cols-4 gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={handlePlayPause} className="h-12">
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-            </Button>
-            <Button type="button" variant="outline" onClick={handleRewind} className="h-12">
-              <RotateCcw className="h-5 w-5" />
-            </Button>
-            <Button type="button" variant="outline" onClick={handleFastForward} className="h-12">
-              <RotateCw className="h-5 w-5" />
-            </Button>
-            <Button type="button" variant="outline" onClick={handleStop} className="h-12">
-              <Square className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Hidden audio element */}
-        <audio
-          ref={audioRef}
-          onEnded={() => setIsPlaying(false)}
-          onPause={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-        />
       </Card>
 
       {/* Delete Confirmation Dialog */}

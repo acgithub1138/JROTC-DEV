@@ -171,6 +171,11 @@ export default function MobileJudgeEventPage() {
       return;
     }
 
+    // Stop recording to create the blob if currently recording
+    if (recordingState !== 'idle') {
+      stopRecording();
+    }
+
     setIsSubmitting(true);
 
     try {
