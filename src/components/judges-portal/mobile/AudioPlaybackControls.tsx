@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, RotateCw, Square, Trash2, Mic, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useRef, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Play, Pause, RotateCcw, RotateCw, Square, Trash2, Mic, ChevronDown, ChevronUp } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ export const AudioPlaybackControls = ({
   isRecording,
   onContinueRecording,
   onPauseRecording,
-  onDelete,
+  onDelete
 }: AudioPlaybackControlsProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPlayback, setShowPlayback] = useState(false);
@@ -80,7 +80,10 @@ export const AudioPlaybackControls = ({
 
   const handleFastForward = () => {
     if (!audioRef.current) return;
-    audioRef.current.currentTime = Math.min(audioRef.current.duration, audioRef.current.currentTime + 10);
+    audioRef.current.currentTime = Math.min(
+      audioRef.current.duration,
+      audioRef.current.currentTime + 10
+    );
   };
 
   const handleDelete = () => {
@@ -102,55 +105,83 @@ export const AudioPlaybackControls = ({
     <>
       <Card className="p-4 mt-6">
         <h3 className="font-semibold mb-4">Audio Recording</h3>
-
+        
         {/* Main Controls */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           <Button
-            type="icon"
+            type="button"
             variant="outline"
-            className="h-6 w-6"
-            title="Replay"
             onClick={() => setShowPlayback(!showPlayback)}
-            //className="h-12"
+            className="h-12"
           >
-            {showPlayback ? <ChevronUp className="h-4 w-4 mr-2" /> : <ChevronDown className="h-4 w-4 mr-2" />}
+            {showPlayback ? (
+              <ChevronUp className="h-4 w-4 mr-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 mr-2" />
+            )}
             Replay
           </Button>
           <Button
-            type="icon"
-            className="h-6 w-6"
-            title="Continue recording"
+            type="button"
             variant={isRecording ? "destructive" : "outline"}
             onClick={isRecording ? onPauseRecording : onContinueRecording}
-            //className="h-12"
+            className="h-12"
           >
-            {isRecording ? <Pause className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
+            {isRecording ? (
+              <Pause className="h-4 w-4 mr-2" />
+            ) : (
+              <Mic className="h-4 w-4 mr-2" />
+            )}
+            {isRecording ? 'Pause' : 'Continue'}
           </Button>
           <Button
-            type="icon"
+            type="button"
             variant="outline"
-            title="Delete"
-            className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
             onClick={handleDelete}
-            //className="h-12 text-destructive hover:text-destructive"
+            className="h-12 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4 mr-2" />
+            Delete
           </Button>
         </div>
 
         {/* Playback Controls */}
         {showPlayback && (
           <div className="grid grid-cols-4 gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={handlePlayPause} className="h-12">
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePlayPause}
+              className="h-12"
+            >
+              {isPlaying ? (
+                <Pause className="h-5 w-5" />
+              ) : (
+                <Play className="h-5 w-5" />
+              )}
             </Button>
-            <Button type="button" variant="outline" onClick={handleRewind} className="h-12">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleRewind}
+              className="h-12"
+            >
               <RotateCcw className="h-5 w-5" />
             </Button>
-            <Button type="button" variant="outline" onClick={handleFastForward} className="h-12">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleFastForward}
+              className="h-12"
+            >
               <RotateCw className="h-5 w-5" />
             </Button>
-            <Button type="button" variant="outline" onClick={handleStop} className="h-12">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleStop}
+              className="h-12"
+            >
               <Square className="h-5 w-5" />
             </Button>
           </div>
@@ -176,10 +207,7 @@ export const AudioPlaybackControls = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
