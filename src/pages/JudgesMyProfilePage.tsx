@@ -156,201 +156,255 @@ export const JudgesMyProfilePage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
-        <p className="text-muted-foreground">Your judge profile information</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5">
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-8 space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-judge to-judge/70 bg-clip-text text-transparent">
+            My Profile
+          </h1>
+          <p className="text-muted-foreground text-lg">Manage your judge profile information</p>
+        </div>
 
-      <div>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Judge Information
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                {!isEditing ? (
-                  <>
-                    <Badge variant={profile.available ? "default" : "secondary"}>
-                      {profile.available ? "Available" : "Unavailable"}
-                    </Badge>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                      disabled={isSaving}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={isSaving}
-                      onClick={handleSubmit(onSubmit)}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      {isSaving ? 'Saving...' : 'Save'}
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!isEditing ? (
-              <div className="grid gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Name</label>
-                  <p className="text-lg">{profile.name}</p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <p>{profile.email}</p>
+        <div>
+          <Card className="shadow-xl border-2 border-judge/10 overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-judge via-judge/70 to-judge/50" />
+            <CardHeader className="bg-gradient-to-br from-card to-judge/5 border-b">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg">
+                    <User className="h-6 w-6 text-white" />
                   </div>
-                </div>
-
-                {profile.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                      <p>{profile.phone}</p>
-                    </div>
-                  </div>
-                )}
-
-                {profile.branch && (
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Branch</label>
-                      <p>{profile.branch}</p>
-                    </div>
-                  </div>
-                )}
-
-                {profile.rank && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Rank</label>
-                    <p>{profile.rank}</p>
-                  </div>
-                )}
-
-                {profile.bio && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Bio</label>
-                    <p className="whitespace-pre-wrap">{profile.bio}</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" {...register('name')} />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" value={profile.email} readOnly className="bg-muted" />
-                  <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
-                </div>
-
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" {...register('phone')} placeholder="(123) 456-7890" />
-                </div>
-
-                <div>
-                  <Label htmlFor="branch">Branch</Label>
-                  <Controller
-                    name="branch"
-                    control={control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger id="branch">
-                          <SelectValue placeholder="Select branch" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MILITARY_BRANCHES.map((branch) => (
-                            <SelectItem key={branch} value={branch}>
-                              {branch}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="rank">Rank</Label>
-                  <Controller
-                    name="rank"
-                    control={control}
-                    render={({ field }) => (
-                      <Select 
-                        value={field.value} 
-                        onValueChange={field.onChange}
-                        disabled={!selectedBranch}
+                  Judge Information
+                </CardTitle>
+                <div className="flex items-center gap-3">
+                  {!isEditing ? (
+                    <>
+                      <Badge 
+                        variant={profile.available ? "default" : "secondary"}
+                        className="px-4 py-2 text-sm font-semibold shadow-sm"
                       >
-                        <SelectTrigger id="rank">
-                          <SelectValue placeholder={selectedBranch ? "Select rank" : "Select branch first"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedBranch && BRANCH_RANKS[selectedBranch as keyof typeof BRANCH_RANKS]?.map((rank) => (
-                            <SelectItem key={rank} value={rank}>
-                              {rank}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" {...register('bio')} rows={4} />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="available">Available for Judging</Label>
-                  <Controller
-                    name="available"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        id="available"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    )}
-                  />
+                        {profile.available ? "✓ Available" : "○ Unavailable"}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                        className="border-judge/20 hover:border-judge hover:bg-judge/5 transition-all shadow-sm"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancel}
+                        disabled={isSaving}
+                        className="hover:bg-destructive/10 hover:border-destructive transition-all"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isSaving}
+                        onClick={handleSubmit(onSubmit)}
+                        className="bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 shadow-lg transition-all"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-8 space-y-6">
+              {!isEditing ? (
+                <div className="grid gap-6">
+                  <div className="group">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</label>
+                    <p className="text-xl font-semibold mt-1 group-hover:text-judge transition-colors">{profile.name}</p>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
+                      <Mail className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email Address</label>
+                      <p className="text-base font-medium mt-1 break-all">{profile.email}</p>
+                    </div>
+                  </div>
+
+                  {profile.phone && (
+                    <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
+                        <Phone className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Phone Number</label>
+                        <p className="text-base font-medium mt-1">{profile.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.branch && (
+                    <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
+                        <Shield className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Military Branch</label>
+                        <p className="text-base font-medium mt-1">{profile.branch}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.rank && (
+                    <div className="group">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Rank</label>
+                      <p className="text-lg font-medium mt-1 group-hover:text-judge transition-colors">{profile.rank}</p>
+                    </div>
+                  )}
+
+                  {profile.bio && (
+                    <div className="p-6 rounded-lg bg-gradient-to-br from-judge/5 via-transparent to-judge/5 border border-judge/10">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Biography</label>
+                      <p className="text-base mt-3 whitespace-pre-wrap leading-relaxed">{profile.bio}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-semibold">Name *</Label>
+                    <Input 
+                      id="name" 
+                      {...register('name')} 
+                      className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
+                    <Input 
+                      id="email" 
+                      value={profile.email} 
+                      readOnly 
+                      className="bg-muted/50 border-muted-foreground/20 cursor-not-allowed h-11" 
+                    />
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      Email address cannot be modified
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
+                    <Input 
+                      id="phone" 
+                      {...register('phone')} 
+                      placeholder="(123) 456-7890" 
+                      className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="branch" className="text-sm font-semibold">Military Branch</Label>
+                      <Controller
+                        name="branch"
+                        control={control}
+                        render={({ field }) => (
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger 
+                              id="branch"
+                              className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
+                            >
+                              <SelectValue placeholder="Select branch" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {MILITARY_BRANCHES.map((branch) => (
+                                <SelectItem key={branch} value={branch}>
+                                  {branch}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="rank" className="text-sm font-semibold">Rank</Label>
+                      <Controller
+                        name="rank"
+                        control={control}
+                        render={({ field }) => (
+                          <Select 
+                            value={field.value} 
+                            onValueChange={field.onChange}
+                            disabled={!selectedBranch}
+                          >
+                            <SelectTrigger 
+                              id="rank"
+                              className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11 disabled:opacity-50"
+                            >
+                              <SelectValue placeholder={selectedBranch ? "Select rank" : "Select branch first"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedBranch && BRANCH_RANKS[selectedBranch as keyof typeof BRANCH_RANKS]?.map((rank) => (
+                                <SelectItem key={rank} value={rank}>
+                                  {rank}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio" className="text-sm font-semibold">Biography</Label>
+                    <Textarea 
+                      id="bio" 
+                      {...register('bio')} 
+                      rows={5} 
+                      placeholder="Share your experience and background..."
+                      className="border-judge/20 focus:border-judge focus:ring-judge/20 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10">
+                    <div>
+                      <Label htmlFor="available" className="text-base font-semibold cursor-pointer">Available for Judging</Label>
+                      <p className="text-sm text-muted-foreground mt-1">Allow others to see your availability status</p>
+                    </div>
+                    <Controller
+                      name="available"
+                      control={control}
+                      render={({ field }) => (
+                        <Switch
+                          id="available"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-judge"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
