@@ -528,10 +528,12 @@ export const CompetitionEventRecord: React.FC = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {eventsWithTemplates.map(event => <SelectItem key={event.uuid} value={event.uuid}>
-                          {event.name}
-                        </SelectItem>)}
+                  <SelectContent className="z-[1000] bg-background">
+                    {eventsWithTemplates.map(event => (
+                      <SelectItem key={event.id} value={event.id}>
+                        {event.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -560,10 +562,12 @@ export const CompetitionEventRecord: React.FC = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a score template" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
+                  <SelectContent className="z-[1000] bg-background">
+                    {scoreSheets.map(sheet => (
+                      <SelectItem key={sheet.id} value={sheet.id}>
                         {sheet.template_name}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
