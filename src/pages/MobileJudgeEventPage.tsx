@@ -132,7 +132,7 @@ export default function MobileJudgeEventPage() {
   // Get question fields (fields that need user input)
   const questionFields = useMemo(() => {
     return fields.filter(field => 
-      !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type)
+      !['section_header', 'calculated'].includes(field.type)
     );
   }, [fields]);
 

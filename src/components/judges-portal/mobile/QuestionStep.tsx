@@ -66,6 +66,17 @@ export const QuestionStep = ({
   };
   const renderScoreInput = () => {
     switch (field.type) {
+      case "label":
+        return (
+          <div className="space-y-4 text-center py-8">
+            {field.fieldInfo && (
+              <p className="text-lg text-muted-foreground whitespace-pre-wrap">{field.fieldInfo}</p>
+            )}
+            {!field.fieldInfo && (
+              <p className="text-muted-foreground">Press Next to continue</p>
+            )}
+          </div>
+        );
       case "number":
         return (
           <ScoreButtonGrid maxValue={field.maxValue || 10} selectedValue={localValue} onSelect={handleValueChange} />
@@ -377,10 +388,11 @@ export const QuestionStep = ({
     }
   };
   const isInputRequired =
-    ["number", "dropdown", "text"].includes(field.type) ||
+    field.type !== "label" &&
+    (["number", "dropdown", "text"].includes(field.type) ||
     (field.type === "penalty" && judgeNumber === "1") ||
     (field.type === "penalty_checkbox" && judgeNumber === "1") ||
-    field.type === "scoring_scale";
+    field.type === "scoring_scale");
   const isAnswered = localValue !== null && localValue !== undefined && localValue !== "";
   const nextDisabled = isInputRequired && !isAnswered;
   return (
