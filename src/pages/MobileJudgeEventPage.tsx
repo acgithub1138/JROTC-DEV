@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useJudgeEventDetails } from '@/hooks/judges-portal/useJudgeEventDetails';
+import { useEventScoreSheets } from '@/hooks/judges-portal/useEventScoreSheets';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 import { useAudioRecording, type AudioMode } from '@/hooks/useAudioRecording';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +26,7 @@ export default function MobileJudgeEventPage() {
   const { user } = useAuth();
 
   const { eventDetails, registeredSchools, isLoading } = useJudgeEventDetails(eventId, competitionId);
+  const { data: submittedSchoolIds = new Set(), isLoading: isLoadingSubmissions } = useEventScoreSheets(eventId, competitionId, user?.id);
 
   // State management with per-user localStorage persistence
   const [currentStep, setCurrentStep] = useState(0);
@@ -330,7 +332,7 @@ export default function MobileJudgeEventPage() {
     }
   };
 
-  if (isLoading || !eventDetails) {
+  if (isLoading || isLoadingSubmissions || !eventDetails) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -366,6 +368,7 @@ export default function MobileJudgeEventPage() {
       {currentStep === 1 && (
         <SchoolSelectionStep
           schools={registeredSchools}
+          submittedSchoolIds={submittedSchoolIds}
           selectedSchoolId={selectedSchoolId}
           onSelect={setSelectedSchoolId}
           onNext={handleNext}

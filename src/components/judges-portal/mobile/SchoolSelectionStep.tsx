@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MobileNavButtons } from './MobileNavButtons';
-import { Search } from 'lucide-react';
+import { Search, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface RegisteredSchool {
   school_id: string;
@@ -10,6 +10,7 @@ interface RegisteredSchool {
 }
 interface SchoolSelectionStepProps {
   schools: RegisteredSchool[];
+  submittedSchoolIds: Set<string>;
   selectedSchoolId: string | null;
   onSelect: (schoolId: string) => void;
   onNext: () => void;
@@ -18,6 +19,7 @@ interface SchoolSelectionStepProps {
 }
 export const SchoolSelectionStep = ({
   schools,
+  submittedSchoolIds,
   selectedSchoolId,
   onSelect,
   onNext,
@@ -39,16 +41,47 @@ export const SchoolSelectionStep = ({
         </div>
         
         <div className="space-y-2">
-          {filteredSchools.map(school => <Card key={school.school_id} onClick={() => onSelect(school.school_id)} className={cn("p-4 cursor-pointer transition-all touch-manipulation", "hover:border-primary", selectedSchoolId === school.school_id && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2")}>
-              <div className="flex items-center gap-3">
-                <div className={cn("w-5 h-5 rounded-full border-2 shrink-0", selectedSchoolId === school.school_id ? "border-primary bg-primary" : "border-muted-foreground")}>
-                  {selectedSchoolId === school.school_id && <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-primary-foreground" />
-                    </div>}
+          {filteredSchools.map(school => {
+            const isSubmitted = submittedSchoolIds.has(school.school_id);
+            const isSelected = selectedSchoolId === school.school_id;
+            
+            return (
+              <Card 
+                key={school.school_id} 
+                onClick={() => !isSubmitted && onSelect(school.school_id)} 
+                className={cn(
+                  "p-4 transition-all touch-manipulation",
+                  isSubmitted 
+                    ? "opacity-60 cursor-not-allowed bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900/30"
+                    : "cursor-pointer hover:border-primary",
+                  !isSubmitted && isSelected && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  {isSubmitted ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0" />
+                  ) : (
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 shrink-0",
+                      isSelected ? "border-primary bg-primary" : "border-muted-foreground"
+                    )}>
+                      {isSelected && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="text-lg font-medium">{school.school_name}</p>
+                    {isSubmitted && (
+                      <p className="text-xs text-green-700 dark:text-green-500 mt-1">Score sheet submitted</p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-lg font-medium">{school.school_name}</p>
-              </div>
-            </Card>)}
+              </Card>
+            );
+          })}
         </div>
       </div>
       
