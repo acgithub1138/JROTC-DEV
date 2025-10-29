@@ -91,13 +91,13 @@ export const MyAssignmentsWidget = () => {
                   key={assignment.assignment_id} 
                   className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                    <div className="flex-1 order-1 md:order-none">
                       <div className="font-medium text-sm">
                         {assignment.event_name || 'Event Assignment'}
                       </div>
                       {assignment.event_start_time && (
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1 w-full">
+                        <div className="hidden md:flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1 w-full">
                           <Clock className="h-3 w-3" />
                           <span>
                             {convertToUI(assignment.event_start_time, timezone, 'time')}
@@ -128,11 +128,28 @@ export const MyAssignmentsWidget = () => {
                             : `/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`;
                           navigate(path);
                         }}
-                        className="shrink-0"
+                        className="shrink-0 order-2 md:order-none"
                       >
                         <ClipboardCheck className="h-4 w-4 mr-1" />
                         Judge Event
                       </Button>
+                    )}
+                    {assignment.event_start_time && (
+                      <div className="flex md:hidden flex-wrap items-center gap-2 text-xs text-muted-foreground w-full order-3">
+                        <Clock className="h-3 w-3" />
+                        <span>
+                          {convertToUI(assignment.event_start_time, timezone, 'time')}
+                          {assignment.event_end_time && 
+                            ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
+                          }
+                        </span>
+                        {assignment.event_location && (
+                          <>
+                            <span>•</span>
+                            <span>{assignment.event_location}</span>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
