@@ -107,12 +107,12 @@ const useCompetitionTemplates = () => {
 
   const deleteTemplate = async (id: string) => {
     try {
-      console.log('Attempting to delete template:', id);
+      console.log('Attempting to soft-delete template:', id);
       console.log('User profile:', userProfile);
       
       const { error } = await supabase
         .from('competition_templates')
-        .delete()
+        .update({ is_active: false })
         .eq('id', id);
 
       if (error) {
