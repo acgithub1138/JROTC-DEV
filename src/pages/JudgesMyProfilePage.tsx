@@ -259,7 +259,6 @@ export const JudgesMyProfilePage = () => {
                         size="sm"
                         disabled={isSaving}
                         onClick={handleSubmit(onSubmit)}
-                        className="bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 shadow-lg transition-all"
                       >
                         <Save className="h-4 w-4 mr-2" />
                         {isSaving ? "Saving..." : "Save Changes"}
