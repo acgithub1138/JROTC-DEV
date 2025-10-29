@@ -121,15 +121,13 @@ export default function MobileJudgeEventPage() {
     }
   }, [currentStep, audioMode, recordingState, startRecording]);
 
-  // On entering review step, pause (don't stop) so judges can resume recording
+  // On entering review step, pause once so judges can resume recording
   useEffect(() => {
     if (currentStep === 3 + questionFields.length) {
-      if (recordingState === 'recording') {
-        pauseRecording();
-      }
-      // If already paused, leave as-is; do not stop to preserve ability to resume
+      // Always attempt to pause when landing on review; if already paused/idle, this is a no-op
+      pauseRecording();
     }
-  }, [currentStep, questionFields.length, recordingState, pauseRecording]);
+  }, [currentStep, questionFields.length, pauseRecording]);
 
   // Handle navigation
   const handleNext = () => {
