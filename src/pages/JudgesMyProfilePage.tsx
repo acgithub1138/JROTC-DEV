@@ -11,9 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Mail, Phone, Shield, User, Edit, X, Save } from 'lucide-react';
 import { toast } from 'sonner';
-
 const MILITARY_BRANCHES = ['Air Force', 'Army', 'Marine Corps', 'Navy', 'Coast Guard', 'Space Force'];
-
 const BRANCH_RANKS: Record<string, string[]> = {
   'Air Force': ['Airman Basic (AB)', 'Airman (Amn)', 'Airman First Class (A1C)', 'Senior Airman (SrA)', 'Staff Sergeant (SSgt)', 'Technical Sergeant (TSgt)', 'Master Sergeant (MSgt)', 'Senior Master Sergeant (SMSgt)', 'Chief Master Sergeant (CMSgt)'],
   'Army': ['Private (PVT)', 'Private (PV2)', 'Private First Class (PFC)', 'Specialist (SPC)', 'Corporal (CPL)', 'Sergeant (SGT)', 'Staff Sergeant (SSG)', 'Sergeant First Class (SFC)', 'Master Sergeant (MSG)', 'First Sergeant (1SG)', 'Sergeant Major (SGM)', 'Command Sergeant Major (CSM)'],
@@ -22,7 +20,6 @@ const BRANCH_RANKS: Record<string, string[]> = {
   'Coast Guard': ['Seaman Recruit (SR)', 'Seaman Apprentice (SA)', 'Seaman (SN)', 'Petty Officer Third Class (PO3)', 'Petty Officer Second Class (PO2)', 'Petty Officer First Class (PO1)', 'Chief Petty Officer (CPO)', 'Senior Chief Petty Officer (SCPO)', 'Master Chief Petty Officer (MCPO)'],
   'Space Force': ['Specialist 1 (Spc1)', 'Specialist 2 (Spc2)', 'Specialist 3 (Spc3)', 'Specialist 4 (Spc4)', 'Sergeant (Sgt)', 'Technical Sergeant (TSgt)', 'Master Sergeant (MSgt)', 'Senior Master Sergeant (SMSgt)', 'Chief Master Sergeant (CMSgt)']
 };
-
 interface JudgeProfile {
   id: string;
   name: string;
@@ -34,14 +31,18 @@ interface JudgeProfile {
   bio: string | null;
   user_id: string;
 }
-
 export const JudgesMyProfilePage = () => {
   const [profile, setProfile] = useState<JudgeProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { register, control, reset, handleSubmit, watch } = useForm({
+  const {
+    register,
+    control,
+    reset,
+    handleSubmit,
+    watch
+  } = useForm({
     defaultValues: {
       name: '',
       phone: '',
@@ -51,24 +52,23 @@ export const JudgesMyProfilePage = () => {
       bio: ''
     }
   });
-
   const selectedBranch = watch('branch');
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: {
+            user
+          }
+        } = await supabase.auth.getUser();
         if (!user) return;
-
-        const { data, error } = await supabase
-          .from('cp_judges')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
+        const {
+          data,
+          error
+        } = await supabase.from('cp_judges').select('*').eq('user_id', user.id).single();
         if (error) throw error;
         setProfile(data);
-        
+
         // Reset form with fetched data
         reset({
           name: data.name || '',
@@ -84,27 +84,22 @@ export const JudgesMyProfilePage = () => {
         setIsLoading(false);
       }
     };
-
     fetchProfile();
   }, [reset]);
-
   const onSubmit = async (values: any) => {
     if (!profile) return;
-
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('cp_judges')
-        .update({
-          name: values.name,
-          phone: values.phone,
-          available: values.available,
-          branch: values.branch,
-          rank: values.rank,
-          bio: values.bio
-        })
-        .eq('id', profile.id);
-
+      const {
+        error
+      } = await supabase.from('cp_judges').update({
+        name: values.name,
+        phone: values.phone,
+        available: values.available,
+        branch: values.branch,
+        rank: values.rank,
+        bio: values.bio
+      }).eq('id', profile.id);
       if (error) throw error;
 
       // Update local state
@@ -112,7 +107,6 @@ export const JudgesMyProfilePage = () => {
         ...profile,
         ...values
       });
-
       toast.success('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
@@ -122,7 +116,6 @@ export const JudgesMyProfilePage = () => {
       setIsSaving(false);
     }
   };
-
   const handleCancel = () => {
     reset({
       name: profile?.name || '',
@@ -134,32 +127,24 @@ export const JudgesMyProfilePage = () => {
     });
     setIsEditing(false);
   };
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
+    return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-judge" />
-      </div>
-    );
+      </div>;
   }
-
   if (!profile) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">No judge profile found.</p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5">
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="mb-8 space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-judge to-judge/70 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-judge to-judge/70 bg-clip-text text-black">
             My Profile
           </h1>
           <p className="text-muted-foreground text-lg">Manage your judge profile information</p>
@@ -172,61 +157,34 @@ export const JudgesMyProfilePage = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-3 text-2xl">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg">
-                    <User className="h-6 w-6 text-white" />
+                    <User className="h-6 w-6 text-black" />
                   </div>
                   Judge Information
                 </CardTitle>
                 <div className="flex items-center gap-3">
-                  {!isEditing ? (
-                    <>
-                      <Badge 
-                        variant={profile.available ? "default" : "secondary"}
-                        className="px-4 py-2 text-sm font-semibold shadow-sm"
-                      >
+                  {!isEditing ? <>
+                      <Badge variant={profile.available ? "default" : "secondary"} className="px-4 py-2 text-sm font-semibold shadow-sm">
                         {profile.available ? "✓ Available" : "○ Unavailable"}
                       </Badge>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsEditing(true)}
-                        className="border-judge/20 hover:border-judge hover:bg-judge/5 transition-all shadow-sm"
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)} className="border-judge/20 hover:border-judge hover:bg-judge/5 transition-all shadow-sm">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Profile
                       </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleCancel}
-                        disabled={isSaving}
-                        className="hover:bg-destructive/10 hover:border-destructive transition-all"
-                      >
+                    </> : <>
+                      <Button type="button" variant="outline" size="sm" onClick={handleCancel} disabled={isSaving} className="hover:bg-destructive/10 hover:border-destructive transition-all">
                         <X className="h-4 w-4 mr-2" />
                         Cancel
                       </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={isSaving}
-                        onClick={handleSubmit(onSubmit)}
-                        className="bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 shadow-lg transition-all"
-                      >
+                      <Button type="button" size="sm" disabled={isSaving} onClick={handleSubmit(onSubmit)} className="bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70 shadow-lg transition-all">
                         <Save className="h-4 w-4 mr-2" />
                         {isSaving ? 'Saving...' : 'Save Changes'}
                       </Button>
-                    </>
-                  )}
+                    </>}
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-8 space-y-6">
-              {!isEditing ? (
-                <div className="grid gap-6">
+              {!isEditing ? <div className="grid gap-6">
                   <div className="group">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</label>
                     <p className="text-xl font-semibold mt-1 group-hover:text-judge transition-colors">{profile.name}</p>
@@ -234,7 +192,7 @@ export const JudgesMyProfilePage = () => {
 
                   <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
-                      <Mail className="h-5 w-5 text-white" />
+                      <Mail className="h-5 w-5 text-black" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email Address</label>
@@ -242,63 +200,44 @@ export const JudgesMyProfilePage = () => {
                     </div>
                   </div>
 
-                  {profile.phone && (
-                    <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                  {profile.phone && <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
-                        <Phone className="h-5 w-5 text-white" />
+                        <Phone className="h-5 w-5 text-black" />
                       </div>
                       <div className="flex-1">
                         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Phone Number</label>
                         <p className="text-base font-medium mt-1">{profile.phone}</p>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {profile.branch && (
-                    <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                  {profile.branch && <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
-                        <Shield className="h-5 w-5 text-white" />
+                        <Shield className="h-5 w-5 text-black" />
                       </div>
                       <div className="flex-1">
                         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Military Branch</label>
                         <p className="text-base font-medium mt-1">{profile.branch}</p>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {profile.rank && (
-                    <div className="group">
+                  {profile.rank && <div className="group">
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Rank</label>
                       <p className="text-lg font-medium mt-1 group-hover:text-judge transition-colors">{profile.rank}</p>
-                    </div>
-                  )}
+                    </div>}
 
-                  {profile.bio && (
-                    <div className="p-6 rounded-lg bg-gradient-to-br from-judge/5 via-transparent to-judge/5 border border-judge/10">
+                  {profile.bio && <div className="p-6 rounded-lg bg-gradient-to-br from-judge/5 via-transparent to-judge/5 border border-judge/10">
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Biography</label>
                       <p className="text-base mt-3 whitespace-pre-wrap leading-relaxed">{profile.bio}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid gap-6">
+                    </div>}
+                </div> : <div className="grid gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-semibold">Name *</Label>
-                    <Input 
-                      id="name" 
-                      {...register('name')} 
-                      className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
-                    />
+                    <Input id="name" {...register('name')} className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
-                    <Input 
-                      id="email" 
-                      value={profile.email} 
-                      readOnly 
-                      className="bg-muted/50 border-muted-foreground/20 cursor-not-allowed h-11" 
-                    />
+                    <Input id="email" value={profile.email} readOnly className="bg-muted/50 border-muted-foreground/20 cursor-not-allowed h-11" />
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <Mail className="h-3 w-3" />
                       Email address cannot be modified
@@ -307,79 +246,46 @@ export const JudgesMyProfilePage = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
-                    <Input 
-                      id="phone" 
-                      {...register('phone')} 
-                      placeholder="(123) 456-7890" 
-                      className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
-                    />
+                    <Input id="phone" {...register('phone')} placeholder="(123) 456-7890" className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11" />
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="branch" className="text-sm font-semibold">Military Branch</Label>
-                      <Controller
-                        name="branch"
-                        control={control}
-                        render={({ field }) => (
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger 
-                              id="branch"
-                              className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11"
-                            >
+                      <Controller name="branch" control={control} render={({
+                    field
+                  }) => <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger id="branch" className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11">
                               <SelectValue placeholder="Select branch" />
                             </SelectTrigger>
                             <SelectContent>
-                              {MILITARY_BRANCHES.map((branch) => (
-                                <SelectItem key={branch} value={branch}>
+                              {MILITARY_BRANCHES.map(branch => <SelectItem key={branch} value={branch}>
                                   {branch}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
-                          </Select>
-                        )}
-                      />
+                          </Select>} />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="rank" className="text-sm font-semibold">Rank</Label>
-                      <Controller
-                        name="rank"
-                        control={control}
-                        render={({ field }) => (
-                          <Select 
-                            value={field.value} 
-                            onValueChange={field.onChange}
-                            disabled={!selectedBranch}
-                          >
-                            <SelectTrigger 
-                              id="rank"
-                              className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11 disabled:opacity-50"
-                            >
+                      <Controller name="rank" control={control} render={({
+                    field
+                  }) => <Select value={field.value} onValueChange={field.onChange} disabled={!selectedBranch}>
+                            <SelectTrigger id="rank" className="border-judge/20 focus:border-judge focus:ring-judge/20 h-11 disabled:opacity-50">
                               <SelectValue placeholder={selectedBranch ? "Select rank" : "Select branch first"} />
                             </SelectTrigger>
                             <SelectContent>
-                              {selectedBranch && BRANCH_RANKS[selectedBranch as keyof typeof BRANCH_RANKS]?.map((rank) => (
-                                <SelectItem key={rank} value={rank}>
+                              {selectedBranch && BRANCH_RANKS[selectedBranch as keyof typeof BRANCH_RANKS]?.map(rank => <SelectItem key={rank} value={rank}>
                                   {rank}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
-                          </Select>
-                        )}
-                      />
+                          </Select>} />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="bio" className="text-sm font-semibold">Biography</Label>
-                    <Textarea 
-                      id="bio" 
-                      {...register('bio')} 
-                      rows={5} 
-                      placeholder="Share your experience and background..."
-                      className="border-judge/20 focus:border-judge focus:ring-judge/20 resize-none"
-                    />
+                    <Textarea id="bio" {...register('bio')} rows={5} placeholder="Share your experience and background..." className="border-judge/20 focus:border-judge focus:ring-judge/20 resize-none" />
                   </div>
 
                   <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10">
@@ -387,25 +293,14 @@ export const JudgesMyProfilePage = () => {
                       <Label htmlFor="available" className="text-base font-semibold cursor-pointer">Available for Judging</Label>
                       <p className="text-sm text-muted-foreground mt-1">Allow others to see your availability status</p>
                     </div>
-                    <Controller
-                      name="available"
-                      control={control}
-                      render={({ field }) => (
-                        <Switch
-                          id="available"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-judge"
-                        />
-                      )}
-                    />
+                    <Controller name="available" control={control} render={({
+                  field
+                }) => <Switch id="available" checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-judge" />} />
                   </div>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
