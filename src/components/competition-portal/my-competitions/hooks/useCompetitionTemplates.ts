@@ -180,9 +180,9 @@ const useCompetitionTemplates = () => {
   };
 
   const canEditTemplate = (template: CompetitionTemplate) => {
-    // Admins can only edit global templates, not school-specific templates from other schools
+    // Admins can edit global templates and templates from their own school
     if (userProfile?.role === 'admin') {
-      return template.is_global;
+      return template.is_global || template.school_id === userProfile?.school_id;
     }
     // Non-admins can only edit templates from their own school (not global ones)
     if (template.is_global) return false;
