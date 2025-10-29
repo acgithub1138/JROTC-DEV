@@ -219,6 +219,9 @@ export const useEmailTemplates = () => {
   const canEditTemplate = (template: EmailTemplate): boolean => {
     if (!userProfile || !canEdit) return false;
     
+    // Admins can edit any template
+    if (userProfile.role === 'admin') return true;
+    
     // Cannot edit global templates (null school_id)
     if (template.school_id === null) return false;
     
@@ -235,6 +238,9 @@ export const useEmailTemplates = () => {
 
   const canDeleteTemplate = (template: EmailTemplate): boolean => {
     if (!userProfile || !canDelete) return false;
+    
+    // Admins can delete any template
+    if (userProfile.role === 'admin') return true;
     
     // Cannot delete global templates (null school_id)
     if (template.school_id === null) return false;
