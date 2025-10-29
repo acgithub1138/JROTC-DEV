@@ -85,14 +85,15 @@ export const useCompetitionPrefetch = () => {
     await queryClient.prefetchQuery({
       queryKey: ['cp-judges', userProfile.school_id],
       queryFn: async () => {
-        const { data, error } = await supabase
+        // @ts-expect-error - Type inference issue with new columns until Supabase types regenerate
+        const result: any = await supabase
           .from('cp_judges')
           .select('*')
           .eq('school_id', userProfile.school_id)
           .order('name', { ascending: true });
 
-        if (error) throw error;
-        return data || [];
+        if (result.error) throw result.error;
+        return result.data || [];
       },
       staleTime: 10 * 60 * 1000,
     });

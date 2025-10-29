@@ -29,7 +29,7 @@ export const useJudges = () => {
         .order('name', { ascending: true });
 
       if (error) throw error;
-      return data as Judge[];
+      return data as unknown as Judge[];
     },
   });
 

@@ -1572,48 +1572,47 @@ export type Database = {
       cp_judges: {
         Row: {
           available: boolean
+          bio: string | null
+          branch: string | null
           created_at: string
           created_by: string | null
           email: string | null
           id: string
           name: string
           phone: string | null
-          school_id: string | null
+          rank: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
           available?: boolean
+          bio?: string | null
+          branch?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
           name: string
           phone?: string | null
-          school_id?: string | null
+          rank?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           available?: boolean
+          bio?: string | null
+          branch?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
           name?: string
           phone?: string | null
-          school_id?: string | null
+          rank?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "cp_judges_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "cp_judges_user_id_fkey"
             columns: ["user_id"]

@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
-import { User, Mail, Phone, Check } from 'lucide-react';
+import { getBranches, getRanksForBranch, MilitaryBranch } from '@/utils/militaryRanks';
+import { User, Mail, Phone, Check, Award, FileText } from 'lucide-react';
 
 export const JudgeProfilePage = () => {
   const { judgeProfile, createProfile, updateProfile, isCreating, isUpdating } = useJudgeProfile();
@@ -14,7 +17,10 @@ export const JudgeProfilePage = () => {
     name: '',
     email: '',
     phone: '',
-    available: true
+    available: true,
+    branch: '',
+    rank: '',
+    bio: ''
   });
 
   // Populate form when profile loads
@@ -24,7 +30,10 @@ export const JudgeProfilePage = () => {
         name: judgeProfile.name || '',
         email: judgeProfile.email || '',
         phone: judgeProfile.phone || '',
-        available: judgeProfile.available
+        available: judgeProfile.available,
+        branch: judgeProfile.branch || '',
+        rank: judgeProfile.rank || '',
+        bio: judgeProfile.bio || ''
       });
     }
   }, [judgeProfile]);
@@ -113,6 +122,66 @@ export const JudgeProfilePage = () => {
                 className="pl-9"
               />
             </div>
+          </div>
+
+          {/* Branch */}
+          <div className="space-y-2">
+            <Label htmlFor="branch">Military Branch</Label>
+            <Select
+              value={formData.branch}
+              onValueChange={(value) => setFormData({ ...formData, branch: value, rank: '' })}
+            >
+              <SelectTrigger id="branch">
+                <SelectValue placeholder="Select branch" />
+              </SelectTrigger>
+              <SelectContent>
+                {getBranches().map((branch) => (
+                  <SelectItem key={branch} value={branch}>
+                    {branch}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Rank */}
+          <div className="space-y-2">
+            <Label htmlFor="rank">Rank</Label>
+            <div className="relative">
+              <Award className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <Select
+                value={formData.rank}
+                onValueChange={(value) => setFormData({ ...formData, rank: value })}
+                disabled={!formData.branch}
+              >
+                <SelectTrigger id="rank" className="pl-9">
+                  <SelectValue placeholder={formData.branch ? "Select rank" : "Select branch first"} />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  {getRanksForBranch(formData.branch as MilitaryBranch).map((rank) => (
+                    <SelectItem key={rank} value={rank}>
+                      {rank}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              placeholder="Share a bit about your judging experience and background..."
+              rows={4}
+              className="resize-none"
+            />
+            <p className="text-sm text-muted-foreground">
+              Your bio will be visible to competition organizers
+            </p>
           </div>
 
           {/* Availability */}

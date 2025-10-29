@@ -10,6 +10,9 @@ export interface JudgeProfile {
   phone: string | null;
   available: boolean;
   school_id: string | null;
+  branch: string | null;
+  rank: string | null;
+  bio: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +22,9 @@ export interface JudgeProfileUpdate {
   email?: string;
   phone?: string;
   available?: boolean;
+  branch?: string;
+  rank?: string;
+  bio?: string;
 }
 
 export const useJudgeProfile = () => {
@@ -43,7 +49,7 @@ export const useJudgeProfile = () => {
         .maybeSingle();
       if (error) throw error;
 
-      if (data) return data as JudgeProfile | null;
+      if (data) return data as unknown as JudgeProfile | null;
 
       // Fallback: legacy records may not have user_id set; try matching by email
       const { data: byEmail, error: emailErr } = await supabase
@@ -63,7 +69,7 @@ export const useJudgeProfile = () => {
         }
       }
 
-      return byEmail as JudgeProfile | null;
+      return byEmail as unknown as JudgeProfile | null;
     }
   });
 
@@ -81,6 +87,9 @@ export const useJudgeProfile = () => {
           email: profileData.email,
           phone: profileData.phone,
           available: profileData.available ?? true,
+          branch: profileData.branch,
+          rank: profileData.rank,
+          bio: profileData.bio,
           school_id: null // Judges don't belong to a school by default
         })
         .select()
