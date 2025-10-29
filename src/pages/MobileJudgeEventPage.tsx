@@ -171,12 +171,20 @@ export default function MobileJudgeEventPage() {
 
   return (
     <div className="relative">
-      {/* Progress Indicator */}
+      {/* Points Counter - Top Right */}
+      {currentStep > 2 && currentStep <= 2 + questionFields.length && (
+        <div className="fixed top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full text-base font-bold shadow-lg z-10">
+          {totalPoints} pts
+        </div>
+      )}
+      
+      {/* Progress Indicator - Bottom Center */}
       {currentStep > 0 && currentStep <= 2 + questionFields.length && (
         <ProgressIndicator
           current={currentStep > 2 ? currentQuestionNumber : currentStep}
           total={currentStep > 2 ? totalQuestions : 3}
-          label={currentStep > 2 ? "Question" : "Step"}
+          label={currentStep > 2 ? "" : "Step"}
+          position="bottom-center"
         />
       )}
 
