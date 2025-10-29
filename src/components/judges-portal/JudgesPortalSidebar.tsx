@@ -1,10 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Gavel, LogOut, LayoutDashboard, Trophy, FileText, User, Menu } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from "react-router-dom";
+import { Gavel, LogOut, LayoutDashboard, Trophy, FileText, User, Menu } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 interface JudgesPortalSidebarProps {
   isMobile?: boolean;
@@ -12,40 +12,44 @@ interface JudgesPortalSidebarProps {
   setSidebarOpen?: (open: boolean) => void;
 }
 
-export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, setSidebarOpen }: JudgesPortalSidebarProps) => {
+export const JudgesPortalSidebar = ({
+  isMobile = false,
+  sidebarOpen = false,
+  setSidebarOpen,
+}: JudgesPortalSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error('Failed to sign out');
+      toast.error("Failed to sign out");
       return;
     }
-    toast.success('Signed out successfully');
-    navigate('/app/user-type');
+    toast.success("Signed out successfully");
+    navigate("/app/user-type");
   };
 
   const navItems = [
     {
-      title: 'Dashboard',
+      title: "Dashboard",
       icon: LayoutDashboard,
-      href: '/app/judges-portal',
+      href: "/app/judges-portal",
     },
     {
-      title: 'Open Competitions',
+      title: "Open Competitions",
       icon: Trophy,
-      href: '/app/judges-portal/open-competitions',
+      href: "/app/judges-portal/open-competitions",
     },
     {
-      title: 'My Applications',
+      title: "My Applications",
       icon: FileText,
-      href: '/app/judges-portal/applications',
+      href: "/app/judges-portal/applications",
     },
     {
-      title: 'Profile',
+      title: "Profile",
       icon: User,
-      href: '/app/judges-portal/profile',
+      href: "/app/judges-portal/profile",
     },
   ];
 
@@ -77,11 +81,11 @@ export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, set
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
-              
+
               return (
                 <Button
                   key={item.href}
-                  variant={isActive ? 'secondary' : 'ghost'}
+                  variant={isActive ? "secondary" : "ghost"}
                   className="w-full justify-start"
                   onClick={() => handleNavClick(item.href)}
                 >
@@ -93,11 +97,7 @@ export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, set
           </nav>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={handleSignOut}
-            >
+            <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
               <LogOut className="h-5 w-5 mr-3" />
               Sign Out
             </Button>
@@ -114,7 +114,7 @@ export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, set
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
-            <Gavel className="h-5 w-5 text-white" />
+            <Gavel className="h-5 w-5 text-black" />
           </div>
           <div>
             <h2 className="font-bold text-sidebar-foreground">Judges Portal</h2>
@@ -128,15 +128,15 @@ export const JudgesPortalSidebar = ({ isMobile = false, sidebarOpen = false, set
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
-          
+
           return (
             <Link
               key={item.href}
               to={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                 isActive
-                  ? 'bg-judge/10 text-judge font-medium'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  ? "bg-judge/10 text-judge font-medium"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               }`}
             >
               <Icon className="h-5 w-5 shrink-0" />
