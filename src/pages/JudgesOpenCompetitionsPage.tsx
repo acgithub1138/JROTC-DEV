@@ -93,10 +93,10 @@ export const JudgesOpenCompetitionsPage = () => {
           <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg shadow-judge/20">
-                <Trophy className="h-8 w-8 text-white" />
+                <Trophy className="h-8 w-8 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-br from-judge via-judge to-judge/60 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-bold text-foreground">
                   Open Competitions
                 </h1>
                 <p className="text-muted-foreground mt-2 text-lg">

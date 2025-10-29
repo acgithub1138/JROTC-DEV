@@ -9,7 +9,7 @@ export const JudgesPortalDashboard = () => {
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-judge to-judge/50 rounded-lg blur opacity-20" />
           <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
-            <h1 className="text-5xl font-bold bg-gradient-to-br from-judge via-judge to-judge/60 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold text-foreground">
               Welcome to Judges Portal
             </h1>
             <p className="text-muted-foreground mt-3 text-lg">
