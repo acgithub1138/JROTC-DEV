@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RotateCcw, RotateCw, Square, Trash2, Mic, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pause, RotateCcw, RotateCw, Square, Trash2, Mic } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface AudioPlaybackControlsProps {
   audioBlob: Blob | null;
@@ -82,17 +82,14 @@ export const AudioPlaybackControls = ({
         
         {/* Main Controls */}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <Button type="button" variant="outline" onClick={() => setShowPlayback(!showPlayback)} className="h-12 text-xs">
-            {showPlayback ? <ChevronUp className="h-4 w-4 mr-2" /> : <ChevronDown className="h-4 w-4 mr-2" />}
-            Replay
+          <Button type="button" variant="outline" onClick={() => setShowPlayback(!showPlayback)} className="h-12">
+            <Play className="h-5 w-5" />
           </Button>
-          <Button type="button" variant={isRecording ? "destructive" : "outline"} onClick={isRecording ? onPauseRecording : onContinueRecording} className="h-12 text-xs">
-            {isRecording ? <Pause className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-            {isRecording ? 'Pause' : 'Continue'}
+          <Button type="button" variant={isRecording ? "destructive" : "outline"} onClick={isRecording ? onPauseRecording : onContinueRecording} className="h-12">
+            {isRecording ? <Pause className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </Button>
-          <Button type="button" variant="outline" onClick={handleDelete} className="h-12 text-xs text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+          <Button type="button" variant="outline" onClick={handleDelete} className="h-12 text-destructive hover:text-destructive">
+            <Trash2 className="h-5 w-5" />
           </Button>
         </div>
 
