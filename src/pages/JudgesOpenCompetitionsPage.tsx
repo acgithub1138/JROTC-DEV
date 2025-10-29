@@ -160,8 +160,8 @@ export const JudgesOpenCompetitionsPage = () => {
                     <Button variant="outline" onClick={() => handleViewDetails(competition.id)} className="flex-1">
                       View Details
                     </Button>
-                    {!applied && <Button onClick={() => handleApply(competition.id)} disabled={isApplying} className="flex-1">
-                        {isApplying ? 'Applying...' : 'Apply'}
+                    {(!applied || status === 'withdrawn') && <Button onClick={() => handleApply(competition.id)} disabled={isApplying} className="flex-1">
+                        {isApplying ? 'Applying...' : status === 'withdrawn' ? 'Reapply' : 'Apply'}
                       </Button>}
                   </CardFooter>
                 </Card>;
