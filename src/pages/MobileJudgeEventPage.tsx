@@ -318,13 +318,13 @@ export default function MobileJudgeEventPage() {
           onEdit={handleEdit}
           onSubmit={handleSubmit}
           onPrevious={handlePrevious}
-          audioBlob={audioBlob}
+          audioMode={audioMode}
           recordingState={recordingState}
           recordingDuration={recordingDuration}
           onStartRecording={startRecording}
           onResumeRecording={resumeRecording}
           onPauseRecording={pauseRecording}
-          onDeleteRecording={deleteRecording}
+          
         />
       )}
     </div>

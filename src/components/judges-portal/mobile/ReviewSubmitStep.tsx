@@ -1,10 +1,10 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+
 import { Edit2 } from 'lucide-react';
-import { AudioPlaybackControls } from './AudioPlaybackControls';
+import { AudioRecordingControls } from './AudioRecordingControls';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
-import type { RecordingState } from '@/hooks/useAudioRecording';
+import type { RecordingState, AudioMode } from '@/hooks/useAudioRecording';
 import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
 
 interface ReviewSubmitStepProps {
@@ -15,13 +15,12 @@ interface ReviewSubmitStepProps {
   onEdit: (questionIndex: number) => void;
   onSubmit: () => void;
   onPrevious: () => void;
-  audioBlob: Blob | null;
+  audioMode: AudioMode;
   recordingState: RecordingState;
   recordingDuration: number;
   onStartRecording: () => void;
   onResumeRecording: () => void;
   onPauseRecording: () => void;
-  onDeleteRecording: () => void;
 }
 export const ReviewSubmitStep = ({
   fields,
@@ -31,13 +30,12 @@ export const ReviewSubmitStep = ({
   onEdit,
   onSubmit,
   onPrevious,
-  audioBlob,
+  audioMode,
   recordingState,
   recordingDuration,
   onStartRecording,
   onResumeRecording,
-  onPauseRecording,
-  onDeleteRecording
+  onPauseRecording
 }: ReviewSubmitStepProps) => {
   // Filter out non-input fields for review
   const reviewFields = fields.filter(field => !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type));
@@ -97,15 +95,14 @@ export const ReviewSubmitStep = ({
         })}
         </div>
 
-        {/* Audio Playback Controls */}
-        <AudioPlaybackControls
-          audioBlob={audioBlob}
+        {/* Audio Recording Controls */}
+        <AudioRecordingControls
+          mode={audioMode}
           recordingState={recordingState}
-          recordingDuration={recordingDuration}
-          onStartRecording={onStartRecording}
-          onResumeRecording={onResumeRecording}
-          onPauseRecording={onPauseRecording}
-          onDelete={onDeleteRecording}
+          duration={recordingDuration}
+          onStart={onStartRecording}
+          onPause={onPauseRecording}
+          onResume={onResumeRecording}
         />
       </div>
 
