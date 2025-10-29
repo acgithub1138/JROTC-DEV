@@ -122,7 +122,7 @@ export const MILITARY_RANKS: BranchRanks[] = [
       'Senior Master Sergeant (SMSgt)',
       'Senior Master Sergeant (SMSgt) / First Sergeant',
       'Chief Master Sergeant (CMSgt)',
-      'Chief Master Sergeant (CMSgt) / First Sergeant'
+      'Chief Master Sergeant (CMSgt) / First Sergeant',
       'Chief Master Sergeant (CMSgt) / Command Chief Master Sergeant',
       'Chief Master Sergeant of the Air Force (CMSAF)',
       'Second Lieutenant (2d Lt)',
