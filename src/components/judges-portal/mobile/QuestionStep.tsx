@@ -143,6 +143,27 @@ export const QuestionStep = ({
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <Card
+                  onClick={() => handleValueChange("none")}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all touch-manipulation hover:border-primary",
+                    (!localValue || localValue === "none") && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 shrink-0",
+                      (!localValue || localValue === "none") ? "border-primary bg-primary" : "border-muted-foreground"
+                    )}>
+                      {(!localValue || localValue === "none") && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-lg font-medium">None</p>
+                  </div>
+                </Card>
+                <Card
                   onClick={() => handleValueChange("minor")}
                   className={cn(
                     "p-4 cursor-pointer transition-all touch-manipulation hover:border-primary",
