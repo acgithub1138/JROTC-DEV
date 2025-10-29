@@ -8,6 +8,7 @@ import { ScoreButtonGrid } from './ScoreButtonGrid';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import { cn } from '@/lib/utils';
 import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
+import { Plus, Minus } from 'lucide-react';
 interface QuestionStepProps {
   field: JsonField;
   value: any;
@@ -77,6 +78,18 @@ export const QuestionStep = ({
         // Use shared penalty calculation utility
         const penaltyDeduction = formatPenaltyDeduction(field, localValue);
         
+        const handleIncrement = () => {
+          const currentValue = Number(localValue) || 0;
+          handleValueChange(String(currentValue + 1));
+        };
+
+        const handleDecrement = () => {
+          const currentValue = Number(localValue) || 0;
+          if (currentValue > 0) {
+            handleValueChange(String(currentValue - 1));
+          }
+        };
+        
         return <div className="space-y-4">
             {/* Penalty Explanation */}
             {field.penaltyType === 'points' && field.pointValue && (
@@ -107,7 +120,35 @@ export const QuestionStep = ({
               </div>
             )}
             
-            <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />
+            <div className="flex items-center gap-2">
+              <Input 
+                type="number" 
+                inputMode="numeric" 
+                pattern="[0-9]*" 
+                value={localValue || ''} 
+                onChange={e => handleValueChange(e.target.value)} 
+                placeholder="Enter penalty value..." 
+                className="h-12 text-base flex-1" 
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleDecrement}
+                className="h-12 w-12 shrink-0"
+              >
+                <Minus className="h-5 w-5" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleIncrement}
+                className="h-12 w-12 shrink-0"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
+            </div>
             
             {penaltyDeduction !== null && (
               <div className="text-center">
