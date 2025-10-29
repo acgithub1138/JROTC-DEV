@@ -1,10 +1,12 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
 import { Edit2 } from 'lucide-react';
 import { AudioRecordingControls } from './AudioRecordingControls';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import type { RecordingState, AudioMode } from '@/hooks/useAudioRecording';
 import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
+
 interface ReviewSubmitStepProps {
   fields: JsonField[];
   answers: Record<string, any>;
@@ -58,10 +60,13 @@ export const ReviewSubmitStep = ({
           const fieldValue = answers[field.id];
           const fieldNotes = answers[`${field.id}_notes`];
           const hasAnswer = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
-
+          
           // Use shared penalty calculation utility
           const isPenalty = ['penalty', 'penalty_checkbox'].includes(field.type);
-          const penaltyDeduction = isPenalty && hasAnswer ? formatPenaltyDeduction(field, fieldValue) : null;
+          const penaltyDeduction = isPenalty && hasAnswer 
+            ? formatPenaltyDeduction(field, fieldValue) 
+            : null;
+          
           return <Card key={field.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -71,9 +76,11 @@ export const ReviewSubmitStep = ({
                           <p className="text-lg font-semibold text-primary">
                             {fieldValue}
                           </p>
-                          {penaltyDeduction !== null && <p className="text-lg font-semibold text-destructive">
+                          {penaltyDeduction !== null && (
+                            <p className="text-lg font-semibold text-destructive">
                               ({penaltyDeduction})
-                            </p>}
+                            </p>
+                          )}
                         </div>
                         {fieldNotes && <p className="text-sm text-muted-foreground mt-2 italic">
                             Note: {fieldNotes}
@@ -89,7 +96,14 @@ export const ReviewSubmitStep = ({
         </div>
 
         {/* Audio Recording Controls */}
-        <AudioRecordingControls mode={audioMode} recordingState={recordingState} duration={recordingDuration} onStart={onStartRecording} onPause={onPauseRecording} onResume={onResumeRecording} className="py-[8px]" />
+        <AudioRecordingControls
+          mode={audioMode}
+          recordingState={recordingState}
+          duration={recordingDuration}
+          onStart={onStartRecording}
+          onPause={onPauseRecording}
+          onResume={onResumeRecording}
+        />
       </div>
 
       {/* Fixed Submit Button */}
