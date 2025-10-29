@@ -26,8 +26,8 @@ export const JudgeNumberStep = ({
   const columns = judgeCount <= 7 ? 2 : 4;
   
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <div className="flex-1 p-6 flex flex-col justify-center overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col pb-24">
+      <div className="flex-1 p-6 flex flex-col justify-center">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Select Judge Number</h1>
           <p className="text-muted-foreground">Choose your assigned judge number</p>

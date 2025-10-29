@@ -34,8 +34,8 @@ export const SchoolSelectionStep = ({
   );
   
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <div className="flex-1 p-6 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-24">
+      <div className="flex-1 p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Select High School</h1>
           <p className="text-muted-foreground">Choose the school you're judging</p>
