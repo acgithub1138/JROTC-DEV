@@ -23,6 +23,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useEventsWithTemplates } from '@/hooks/competition-portal/useEventsWithTemplates';
 import { MultiSelectJudges } from '../components/MultiSelectJudges';
 import { MultiSelectResources } from '../components/MultiSelectResources';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
@@ -84,6 +85,10 @@ export const CompetitionEventRecord: React.FC = () => {
     eventTypes,
     isLoading: eventTypesLoading
   } = useCompetitionEventTypes();
+  const {
+    events: eventsWithTemplates,
+    isLoading: eventsWithTemplatesLoading
+  } = useEventsWithTemplates();
   const {
     canCreate,
     canEdit,
@@ -504,8 +509,8 @@ export const CompetitionEventRecord: React.FC = () => {
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
                   <SelectContent>
-                    {eventTypes.sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <SelectItem key={eventType.id} value={eventType.id}>
-                          {eventType.name}
+                    {eventsWithTemplates.map(event => <SelectItem key={event.uuid} value={event.uuid}>
+                          {event.name}
                         </SelectItem>)}
                   </SelectContent>
                 </Select>
