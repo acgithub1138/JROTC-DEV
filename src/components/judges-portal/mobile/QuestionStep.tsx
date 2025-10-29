@@ -135,7 +135,7 @@ export const QuestionStep = ({
         // If there are dropdown options/values, show as dropdown
         if (field.values && field.values.length > 0) {
           return (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-2">
               {field.values.map((option) => (
                 <Card
                   key={option}
