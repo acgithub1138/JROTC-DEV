@@ -128,14 +128,14 @@ export const MyAssignmentsWidget = () => {
                             : `/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`;
                           navigate(path);
                         }}
-                        className="shrink-0 order-2 md:order-none"
+                        className="shrink-0 order-3 md:order-none"
                       >
                         <ClipboardCheck className="h-4 w-4 mr-1" />
                         Judge Event
                       </Button>
                     )}
                     {assignment.event_start_time && (
-                      <div className="flex md:hidden flex-wrap items-center gap-2 text-xs text-muted-foreground w-full order-3">
+                      <div className="flex md:hidden flex-wrap items-center gap-2 text-xs text-muted-foreground w-full order-2">
                         <Clock className="h-3 w-3" />
                         <span>
                           {convertToUI(assignment.event_start_time, timezone, 'time')}
