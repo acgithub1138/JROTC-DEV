@@ -188,7 +188,7 @@ export const MILITARY_RANKS: BranchRanks[] = [
 ];
 
 export const getBranches = (): string[] => {
-  return MILITARY_RANKS.map((br) => br.branch);
+  return MILITARY_RANKS.map((br) => br.branch).sort();
 };
 
 export const getRanksForBranch = (branch: MilitaryBranch | null | undefined): string[] => {
