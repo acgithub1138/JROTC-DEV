@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { getRoleIcon, getRoleColor } from "@/components/user-management/components/UserRoleUtils";
 interface JudgesPortalSidebarProps {
   isMobile?: boolean;
   sidebarOpen?: boolean;
@@ -17,6 +20,7 @@ export const JudgesPortalSidebar = ({
 }: JudgesPortalSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
   const handleSignOut = async () => {
     const {
       error
@@ -79,11 +83,27 @@ export const JudgesPortalSidebar = ({
           })}
           </nav>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
-            <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5 mr-3" />
-              Sign Out
-            </Button>
+          <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border">
+            {userProfile && (
+              <div className="p-4 border-b border-sidebar-border">
+                <div className="text-sm font-medium text-sidebar-foreground">
+                  {userProfile.last_name}, {userProfile.first_name}
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit mt-1`}
+                >
+                  {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
+                  {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </Badge>
+              </div>
+            )}
+            <div className="p-4">
+              <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </SheetContent>
       </Sheet>;
@@ -117,11 +137,27 @@ export const JudgesPortalSidebar = ({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border">
-        <button onClick={handleSignOut} className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all">
-          <LogOut className="h-5 w-5 shrink-0" />
-          <span>Sign Out</span>
-        </button>
+      <div className="border-t border-sidebar-border">
+        {userProfile && (
+          <div className="p-4 border-b border-sidebar-border">
+            <div className="text-sm font-medium text-sidebar-foreground">
+              {userProfile.last_name}, {userProfile.first_name}
+            </div>
+            <Badge 
+              variant="secondary" 
+              className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit mt-1`}
+            >
+              {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
+              {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </Badge>
+          </div>
+        )}
+        <div className="p-4">
+          <button onClick={handleSignOut} className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all">
+            <LogOut className="h-5 w-5 shrink-0" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
     </div>;
 };
