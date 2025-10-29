@@ -25,53 +25,58 @@ export const MobileNavButtons = ({
   totalSteps
 }: MobileNavButtonsProps) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t safe-area-bottom z-50">
-      {/* Progress indicator */}
-      {currentStep !== undefined && totalSteps !== undefined && (
-        <div className="flex justify-center py-2 border-b">
-          <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-            {currentStep} of {totalSteps}
-          </div>
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 safe-area-bottom z-50">
+      <div className="grid grid-cols-3 gap-4 items-center">
+        {/* Left Section - Previous/Exit Button */}
+        <div>
+          {showExit && onExit && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={onExit}
+              className="w-full h-14 text-base"
+            >
+              <X className="h-5 w-5 mr-2" />
+              Exit
+            </Button>
+          )}
+          
+          {showPrevious && onPrevious && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={onPrevious}
+              className="w-full h-14 text-base"
+            >
+              <ChevronLeft className="h-5 w-5 mr-2" />
+              Previous
+            </Button>
+          )}
         </div>
-      )}
-      
-      {/* Navigation buttons */}
-      <div className="p-4 flex justify-between gap-4">
-        {showExit && onExit && (
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={onExit}
-            className="flex-1 h-14 text-base"
-          >
-            <X className="h-5 w-5 mr-2" />
-            Exit
-          </Button>
-        )}
         
-        {showPrevious && onPrevious && (
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={onPrevious}
-            className="flex-1 h-14 text-base"
-          >
-            <ChevronLeft className="h-5 w-5 mr-2" />
-            Previous
-          </Button>
-        )}
+        {/* Middle Section - Progress Indicator */}
+        <div className="flex justify-center">
+          {currentStep !== undefined && totalSteps !== undefined && (
+            <div className="bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap">
+              {currentStep} of {totalSteps}
+            </div>
+          )}
+        </div>
         
-        {onNext && (
-          <Button
-            size="lg"
-            onClick={onNext}
-            disabled={nextDisabled}
-            className="flex-1 h-14 text-base"
-          >
-            {nextLabel}
-            <ChevronRight className="h-5 w-5 ml-2" />
-          </Button>
-        )}
+        {/* Right Section - Next Button */}
+        <div>
+          {onNext && (
+            <Button
+              size="lg"
+              onClick={onNext}
+              disabled={nextDisabled}
+              className="w-full h-14 text-base"
+            >
+              {nextLabel}
+              <ChevronRight className="h-5 w-5 ml-2" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
