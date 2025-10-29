@@ -33,7 +33,7 @@ export const AudioRecordingControls = ({
   const isPaused = recordingState === 'paused';
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2">
+    <div className="flex flex-row items-center justify-center gap-4">
       <Button
         type="button"
         variant={isRecording ? "destructive" : "default"}
