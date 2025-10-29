@@ -7,6 +7,7 @@ import { MobileNavButtons } from './MobileNavButtons';
 import { ScoreButtonGrid } from './ScoreButtonGrid';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import { cn } from '@/lib/utils';
+import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
 interface QuestionStepProps {
   field: JsonField;
   value: any;
@@ -73,21 +74,8 @@ export const QuestionStep = ({
             </div>;
         }
         
-        // Calculate actual penalty deduction
-        let calculatedPenalty = 0;
-        const numValue = Number(localValue) || 0;
-        
-        if (numValue > 0) {
-          if (field.penaltyType === 'split' && field.splitFirstValue && field.splitSubsequentValue) {
-            // First occurrence uses splitFirstValue, subsequent use splitSubsequentValue
-            calculatedPenalty = field.splitFirstValue + ((numValue - 1) * field.splitSubsequentValue);
-          } else if (field.pointValue) {
-            // Standard points-based penalty
-            calculatedPenalty = field.pointValue * numValue;
-          }
-        }
-        
-        const penaltyDeduction = calculatedPenalty !== 0 ? -Math.abs(calculatedPenalty) : null;
+        // Use shared penalty calculation utility
+        const penaltyDeduction = formatPenaltyDeduction(field, localValue);
         
         return <div className="space-y-4">
             <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />

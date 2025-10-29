@@ -11,6 +11,7 @@ import { QuestionStep } from '@/components/judges-portal/mobile/QuestionStep';
 import { ReviewSubmitStep } from '@/components/judges-portal/mobile/ReviewSubmitStep';
 import { ProgressIndicator } from '@/components/judges-portal/mobile/ProgressIndicator';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
+import { calculateTotalScore } from '@/utils/scoreCalculations';
 
 export default function MobileJudgeEventPage() {
   const { eventId } = useParams();
@@ -68,53 +69,9 @@ export default function MobileJudgeEventPage() {
   // Calculate total steps
   const totalSteps = 3 + questionFields.length; // confirmation + school + judge + questions
 
-  // Calculate total points (including penalties)
+  // Calculate total points (including penalties) using shared utility
   const totalPoints = useMemo(() => {
-    let total = 0;
-    fields.forEach(field => {
-      const rawValue = answers[field.id];
-      const valueNum = typeof rawValue === 'number' ? rawValue : Number(rawValue);
-
-      if (field.type === 'number' && rawValue !== '' && !isNaN(valueNum)) {
-        total += valueNum;
-      } else if (field.type === 'dropdown' && rawValue !== '' && !isNaN(valueNum)) {
-        total += valueNum;
-      } else if (field.type === 'scoring_scale' && rawValue !== '' && !isNaN(valueNum)) {
-        total += valueNum;
-      } else if (field.type === 'penalty' && rawValue !== '' && rawValue !== undefined && rawValue !== null) {
-        const penaltyType = (field as any).penaltyType;
-        if (penaltyType === 'points') {
-          const violations = valueNum || 0;
-          const pointValue = Number((field as any).pointValue ?? -10);
-          total += violations * pointValue;
-        } else if (penaltyType === 'minor_major') {
-          if (rawValue === 'minor') total += -20;
-          else if (rawValue === 'major') total += -50;
-        } else if (penaltyType === 'split') {
-          const occurrences = valueNum || 0;
-          if (occurrences >= 1) {
-            const firstValue = Number((field as any).splitFirstValue ?? -5);
-            const subsequentValue = Number((field as any).splitSubsequentValue ?? -25);
-            if (occurrences === 1) total += firstValue;
-            else total += firstValue + (occurrences - 1) * subsequentValue;
-          }
-        } else if (penaltyType === 'checkbox_list' && Array.isArray(rawValue)) {
-          const penaltyValue = Number((field as any).penaltyValue ?? -10);
-          total += rawValue.length * penaltyValue;
-        }
-      } else if (field.type === 'penalty_checkbox' && rawValue !== '' && !isNaN(valueNum)) {
-        const count = valueNum || 0;
-        const penaltyValue = Number((field as any).penaltyValue ?? -10);
-        total += count * penaltyValue;
-      } else if (field.type === 'calculated' && (field as any).calculationType === 'sum' && (field as any).calculationFields) {
-        (field as any).calculationFields.forEach((fieldId: string) => {
-          const val = answers[fieldId];
-          const valNum = typeof val === 'number' ? val : Number(val);
-          if (val !== '' && !isNaN(valNum)) total += valNum;
-        });
-      }
-    });
-    return total;
+    return calculateTotalScore(fields, answers);
   }, [answers, fields]);
 
   // Reset transition state when step changes
