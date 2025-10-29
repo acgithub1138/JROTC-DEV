@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +20,7 @@ export const ApplyToCompetitionPage = () => {
   const [availabilityNotes, setAvailabilityNotes] = useState('');
   
   // Get current user's judge ID
-  useState(() => {
+  useEffect(() => {
     supabaseClient.auth.getUser().then(({ data }) => {
       if (data.user) {
         supabaseClient
@@ -33,7 +33,7 @@ export const ApplyToCompetitionPage = () => {
           });
       }
     });
-  });
+  }, []);
 
   const { data: competition, isLoading } = useQuery({
     queryKey: ['competition-details', competitionId],
@@ -48,6 +48,21 @@ export const ApplyToCompetitionPage = () => {
       return data;
     },
     enabled: !!competitionId
+  });
+
+  const { data: judgeData } = useQuery({
+    queryKey: ['judge-info', judgeId],
+    queryFn: async () => {
+      if (!judgeId) return null;
+      const { data, error } = await supabase
+        .from('cp_judges')
+        .select('*')
+        .eq('id', judgeId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!judgeId
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -86,21 +101,6 @@ export const ApplyToCompetitionPage = () => {
       </div>
     );
   }
-
-  const { data: judgeData } = useQuery({
-    queryKey: ['judge-info', judgeId],
-    queryFn: async () => {
-      if (!judgeId) return null;
-      const { data, error } = await supabase
-        .from('cp_judges')
-        .select('*')
-        .eq('id', judgeId)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!judgeId
-  });
 
   if (!judgeId || !judgeData) {
     return (
