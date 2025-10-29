@@ -30,7 +30,7 @@ export const SchoolSelectionStep = ({
       <div className="flex-1 min-h-0 p-6 overflow-y-auto pb-28">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2 text-center">Select School</h1>
-          <p className="text-muted-foreground">Choose the school you're judging</p>
+          <p className="text-muted-foreground text-center">Choose the school you're judging</p>
         </div>
         
         <div className="relative mb-4">
