@@ -13,6 +13,7 @@ interface Competition {
   description?: string;
   start_date: string;
   end_date?: string;
+  location: string;
   address: string;
   city: string;
   state: string;
@@ -125,16 +126,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 <span>
-                  <div>
-                    <a href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">
-                      {competition.address}
-                    </a>
-                  </div>
-                  <div>
-                    <a href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`} target="_blank" rel="noopener noreferrer" className="block text-primary hover:underline cursor-pointer">
-                      {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
-                    </a>
-                  </div>
+                  <a href={`https://www.google.com/maps/place/${competition.location.replace(/ /g, '+')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">
+                    {competition.location}
+                  </a>
                 </span>
               </div>
               {competition.max_participants && <div className="flex items-center gap-2">
