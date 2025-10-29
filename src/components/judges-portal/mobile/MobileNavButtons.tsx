@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface MobileNavButtonsProps {
   onPrevious?: () => void;
@@ -22,7 +22,7 @@ export const MobileNavButtons = ({
   nextDisabled = false,
   nextLabel = "Next",
   currentStep,
-  totalSteps
+  totalSteps,
 }: MobileNavButtonsProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 safe-area-bottom z-50">
@@ -30,29 +30,20 @@ export const MobileNavButtons = ({
         {/* Left Section - Previous/Exit Button */}
         <div>
           {showExit && onExit && (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={onExit}
-              className="w-full h-14 text-base"
-            >
+            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-14 text-base">
               <X className="h-5 w-5 mr-2" />
               Exit
             </Button>
           )}
-          
+
           {showPrevious && onPrevious && (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={onPrevious}
-              className="w-full h-14 text-base text-left"
-            >
-              < Prev
+            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-14 text-base text-left">
+              <ChevronLeft className="h-5 w-5 mr-2" />
+              Prev
             </Button>
           )}
         </div>
-        
+
         {/* Middle Section - Progress Indicator */}
         <div className="flex justify-center">
           {currentStep !== undefined && totalSteps !== undefined && (
@@ -61,17 +52,13 @@ export const MobileNavButtons = ({
             </div>
           )}
         </div>
-        
+
         {/* Right Section - Next Button */}
         <div>
           {onNext && (
-            <Button
-              size="lg"
-              onClick={onNext}
-              disabled={nextDisabled}
-              className="w-full h-14 text-base text-right"
-            >
-              {nextLabel} >
+            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-14 text-base text Right">
+              {nextLabel}
+              <ChevronRight className="h-5 w-5 ml-2" />
             </Button>
           )}
         </div>
