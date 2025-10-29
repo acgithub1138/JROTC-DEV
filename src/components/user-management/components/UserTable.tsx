@@ -149,6 +149,10 @@ export const UserTable = ({
                   </Badge>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-right">{user.email}</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">School:</span>
                   <span className="text-right">{user.schools?.name || 'No school assigned'}</span>
                 </div>
@@ -194,6 +198,7 @@ export const UserTable = ({
               {getSortIcon('role')}
             </div>
           </TableHead>
+          <TableHead>Email</TableHead>
           <TableHead 
             className="cursor-pointer hover:bg-muted/50 select-none"
             onClick={() => handleHeaderClick('school')}
@@ -236,6 +241,9 @@ export const UserTable = ({
                 {getRoleIcon(user.user_roles?.role_name || user.role)}
                 {(user.user_roles?.role_name || user.role).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Badge>
+            </TableCell>
+            <TableCell className="py-2">
+              {user.email}
             </TableCell>
             <TableCell className="py-2">
               {user.schools?.name || 'No school assigned'}
