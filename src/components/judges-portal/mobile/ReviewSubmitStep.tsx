@@ -89,7 +89,9 @@ export const ReviewSubmitStep = ({
         </div>
 
         {/* Audio Recording Controls */}
-        <AudioRecordingControls mode={audioMode} recordingState={recordingState} duration={recordingDuration} onStart={onStartRecording} onPause={onPauseRecording} onResume={onResumeRecording} className="py-[12px]" />
+        <div className="py-[12px]">
+          <AudioRecordingControls mode={audioMode} recordingState={recordingState} duration={recordingDuration} onStart={onStartRecording} onPause={onPauseRecording} onResume={onResumeRecording} />
+        </div>
       </div>
 
       {/* Fixed Submit Button */}

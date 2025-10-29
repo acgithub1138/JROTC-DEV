@@ -50,6 +50,12 @@ export default function MobileJudgeEventPage() {
     deleteRecording,
   } = useAudioRecording(audioMode);
   const hasPausedOnReviewRef = useRef(false);
+  const audioBlobRef = useRef<Blob | null>(null);
+
+  // Keep ref in sync with audioBlob state
+  useEffect(() => {
+    audioBlobRef.current = audioBlob;
+  }, [audioBlob]);
 
   // Handle audio mode change with permission request
   const handleAudioModeChange = async (mode: AudioMode) => {
@@ -171,6 +177,27 @@ export default function MobileJudgeEventPage() {
     setCurrentStep(3 + questionIndex); // 3 = confirmation + school + judge
   };
 
+  // Utility to wait for a value to become available
+  const waitFor = <T,>(
+    getValue: () => T | null | undefined,
+    timeoutMs = 4000,
+    intervalMs = 50
+  ): Promise<T | null> => {
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+      const checkInterval = setInterval(() => {
+        const value = getValue();
+        if (value) {
+          clearInterval(checkInterval);
+          resolve(value);
+        } else if (Date.now() - startTime >= timeoutMs) {
+          clearInterval(checkInterval);
+          resolve(null);
+        }
+      }, intervalMs);
+    });
+  };
+
   // Handle submission
   const handleSubmit = async () => {
     if (!selectedSchoolId || !eventDetails || !selectedJudgeNumber || !user) {
@@ -178,14 +205,15 @@ export default function MobileJudgeEventPage() {
       return;
     }
 
-    // Stop recording to create the blob if currently recording
-    if (recordingState !== 'idle') {
-      stopRecording();
-    }
-
     setIsSubmitting(true);
 
     try {
+      // Stop recording if active
+      if (recordingState !== 'idle') {
+        console.log('Stopping recording before submit...');
+        stopRecording();
+      }
+
       // Insert competition_events record
       const { data: newEvent, error: eventError } = await supabase
         .from('competition_events')
@@ -209,19 +237,27 @@ export default function MobileJudgeEventPage() {
 
       if (eventError) throw eventError;
 
-      // Upload audio if exists
-      if (audioBlob && newEvent) {
+      // Wait for blob to finalize after stop
+      console.log('Waiting for audio blob to finalize...');
+      const finalBlob = await waitFor(() => audioBlobRef.current, 4000);
+
+      if (finalBlob) {
+        console.log(`Blob ready, size: ${finalBlob.size} bytes`);
         const audioFile = new File(
-          [audioBlob],
+          [finalBlob],
           `judge-${selectedJudgeNumber}-recording-${Date.now()}.webm`,
           { type: 'audio/webm' }
         );
 
+        console.log('Uploading audio attachment...');
         await uploadFile({
           record_type: 'competition_event',
           record_id: newEvent.id,
           file: audioFile
         });
+        console.log('Audio attachment uploaded successfully');
+      } else {
+        console.warn('Audio blob not available after stop; proceeding without attachment');
       }
 
       toast.success('Score sheet submitted successfully!');
