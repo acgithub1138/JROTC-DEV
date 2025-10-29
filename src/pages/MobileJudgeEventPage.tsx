@@ -32,7 +32,7 @@ export default function MobileJudgeEventPage() {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [audioMode, setAudioMode] = useState<AudioMode>('auto');
+  const [audioMode, setAudioMode] = useState<AudioMode>('none');
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   // Audio recording
