@@ -86,11 +86,11 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
 
   const handleStartDateSelect = (date: Date | undefined) => {
     setStartDate(date);
-    setShowStartCalendar(false);
     // Auto-set end date to same as start date
     if (date) {
       setEndDate(date);
     }
+    // Keep calendar open for easy month navigation
   };
 
   const isFormValid = name.trim() && startDate && endDate && endDate >= startDate;
@@ -169,7 +169,7 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
                     selected={endDate}
                     onSelect={(date) => {
                       setEndDate(date);
-                      setShowEndCalendar(false);
+                      // Keep calendar open for easy month navigation
                     }}
                     disabled={(date) => {
                       const minDate = startDate || new Date();
