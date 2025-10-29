@@ -34,8 +34,8 @@ export const SchoolSelectionStep = ({
   );
   
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-24">
-      <div className="flex-1 p-6">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <div className="flex-1 p-6 overflow-y-auto h-[calc(100vh-88px)]">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Select High School</h1>
           <p className="text-muted-foreground">Choose the school you're judging</p>
@@ -52,7 +52,7 @@ export const SchoolSelectionStep = ({
           />
         </div>
         
-        <div className="space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div className="space-y-2">
           {filteredSchools.map((school) => (
             <Card
               key={school.school_id}
