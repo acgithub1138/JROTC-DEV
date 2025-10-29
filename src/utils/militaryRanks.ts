@@ -57,7 +57,7 @@ export const MILITARY_RANKS: BranchRanks[] = [
       'Chief Petty Officer (CPO)',
       'Senior Chief Petty Officer (SCPO)',
       'Master Chief Petty Officer (MCPO)',
-      'Fleet Command Master Chief Petty Officer'
+      'Fleet Command Master Chief Petty Officer',
       'Master Chief Petty Officer of the Navy (MCPON)',
       'USN Warrant Officer 1 (WO1)',
       'USN Chief Warrant Officer 2 (CWO2)',
