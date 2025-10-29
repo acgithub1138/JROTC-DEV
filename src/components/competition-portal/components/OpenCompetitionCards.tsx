@@ -114,7 +114,18 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                   {competition.description || "No description available"}
                 </CardDescription>
               </div>
-              <Badge variant="secondary" className="ml-2">
+              <Badge 
+                variant="secondary" 
+                className="ml-2 text-white"
+                style={{
+                  backgroundColor: 
+                    competition.program === 'air_force' ? '#003f87' :
+                    competition.program === 'army' ? '#454B1B' :
+                    competition.program === 'navy' ? '#000080' :
+                    competition.program === 'marine_corps' ? '#940000' :
+                    undefined
+                }}
+              >
                 <Trophy className="w-3 h-3 mr-1" />
                 {competition.program?.replace("_", " ").toUpperCase() || "N/A"}
               </Badge>
