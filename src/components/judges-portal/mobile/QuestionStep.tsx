@@ -120,7 +120,7 @@ export const QuestionStep = ({
               </div>
             )}
             
-            <div className="flex items-center gap-2">
+            <div className="space-y-3">
               <Input 
                 type="number" 
                 inputMode="numeric" 
@@ -128,26 +128,30 @@ export const QuestionStep = ({
                 value={localValue || ''} 
                 onChange={e => handleValueChange(e.target.value)} 
                 placeholder="Enter penalty value..." 
-                className="h-12 text-base flex-1" 
+                className="h-12 text-base w-full" 
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleDecrement}
-                className="h-12 w-12 shrink-0"
-              >
-                <Minus className="h-5 w-5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleIncrement}
-                className="h-12 w-12 shrink-0"
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={handleDecrement}
+                  className="h-16 text-lg font-semibold"
+                >
+                  <Minus className="h-6 w-6 mr-2" />
+                  Decrease
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={handleIncrement}
+                  className="h-16 text-lg font-semibold"
+                >
+                  <Plus className="h-6 w-6 mr-2" />
+                  Increase
+                </Button>
+              </div>
             </div>
             
             {penaltyDeduction !== null && (
