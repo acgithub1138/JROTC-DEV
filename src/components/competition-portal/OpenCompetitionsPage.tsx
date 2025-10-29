@@ -403,43 +403,6 @@ export const OpenCompetitionsPage = () => {
                 <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>No events found for this competition.</p>
               </div>}
-            
-            {/* SOP Section - Moved to bottom */}
-            {selectedCompetitionId && competitions && (() => {
-              const competition = competitions.find(c => c.id === selectedCompetitionId) as any;
-              const hasSOP = competition?.sop && competition.sop !== 'none';
-              
-              if (!hasSOP) return null;
-              
-              return (
-                <Card className="bg-muted/50 border-2">
-                  <CardContent className="pt-6">
-                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                      <Calendar className="w-5 h-5" />
-                      Competition SOP
-                    </h3>
-                    {competition.sop === 'link' && competition.sop_link ? (
-                      <div className="p-4 bg-background rounded-md border">
-                        <p className="text-sm text-muted-foreground mb-2">SOP Link:</p>
-                        <a 
-                          href={competition.sop_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-base font-medium break-all"
-                        >
-                          {competition.sop_link}
-                        </a>
-                      </div>
-                    ) : competition.sop === 'text' && competition.sop_text ? (
-                      <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-background rounded-md border" dangerouslySetInnerHTML={{
-                        __html: competition.sop_text
-                      }}>
-                      </div>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              );
-            })()}
           </div>
         </DialogContent>
       </Dialog>
