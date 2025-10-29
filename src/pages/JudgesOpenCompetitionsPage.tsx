@@ -86,37 +86,44 @@ export const JudgesOpenCompetitionsPage = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center">
-            <Trophy className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold">Open Competitions</h1>
-            <p className="text-muted-foreground mt-1">
-              Browse and register for available competitions
-            </p>
+        <div className="relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-judge to-judge/50 rounded-lg blur opacity-20" />
+          <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-lg shadow-judge/20">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-5xl font-bold bg-gradient-to-br from-judge via-judge to-judge/60 bg-clip-text text-transparent">
+                  Open Competitions
+                </h1>
+                <p className="text-muted-foreground mt-2 text-lg">
+                  Browse and register for available competitions
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search by name, location, school, or date..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12 border-judge/20 focus-visible:ring-judge shadow-sm"
           />
         </div>
 
         {filteredCompetitions.length === 0 ? (
-          <div className="rounded-lg border bg-card p-12 text-center">
-            <Trophy className="h-16 w-16 mx-auto text-judge/50 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">
+          <div className="rounded-xl border-2 border-dashed border-judge/30 bg-card/50 backdrop-blur-sm p-12 text-center">
+            <Trophy className="h-20 w-20 mx-auto text-judge/50 mb-6" />
+            <h3 className="text-2xl font-bold mb-2">
               {searchTerm ? 'No Matching Competitions' : 'No Open Competitions'}
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               {searchTerm ? 'Try adjusting your search criteria' : 'Check back later for new competition opportunities'}
             </p>
           </div>
@@ -127,7 +134,7 @@ export const JudgesOpenCompetitionsPage = () => {
               const status = getApplicationStatus(competition.id);
               
               return (
-                <Card key={competition.id} className="flex flex-col">
+                <Card key={competition.id} className="flex flex-col border-judge/20 hover:border-judge/40 transition-all duration-300 hover:shadow-lg hover:shadow-judge/10 hover:scale-[1.02] bg-card/80 backdrop-blur-sm">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">

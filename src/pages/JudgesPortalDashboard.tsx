@@ -3,28 +3,33 @@ import { MyScoreSheetsWidget } from '@/components/judges-portal/MyScoreSheetsWid
 import { AllAssignmentsTable } from '@/components/judges-portal/AllAssignmentsTable';
 
 export const JudgesPortalDashboard = () => {
-  return <div className="p-8">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-br from-judge to-judge/70 bg-clip-text text-transparent">
-            Welcome to Judges Portal
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your judging assignments and scoring
-          </p>
+        <div className="relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-judge to-judge/50 rounded-lg blur opacity-20" />
+          <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
+            <h1 className="text-5xl font-bold bg-gradient-to-br from-judge via-judge to-judge/60 bg-clip-text text-transparent">
+              Welcome to Judges Portal
+            </h1>
+            <p className="text-muted-foreground mt-3 text-lg">
+              Manage your judging assignments and scoring
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
             <MyAssignmentsWidget />
           </div>
 
-          <div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
             <MyScoreSheetsWidget />
           </div>
         </div>
 
         <AllAssignmentsTable />
       </div>
-    </div>;
+    </div>
+  );
 };

@@ -86,7 +86,7 @@ export const MyApplicationsPage = () => {
   }
 
   const ApplicationCard = ({ application }: { application: any }) => (
-    <Card key={application.id} className="p-6">
+    <Card key={application.id} className="p-6 border-judge/20 hover:border-judge/40 transition-all duration-300 hover:shadow-lg hover:shadow-judge/10 bg-card/80 backdrop-blur-sm">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4 mb-2">
@@ -166,75 +166,96 @@ export const MyApplicationsPage = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Applications</h1>
-        <p className="text-muted-foreground">
-          Manage your competition judge applications
-        </p>
-      </div>
-
-      {applications && applications.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground mb-4">You haven't applied to any competitions yet.</p>
-          <Button onClick={() => navigate('/app/judges-portal/open-competitions')}>
-            Browse Competitions
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-8">
-          {/* Pending Applications */}
-          {groupedApplications.pending.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Pending Review</h2>
-              <div className="space-y-4">
-                {groupedApplications.pending.map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Approved Applications */}
-          {groupedApplications.approved.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Approved</h2>
-              <div className="space-y-4">
-                {groupedApplications.approved.map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Declined Applications */}
-          {groupedApplications.declined.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Declined</h2>
-              <div className="space-y-4">
-                {groupedApplications.declined.map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Withdrawn Applications */}
-          {groupedApplications.withdrawn.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Withdrawn</h2>
-              <div className="space-y-4">
-                {groupedApplications.withdrawn.map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))}
-              </div>
-            </div>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-judge/5 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-judge to-judge/50 rounded-lg blur opacity-20" />
+          <div className="relative bg-background/80 backdrop-blur-sm border border-judge/20 rounded-lg p-6 shadow-lg">
+            <h1 className="text-5xl font-bold bg-gradient-to-br from-judge via-judge to-judge/60 bg-clip-text text-transparent">
+              My Applications
+            </h1>
+            <p className="text-muted-foreground mt-3 text-lg">
+              Manage your competition judge applications
+            </p>
+          </div>
         </div>
-      )}
 
-      {/* Withdraw Confirmation Dialog */}
-      <AlertDialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
+        {applications && applications.length === 0 ? (
+          <Card className="p-12 text-center border-2 border-dashed border-judge/30 bg-card/50 backdrop-blur-sm">
+            <p className="text-muted-foreground mb-6 text-lg">You haven't applied to any competitions yet.</p>
+            <Button 
+              onClick={() => navigate('/app/judges-portal/open-competitions')}
+              className="bg-gradient-to-r from-judge to-judge/80 hover:from-judge/90 hover:to-judge/70"
+            >
+              Browse Competitions
+            </Button>
+          </Card>
+        ) : (
+          <div className="space-y-8">
+            {/* Pending Applications */}
+            {groupedApplications.pending.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-1 w-12 bg-gradient-to-r from-judge to-judge/50 rounded-full" />
+                  <h2 className="text-2xl font-bold">Pending Review</h2>
+                </div>
+                <div className="space-y-4">
+                  {groupedApplications.pending.map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Approved Applications */}
+            {groupedApplications.approved.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-1 w-12 bg-gradient-to-r from-judge to-judge/50 rounded-full" />
+                  <h2 className="text-2xl font-bold">Approved</h2>
+                </div>
+                <div className="space-y-4">
+                  {groupedApplications.approved.map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Declined Applications */}
+            {groupedApplications.declined.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-1 w-12 bg-gradient-to-r from-judge to-judge/50 rounded-full" />
+                  <h2 className="text-2xl font-bold">Declined</h2>
+                </div>
+                <div className="space-y-4">
+                  {groupedApplications.declined.map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Withdrawn Applications */}
+            {groupedApplications.withdrawn.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-1 w-12 bg-gradient-to-r from-judge to-judge/50 rounded-full" />
+                  <h2 className="text-2xl font-bold">Withdrawn</h2>
+                </div>
+                <div className="space-y-4">
+                  {groupedApplications.withdrawn.map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Withdraw Confirmation Dialog */}
+        <AlertDialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Withdraw Application</AlertDialogTitle>
@@ -250,6 +271,7 @@ export const MyApplicationsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 };
