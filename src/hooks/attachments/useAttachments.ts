@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import type { Attachment, CreateAttachmentData } from './types';
 
-export const useAttachments = (recordType: string, recordId: string) => {
+export const useAttachments = (recordType: string, recordId: string, overrideSchoolId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -43,22 +43,26 @@ export const useAttachments = (recordType: string, recordId: string) => {
       if (uploadError) throw uploadError;
 
       // Create attachment record
-      // Get school_id from user metadata or profile
-      let schoolId = user.user_metadata?.school_id;
+      // Get school_id - use override if provided, otherwise get from user
+      let schoolId = overrideSchoolId;
       
       if (!schoolId) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('school_id')
-          .eq('id', user.id)
-          .single();
-          
-        if (profileError) throw new Error('Could not retrieve user school information');
-        schoolId = profileData?.school_id;
+        schoolId = user.user_metadata?.school_id;
+        
+        if (!schoolId) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('school_id')
+            .eq('id', user.id)
+            .single();
+            
+          if (profileError) throw new Error('Could not retrieve user school information');
+          schoolId = profileData?.school_id;
+        }
       }
       
       if (!schoolId) {
-        throw new Error('User does not have a school assigned');
+        throw new Error('School ID is required for attachment upload');
       }
 
       const { data, error } = await supabase

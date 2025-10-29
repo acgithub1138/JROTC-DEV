@@ -58,8 +58,8 @@ export default function MobileJudgeEventPage() {
     }
   };
 
-  // Attachments for uploading audio
-  const { uploadFile } = useAttachments('competition_event', createdEventId || '');
+  // Attachments for uploading audio - use selected school's ID
+  const { uploadFile } = useAttachments('competition_event', createdEventId || '', selectedSchoolId || undefined);
 
   // Fetch template
   const { data: template } = useQuery({
