@@ -9,7 +9,8 @@ interface AudioPlaybackControlsProps {
   audioBlob: Blob | null;
   recordingState: RecordingState;
   recordingDuration: number;
-  onContinueRecording: () => void;
+  onStartRecording: () => void;
+  onResumeRecording: () => void;
   onPauseRecording: () => void;
   onDelete: () => void;
 }
@@ -17,7 +18,8 @@ export const AudioPlaybackControls = ({
   audioBlob,
   recordingState,
   recordingDuration,
-  onContinueRecording,
+  onStartRecording,
+  onResumeRecording,
   onPauseRecording,
   onDelete
 }: AudioPlaybackControlsProps) => {
@@ -108,7 +110,20 @@ export const AudioPlaybackControls = ({
           <Button type="button" variant="outline" onClick={() => setShowPlayback(!showPlayback)} className="h-12">
             <AudioLines className="h-5 w-5" />
           </Button>
-          <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={isRecording ? onPauseRecording : onContinueRecording} className="h-12">
+          <Button 
+            type="button" 
+            variant={isRecording ? "destructive" : "default"} 
+            onClick={() => {
+              if (isRecording) {
+                onPauseRecording();
+              } else if (isPaused) {
+                onResumeRecording();
+              } else {
+                onStartRecording();
+              }
+            }} 
+            className="h-12"
+          >
             {isRecording ? <Pause className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </Button>
           <Button type="button" variant="outline" onClick={handleDelete} className="h-12 text-destructive hover:text-destructive">

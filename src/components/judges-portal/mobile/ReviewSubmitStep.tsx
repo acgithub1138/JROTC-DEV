@@ -18,7 +18,8 @@ interface ReviewSubmitStepProps {
   audioBlob: Blob | null;
   recordingState: RecordingState;
   recordingDuration: number;
-  onContinueRecording: () => void;
+  onStartRecording: () => void;
+  onResumeRecording: () => void;
   onPauseRecording: () => void;
   onDeleteRecording: () => void;
 }
@@ -33,7 +34,8 @@ export const ReviewSubmitStep = ({
   audioBlob,
   recordingState,
   recordingDuration,
-  onContinueRecording,
+  onStartRecording,
+  onResumeRecording,
   onPauseRecording,
   onDeleteRecording
 }: ReviewSubmitStepProps) => {
@@ -100,7 +102,8 @@ export const ReviewSubmitStep = ({
           audioBlob={audioBlob}
           recordingState={recordingState}
           recordingDuration={recordingDuration}
-          onContinueRecording={onContinueRecording}
+          onStartRecording={onStartRecording}
+          onResumeRecording={onResumeRecording}
           onPauseRecording={onPauseRecording}
           onDelete={onDeleteRecording}
         />
