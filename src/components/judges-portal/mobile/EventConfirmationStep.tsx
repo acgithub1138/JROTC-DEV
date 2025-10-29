@@ -19,8 +19,8 @@ export const EventConfirmationStep = ({
   onExit
 }: EventConfirmationStepProps) => {
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto h-[calc(100vh-88px)]">
+    <div className="h-[calc(100dvh-4rem)] bg-background flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 p-6 flex flex-col justify-center overflow-y-auto pb-28">
         <div className="space-y-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Confirm Event</h1>
