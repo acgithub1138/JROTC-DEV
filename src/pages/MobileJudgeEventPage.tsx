@@ -177,16 +177,6 @@ export default function MobileJudgeEventPage() {
           {totalPoints} pts
         </div>
       )}
-      
-      {/* Progress Indicator - Bottom Center */}
-      {currentStep > 0 && currentStep <= 2 + questionFields.length && (
-        <ProgressIndicator
-          current={currentStep > 2 ? currentQuestionNumber : currentStep}
-          total={currentStep > 2 ? totalQuestions : 3}
-          label={currentStep > 2 ? "" : "Step"}
-          position="bottom-center"
-        />
-      )}
 
       {/* Step 0: Event Confirmation */}
       {currentStep === 0 && (
@@ -235,6 +225,8 @@ export default function MobileJudgeEventPage() {
           onNext={handleNext}
           onPrevious={handlePrevious}
           isTransitioning={isTransitioning}
+          currentStep={currentQuestionNumber}
+          totalSteps={totalQuestions}
         />
       )}
 
