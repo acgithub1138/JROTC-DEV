@@ -144,7 +144,7 @@ export const QuestionStep = ({
                 type="number" 
                 inputMode="numeric" 
                 pattern="[0-9]*" 
-                value={localValue || ''} 
+                value={localValue ?? ''} 
                 onChange={e => handleValueChange(e.target.value)} 
                 placeholder="Enter penalty value..." 
                 className="h-12 text-base w-full" 
