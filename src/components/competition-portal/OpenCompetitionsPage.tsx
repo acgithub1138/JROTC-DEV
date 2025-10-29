@@ -77,7 +77,7 @@ export const OpenCompetitionsPage = () => {
     return list.filter((c: any) => {
       const programRaw = c.program ? String(c.program) : '';
       const programFormatted = programRaw.replace(/_/g, ' ');
-      const haystack = [c.name, c.address, c.city, c.state, c.zip, c.program, programFormatted, c.hosting_school, c.description].filter(Boolean).join(' ').toLowerCase();
+      const haystack = [c.name, c.location, c.address, c.city, c.state, c.zip, c.program, programFormatted, c.hosting_school, c.description].filter(Boolean).join(' ').toLowerCase();
       return haystack.includes(q);
     });
   }, [competitions, debouncedSearch]);
@@ -257,7 +257,7 @@ export const OpenCompetitionsPage = () => {
 
       <div className="max-w-xl">
         <label htmlFor="competition-search" className="text-sm font-medium mb-2 block">Search competitions</label>
-        <Input id="competition-search" placeholder="Search by name, address, city, state, zip, program, hosting school" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        <Input id="competition-search" placeholder="Search by name, location, address, city, state, zip, program, hosting school" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
       </div>
 
       {isLoading ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
