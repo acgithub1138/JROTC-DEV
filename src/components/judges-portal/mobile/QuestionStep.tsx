@@ -78,7 +78,37 @@ export const QuestionStep = ({
         const penaltyDeduction = formatPenaltyDeduction(field, localValue);
         
         return <div className="space-y-4">
+            {/* Penalty Explanation */}
+            {field.penaltyType === 'points' && field.pointValue && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Each violation: {field.pointValue} points</p>
+              </div>
+            )}
+            {(field.penaltyType === 'split' || (field.splitFirstValue && field.splitSubsequentValue)) && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">
+                  1st occurrence: {field.splitFirstValue || -5} points | 2+ occurrences: {field.splitSubsequentValue || -25} points each
+                </p>
+              </div>
+            )}
+            {field.penaltyType === 'minor_major' && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Minor: -20 points | Major: -50 points</p>
+              </div>
+            )}
+            {field.type === 'penalty_checkbox' && field.penaltyValue && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Each penalty: {field.penaltyValue} points</p>
+              </div>
+            )}
+            {!field.penaltyType && field.penaltyValue && field.type === 'penalty' && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Penalty: {field.penaltyValue} points</p>
+              </div>
+            )}
+            
             <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue || ''} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base" />
+            
             {penaltyDeduction !== null && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
