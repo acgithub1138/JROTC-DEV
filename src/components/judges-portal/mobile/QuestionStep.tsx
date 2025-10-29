@@ -132,6 +132,69 @@ export const QuestionStep = ({
           );
         }
 
+        // Handle minor_major penalty type with dedicated UI
+        const penaltyDeduction = formatPenaltyDeduction(field, localValue);
+        
+        if (field.penaltyType === "minor_major") {
+          return (
+            <div className="space-y-4">
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Minor: -20 points | Major: -50 points</p>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <Card
+                  onClick={() => handleValueChange("minor")}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all touch-manipulation hover:border-primary",
+                    localValue === "minor" && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 shrink-0",
+                      localValue === "minor" ? "border-primary bg-primary" : "border-muted-foreground"
+                    )}>
+                      {localValue === "minor" && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-lg font-medium">Minor: -20</p>
+                  </div>
+                </Card>
+                <Card
+                  onClick={() => handleValueChange("major")}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all touch-manipulation hover:border-primary",
+                    localValue === "major" && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 shrink-0",
+                      localValue === "major" ? "border-primary bg-primary" : "border-muted-foreground"
+                    )}>
+                      {localValue === "major" && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-lg font-medium">Major: -50</p>
+                  </div>
+                </Card>
+              </div>
+              {penaltyDeduction !== null && (
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
+                  <p className="text-3xl font-bold text-destructive">{penaltyDeduction} points</p>
+                </div>
+              )}
+            </div>
+          );
+        }
+
         // If there are dropdown options/values, show as dropdown
         if (field.values && field.values.length > 0) {
           return (
@@ -168,9 +231,6 @@ export const QuestionStep = ({
         }
 
         // Otherwise, show numeric input for penalty count
-        // Use shared penalty calculation utility
-        const penaltyDeduction = formatPenaltyDeduction(field, localValue);
-
         const handleIncrement = () => {
           const currentValue = Number(localValue) || 0;
           handleValueChange(String(currentValue + 1));
@@ -197,11 +257,6 @@ export const QuestionStep = ({
                   1st occurrence: {field.splitFirstValue || -5} points | 2+ occurrences:{" "}
                   {field.splitSubsequentValue || -25} points each
                 </p>
-              </div>
-            )}
-            {field.penaltyType === "minor_major" && (
-              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-                <p className="text-sm font-medium text-destructive">Minor: -20 points | Major: -50 points</p>
               </div>
             )}
             {field.type === "penalty_checkbox" && field.penaltyValue && (
