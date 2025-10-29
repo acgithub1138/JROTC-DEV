@@ -11,10 +11,22 @@ export const AudioRecordingModeSelector = ({
   selectedMode,
   onModeChange
 }: AudioRecordingModeSelectorProps) => {
-  const modes: { value: AudioMode; label: string }[] = [
-    { value: 'none', label: 'None' },
-    { value: 'manual', label: 'Manual' },
-    { value: 'auto', label: 'Auto' }
+  const modes: { value: AudioMode; label: string; description: string }[] = [
+    { 
+      value: 'none', 
+      label: 'None',
+      description: 'No recording will be made'
+    },
+    { 
+      value: 'manual', 
+      label: 'Manual',
+      description: 'Recording will start when you tap the start button, you will be able to pause & start recording during judging'
+    },
+    { 
+      value: 'auto', 
+      label: 'Auto',
+      description: 'Recording will start automatically when you click >, you will be able to pause & start recording during judging'
+    }
   ];
 
   return (
@@ -36,6 +48,12 @@ export const AudioRecordingModeSelector = ({
           </Button>
         ))}
       </div>
+      
+      {selectedMode && (
+        <p className="mt-4 text-sm text-muted-foreground text-center px-4">
+          {modes.find(mode => mode.value === selectedMode)?.description}
+        </p>
+      )}
     </div>
   );
 };
