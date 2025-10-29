@@ -114,7 +114,7 @@ export const MyScoreSheetsWidget = () => {
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">
                     {sheet.event_name}
-                    {sheet.score_sheet?.judge_number && ` (Judge ${sheet.score_sheet.judge_number})`}
+                    {sheet.score_sheet?.judge_number && ` - (Judge ${sheet.score_sheet.judge_number})`}
                   </h3>
                   {sheet.school_name && <p className="font-semibold text-sm">{sheet.school_name}</p>}
                   <p className="text-xs text-muted-foreground">{sheet.competition_name}</p>
