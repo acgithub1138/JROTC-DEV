@@ -1,7 +1,7 @@
 import { Trophy, Calendar, MapPin, Building2, Search } from 'lucide-react';
 import { useAvailableCompetitions } from '@/hooks/judges-portal/useAvailableCompetitions';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
-import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +14,24 @@ export const JudgesOpenCompetitionsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const { competitions, isLoading, error } = useAvailableCompetitions();
-  const { judgeProfile } = useJudgeProfile();
-  const { applications, applyToCompetition, isApplying } = useJudgeApplications(judgeProfile?.id);
+  const [judgeId, setJudgeId] = useState<string | undefined>();
+  const { applications, applyToCompetition, isApplying } = useJudgeApplications(judgeId);
+  
+  // Get judge ID
+  useState(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabase
+          .from('cp_judges')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: judge }) => {
+            if (judge) setJudgeId(judge.id);
+          });
+      }
+    });
+  });
 
   const isAlreadyApplied = (competitionId: string) => {
     return applications.some(app => app.competition_id === competitionId);

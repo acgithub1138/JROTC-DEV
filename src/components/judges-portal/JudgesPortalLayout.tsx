@@ -10,7 +10,6 @@ import { JudgesOpenCompetitionsPage } from '@/pages/JudgesOpenCompetitionsPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { ApplyToCompetitionPage } from './ApplyToCompetitionPage';
 import { MyApplicationsPage } from './MyApplicationsPage';
-import { JudgeProfilePage } from './JudgeProfilePage';
 import { JudgeEventPage } from '@/pages/JudgeEventPage';
 import MobileJudgeEventPage from '@/pages/MobileJudgeEventPage';
 import { EditScoreSheetPage } from '@/pages/EditScoreSheetPage';
@@ -91,7 +90,6 @@ export const JudgesPortalLayout = () => {
             <Route path="competitions/:competitionId" element={<CompetitionDetailsPage />} />
             <Route path="competitions/:competitionId/apply" element={<ApplyToCompetitionPage />} />
             <Route path="applications" element={<MyApplicationsPage />} />
-            <Route path="profile" element={<JudgeProfilePage />} />
             <Route path="edit-score-sheet" element={<EditScoreSheetPage />} />
             <Route path="judge_event/:eventId" element={<JudgeEventPage />} />
             <Route path="m_judge_event/:eventId" element={<MobileJudgeEventPage />} />

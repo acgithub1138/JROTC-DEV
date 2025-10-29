@@ -2,8 +2,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Building2, AlertCircle } from 'lucide-react';
-import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,11 +20,27 @@ import { useState } from 'react';
 
 export const MyApplicationsPage = () => {
   const navigate = useNavigate();
-  const { judgeProfile, isLoading: profileLoading } = useJudgeProfile();
-  const { applications, isLoading, withdrawApplication, isWithdrawing } = useJudgeApplications(judgeProfile?.id);
+  const [judgeId, setJudgeId] = useState<string | undefined>();
+  const { applications, isLoading, withdrawApplication, isWithdrawing } = useJudgeApplications(judgeId);
   
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+  
+  // Get judge ID
+  useState(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabase
+          .from('cp_judges')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: judge }) => {
+            if (judge) setJudgeId(judge.id);
+          });
+      }
+    });
+  });
 
   const handleWithdrawClick = (applicationId: string) => {
     setSelectedApplicationId(applicationId);
@@ -61,26 +77,10 @@ export const MyApplicationsPage = () => {
     withdrawn: applications?.filter(app => app.status === 'withdrawn') || []
   };
 
-  if (profileLoading || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!judgeProfile) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Create Your Judge Profile</h2>
-          <p className="text-muted-foreground mb-4">
-            You need to create a judge profile before you can apply to competitions.
-          </p>
-          <Button onClick={() => navigate('/app/judges-portal/profile')}>
-            Create Profile
-          </Button>
-        </Card>
       </div>
     );
   }

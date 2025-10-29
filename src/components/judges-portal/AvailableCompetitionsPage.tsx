@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Calendar, MapPin, Building2, Filter } from 'lucide-react';
 import { useAvailableCompetitions } from '@/hooks/judges-portal/useAvailableCompetitions';
-import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,11 +14,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export const AvailableCompetitionsPage = () => {
   const navigate = useNavigate();
   const { competitions, isLoading } = useAvailableCompetitions();
-  const { judgeProfile } = useJudgeProfile();
-  const { applications } = useJudgeApplications(judgeProfile?.id);
+  const [judgeId, setJudgeId] = useState<string | undefined>();
+  const { applications } = useJudgeApplications(judgeId);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [programFilter, setProgramFilter] = useState<string>('all');
+  
+  // Get judge ID
+  useState(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabase
+          .from('cp_judges')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: judge }) => {
+            if (judge) setJudgeId(judge.id);
+          });
+      }
+    });
+  });
 
   // Get application status for a competition
   const getApplicationStatus = (competitionId: string) => {
@@ -58,21 +74,6 @@ export const AvailableCompetitionsPage = () => {
     );
   }
 
-  if (!judgeProfile) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Create Your Judge Profile</h2>
-          <p className="text-muted-foreground mb-4">
-            You need to create a judge profile before you can view and apply to competitions.
-          </p>
-          <Button onClick={() => navigate('/judges-portal/profile')}>
-            Create Profile
-          </Button>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,14 +7,30 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Building2, DollarSign, Users, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
-import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
 export const CompetitionDetailsPage = () => {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
-  const { judgeProfile } = useJudgeProfile();
-  const { applications } = useJudgeApplications(judgeProfile?.id);
+  const [judgeId, setJudgeId] = useState<string | undefined>();
+  const { applications } = useJudgeApplications(judgeId);
+  
+  // Get judge ID
+  useState(() => {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabaseClient
+          .from('cp_judges')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: judge }) => {
+            if (judge) setJudgeId(judge.id);
+          });
+      }
+    });
+  });
 
   const { data: competition, isLoading } = useQuery({
     queryKey: ['competition-details', competitionId],
@@ -96,7 +113,7 @@ export const CompetitionDetailsPage = () => {
               {applicationStatus && getStatusBadge(applicationStatus)}
             </div>
             
-            {!applicationStatus && judgeProfile && (
+            {!applicationStatus && judgeId && (
               <Button
                 size="lg"
                 onClick={() => navigate(`/app/judges-portal/competitions/${competitionId}/apply`)}

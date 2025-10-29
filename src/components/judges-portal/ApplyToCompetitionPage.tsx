@@ -7,17 +7,33 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft } from 'lucide-react';
-import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 export const ApplyToCompetitionPage = () => {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
-  const { judgeProfile } = useJudgeProfile();
-  const { applyToCompetition, isApplying } = useJudgeApplications(judgeProfile?.id);
+  const [judgeId, setJudgeId] = useState<string | null>(null);
+  const { applyToCompetition, isApplying } = useJudgeApplications(judgeId || undefined);
   
   const [availabilityNotes, setAvailabilityNotes] = useState('');
+  
+  // Get current user's judge ID
+  useState(() => {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabaseClient
+          .from('cp_judges')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+          .then(({ data: judge }) => {
+            if (judge) setJudgeId(judge.id);
+          });
+      }
+    });
+  });
 
   const { data: competition, isLoading } = useQuery({
     queryKey: ['competition-details', competitionId],
@@ -37,10 +53,10 @@ export const ApplyToCompetitionPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!judgeProfile || !competitionId) return;
+    if (!judgeId || !competitionId) return;
 
     applyToCompetition({
-      judgeId: judgeProfile.id,
+      judgeId,
       competitionId,
       availabilityNotes: availabilityNotes.trim() || undefined
     }, {
@@ -71,23 +87,32 @@ export const ApplyToCompetitionPage = () => {
     );
   }
 
-  if (!judgeProfile) {
+  const { data: judgeData } = useQuery({
+    queryKey: ['judge-info', judgeId],
+    queryFn: async () => {
+      if (!judgeId) return null;
+      const { data, error } = await supabase
+        .from('cp_judges')
+        .select('*')
+        .eq('id', judgeId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!judgeId
+  });
+
+  if (!judgeId || !judgeData) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Create Your Judge Profile First</h2>
+          <h2 className="text-xl font-semibold mb-4">Judge Profile Required</h2>
           <p className="text-muted-foreground mb-6">
-            You need to create a judge profile before you can apply to competitions. 
-            This helps competition organizers learn about your experience and availability.
+            Loading your profile...
           </p>
-          <div className="flex gap-3">
-            <Button onClick={() => navigate('/app/judges-portal/profile')}>
-              Create Profile
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/app/judges-portal/open-competitions')}>
-              Back to Competitions
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => navigate('/app/judges-portal/open-competitions')}>
+            Back to Competitions
+          </Button>
         </Card>
       </div>
     );
@@ -122,12 +147,12 @@ export const ApplyToCompetitionPage = () => {
           <div>
             <h3 className="font-semibold mb-3">Your Information</h3>
             <div className="bg-muted p-4 rounded-lg space-y-2">
-              <p><span className="font-medium">Name:</span> {judgeProfile.name}</p>
-              {judgeProfile.email && (
-                <p><span className="font-medium">Email:</span> {judgeProfile.email}</p>
+              <p><span className="font-medium">Name:</span> {judgeData.name}</p>
+              {judgeData.email && (
+                <p><span className="font-medium">Email:</span> {judgeData.email}</p>
               )}
-              {judgeProfile.phone && (
-                <p><span className="font-medium">Phone:</span> {judgeProfile.phone}</p>
+              {judgeData.phone && (
+                <p><span className="font-medium">Phone:</span> {judgeData.phone}</p>
               )}
             </div>
           </div>
