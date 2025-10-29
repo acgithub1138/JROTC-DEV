@@ -39,16 +39,23 @@ export const AudioRecordingControls = ({
         variant={isRecording ? "destructive" : "default"}
         size="lg"
         onClick={() => {
+          console.log('AudioRecordingControls click', { mode, recordingState });
           if (isRecording) {
+            console.log('Pausing recording');
             onPause();
           } else if (isPaused) {
+            console.log('Resuming recording');
             onResume();
           } else {
+            console.log('Starting recording');
             onStart();
           }
         }}
         className="w-16 h-16 rounded-full p-0"
+        aria-label={isRecording ? 'Pause recording' : (isPaused ? 'Resume recording' : 'Start recording')}
+        aria-pressed={isRecording}
       >
+
         {isRecording ? (
           <Pause className="h-6 w-6" />
         ) : (
