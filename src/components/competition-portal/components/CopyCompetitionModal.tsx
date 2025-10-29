@@ -135,7 +135,7 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
                     {startDate ? format(startDate, "MMM d, yyyy") : "Select date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0" align="start" side="bottom" avoidCollisions={false}>
                   <Calendar
                     mode="single"
                     selected={startDate}
@@ -163,13 +163,12 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
                     {endDate ? format(endDate, "MMM d, yyyy") : "Select date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0" align="start" side="bottom" avoidCollisions={false}>
                   <Calendar
                     mode="single"
                     selected={endDate}
                     onSelect={(date) => {
                       setEndDate(date);
-                      setShowEndCalendar(false);
                     }}
                     disabled={(date) => {
                       const minDate = startDate || new Date();
