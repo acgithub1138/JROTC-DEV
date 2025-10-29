@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useJudgeProfile } from '@/hooks/judges-portal/useJudgeProfile';
 import { getBranches, getRanksForBranch, MilitaryBranch } from '@/utils/militaryRanks';
 import { User, Mail, Phone, Check, Award, FileText } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 export const JudgeProfilePage = () => {
   const { judgeProfile, createProfile, updateProfile, isCreating, isUpdating } = useJudgeProfile();
@@ -23,17 +22,6 @@ export const JudgeProfilePage = () => {
     rank: '',
     bio: ''
   });
-
-  // Populate email from authenticated user on mount
-  useEffect(() => {
-    const getAuthEmail = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        setFormData(prev => ({ ...prev, email: user.email }));
-      }
-    };
-    getAuthEmail();
-  }, []);
 
   // Populate form when profile loads
   useEffect(() => {
