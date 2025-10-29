@@ -126,9 +126,9 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
-            {field.penaltyType === 'split' && field.splitFirstValue && field.splitSubsequentValue && (
+            {(field.penaltyType === 'split' || (field.splitFirstValue && field.splitSubsequentValue)) && (
               <p className="text-xs text-destructive">
-                1st occurrence: {field.splitFirstValue} points | 2+ occurrences: {field.splitSubsequentValue} each
+                1st occurrence: {field.splitFirstValue || -5} points | 2+ occurrences: {field.splitSubsequentValue || -25} each
               </p>
             )}
             <Textarea 
