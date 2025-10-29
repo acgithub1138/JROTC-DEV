@@ -26,26 +26,47 @@ export default function MobileJudgeEventPage() {
 
   const { eventDetails, registeredSchools, isLoading } = useJudgeEventDetails(eventId, competitionId);
 
-  // State management with session persistence
+  // State management with per-user localStorage persistence
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
-  const [selectedJudgeNumber, setSelectedJudgeNumber] = useState<string | null>(() => {
-    return sessionStorage.getItem('judgePortal_selectedJudgeNumber') || null;
-  });
+  const [selectedJudgeNumber, setSelectedJudgeNumber] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [audioMode, setAudioMode] = useState<AudioMode>(() => {
-    const saved = sessionStorage.getItem('judgePortal_audioMode');
-    return (saved as AudioMode) || 'none';
-  });
-  const [scoringMode, setScoringMode] = useState<ScoringMode>(() => {
-    const saved = sessionStorage.getItem('judgePortal_scoringMode');
-    return (saved as ScoringMode) || 'manual';
-  });
+  const [audioMode, setAudioMode] = useState<AudioMode>('none');
+  const [scoringMode, setScoringMode] = useState<ScoringMode>('manual');
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
-  // Audio recording
+  // Load user preferences from localStorage (keyed by user ID)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const storageKey = `judgePortal_${user.id}`;
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.judgeNumber) setSelectedJudgeNumber(settings.judgeNumber);
+        if (settings.audioMode) setAudioMode(settings.audioMode);
+        if (settings.scoringMode) setScoringMode(settings.scoringMode);
+      } catch (e) {
+        console.error('Failed to load judge portal settings:', e);
+      }
+    }
+  }, [user?.id]);
+
+  // Save preferences to localStorage when they change
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const storageKey = `judgePortal_${user.id}`;
+    const settings = {
+      judgeNumber: selectedJudgeNumber,
+      audioMode,
+      scoringMode
+    };
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  }, [selectedJudgeNumber, audioMode, scoringMode, user?.id]);
   const {
     recordingState,
     audioBlob,
@@ -66,21 +87,6 @@ export default function MobileJudgeEventPage() {
   useEffect(() => {
     audioBlobRef.current = audioBlob;
   }, [audioBlob]);
-
-  // Save preferences to sessionStorage when they change
-  useEffect(() => {
-    if (selectedJudgeNumber) {
-      sessionStorage.setItem('judgePortal_selectedJudgeNumber', selectedJudgeNumber);
-    }
-  }, [selectedJudgeNumber]);
-
-  useEffect(() => {
-    sessionStorage.setItem('judgePortal_audioMode', audioMode);
-  }, [audioMode]);
-
-  useEffect(() => {
-    sessionStorage.setItem('judgePortal_scoringMode', scoringMode);
-  }, [scoringMode]);
 
   // Handle audio mode change with permission request
   const handleAudioModeChange = async (mode: AudioMode) => {
