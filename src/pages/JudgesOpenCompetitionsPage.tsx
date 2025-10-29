@@ -114,18 +114,39 @@ export const JudgesOpenCompetitionsPage = () => {
                 <Card key={competition.id} className="flex flex-col">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-xl">{competition.name}</CardTitle>
-                      {applied && (
-                        <Badge variant={status === 'approved' ? 'default' : 'secondary'}>
-                          {status}
-                        </Badge>
-                      )}
+                      <div className="flex-1">
+                        <CardTitle className="text-xl">{competition.name}</CardTitle>
+                        {competition.description && (
+                          <CardDescription className="line-clamp-2 mt-1">
+                            {competition.description}
+                          </CardDescription>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {(competition as any).program && (
+                          <Badge 
+                            variant="secondary" 
+                            className="ml-2 text-white whitespace-nowrap"
+                            style={{
+                              backgroundColor: 
+                                (competition as any).program === 'air_force' ? '#003f87' :
+                                (competition as any).program === 'army' ? '#454B1B' :
+                                (competition as any).program === 'navy' ? '#000080' :
+                                (competition as any).program === 'marine_corps' ? '#940000' :
+                                undefined
+                            }}
+                          >
+                            <Trophy className="w-3 h-3 mr-1" />
+                            {(competition as any).program?.replace("_", " ").toUpperCase() || "N/A"}
+                          </Badge>
+                        )}
+                        {applied && (
+                          <Badge variant={status === 'approved' ? 'default' : 'secondary'}>
+                            {status}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    {competition.description && (
-                      <CardDescription className="line-clamp-2">
-                        {competition.description}
-                      </CardDescription>
-                    )}
                   </CardHeader>
                   <CardContent className="flex-1 space-y-3">
                     {competition.hosting_school && (
