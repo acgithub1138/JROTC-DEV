@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, AudioLines, Play, Pause } from 'lucide-react';
 import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
 import { useCompetitionTemplates } from '@/components/competition-management/hooks/useCompetitionTemplates';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,6 +20,8 @@ export const EditScoreSheetPage = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (!scoreSheetId) {
@@ -103,6 +105,37 @@ export const EditScoreSheetPage = () => {
   const scoreSheetData = scoreSheet?.score_sheet as any;
   const template = templates.find(t => t.id === scoreSheetData?.template_id);
   const judgeNumber = scoreSheetData?.judge_number || 'Unknown Judge';
+  const hasAudioRecording = scoreSheet?.judge_transcript;
+
+  const togglePlayback = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    const audio = audioRef.current;
+    const handleEnded = () => setIsPlaying(false);
+    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => setIsPlaying(true);
+    
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('play', handlePlay);
+    
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('play', handlePlay);
+    };
+  }, [hasAudioRecording]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -142,6 +175,38 @@ export const EditScoreSheetPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {hasAudioRecording && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AudioLines className="h-5 w-5" />
+              Judge Audio Recording
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={togglePlayback}
+              >
+                {isPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </Button>
+              <audio
+                ref={audioRef}
+                src={hasAudioRecording}
+                className="flex-1"
+                controls
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex justify-end gap-3">
         <Button
