@@ -155,7 +155,10 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
             </div>
             
             <div className="flex gap-1">
-              {canViewDetails}
+              {canViewDetails && <Button variant="outline" size="sm" className="flex-1" onClick={() => onViewDetails(competition.id)}>
+                  <Eye className="w-3 h-3 mr-1" />
+                  View
+                </Button>}
               {isRegistered(competition.id) ? <>
                   {canUpdate && <Button size="sm" className="flex-1" onClick={() => navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)}>
                       Edit
