@@ -4495,6 +4495,10 @@ export type Database = {
         Args: { action_name: string; module_name: string }
         Returns: boolean
       }
+      can_link_attachment_to_competition_event: {
+        Args: { _record_id: string; _school_id: string }
+        Returns: boolean
+      }
       can_manage_user_role: {
         Args: { target_role_name: string }
         Returns: boolean
