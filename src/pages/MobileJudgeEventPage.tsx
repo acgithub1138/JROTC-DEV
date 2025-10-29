@@ -107,6 +107,21 @@ export default function MobileJudgeEventPage() {
     );
   }, [fields]);
 
+  // Initialize penalty fields to 0
+  useEffect(() => {
+    if (questionFields.length > 0) {
+      const penaltyDefaults: Record<string, any> = {};
+      questionFields.forEach(field => {
+        if ((field.type === 'penalty' || field.type === 'penalty_checkbox') && answers[field.id] === undefined) {
+          penaltyDefaults[field.id] = 0;
+        }
+      });
+      if (Object.keys(penaltyDefaults).length > 0) {
+        setAnswers(prev => ({ ...penaltyDefaults, ...prev }));
+      }
+    }
+  }, [questionFields]); // Only run when questionFields change, not answers
+
   // Calculate total steps
   const totalSteps = 3 + questionFields.length; // confirmation + school + judge + questions
 
