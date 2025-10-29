@@ -85,7 +85,7 @@ export const AudioPlaybackControls = ({
           <Button type="button" variant="outline" onClick={() => setShowPlayback(!showPlayback)} className="h-12">
             <AudioLines className="h-5 w-5" />
           </Button>
-          <Button type="button" variant={isRecording ? "destructive" : "outline"} onClick={isRecording ? onPauseRecording : onContinueRecording} className="h-12">
+          <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={isRecording ? onPauseRecording : onContinueRecording} className="h-12">
             {isRecording ? <Pause className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </Button>
           <Button type="button" variant="outline" onClick={handleDelete} className="h-12 text-destructive hover:text-destructive">
