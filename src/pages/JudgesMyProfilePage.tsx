@@ -162,7 +162,7 @@ export const JudgesMyProfilePage = () => {
         <p className="text-muted-foreground">Your judge profile information</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -199,9 +199,10 @@ export const JudgesMyProfilePage = () => {
                       Cancel
                     </Button>
                     <Button
-                      type="submit"
+                      type="button"
                       size="sm"
                       disabled={isSaving}
+                      onClick={handleSubmit(onSubmit)}
                     >
                       <Save className="h-4 w-4 mr-2" />
                       {isSaving ? 'Saving...' : 'Save'}
@@ -350,7 +351,7 @@ export const JudgesMyProfilePage = () => {
             )}
           </CardContent>
         </Card>
-      </form>
+      </div>
     </div>
   );
 };
