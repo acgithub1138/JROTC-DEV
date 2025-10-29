@@ -27,7 +27,7 @@ export const JudgeNumberStep = ({
   
   return (
     <div className="h-screen bg-background flex flex-col">
-      <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
+      <div className="flex-1 p-6 flex flex-col justify-center overflow-hidden">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Select Judge Number</h1>
           <p className="text-muted-foreground">Choose your assigned judge number</p>

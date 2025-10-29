@@ -20,7 +20,7 @@ export const EventConfirmationStep = ({
 }: EventConfirmationStepProps) => {
   return (
     <div className="h-screen bg-background flex flex-col">
-      <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
+      <div className="flex-1 p-6 flex flex-col justify-center overflow-hidden">
         <div className="space-y-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Confirm Event</h1>
