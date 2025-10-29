@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useJudgeEventDetails } from '@/hooks/judges-portal/useJudgeEventDetails';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
@@ -49,6 +49,7 @@ export default function MobileJudgeEventPage() {
     stopRecording,
     deleteRecording,
   } = useAudioRecording(audioMode);
+  const hasPausedOnReviewRef = useRef(false);
 
   // Handle audio mode change with permission request
   const handleAudioModeChange = async (mode: AudioMode) => {
@@ -121,13 +122,19 @@ export default function MobileJudgeEventPage() {
     }
   }, [currentStep, audioMode, recordingState, startRecording]);
 
-  // On entering review step, pause once so judges can resume recording
+  // On entering review step, pause once; allow manual resume without re-pausing
   useEffect(() => {
-    if (currentStep === 3 + questionFields.length) {
-      // Always attempt to pause when landing on review; if already paused/idle, this is a no-op
+    const onReview = currentStep === 3 + questionFields.length;
+    if (onReview && !hasPausedOnReviewRef.current) {
+      console.log('[Audio] Pausing on review entry');
       pauseRecording();
+      hasPausedOnReviewRef.current = true;
     }
-  }, [currentStep, questionFields.length, pauseRecording]);
+    if (!onReview && hasPausedOnReviewRef.current) {
+      hasPausedOnReviewRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, questionFields.length]);
 
   // Handle navigation
   const handleNext = () => {
