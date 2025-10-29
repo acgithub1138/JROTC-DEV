@@ -8,11 +8,27 @@ export const useAudioRecording = (mode: AudioMode) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
+
+  const requestPermission = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop immediately, we just wanted permission
+      setHasPermission(true);
+      setError(null);
+      return true;
+    } catch (err) {
+      console.error('Microphone permission denied:', err);
+      setHasPermission(false);
+      setError('Microphone access denied. Please enable microphone permissions in your browser settings.');
+      return false;
+    }
+  }, []);
 
   const startRecording = useCallback(async () => {
     try {
@@ -116,6 +132,8 @@ export const useAudioRecording = (mode: AudioMode) => {
     audioBlob,
     duration,
     error,
+    hasPermission,
+    requestPermission,
     startRecording,
     pauseRecording,
     resumeRecording,

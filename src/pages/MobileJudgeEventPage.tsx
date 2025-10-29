@@ -41,12 +41,22 @@ export default function MobileJudgeEventPage() {
     audioBlob,
     duration: recordingDuration,
     error: recordingError,
+    hasPermission,
+    requestPermission,
     startRecording,
     pauseRecording,
     resumeRecording,
     stopRecording,
     deleteRecording,
   } = useAudioRecording(audioMode);
+
+  // Handle audio mode change with permission request
+  const handleAudioModeChange = async (mode: AudioMode) => {
+    setAudioMode(mode);
+    if (mode === 'manual' || mode === 'auto') {
+      await requestPermission();
+    }
+  };
 
   // Attachments for uploading audio
   const { uploadFile } = useAttachments('competition_event', createdEventId || '');
@@ -265,7 +275,7 @@ export default function MobileJudgeEventPage() {
           onPrevious={handlePrevious}
           isTransitioning={isTransitioning}
           audioMode={audioMode}
-          onAudioModeChange={setAudioMode}
+          onAudioModeChange={handleAudioModeChange}
         />
       )}
 
