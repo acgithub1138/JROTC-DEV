@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Edit2 } from "lucide-react";
 import { AudioRecordingControls } from "./AudioPlaybackControls";
+import type { AudioMode, RecordingState } from "@/hooks/useAudioRecording";
 import type { JsonField } from "@/components/competition-management/components/json-field-builder/types";
 import type { RecordingState } from "@/hooks/useAudioRecording";
 import { formatPenaltyDeduction } from "@/utils/scoreCalculations";
@@ -16,6 +17,7 @@ interface ReviewSubmitStepProps {
   onSubmit: () => void;
   onPrevious: () => void;
   audioBlob: Blob | null;
+  audioMode: AudioMode;
   recordingState: RecordingState;
   recordingDuration: number;
   onStartRecording: () => void;
@@ -32,6 +34,7 @@ export const ReviewSubmitStep = ({
   onSubmit,
   onPrevious,
   audioBlob,
+  audioMode,
   recordingState,
   recordingDuration,
   onStartRecording,
