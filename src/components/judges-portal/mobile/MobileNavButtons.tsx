@@ -46,10 +46,9 @@ export const MobileNavButtons = ({
               variant="outline"
               size="lg"
               onClick={onPrevious}
-              className="w-full h-14 text-base"
+              className="w-full h-14 text-base text-left"
             >
-              <ChevronLeft className="h-5 w-5 mr-2" />
-              Previous
+              < Prev
             </Button>
           )}
         </div>
@@ -70,10 +69,9 @@ export const MobileNavButtons = ({
               size="lg"
               onClick={onNext}
               disabled={nextDisabled}
-              className="w-full h-14 text-base"
+              className="w-full h-14 text-base text-right"
             >
-              {nextLabel}
-              <ChevronRight className="h-5 w-5 ml-2" />
+              {nextLabel} >
             </Button>
           )}
         </div>
