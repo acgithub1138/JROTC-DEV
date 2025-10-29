@@ -1,4 +1,4 @@
-export type MilitaryBranch = "Army" | "Navy" | "Marine Corps" | "Air Force" | "Space Force" | "Coast Guard";
+export type MilitaryBranch = "Air Force" | "Army" | "Coast Guard" | "Navy" | "Marine Corps" | "Space Force";
 
 export interface BranchRanks {
   branch: MilitaryBranch;
