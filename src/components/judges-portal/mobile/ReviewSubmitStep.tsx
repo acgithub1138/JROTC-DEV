@@ -2,8 +2,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Edit2 } from 'lucide-react';
+import { AudioPlaybackControls } from './AudioPlaybackControls';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
+
 interface ReviewSubmitStepProps {
   fields: JsonField[];
   answers: Record<string, any>;
@@ -12,6 +14,11 @@ interface ReviewSubmitStepProps {
   onEdit: (questionIndex: number) => void;
   onSubmit: () => void;
   onPrevious: () => void;
+  audioBlob: Blob | null;
+  isRecording: boolean;
+  onContinueRecording: () => void;
+  onPauseRecording: () => void;
+  onDeleteRecording: () => void;
 }
 export const ReviewSubmitStep = ({
   fields,
@@ -20,7 +27,12 @@ export const ReviewSubmitStep = ({
   isSubmitting,
   onEdit,
   onSubmit,
-  onPrevious
+  onPrevious,
+  audioBlob,
+  isRecording,
+  onContinueRecording,
+  onPauseRecording,
+  onDeleteRecording
 }: ReviewSubmitStepProps) => {
   // Filter out non-input fields for review
   const reviewFields = fields.filter(field => !['section_header', 'label', 'pause', 'bold_gray', 'calculated'].includes(field.type));
@@ -79,6 +91,15 @@ export const ReviewSubmitStep = ({
               </Card>;
         })}
         </div>
+
+        {/* Audio Playback Controls */}
+        <AudioPlaybackControls
+          audioBlob={audioBlob}
+          isRecording={isRecording}
+          onContinueRecording={onContinueRecording}
+          onPauseRecording={onPauseRecording}
+          onDelete={onDeleteRecording}
+        />
       </div>
 
       {/* Fixed Submit Button */}

@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useJudgeEventDetails } from '@/hooks/judges-portal/useJudgeEventDetails';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { useAudioRecording, type AudioMode } from '@/hooks/useAudioRecording';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,6 +21,7 @@ export default function MobileJudgeEventPage() {
   const [searchParams] = useSearchParams();
   const competitionId = searchParams.get('competitionId');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { eventDetails, registeredSchools, isLoading } = useJudgeEventDetails(eventId, competitionId);
 
@@ -28,6 +32,24 @@ export default function MobileJudgeEventPage() {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [audioMode, setAudioMode] = useState<AudioMode>('auto');
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
+
+  // Audio recording
+  const {
+    recordingState,
+    audioBlob,
+    duration: recordingDuration,
+    error: recordingError,
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+    stopRecording,
+    deleteRecording,
+  } = useAudioRecording(audioMode);
+
+  // Attachments for uploading audio
+  const { uploadFile } = useAttachments('competition_event', createdEventId || '');
 
   // Fetch template
   const { data: template } = useQuery({
@@ -82,6 +104,20 @@ export default function MobileJudgeEventPage() {
     }
   }, [currentStep, isTransitioning]);
 
+  // Auto-start recording on first question if mode is auto
+  useEffect(() => {
+    if (currentStep === 3 && audioMode === 'auto' && recordingState === 'idle') {
+      startRecording();
+    }
+  }, [currentStep, audioMode, recordingState, startRecording]);
+
+  // Auto-stop recording when moving to review
+  useEffect(() => {
+    if (currentStep === 3 + questionFields.length && (recordingState === 'recording' || recordingState === 'paused')) {
+      stopRecording();
+    }
+  }, [currentStep, questionFields.length, recordingState, stopRecording]);
+
   // Handle navigation
   const handleNext = () => {
     if (currentStep < totalSteps && !isTransitioning) {
@@ -119,7 +155,7 @@ export default function MobileJudgeEventPage() {
 
   // Handle submission
   const handleSubmit = async () => {
-    if (!selectedSchoolId || !eventDetails || !selectedJudgeNumber) {
+    if (!selectedSchoolId || !eventDetails || !selectedJudgeNumber || !user) {
       toast.error('Missing required information');
       return;
     }
@@ -127,7 +163,8 @@ export default function MobileJudgeEventPage() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Insert competition_events record
+      const { data: newEvent, error: eventError } = await supabase
         .from('competition_events')
         .insert([{
           school_id: selectedSchoolId,
@@ -143,9 +180,26 @@ export default function MobileJudgeEventPage() {
           },
           total_points: totalPoints,
           cadet_ids: []
-        }]);
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (eventError) throw eventError;
+
+      // Upload audio if exists
+      if (audioBlob && newEvent) {
+        const audioFile = new File(
+          [audioBlob],
+          `judge-${selectedJudgeNumber}-recording-${Date.now()}.webm`,
+          { type: 'audio/webm' }
+        );
+
+        await uploadFile({
+          record_type: 'competition_event',
+          record_id: newEvent.id,
+          file: audioFile
+        });
+      }
 
       toast.success('Score sheet submitted successfully!');
       navigate('/app/judges-portal');
@@ -210,6 +264,8 @@ export default function MobileJudgeEventPage() {
           onNext={handleNext}
           onPrevious={handlePrevious}
           isTransitioning={isTransitioning}
+          audioMode={audioMode}
+          onAudioModeChange={setAudioMode}
         />
       )}
 
@@ -227,6 +283,12 @@ export default function MobileJudgeEventPage() {
           isTransitioning={isTransitioning}
           currentStep={currentQuestionNumber}
           totalSteps={totalQuestions}
+          audioMode={audioMode}
+          recordingState={recordingState}
+          recordingDuration={recordingDuration}
+          onStartRecording={startRecording}
+          onPauseRecording={pauseRecording}
+          onResumeRecording={resumeRecording}
         />
       )}
 
@@ -240,6 +302,11 @@ export default function MobileJudgeEventPage() {
           onEdit={handleEdit}
           onSubmit={handleSubmit}
           onPrevious={handlePrevious}
+          audioBlob={audioBlob}
+          isRecording={recordingState === 'recording'}
+          onContinueRecording={resumeRecording}
+          onPauseRecording={pauseRecording}
+          onDeleteRecording={deleteRecording}
         />
       )}
     </div>

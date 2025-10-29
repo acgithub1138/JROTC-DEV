@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { MobileNavButtons } from './MobileNavButtons';
+import { AudioRecordingModeSelector } from './AudioRecordingModeSelector';
 import { cn } from '@/lib/utils';
+import type { AudioMode } from '@/hooks/useAudioRecording';
+
 interface JudgeNumberStepProps {
   judgeCount: number;
   selectedJudgeNumber: string | null;
@@ -8,6 +11,8 @@ interface JudgeNumberStepProps {
   onNext: () => void;
   onPrevious: () => void;
   isTransitioning?: boolean;
+  audioMode: AudioMode;
+  onAudioModeChange: (mode: AudioMode) => void;
 }
 export const JudgeNumberStep = ({
   judgeCount,
@@ -15,7 +20,9 @@ export const JudgeNumberStep = ({
   onSelect,
   onNext,
   onPrevious,
-  isTransitioning = false
+  isTransitioning = false,
+  audioMode,
+  onAudioModeChange
 }: JudgeNumberStepProps) => {
   const judges = Array.from({
     length: judgeCount
@@ -36,6 +43,11 @@ export const JudgeNumberStep = ({
               Judge {judge}
             </Button>)}
         </div>
+
+        <AudioRecordingModeSelector
+          selectedMode={audioMode}
+          onModeChange={onAudioModeChange}
+        />
       </div>
       
       <MobileNavButtons onNext={onNext} onPrevious={onPrevious} showPrevious nextDisabled={!selectedJudgeNumber || isTransitioning} />

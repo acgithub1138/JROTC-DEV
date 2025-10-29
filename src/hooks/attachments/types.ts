@@ -1,6 +1,6 @@
 export interface Attachment {
   id: string;
-  record_type: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event';
+  record_type: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event' | 'competition_event';
   record_id: string;
   file_name: string;
   file_path: string;
@@ -13,13 +13,13 @@ export interface Attachment {
 }
 
 export interface CreateAttachmentData {
-  record_type: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event';
+  record_type: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event' | 'competition_event';
   record_id: string;
   file: File;
 }
 
 export interface AttachmentListProps {
-  recordType: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event';
+  recordType: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction' | 'event' | 'competition_event';
   recordId: string;
   canEdit?: boolean;
 }

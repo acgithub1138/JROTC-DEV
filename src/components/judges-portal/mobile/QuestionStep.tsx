@@ -5,10 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { MobileNavButtons } from './MobileNavButtons';
 import { ScoreButtonGrid } from './ScoreButtonGrid';
+import { AudioRecordingControls } from './AudioRecordingControls';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
+import type { AudioMode, RecordingState } from '@/hooks/useAudioRecording';
 import { cn } from '@/lib/utils';
 import { formatPenaltyDeduction } from '@/utils/scoreCalculations';
 import { Plus, Minus } from 'lucide-react';
+
 interface QuestionStepProps {
   field: JsonField;
   value: any;
@@ -21,6 +24,12 @@ interface QuestionStepProps {
   isTransitioning?: boolean;
   currentStep?: number;
   totalSteps?: number;
+  audioMode: AudioMode;
+  recordingState: RecordingState;
+  recordingDuration: number;
+  onStartRecording: () => void;
+  onPauseRecording: () => void;
+  onResumeRecording: () => void;
 }
 export const QuestionStep = ({
   field,
@@ -33,7 +42,13 @@ export const QuestionStep = ({
   onPrevious,
   isTransitioning = false,
   currentStep,
-  totalSteps
+  totalSteps,
+  audioMode,
+  recordingState,
+  recordingDuration,
+  onStartRecording,
+  onPauseRecording,
+  onResumeRecording
 }: QuestionStepProps) => {
   const [localValue, setLocalValue] = useState(value);
   const [localNotes, setLocalNotes] = useState(notes);
@@ -221,12 +236,30 @@ export const QuestionStep = ({
           {renderScoreInput()}
         </div>
 
-        {/* Notes Area - reduced by 1/3 */}
+        {/* Notes Area - split into 2/3 notes + 1/3 audio controls */}
         <div className="px-4 py-4 border-t bg-muted/30 flex flex-col" style={{
         flex: '0.67'
       }}>
           <label className="block text-sm font-medium mb-2 shrink-0">Notes (Optional)</label>
-          <Textarea value={localNotes} onChange={e => handleNotesChange(e.target.value)} placeholder="Add notes..." className="flex-1 min-h-0 text-base resize-none" />
+          <div className="flex gap-3 flex-1 min-h-0">
+            <Textarea 
+              value={localNotes} 
+              onChange={e => handleNotesChange(e.target.value)} 
+              placeholder="Add notes..." 
+              className="flex-1 min-h-0 text-base resize-none" 
+              style={{ flex: '2' }}
+            />
+            <div style={{ flex: '1' }} className="flex items-center justify-center">
+              <AudioRecordingControls
+                mode={audioMode}
+                recordingState={recordingState}
+                duration={recordingDuration}
+                onStart={onStartRecording}
+                onPause={onPauseRecording}
+                onResume={onResumeRecording}
+              />
+            </div>
+          </div>
         </div>
       </div>
       
