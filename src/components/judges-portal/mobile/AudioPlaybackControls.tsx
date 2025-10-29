@@ -94,16 +94,6 @@ export const AudioPlaybackControls = ({
   return <>
       <Card className="p-4 mt-6">
         <h3 className="font-semibold mb-4 text-center">Audio Recording</h3>
-        
-        {/* Recording Duration */}
-        <div className="flex items-center justify-center gap-2 mb-4">
-          {isRecording && (
-            <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-          )}
-          <span className="text-sm font-medium tabular-nums">
-            {formatDuration(recordingDuration)}
-          </span>
-        </div>
 
         {/* Main Controls */}
         <div className="grid grid-cols-3 gap-3 mb-4">
@@ -129,6 +119,16 @@ export const AudioPlaybackControls = ({
           <Button type="button" variant="outline" onClick={handleDelete} className="h-12 text-destructive hover:text-destructive">
             <Trash2 className="h-5 w-5" />
           </Button>
+        </div>
+
+        {/* Recording Duration */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          {isRecording && (
+            <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+          )}
+          <span className="text-sm font-medium tabular-nums">
+            {formatDuration(recordingDuration)}
+          </span>
         </div>
 
         {/* Playback Controls */}
