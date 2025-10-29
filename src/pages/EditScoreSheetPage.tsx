@@ -8,6 +8,7 @@ import { ArrowLeft, Save, AudioLines, Play, Pause } from 'lucide-react';
 import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
 import { useCompetitionTemplates } from '@/components/competition-management/hooks/useCompetitionTemplates';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 export const EditScoreSheetPage = () => {
   const navigate = useNavigate();
@@ -21,8 +22,18 @@ export const EditScoreSheetPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const hasAudioRecording = scoreSheet?.judge_transcript;
+  
+  // Fetch attachments for this competition_event
+  const { attachments, isLoading: attachmentsLoading } = useAttachments(
+    'competition_event',
+    scoreSheetId || ''
+  );
+  
+  // Find audio attachment
+  const audioAttachment = attachments.find(att => att.file_type?.startsWith('audio/'));
+  const hasAudioRecording = scoreSheet?.judge_transcript || audioUrl;
 
   const togglePlayback = () => {
     if (!audioRef.current) return;
@@ -52,6 +63,16 @@ export const EditScoreSheetPage = () => {
       audio.removeEventListener('play', handlePlay);
     };
   }, [hasAudioRecording]);
+
+  // Load audio URL from attachment
+  useEffect(() => {
+    if (audioAttachment) {
+      const { data } = supabase.storage
+        .from('task-incident-attachments')
+        .getPublicUrl(audioAttachment.file_path);
+      setAudioUrl(data.publicUrl);
+    }
+  }, [audioAttachment]);
 
   useEffect(() => {
     if (!scoreSheetId) {
@@ -198,7 +219,7 @@ export const EditScoreSheetPage = () => {
               </Button>
               <audio
                 ref={audioRef}
-                src={hasAudioRecording}
+                src={audioUrl || scoreSheet?.judge_transcript}
                 className="flex-1"
                 controls
               />
