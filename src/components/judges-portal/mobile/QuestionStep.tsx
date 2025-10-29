@@ -132,6 +132,42 @@ export const QuestionStep = ({
           );
         }
 
+        // If there are dropdown options/values, show as dropdown
+        if (field.values && field.values.length > 0) {
+          return (
+            <div className="space-y-2">
+              {field.values.map((option) => (
+                <Card
+                  key={option}
+                  onClick={() => handleValueChange(option)}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all touch-manipulation",
+                    "hover:border-primary",
+                    localValue === option && "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2",
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "w-5 h-5 rounded-full border-2 shrink-0",
+                        localValue === option ? "border-primary bg-primary" : "border-muted-foreground",
+                      )}
+                    >
+                      {localValue === option && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-lg font-medium">{option}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          );
+        }
+
+        // Otherwise, show numeric input for penalty count
         // Use shared penalty calculation utility
         const penaltyDeduction = formatPenaltyDeduction(field, localValue);
 
