@@ -11,7 +11,7 @@ import { getBranches, getRanksForBranch, MilitaryBranch } from '@/utils/military
 import { User, Mail, Phone, Check, Award, FileText } from 'lucide-react';
 
 export const JudgeProfilePage = () => {
-  const { judgeProfile, createProfile, updateProfile, isCreating, isUpdating } = useJudgeProfile();
+  const { judgeProfile, createProfile, updateProfile, isCreating, isUpdating, isLoading, error } = useJudgeProfile();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -36,7 +36,7 @@ export const JudgeProfilePage = () => {
         bio: judgeProfile.bio || ''
       });
     }
-  }, [judgeProfile]);
+  }, [judgeProfile?.id, judgeProfile?.updated_at]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +68,19 @@ export const JudgeProfilePage = () => {
         </p>
       </div>
 
-      <Card className="p-6">
+      {isLoading && (
+        <Card className="p-6 mb-6">
+          <p>Loading profile...</p>
+        </Card>
+      )}
+
+      {error && (
+        <Card className="p-6 mb-6">
+          <p className="text-destructive">Failed to load profile</p>
+        </Card>
+      )}
+
+      <Card key={judgeProfile?.updated_at ?? judgeProfile?.id ?? 'new'} className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}
           <div className="space-y-2">
