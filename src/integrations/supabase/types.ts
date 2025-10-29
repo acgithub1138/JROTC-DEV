@@ -288,6 +288,7 @@ export type Database = {
           created_by: string | null
           event: string
           id: string
+          judge_transcript: string | null
           school_id: string
           score_sheet: Json
           source_competition_id: string | null
@@ -305,6 +306,7 @@ export type Database = {
           created_by?: string | null
           event: string
           id?: string
+          judge_transcript?: string | null
           school_id: string
           score_sheet?: Json
           source_competition_id?: string | null
@@ -322,6 +324,7 @@ export type Database = {
           created_by?: string | null
           event?: string
           id?: string
+          judge_transcript?: string | null
           school_id?: string
           score_sheet?: Json
           source_competition_id?: string | null
@@ -393,6 +396,13 @@ export type Database = {
             columns: ["competition_event_id"]
             isOneToOne: false
             referencedRelation: "competition_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_history_competition_event_id_fkey"
+            columns: ["competition_event_id"]
+            isOneToOne: false
+            referencedRelation: "judge_score_sheets_view"
             referencedColumns: ["id"]
           },
         ]
@@ -808,6 +818,7 @@ export type Database = {
           fee: number | null
           id: string
           interval: number | null
+          judges_needed: number | null
           location: string | null
           lunch_end_time: string | null
           lunch_start_time: string | null
@@ -831,6 +842,7 @@ export type Database = {
           fee?: number | null
           id?: string
           interval?: number | null
+          judges_needed?: number | null
           location?: string | null
           lunch_end_time?: string | null
           lunch_start_time?: string | null
@@ -854,6 +866,7 @@ export type Database = {
           fee?: number | null
           id?: string
           interval?: number | null
+          judges_needed?: number | null
           location?: string | null
           lunch_end_time?: string | null
           lunch_start_time?: string | null
@@ -4236,6 +4249,42 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      judge_score_sheets_view: {
+        Row: {
+          competition_end_date: string | null
+          competition_location: string | null
+          competition_name: string | null
+          competition_start_date: string | null
+          competition_status: string | null
+          created_at: string | null
+          created_by: string | null
+          event: string | null
+          event_name: string | null
+          id: string | null
+          school_id: string | null
+          school_initials: string | null
+          school_name: string | null
+          score_sheet: Json | null
+          source_competition_id: string | null
+          total_points: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
