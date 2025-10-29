@@ -125,11 +125,19 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-            {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+            {field.penaltyType === 'points' && field.pointValue && (
+              <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>
+            )}
             {(field.penaltyType === 'split' || (field.splitFirstValue && field.splitSubsequentValue)) && (
               <p className="text-xs text-destructive">
-                1st occurrence: {field.splitFirstValue || -5} points | 2+ occurrences: {field.splitSubsequentValue || -25} each
+                1st occurrence: {field.splitFirstValue || -5} points | 2+ occurrences: {field.splitSubsequentValue || -25} points each
               </p>
+            )}
+            {field.penaltyType === 'minor_major' && (
+              <p className="text-xs text-destructive">Minor: -20 points | Major: -50 points</p>
+            )}
+            {!field.penaltyType && field.penaltyValue && (
+              <p className="text-xs text-destructive">Penalty: {field.penaltyValue} points</p>
             )}
             <Textarea 
               id={`${field.id}_notes`}
