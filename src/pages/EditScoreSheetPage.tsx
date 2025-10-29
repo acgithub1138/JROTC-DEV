@@ -66,12 +66,23 @@ export const EditScoreSheetPage = () => {
 
   // Load audio URL from attachment
   useEffect(() => {
-    if (audioAttachment) {
-      const { data } = supabase.storage
-        .from('task-incident-attachments')
-        .getPublicUrl(audioAttachment.file_path);
-      setAudioUrl(data.publicUrl);
-    }
+    const loadAudioUrl = async () => {
+      if (audioAttachment) {
+        const { data, error } = await supabase.storage
+          .from('task-incident-attachments')
+          .createSignedUrl(audioAttachment.file_path, 3600); // 1 hour expiry
+        
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          return;
+        }
+        
+        console.log('Audio signed URL created:', data.signedUrl);
+        setAudioUrl(data.signedUrl);
+      }
+    };
+    
+    loadAudioUrl();
   }, [audioAttachment]);
 
   useEffect(() => {
