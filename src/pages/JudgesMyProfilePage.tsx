@@ -260,19 +260,20 @@ export const JudgesMyProfilePage = () => {
                         size="sm"
                         onClick={handleCancel}
                         disabled={isSaving}
-                        className="hover:bg-destructive/10 hover:border-destructive transition-all"
+                        className={`hover:bg-destructive/10 hover:border-destructive transition-all ${isMobile ? "px-2" : ""}`}
                       >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
+                        <X className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">Cancel</span>}
                       </Button>
                       <Button
                         type="button"
                         size="sm"
                         disabled={isSaving}
                         onClick={handleSubmit(onSubmit)}
+                        className={isMobile ? "px-2" : ""}
                       >
-                        <Save className="h-4 w-4 mr-2" />
-                        {isSaving ? "Saving..." : "Save Changes"}
+                        <Save className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">{isSaving ? "Saving..." : "Save Changes"}</span>}
                       </Button>
                     </>
                   )}
