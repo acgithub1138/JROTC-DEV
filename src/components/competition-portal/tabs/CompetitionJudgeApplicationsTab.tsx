@@ -157,7 +157,7 @@ export const CompetitionJudgeApplicationsTab = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-2">
+                  <div className="flex items-center gap-2">
                     {getStatusBadge(application.status)}
                     {application.status === 'pending' && (
                       <div className="flex gap-2">
