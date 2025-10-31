@@ -133,6 +133,13 @@
   }
 }
 
+/* Hide scrollbars in mobile view for judges portal */
+@media (max-width: 767px) {
+  html { scrollbar-width: none; } /* Firefox */
+  body { -ms-overflow-style: none; } /* IE and Edge */
+  body::-webkit-scrollbar, body::-webkit-scrollbar-button { display: none; } /* Chrome */
+}
+
 /* Print utility classes */
 .print-only {
   display: none;
