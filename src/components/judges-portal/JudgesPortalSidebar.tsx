@@ -57,7 +57,7 @@ export const JudgesPortalSidebar = ({
     }
   };
 
-  // Mobile view with dropdown menu
+  // Mobile view with dropdown card
   if (isMobile) {
     return (
       <>
@@ -65,60 +65,67 @@ export const JudgesPortalSidebar = ({
           <>
             {/* Backdrop */}
             <div 
-              className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
+              className="fixed inset-0 z-40"
               onClick={() => setSidebarOpen?.(false)}
             />
             
-            {/* Dropdown Menu */}
-            <div className="fixed top-16 left-0 right-0 z-50 bg-background border-b border-sidebar-border shadow-lg animate-fade-in">
-              <div className="p-4 border-b border-sidebar-border">
+            {/* Dropdown Card */}
+            <div className="fixed top-[4.5rem] left-4 right-4 z-50 bg-background rounded-xl shadow-xl border border-border animate-scale-in">
+              <div className="p-4 border-b border-border">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
                     <Gavel className="h-5 w-5 text-black" />
                   </div>
                   <div className="text-left">
-                    <div className="font-bold text-sidebar-foreground">Judges Portal</div>
-                    <div className="text-xs text-sidebar-foreground/60">Manage your judging</div>
+                    <div className="font-bold text-foreground">Judges Portal</div>
+                    <div className="text-xs text-muted-foreground">Manage your judging</div>
                   </div>
                 </div>
               </div>
 
-              <nav className="p-4 space-y-1">
+              <nav className="p-3 space-y-0.5">
                 {navItems.map(item => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href;
                   return (
-                    <Button 
-                      key={item.href} 
-                      variant={isActive ? "secondary" : "ghost"} 
-                      className="w-full justify-start" 
+                    <button
+                      key={item.href}
                       onClick={() => handleNavClick(item.href)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                        isActive 
+                          ? "bg-judge text-white" 
+                          : "text-foreground hover:bg-accent"
+                      }`}
                     >
-                      <Icon className="h-5 w-5 mr-3" />
-                      {item.title}
-                    </Button>
+                      <Icon className="h-5 w-5 shrink-0" />
+                      <span className="text-sm font-medium">{item.title}</span>
+                    </button>
                   );
                 })}
               </nav>
 
-              <div className="border-t border-sidebar-border">
-                {userProfile && (
-                  <div className="p-4 border-b border-sidebar-border">
-                    <div className="text-sm font-medium text-sidebar-foreground">
-                      {userProfile.last_name}, {userProfile.first_name}
-                    </div>
-                    <Badge variant="secondary" className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit mt-1`}>
-                      {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
-                      {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                    </Badge>
+              {userProfile && (
+                <div className="p-4 border-t border-border">
+                  <div className="text-sm font-medium text-foreground mb-1">
+                    {userProfile.last_name}, {userProfile.first_name}
                   </div>
-                )}
-                <div className="p-4">
-                  <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
-                    <LogOut className="h-5 w-5 mr-3" />
-                    Sign Out
-                  </Button>
+                  <Badge variant="secondary" className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit`}>
+                    {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
+                    <span className="text-xs">
+                      {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
+                  </Badge>
                 </div>
+              )}
+
+              <div className="p-3 border-t border-border">
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-foreground hover:bg-accent transition-colors"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" />
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
               </div>
             </div>
           </>
