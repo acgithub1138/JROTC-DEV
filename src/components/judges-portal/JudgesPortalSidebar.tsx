@@ -3,6 +3,7 @@ import { Gavel, LogOut, LayoutDashboard, Trophy, FileText, User } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,72 +58,52 @@ export const JudgesPortalSidebar = ({
     }
   };
 
-  // Mobile view with simple dropdown list
+  // Mobile view with Sheet
   if (isMobile) {
-    return (
-      <>
-        {sidebarOpen && (
-          <>
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 z-40"
-              onClick={() => setSidebarOpen?.(false)}
-            />
-            
-            {/* Dropdown Card */}
-            <div className="fixed top-[4.5rem] left-4 right-4 z-50 bg-background rounded-xl shadow-xl border border-border animate-scale-in overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center">
-                    <Gavel className="h-5 w-5 text-black" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground">Judges Portal</div>
-                  </div>
-                </div>
+    return <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="p-6 border-b border-sidebar-border">
+            <SheetTitle className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
+                <Gavel className="h-5 w-5 text-black" />
               </div>
-
-              <div className="py-2">
-                {navItems.map(item => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.href;
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => handleNavClick(item.href)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                        isActive 
-                          ? "bg-judge/10 text-judge border-l-4 border-judge" 
-                          : "text-foreground hover:bg-accent"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </button>
-                  );
-                })}
+              <div className="text-left">
+                <div className="font-bold text-sidebar-foreground">Judges Portal</div>
                 
-                <button
-                  onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>Sign Out</span>
-                </button>
               </div>
+            </SheetTitle>
+          </SheetHeader>
 
-              {userProfile && (
-                <div className="px-4 py-3 border-t border-border bg-accent/50">
-                  <div className="text-xs text-muted-foreground">
-                    {userProfile.last_name}, {userProfile.first_name}
-                  </div>
+          <nav className="p-4 space-y-1">
+            {navItems.map(item => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return <Button key={item.href} variant={isActive ? "secondary" : "ghost"} className="w-full justify-start" onClick={() => handleNavClick(item.href)}>
+                  <Icon className="h-5 w-5 mr-3" />
+                  {item.title}
+                </Button>;
+          })}
+          </nav>
+
+          <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border">
+            {userProfile && <div className="p-4 border-b border-sidebar-border">
+                <div className="text-sm font-medium text-sidebar-foreground">
+                  {userProfile.last_name}, {userProfile.first_name}
                 </div>
-              )}
+                <Badge variant="secondary" className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit mt-1`}>
+                  {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
+                  {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                </Badge>
+              </div>}
+            <div className="p-4">
+              <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </Button>
             </div>
-          </>
-        )}
-      </>
-    );
+          </div>
+        </SheetContent>
+      </Sheet>;
   }
 
   // Desktop view
