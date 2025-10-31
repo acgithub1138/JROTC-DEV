@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useForm, Controller } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Phone, Shield, User, Edit, X, Save } from "lucide-react";
 import { toast } from "sonner";
 const MILITARY_BRANCHES = ["Air Force", "Army", "Marine Corps", "Navy", "Coast Guard", "Space Force"];
@@ -97,6 +99,7 @@ interface JudgeProfile {
   user_id: string;
 }
 export const JudgesMyProfilePage = () => {
+  const isMobile = useIsMobile();
   const [profile, setProfile] = useState<JudgeProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -224,21 +227,29 @@ export const JudgesMyProfilePage = () => {
                 <div className="flex items-center gap-3">
                   {!isEditing ? (
                     <>
-                      <Badge
-                        variant={profile.available ? "default" : "secondary"}
-                        className="px-4 py-2 text-sm font-semibold shadow-sm"
-                      >
-                        {profile.available ? "✓ Available" : "○ Unavailable"}
-                      </Badge>
+                      {isMobile ? (
+                        <Checkbox 
+                          checked={profile.available} 
+                          disabled
+                          className="h-5 w-5"
+                        />
+                      ) : (
+                        <Badge
+                          variant={profile.available ? "default" : "secondary"}
+                          className="px-4 py-2 text-sm font-semibold shadow-sm"
+                        >
+                          {profile.available ? "✓ Available" : "○ Unavailable"}
+                        </Badge>
+                      )}
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => setIsEditing(true)}
-                        className="flex-1"
+                        className={isMobile ? "px-2" : "flex-1"}
                       >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Profile
+                        <Edit className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">Edit Profile</span>}
                       </Button>
                     </>
                   ) : (
