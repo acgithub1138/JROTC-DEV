@@ -65,7 +65,7 @@ export const MyAssignmentsWidget = () => {
         <CardTitle>My Assignments</CardTitle>
       </CardHeader>
       <CardContent>
-        <Accordion type="multiple" className="space-y-4">
+        <Accordion type="multiple" defaultValue={competitions.map(c => c.competition_id)} className="space-y-4">
           {competitions.map((competition) => (
             <AccordionItem 
               key={competition.competition_id} 
