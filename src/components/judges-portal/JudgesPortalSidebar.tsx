@@ -59,70 +59,39 @@ export const JudgesPortalSidebar = ({
 
   // Mobile view with simple dropdown list
   if (isMobile) {
-    return (
-      <>
-        {sidebarOpen && (
-          <>
+    return <>
+        {sidebarOpen && <>
             {/* Backdrop */}
-            <div 
-              className="fixed inset-0 z-40"
-              onClick={() => setSidebarOpen?.(false)}
-            />
+            <div className="fixed inset-0 z-40" onClick={() => setSidebarOpen?.(false)} />
             
             {/* Dropdown Card */}
             <div className="fixed top-[4.5rem] left-4 right-4 z-50 bg-background rounded-xl shadow-xl border border-border animate-scale-in overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center">
-                    <Gavel className="h-5 w-5 text-black" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground">Judges Portal</div>
-                  </div>
-                </div>
-              </div>
+              
 
               <div className="py-2">
                 {navItems.map(item => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.href;
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => handleNavClick(item.href)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                        isActive 
-                          ? "bg-judge/10 text-judge border-l-4 border-judge" 
-                          : "text-foreground hover:bg-accent"
-                      }`}
-                    >
+              const Icon = item.icon;
+              const isActive = location.pathname === item.href;
+              return <button key={item.href} onClick={() => handleNavClick(item.href)} className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${isActive ? "bg-judge/10 text-judge border-l-4 border-judge" : "text-foreground hover:bg-accent"}`}>
                       <Icon className="h-5 w-5" />
                       <span>{item.title}</span>
-                    </button>
-                  );
-                })}
+                    </button>;
+            })}
                 
-                <button
-                  onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
-                >
+                <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-accent transition-colors">
                   <LogOut className="h-5 w-5" />
                   <span>Sign Out</span>
                 </button>
               </div>
 
-              {userProfile && (
-                <div className="px-4 py-3 border-t border-border bg-accent/50">
+              {userProfile && <div className="px-4 py-3 border-t border-border bg-accent/50">
                   <div className="text-xs text-muted-foreground">
                     {userProfile.last_name}, {userProfile.first_name}
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
-          </>
-        )}
-      </>
-    );
+          </>}
+      </>;
   }
 
   // Desktop view
