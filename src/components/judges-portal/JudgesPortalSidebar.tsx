@@ -3,7 +3,7 @@ import { Gavel, LogOut, LayoutDashboard, Trophy, FileText, User } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,12 +58,12 @@ export const JudgesPortalSidebar = ({
     }
   };
 
-  // Mobile view with Sheet
+  // Mobile view with Drawer
   if (isMobile) {
-    return <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-64 p-0">
-          <SheetHeader className="p-6 border-b border-sidebar-border">
-            <SheetTitle className="flex items-center gap-3">
+    return <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <DrawerContent className="h-auto max-h-[80vh]">
+          <DrawerHeader className="border-b border-sidebar-border">
+            <DrawerTitle className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
                 <Gavel className="h-5 w-5 text-black" />
               </div>
@@ -71,8 +71,8 @@ export const JudgesPortalSidebar = ({
                 <div className="font-bold text-sidebar-foreground">Judges Portal</div>
                 <div className="text-xs text-sidebar-foreground/60">Manage your judging</div>
               </div>
-            </SheetTitle>
-          </SheetHeader>
+            </DrawerTitle>
+          </DrawerHeader>
 
           <nav className="p-4 space-y-1">
             {navItems.map(item => {
@@ -85,7 +85,7 @@ export const JudgesPortalSidebar = ({
           })}
           </nav>
 
-          <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border">
+          <div className="border-t border-sidebar-border">
             {userProfile && <div className="p-4 border-b border-sidebar-border">
                 <div className="text-sm font-medium text-sidebar-foreground">
                   {userProfile.last_name}, {userProfile.first_name}
@@ -102,8 +102,8 @@ export const JudgesPortalSidebar = ({
               </Button>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>;
+        </DrawerContent>
+      </Drawer>;
   }
 
   // Desktop view
