@@ -259,11 +259,15 @@ const UserRecordPage = () => {
     
     setPasswordResetLoading(true);
     try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          userId,
+          newPassword
+        }
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast({
         title: "Success",
@@ -277,7 +281,7 @@ const UserRecordPage = () => {
       console.error('Error resetting password:', error);
       toast({
         title: "Error",
-        description: "Failed to reset password",
+        description: error instanceof Error ? error.message : "Failed to reset password",
         variant: "destructive"
       });
     } finally {
