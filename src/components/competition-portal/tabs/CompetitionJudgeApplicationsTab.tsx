@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Mail, Phone, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSchoolJudgeApplications } from '@/hooks/judges-portal/useSchoolJudgeApplications';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -160,23 +161,31 @@ export const CompetitionJudgeApplicationsTab = ({
                     {getStatusBadge(application.status)}
                     {application.status === 'pending' && (
                       <div className="flex gap-2">
-                        <Button 
-                          size="sm"
-                          onClick={() => handleApproveClick(application)} 
-                          disabled={isApproving}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button 
-                          size="sm"
-                          variant="destructive" 
-                          onClick={() => handleDeclineClick(application)} 
-                          disabled={isDeclining}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Decline
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              size="icon"
+                              onClick={() => handleApproveClick(application)} 
+                              disabled={isApproving}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Approve</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              size="icon"
+                              variant="destructive" 
+                              onClick={() => handleDeclineClick(application)} 
+                              disabled={isDeclining}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Decline</TooltipContent>
+                        </Tooltip>
                       </div>
                     )}
                   </div>
