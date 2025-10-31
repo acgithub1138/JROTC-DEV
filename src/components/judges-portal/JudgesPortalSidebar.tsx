@@ -57,7 +57,7 @@ export const JudgesPortalSidebar = ({
     }
   };
 
-  // Mobile view with dropdown card
+  // Mobile view with simple dropdown list
   if (isMobile) {
     return (
       <>
@@ -70,20 +70,19 @@ export const JudgesPortalSidebar = ({
             />
             
             {/* Dropdown Card */}
-            <div className="fixed top-[4.5rem] left-4 right-4 z-50 bg-background rounded-xl shadow-xl border border-border animate-scale-in">
+            <div className="fixed top-[4.5rem] left-4 right-4 z-50 bg-background rounded-xl shadow-xl border border-border animate-scale-in overflow-hidden">
               <div className="p-4 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center">
                     <Gavel className="h-5 w-5 text-black" />
                   </div>
-                  <div className="text-left">
-                    <div className="font-bold text-foreground">Judges Portal</div>
-                    <div className="text-xs text-muted-foreground">Manage your judging</div>
+                  <div>
+                    <div className="font-semibold text-foreground">Judges Portal</div>
                   </div>
                 </div>
               </div>
 
-              <nav className="p-3 space-y-0.5">
+              <div className="py-2">
                 {navItems.map(item => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href;
@@ -91,42 +90,34 @@ export const JudgesPortalSidebar = ({
                     <button
                       key={item.href}
                       onClick={() => handleNavClick(item.href)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                         isActive 
-                          ? "bg-judge text-white" 
+                          ? "bg-judge/10 text-judge border-l-4 border-judge" 
                           : "text-foreground hover:bg-accent"
                       }`}
                     >
-                      <Icon className="h-5 w-5 shrink-0" />
-                      <span className="text-sm font-medium">{item.title}</span>
+                      <Icon className="h-5 w-5" />
+                      <span>{item.title}</span>
                     </button>
                   );
                 })}
-              </nav>
-
-              {userProfile && (
-                <div className="p-4 border-t border-border">
-                  <div className="text-sm font-medium text-foreground mb-1">
-                    {userProfile.last_name}, {userProfile.first_name}
-                  </div>
-                  <Badge variant="secondary" className={`${getRoleColor(userProfile.user_roles?.role_name || userProfile.role)} flex items-center gap-1 w-fit`}>
-                    {getRoleIcon(userProfile.user_roles?.role_name || userProfile.role)}
-                    <span className="text-xs">
-                      {(userProfile.user_roles?.role_name || userProfile.role).replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                    </span>
-                  </Badge>
-                </div>
-              )}
-
-              <div className="p-3 border-t border-border">
+                
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-foreground hover:bg-accent transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
                 >
-                  <LogOut className="h-5 w-5 shrink-0" />
-                  <span className="text-sm font-medium">Sign Out</span>
+                  <LogOut className="h-5 w-5" />
+                  <span>Sign Out</span>
                 </button>
               </div>
+
+              {userProfile && (
+                <div className="px-4 py-3 border-t border-border bg-accent/50">
+                  <div className="text-xs text-muted-foreground">
+                    {userProfile.last_name}, {userProfile.first_name}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
