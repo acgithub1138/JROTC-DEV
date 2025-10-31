@@ -476,7 +476,6 @@ export const JudgesMyProfilePage = () => {
                           id="available"
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-judge"
                         />
                       )}
                     />
