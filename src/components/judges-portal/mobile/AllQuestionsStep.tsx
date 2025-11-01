@@ -563,6 +563,23 @@ export const AllQuestionsStep = ({
           );
         })}
 
+        {/* Audio Recording Controls for Manual mode - above notes */}
+        {audioMode === 'manual' && (
+          <Card className="p-4">
+            <div className="flex flex-col items-center gap-4">
+              <label className="text-sm font-medium">Audio Recording</label>
+              <AudioRecordingControls
+                mode={audioMode}
+                recordingState={recordingState}
+                duration={recordingDuration}
+                onStart={onStartRecording}
+                onPause={onPauseRecording}
+                onResume={onResumeRecording}
+              />
+            </div>
+          </Card>
+        )}
+
         {/* General Notes Section */}
         <Card className="p-4">
           <div className="space-y-3">
@@ -572,21 +589,6 @@ export const AllQuestionsStep = ({
               onChange={(e) => onValueChange('general_notes', e.target.value)}
               placeholder="Add general notes..."
               className="min-h-32 text-base resize-none"
-            />
-          </div>
-        </Card>
-
-        {/* Audio Recording Controls at bottom of list */}
-        <Card className="p-4">
-          <div className="flex flex-col items-center gap-4">
-            <label className="text-sm font-medium">Audio Recording</label>
-            <AudioRecordingControls
-              mode={audioMode}
-              recordingState={recordingState}
-              duration={recordingDuration}
-              onStart={onStartRecording}
-              onPause={onPauseRecording}
-              onResume={onResumeRecording}
             />
           </div>
         </Card>
