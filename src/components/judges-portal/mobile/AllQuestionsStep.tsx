@@ -539,6 +539,22 @@ export const AllQuestionsStep = ({
                     {/* Scoring Input */}
                     <div className="space-y-4">
                       {renderScoreInput(field)}
+                      
+                      {/* Next button for penalty fields */}
+                      {(field.type === 'penalty' || field.type === 'penalty_checkbox') && judgeNumber === '1' && (
+                        <div className="flex justify-end pt-2">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              expandNextQuestion(field.id);
+                            }}
+                            size="lg"
+                            className="min-w-[120px]"
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CollapsibleContent>
