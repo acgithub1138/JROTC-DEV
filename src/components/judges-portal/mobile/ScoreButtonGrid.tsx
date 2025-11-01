@@ -15,8 +15,8 @@ export const ScoreButtonGrid = ({
   startFrom = 0 
 }: ScoreButtonGridProps) => {
   // Calculate columns based on maxValue
-  // For 0-7: 2 columns, For 8+: 4 columns
-  const columns = maxValue <= 7 ? 2 : 4;
+  // For 0-7: 2 columns, For 8+: 6 columns
+  const columns = maxValue <= 7 ? 2 : 6;
   
   // Generate array of values from high to low
   const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => maxValue - i);
@@ -25,7 +25,7 @@ export const ScoreButtonGrid = ({
     <div 
       className={cn(
         "grid gap-2 w-full",
-        columns === 2 ? "grid-cols-2" : "grid-cols-4"
+        columns === 2 ? "grid-cols-2" : "grid-cols-6"
       )}
     >
       {values.map((value) => (
