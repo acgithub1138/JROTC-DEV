@@ -44,8 +44,13 @@ export const AllQuestionsStep = ({
   onPauseRecording,
   onResumeRecording,
 }: AllQuestionsStepProps) => {
-  // Track which questions are expanded - default all to collapsed
-  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  // Track which questions are expanded - default first question expanded
+  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(() => {
+    if (fields.length > 0) {
+      return new Set([fields[0].id]);
+    }
+    return new Set();
+  });
 
   const toggleQuestion = (fieldId: string) => {
     setExpandedQuestions(prev => {
@@ -59,10 +64,39 @@ export const AllQuestionsStep = ({
     });
   };
 
+  const expandNextQuestion = (currentFieldId: string) => {
+    const currentIndex = fields.findIndex(f => f.id === currentFieldId);
+    if (currentIndex !== -1 && currentIndex < fields.length - 1) {
+      const nextField = fields[currentIndex + 1];
+      setExpandedQuestions(new Set([nextField.id]));
+    } else {
+      // If this was the last question, collapse all
+      setExpandedQuestions(new Set());
+    }
+  };
+
   const renderScoreInput = (field: JsonField) => {
     const localValue = answers[field.id];
     const handleValueChange = (newValue: any) => {
       onValueChange(field.id, newValue);
+      
+      // Auto-advance for fields that have single-tap selection
+      // Don't auto-advance for text fields or numeric penalty fields that need manual input
+      const shouldAutoAdvance = 
+        field.type === 'number' || 
+        field.type === 'dropdown' || 
+        field.type === 'scoring_scale' ||
+        (field.type === 'penalty' && field.penaltyType === 'minor_major') ||
+        (field.type === 'penalty_checkbox' && field.penaltyType === 'minor_major') ||
+        (field.type === 'penalty' && field.values && field.values.length > 0) ||
+        (field.type === 'penalty_checkbox' && field.values && field.values.length > 0);
+      
+      if (shouldAutoAdvance) {
+        // Small delay to show selection before collapsing
+        setTimeout(() => {
+          expandNextQuestion(field.id);
+        }, 300);
+      }
     };
 
     switch (field.type) {
