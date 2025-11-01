@@ -54,7 +54,7 @@ export const MobileNavButtons = ({
         {/* Right Section - Next Button */}
         <div>
           {onNext && (
-            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-14 text-base text Right">
+            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-14 text-base text-right">
               <ChevronRight className="h-5 w-5 ml-2" />
             </Button>
           )}
