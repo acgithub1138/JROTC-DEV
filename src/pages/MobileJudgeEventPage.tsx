@@ -16,7 +16,6 @@ import { ReviewSubmitStep } from '@/components/judges-portal/mobile/ReviewSubmit
 import { ProgressIndicator } from '@/components/judges-portal/mobile/ProgressIndicator';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
 import { calculateTotalScore } from '@/utils/scoreCalculations';
-import type { ScoringMode } from '@/components/judges-portal/mobile/ScoringModeSelector';
 
 export default function MobileJudgeEventPage() {
   const { eventId } = useParams();
@@ -40,7 +39,6 @@ export default function MobileJudgeEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [audioMode, setAudioMode] = useState<AudioMode>('none');
-  const [scoringMode, setScoringMode] = useState<ScoringMode>('manual');
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   // Load user preferences from localStorage (keyed by user ID)
@@ -54,7 +52,6 @@ export default function MobileJudgeEventPage() {
         const settings = JSON.parse(saved);
         if (settings.judgeNumber) setSelectedJudgeNumber(settings.judgeNumber);
         if (settings.audioMode) setAudioMode(settings.audioMode);
-        if (settings.scoringMode) setScoringMode(settings.scoringMode);
       } catch (e) {
         console.error('Failed to load judge portal settings:', e);
       }
@@ -68,11 +65,10 @@ export default function MobileJudgeEventPage() {
     const storageKey = `judgePortal_${user.id}`;
     const settings = {
       judgeNumber: selectedJudgeNumber,
-      audioMode,
-      scoringMode
+      audioMode
     };
     localStorage.setItem(storageKey, JSON.stringify(settings));
-  }, [selectedJudgeNumber, audioMode, scoringMode, user?.id]);
+  }, [selectedJudgeNumber, audioMode, user?.id]);
   const {
     recordingState,
     audioBlob,
@@ -218,20 +214,6 @@ export default function MobileJudgeEventPage() {
   // Handle answer changes
   const handleValueChange = (fieldId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
-    
-    // Auto-advance if in auto mode and we're on a question step
-    // BUT skip auto-advance for penalty fields (they need manual confirmation)
-    if (scoringMode === 'auto' && currentStep > 2 && currentStep < 3 + questionFields.length) {
-      const currentField = questionFields[currentStep - 3];
-      const isPenaltyField = currentField?.type === 'penalty' || currentField?.type === 'penalty_checkbox';
-      
-      if (!isPenaltyField) {
-        // Small delay to show selection before advancing
-        setTimeout(() => {
-          handleNext();
-        }, 150);
-      }
-    }
   };
 
   const handleNotesChange = (fieldId: string, notes: string) => {
@@ -392,8 +374,6 @@ export default function MobileJudgeEventPage() {
           isTransitioning={isTransitioning}
           audioMode={audioMode}
           onAudioModeChange={handleAudioModeChange}
-          scoringMode={scoringMode}
-          onScoringModeChange={setScoringMode}
         />
       )}
 
