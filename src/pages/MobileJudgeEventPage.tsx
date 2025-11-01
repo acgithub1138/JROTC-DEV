@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { EventConfirmationStep } from '@/components/judges-portal/mobile/EventConfirmationStep';
 import { SchoolSelectionStep } from '@/components/judges-portal/mobile/SchoolSelectionStep';
 import { JudgeNumberStep } from '@/components/judges-portal/mobile/JudgeNumberStep';
-import { QuestionStep } from '@/components/judges-portal/mobile/QuestionStep';
+import { AllQuestionsStep } from '@/components/judges-portal/mobile/AllQuestionsStep';
 import { ReviewSubmitStep } from '@/components/judges-portal/mobile/ReviewSubmitStep';
 import { ProgressIndicator } from '@/components/judges-portal/mobile/ProgressIndicator';
 import type { JsonField } from '@/components/competition-management/components/json-field-builder/types';
@@ -153,8 +153,8 @@ export default function MobileJudgeEventPage() {
     }
   }, [questionFields]); // Only run when questionFields change, not answers
 
-  // Calculate total steps
-  const totalSteps = 3 + questionFields.length; // confirmation + school + judge + questions
+  // Calculate total steps - now all questions are on one page
+  const totalSteps = 4; // confirmation + school + judge + all questions + review
 
   // Calculate total points (including penalties) using shared utility
   const totalPoints = useMemo(() => {
@@ -169,7 +169,7 @@ export default function MobileJudgeEventPage() {
     }
   }, [currentStep, isTransitioning]);
 
-  // Auto-start recording on first question if mode is auto
+  // Auto-start recording on questions step if mode is auto
   useEffect(() => {
     if (currentStep === 3 && audioMode === 'auto' && recordingState === 'idle') {
       startRecording();
@@ -178,7 +178,7 @@ export default function MobileJudgeEventPage() {
 
   // On entering review step, pause once; allow manual resume without re-pausing
   useEffect(() => {
-    const onReview = currentStep === 3 + questionFields.length;
+    const onReview = currentStep === 4; // Now review is step 4
     if (onReview && !hasPausedOnReviewRef.current) {
       console.log('[Audio] Pausing on review entry');
       pauseRecording();
@@ -188,7 +188,7 @@ export default function MobileJudgeEventPage() {
       hasPausedOnReviewRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep, questionFields.length]);
+  }, [currentStep]);
 
   // Handle navigation
   const handleNext = () => {
@@ -220,9 +220,9 @@ export default function MobileJudgeEventPage() {
     setAnswers(prev => ({ ...prev, [`${fieldId}_notes`]: notes }));
   };
 
-  // Handle edit from review page
+  // Handle edit from review page - go back to questions page
   const handleEdit = (questionIndex: number) => {
-    setCurrentStep(3 + questionIndex); // 3 = confirmation + school + judge
+    setCurrentStep(3); // Go back to all questions step
   };
 
   // Utility to wait for a value to become available
@@ -326,14 +326,10 @@ export default function MobileJudgeEventPage() {
     );
   }
 
-  // Calculate current question number for display
-  const currentQuestionNumber = currentStep > 2 ? currentStep - 2 : 0;
-  const totalQuestions = questionFields.length;
-
   return (
     <div className="relative">
       {/* Points Counter - Top Right */}
-      {currentStep > 2 && currentStep <= 2 + questionFields.length && (
+      {currentStep === 3 && (
         <div className="fixed top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full text-base font-bold shadow-lg z-10">
           {totalPoints} pts
         </div>
@@ -377,20 +373,17 @@ export default function MobileJudgeEventPage() {
         />
       )}
 
-      {/* Steps 3+: Question Steps */}
-      {currentStep > 2 && currentStep < 3 + questionFields.length && (
-        <QuestionStep
-          field={questionFields[currentStep - 3]}
-          value={answers[questionFields[currentStep - 3].id]}
-          notes={answers[`${questionFields[currentStep - 3].id}_notes`] || ''}
+      {/* Step 3: All Questions */}
+      {currentStep === 3 && (
+        <AllQuestionsStep
+          fields={questionFields}
+          answers={answers}
           judgeNumber={selectedJudgeNumber || '1'}
-          onValueChange={(value) => handleValueChange(questionFields[currentStep - 3].id, value)}
-          onNotesChange={(notes) => handleNotesChange(questionFields[currentStep - 3].id, notes)}
+          onValueChange={handleValueChange}
+          onNotesChange={handleNotesChange}
           onNext={handleNext}
           onPrevious={handlePrevious}
           isTransitioning={isTransitioning}
-          currentStep={currentQuestionNumber}
-          totalSteps={totalQuestions}
           audioMode={audioMode}
           recordingState={recordingState}
           recordingDuration={recordingDuration}
@@ -400,8 +393,8 @@ export default function MobileJudgeEventPage() {
         />
       )}
 
-      {/* Final Step: Review & Submit */}
-      {currentStep === 3 + questionFields.length && (
+      {/* Step 4: Review & Submit */}
+      {currentStep === 4 && (
         <ReviewSubmitStep
           fields={questionFields}
           answers={answers}
