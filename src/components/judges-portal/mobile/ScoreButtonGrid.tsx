@@ -24,8 +24,8 @@ export const ScoreButtonGrid = ({
   return (
     <div 
       className={cn(
-        "grid gap-2 w-full",
-        columns === 2 ? "grid-cols-2" : "grid-cols-6"
+        "grid w-full",
+        columns === 2 ? "grid-cols-2 gap-3" : "grid-cols-6 gap-1.5"
       )}
     >
       {values.map((value) => (
@@ -36,7 +36,7 @@ export const ScoreButtonGrid = ({
           size="lg"
           onClick={() => onSelect(value)}
           className={cn(
-            "h-20 text-2xl font-bold touch-manipulation min-w-0",
+            "h-16 text-xl font-bold touch-manipulation min-w-0 px-2",
             selectedValue === value && "ring-2 ring-primary ring-offset-2"
           )}
         >
