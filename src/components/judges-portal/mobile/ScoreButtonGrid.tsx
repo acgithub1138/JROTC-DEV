@@ -36,7 +36,7 @@ export const ScoreButtonGrid = ({
           size="lg"
           onClick={() => onSelect(value)}
           className={cn(
-            "h-16 text-xl font-bold touch-manipulation min-w-0 px-2",
+            "h-11 text-xl font-bold touch-manipulation min-w-0 px-2",
             selectedValue === value && "ring-2 ring-primary ring-offset-2"
           )}
         >
