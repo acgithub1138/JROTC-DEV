@@ -45,12 +45,22 @@ export const SchoolSelectionStep = ({
             const isSubmitted = submittedSchoolIds.has(school.school_id);
             const isSelected = selectedSchoolId === school.school_id;
             
+            const handleSelect = () => {
+              if (!isSubmitted) {
+                onSelect(school.school_id);
+              }
+            };
+            
             return (
               <Card 
                 key={school.school_id} 
-                onClick={() => !isSubmitted && onSelect(school.school_id)} 
+                onClick={handleSelect}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleSelect();
+                }}
                 className={cn(
-                  "p-4 transition-all touch-manipulation",
+                  "p-4 transition-all touch-manipulation active:scale-[0.98]",
                   isSubmitted 
                     ? "opacity-60 cursor-not-allowed bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900/30"
                     : "cursor-pointer hover:border-primary",
