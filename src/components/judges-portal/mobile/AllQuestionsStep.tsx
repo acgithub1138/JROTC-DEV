@@ -519,7 +519,7 @@ export const AllQuestionsStep = ({
                       </div>
                       {isAnswered && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          Answered: {answers[field.id]}
+                          Score: {answers[field.id]}
                         </p>
                       )}
                     </div>
