@@ -18,7 +18,6 @@ interface AllQuestionsStepProps {
   answers: Record<string, any>;
   judgeNumber: string;
   onValueChange: (fieldId: string, value: any) => void;
-  onNotesChange: (fieldId: string, notes: string) => void;
   onNext: () => void;
   onPrevious: () => void;
   isTransitioning?: boolean;
@@ -35,7 +34,6 @@ export const AllQuestionsStep = ({
   answers,
   judgeNumber,
   onValueChange,
-  onNotesChange,
   onNext,
   onPrevious,
   isTransitioning = false,
@@ -454,23 +452,25 @@ export const AllQuestionsStep = ({
                     <div className="space-y-4">
                       {renderScoreInput(field)}
                     </div>
-
-                    {/* Notes for this question */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Notes (Optional)</label>
-                      <Textarea
-                        value={answers[`${field.id}_notes`] || ''}
-                        onChange={(e) => onNotesChange(field.id, e.target.value)}
-                        placeholder="Add notes for this question..."
-                        className="min-h-20 text-base resize-none"
-                      />
-                    </div>
                   </div>
                 </CollapsibleContent>
               </Card>
             </Collapsible>
           );
         })}
+
+        {/* General Notes Section */}
+        <Card className="p-4">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium">Notes (Optional)</label>
+            <Textarea
+              value={answers['general_notes'] || ''}
+              onChange={(e) => onValueChange('general_notes', e.target.value)}
+              placeholder="Add general notes..."
+              className="min-h-32 text-base resize-none"
+            />
+          </div>
+        </Card>
 
         {/* Audio Recording Controls at bottom of list */}
         <Card className="p-4">

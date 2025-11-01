@@ -380,7 +380,6 @@ export default function MobileJudgeEventPage() {
           answers={answers}
           judgeNumber={selectedJudgeNumber || '1'}
           onValueChange={handleValueChange}
-          onNotesChange={handleNotesChange}
           onNext={handleNext}
           onPrevious={handlePrevious}
           isTransitioning={isTransitioning}
