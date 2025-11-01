@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,10 @@ export const AllQuestionsStep = ({
     return new Set();
   });
 
+  // Refs for each question card to enable scrolling
+  const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
   const toggleQuestion = (fieldId: string) => {
     setExpandedQuestions(prev => {
       const next = new Set(prev);
@@ -69,9 +73,56 @@ export const AllQuestionsStep = ({
     if (currentIndex !== -1 && currentIndex < fields.length - 1) {
       const nextField = fields[currentIndex + 1];
       setExpandedQuestions(new Set([nextField.id]));
+      
+      // Scroll to show previous and current question
+      setTimeout(() => {
+        scrollToQuestion(nextField.id, currentIndex);
+      }, 100);
     } else {
-      // If this was the last question, collapse all
+      // If this was the last question, collapse all and scroll to bottom
       setExpandedQuestions(new Set());
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  };
+
+  const scrollToQuestion = (fieldId: string, currentIndex: number) => {
+    const questionElement = questionRefs.current[fieldId];
+    const container = scrollContainerRef.current;
+    
+    if (questionElement && container) {
+      // If not first question, try to show previous question too
+      if (currentIndex > 0) {
+        const prevFieldId = fields[currentIndex - 1].id;
+        const prevElement = questionRefs.current[prevFieldId];
+        
+        if (prevElement) {
+          // Scroll to previous element position
+          const containerTop = container.getBoundingClientRect().top;
+          const prevTop = prevElement.getBoundingClientRect().top;
+          const scrollOffset = prevTop - containerTop + container.scrollTop - 16; // 16px padding
+          
+          container.scrollTo({
+            top: scrollOffset,
+            behavior: 'smooth'
+          });
+          return;
+        }
+      }
+      
+      // Fallback: scroll to current question
+      questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const scrollToBottom = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -441,7 +492,7 @@ export const AllQuestionsStep = ({
       </div>
 
       {/* Questions List */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-28">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-28">
         {fields.map((field, index) => {
           const isAnswered = isFieldAnswered(field);
           const isExpanded = expandedQuestions.has(field.id);
@@ -452,10 +503,13 @@ export const AllQuestionsStep = ({
               open={isExpanded}
               onOpenChange={() => toggleQuestion(field.id)}
             >
-              <Card className={cn(
-                'overflow-hidden transition-all',
-                isAnswered && 'border-primary/50 bg-primary/5'
-              )}>
+              <Card 
+                ref={(el) => questionRefs.current[field.id] = el}
+                className={cn(
+                  'overflow-hidden transition-all',
+                  isAnswered && 'border-primary/50 bg-primary/5'
+                )}
+              >
                 <CollapsibleTrigger className="w-full">
                   <div className="p-4 flex items-center justify-between">
                     <div className="flex-1 text-left">
