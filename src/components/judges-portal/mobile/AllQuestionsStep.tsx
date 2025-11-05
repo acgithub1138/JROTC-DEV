@@ -359,8 +359,8 @@ export const AllQuestionsStep = ({
                     <div className="space-y-4">
                       {renderScoreInput(field)}
                       
-                      {/* Next button for penalty fields */}
-                      {(field.type === 'penalty' || field.type === 'penalty_checkbox') && judgeNumber === '1' && <div className="flex justify-end pt-2">
+                      {/* Next button for label and penalty fields */}
+                      {(field.type === 'label' || (field.type === 'penalty' || field.type === 'penalty_checkbox') && judgeNumber === '1') && <div className="flex justify-end pt-2">
                           <Button onClick={e => {
                       e.stopPropagation();
                       expandNextQuestion(field.id);
