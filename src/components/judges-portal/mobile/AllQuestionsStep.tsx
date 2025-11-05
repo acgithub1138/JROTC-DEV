@@ -88,7 +88,7 @@ export const AllQuestionsStep = ({
     if (questionElement && container) {
       // Only scroll after Q2 (when moving from Q2 to Q3 and beyond)
 
-      console.log("***AC_TEST: " & currentIndex);
+      console.log("***AC_TEST: " + currentIndex);
 
       if (currentIndex >= 1) {
         const prevFieldId = fields[currentIndex - 1].id;
