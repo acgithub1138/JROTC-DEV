@@ -328,7 +328,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                               <Button
                                 variant="outline"
                                 size="icon"
-                                className="h-6 w-6"
+                                className="h-8 w-8"
                                 title="View Scores"
                                 aria-label={`View score sheets for ${s.schoolName}`}
                                 onClick={() => {
@@ -345,7 +345,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                                 variant="outline"
                                 size="icon"
                                 title="Score Change History"
-                                className="h-6 w-6"
+                                className="h-8 w-8"
                                 aria-label={`View history for ${s.schoolName}`}
                                 onClick={() => openHistoryModal(s, group.event, group.eventId)}
                               >
