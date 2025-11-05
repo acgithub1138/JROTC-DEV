@@ -156,19 +156,30 @@ export const EventScheduleView = ({
                     </th>
                     {events.map(event => <th key={event.id} className="text-center p-4 min-w-[120px] py-[4px] px-[4px]">
                         <div className="flex flex-col items-center justify-center gap-1">
-                          <div className="font-medium text-sm whitespace-normal break-words w-full">
-                            {event.event_name}
-                          </div>
-                          {!readOnly && canUpdate && <Tooltip>
+                          {!readOnly && canUpdate ? (
+                            <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6 no-print">
-                                  <Edit className="h-3 w-3" />
-                                </Button>
+                                <button
+                                  onClick={() => handleEditEvent(event)}
+                                  className="font-medium text-sm whitespace-normal break-words w-full hover:text-primary transition-colors cursor-pointer no-print"
+                                >
+                                  {event.event_name}
+                                </button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Edit schedule for {event.event_name}</p>
+                                <p>Click to edit schedule</p>
                               </TooltipContent>
-                            </Tooltip>}
+                            </Tooltip>
+                          ) : (
+                            <div className="font-medium text-sm whitespace-normal break-words w-full">
+                              {event.event_name}
+                            </div>
+                          )}
+                          {event.event_location && (
+                            <div className="text-[10px] text-muted-foreground font-normal mt-1">
+                              {event.event_location}
+                            </div>
+                          )}
                         </div>
                       </th>)}
                   </tr>
