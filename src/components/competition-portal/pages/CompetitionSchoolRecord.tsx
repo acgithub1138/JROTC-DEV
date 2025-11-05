@@ -574,7 +574,7 @@ export const CompetitionSchoolRecord = () => {
                 </>}
 
               {/* Payment Status and Color - only for edit mode */}
-              {(isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              {(isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-center">
                     <Label className="text-left md:text-right font-semibold">Payment Status</Label>
                     <FormField control={form.control} name="paid" render={({
@@ -601,7 +601,7 @@ export const CompetitionSchoolRecord = () => {
                 </div>}
 
               {/* Event Selection - only for edit/view mode */}
-              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                   <Label className="text-base font-semibold">Registered Events</Label>
                   <div className="max-h-[300px] overflow-y-auto space-y-2 border rounded-md p-4 bg-background/50">
                     {availableEvents.map(event => <div key={event.id} className="flex items-center space-x-3">
@@ -623,7 +623,7 @@ export const CompetitionSchoolRecord = () => {
                   </div>
 
                   {/* Total Fee Display */}
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 py-[8px]">
                     <div className="space-y-2">
                       <Label className="text-base font-semibold">Fee Breakdown:</Label>
                       <div className="space-y-1 text-sm">
