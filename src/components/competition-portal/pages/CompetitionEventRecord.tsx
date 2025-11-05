@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -514,42 +514,63 @@ export const CompetitionEventRecord: React.FC = () => {
   }
   const pageTitle = isCreateMode ? 'Add Competition Event' : isEditMode ? 'Edit Competition Event' : 'View Competition Event';
   const canEditForm = isCreateMode && canCreate || isEditMode && canEdit;
-  return <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleBack} 
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
-          
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {pageTitle}
+            </h1>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {canEditForm && <>
-              
-              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>}
-              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center gap-2">
+              {isEditMode && canDelete && <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => setShowDeleteDialog(true)} 
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>}
+              <Button 
+                type="submit" 
+                form="event-form" 
+                disabled={isSaving} 
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+              >
                 <Save className="h-4 w-4" />
                 {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
               </Button>
             </>}
-
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>{pageTitle}</CardTitle>
+        <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+          <CardHeader className="border-b border-primary/10">
+            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
           </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="event" className="text-right">Event *</Label>
+                <Label htmlFor="event" className="text-left md:text-right font-semibold">Event *</Label>
                 <Select value={formData.event} onValueChange={value => setFormData(prev => ({
                   ...prev,
                   event: value
@@ -567,7 +588,7 @@ export const CompetitionEventRecord: React.FC = () => {
                 </Select>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
+                <Label htmlFor="score_sheet" className="text-left md:text-right font-semibold">Score Template *</Label>
                 <Select value={formData.score_sheet} onValueChange={async value => {
                   setFormData(prev => ({
                     ...prev,
@@ -603,16 +624,16 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Fee & Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="fee" className="text-right">Fee *</Label>
+                <Label htmlFor="fee" className="text-left md:text-right font-semibold">Fee *</Label>
                 <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
                   ...prev,
                   fee: e.target.value
                 }))} placeholder="Event fee" disabled={isViewMode} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="location" className="text-right">Location *</Label>
+                <Label htmlFor="location" className="text-left md:text-right font-semibold">Location *</Label>
                 <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
                   ...prev,
                   location: e.target.value
@@ -621,16 +642,16 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Interval & Max Participants */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
+                <Label htmlFor="interval" className="text-left md:text-right font-semibold">Interval (minutes) *</Label>
                 <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
                   ...prev,
                   interval: e.target.value
                 }))} placeholder="Interval in minutes" disabled={isViewMode} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
+                <Label htmlFor="max_participants" className="text-left md:text-right font-semibold">Max Participants *</Label>
                 <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
                   ...prev,
                   max_participants: e.target.value
@@ -639,8 +660,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Start Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label className="text-right">Start Date & Time *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
                   <Input type="date" value={formData.start_date} onChange={e => {
@@ -702,11 +723,11 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Lunch Start Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label></Label>
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+              <Label className="text-left md:text-right font-semibold">Lunch Break</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1 flex items-center justify-center">
-                  <Label>Lunch Start Time</Label>
+                  <Label className="text-sm font-medium">Start Time</Label>
                 </div>
                 <div>
                   <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
@@ -749,7 +770,7 @@ export const CompetitionEventRecord: React.FC = () => {
               <Label></Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1 flex items-center justify-center">
-                  <Label>Lunch End Time</Label>
+                  <Label className="text-sm font-medium">End Time</Label>
                 </div>
                 <div>
                   <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
@@ -788,8 +809,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label className="text-right">End Date & Time *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
                   <Input type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
@@ -837,8 +858,8 @@ export const CompetitionEventRecord: React.FC = () => {
 
 
             {/* Judges Needed */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="judges_needed" className="text-right">Judges Needed</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <Label htmlFor="judges_needed" className="text-left md:text-right font-semibold">Judges Needed</Label>
               <Input id="judges_needed" type="number" min="0" value={formData.judges_needed} onChange={e => setFormData(prev => ({
                 ...prev,
                 judges_needed: e.target.value
@@ -846,12 +867,12 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-              <Label htmlFor="notes" className="mt-2 text-right">Notes</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <Label htmlFor="notes" className="mt-2 text-left md:text-right font-semibold">Notes</Label>
               <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
                 ...prev,
                 notes: e.target.value
-              }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} />
+              }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} className="resize-none" />
             </div>
 
 
