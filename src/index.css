@@ -199,23 +199,38 @@
   .schedule-print-container table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 8px !important;
+    font-size: 7px !important;
     margin: 0 !important;
-    table-layout: fixed !important;
+    table-layout: auto !important;
+    page-break-inside: auto !important;
+  }
+  
+  .schedule-print-container thead {
+    display: table-header-group !important;
+  }
+  
+  .schedule-print-container tbody {
+    display: table-row-group !important;
+  }
+  
+  .schedule-print-container tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
   }
   
   .schedule-print-container th,
   .schedule-print-container td {
     border: 1px solid #000 !important;
-    padding: 3px 4px !important;
+    padding: 2px 3px !important;
     background: white !important;
     position: static !important;
     white-space: normal !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     text-align: center !important;
-    line-height: 1.2 !important;
+    line-height: 1.1 !important;
     vertical-align: middle !important;
+    max-width: 80px !important;
   }
   
   .schedule-print-container th {
@@ -225,8 +240,9 @@
   
   .schedule-print-container th:first-child,
   .schedule-print-container td:first-child {
-    width: 70px !important;
-    min-width: 70px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
     text-align: left !important;
   }
   
