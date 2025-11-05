@@ -296,33 +296,33 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left">
-                      <th className="px-3 py-2">Rank</th>
-                      <th className="px-3 py-2">School</th>
+                      <th className="px-3 py-2 w-20">Rank</th>
+                      <th className="px-3 py-2 min-w-[200px]">School</th>
                       {group.judgeNumbers.map((n) => (
-                        <th key={n} className="px-3 py-2">
+                        <th key={n} className="px-3 py-2 w-24">
                           Judge {n}
                         </th>
                       ))}
-                      <th className="px-3 py-2">Total</th>
-                      <th className="px-3 py-2 text-center">Actions</th>
+                      <th className="px-3 py-2 w-24">Total</th>
+                      <th className="px-3 py-2 w-28 text-center">Actions</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {group.schools.map((s, idx) => (
                       <tr key={s.schoolId} className="border-t">
-                        <td className="px-3 py-2">{idx + 1}</td>
-                        <td className="px-3 py-2">{s.schoolName}</td>
+                        <td className="px-3 py-2 w-20">{idx + 1}</td>
+                        <td className="px-3 py-2 min-w-[200px]">{s.schoolName}</td>
                         {group.judgeNumbers.map((n) => {
                           const js = s.judges.find((j) => j.judgeNumber === n);
                           return (
-                            <td key={n} className="px-3 py-2">
+                            <td key={n} className="px-3 py-2 w-24">
                               {js ? js.score : "-"}
                             </td>
                           );
                         })}
-                        <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 w-24 font-medium">{s.total.toFixed(1)}</td>
+                        <td className="px-3 py-2 w-28">
                           <div className="flex items-center justify-center gap-2">
                             {canViewDetails && (
                               <Button
