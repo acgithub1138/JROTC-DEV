@@ -86,8 +86,12 @@ export const AllQuestionsStep = ({
     const questionElement = questionRefs.current[fieldId];
     const container = scrollContainerRef.current;
     if (questionElement && container) {
-      // Only scroll after Q2 (when moving from Q2 to Q3 and beyond)
+      // Do not scroll when moving from Q1 to Q2
+      if (currentIndex === 0) {
+        return;
+      }
 
+      // Only scroll after Q2 (when moving from Q2 to Q3 and beyond)
       console.log("***AC_TEST: " + currentIndex);
 
       if (currentIndex >= 1) {
@@ -107,11 +111,13 @@ export const AllQuestionsStep = ({
         }
       }
 
-      // Fallback: scroll to current question
-      questionElement.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      // Fallback: scroll to current question (only when scrolling is enabled)
+      if (currentIndex >= 1) {
+        questionElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
     }
   };
   const scrollToBottom = () => {
