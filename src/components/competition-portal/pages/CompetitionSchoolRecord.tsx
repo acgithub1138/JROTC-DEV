@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as z from 'zod';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -433,26 +433,44 @@ export const CompetitionSchoolRecord = () => {
       </div>;
   }
   const pageTitle = isCreateMode ? 'Register School' : isEditMode ? 'Edit School Registration' : 'View School Registration';
-  return <div className="p-6 space-y-6">
-      {/* Header with Action Buttons */}
-      <div className="flex items-center justify-between">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleBack}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleBack}
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to Schools
           </Button>
-          
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <School className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {pageTitle}
+            </h1>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {canEdit && !isViewMode && <>
-              <Button type="button" variant="outline" onClick={handleBack}>
-                Cancel
-              </Button>
-              {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>}
-              <Button type="submit" form="school-form" disabled={isSubmitting}>
+              {canDelete && !isCreateMode && <Button 
+                variant="destructive" 
+                onClick={() => setShowDeleteDialog(true)}
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>}
+              <Button 
+                type="submit" 
+                form="school-form" 
+                disabled={isSubmitting}
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+              >
                 <Save className="h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
@@ -461,17 +479,17 @@ export const CompetitionSchoolRecord = () => {
       </div>
 
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>{pageTitle}</CardTitle>
+        <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+          <CardHeader className="border-b border-primary/10">
+            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
           </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form id="school-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Row 1: School and Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                  <Label className="text-right">School *</Label>
+                  <Label className="text-left md:text-right font-semibold">School *</Label>
                   <FormField control={form.control} name="school_id" render={({ field }) => (
                     <FormItem>
                       {isCreateMode ? (
@@ -511,7 +529,7 @@ export const CompetitionSchoolRecord = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                  <Label className="text-right">Status</Label>
+                  <Label className="text-left md:text-right font-semibold">Status</Label>
                   <FormField control={form.control} name="status" render={({
                     field
                   }) => <FormItem>
@@ -534,9 +552,9 @@ export const CompetitionSchoolRecord = () => {
 
               {/* New School Fields - Row 2 & 3: School Name/Initials, Contact Person/Email */}
               {form.watch('school_id') === 'not_listed' && isCreateMode && <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                      <Label className="text-right">School Name *</Label>
+                      <Label className="text-left md:text-right font-semibold">School Name *</Label>
                       <FormField control={form.control} name="new_school_name" render={({
                       field
                     }) => <FormItem>
@@ -548,7 +566,7 @@ export const CompetitionSchoolRecord = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                      <Label className="text-right">Initials</Label>
+                      <Label className="text-left md:text-right font-semibold">Initials</Label>
                       <FormField control={form.control} name="new_school_initials" render={({
                       field
                     }) => <FormItem>
@@ -560,9 +578,9 @@ export const CompetitionSchoolRecord = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                      <Label className="text-right">Contact Person</Label>
+                      <Label className="text-left md:text-right font-semibold">Contact Person</Label>
                       <FormField control={form.control} name="new_school_contact" render={({
                       field
                     }) => <FormItem>
@@ -574,7 +592,7 @@ export const CompetitionSchoolRecord = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                      <Label className="text-right">Email</Label>
+                      <Label className="text-left md:text-right font-semibold">Email</Label>
                       <FormField control={form.control} name="new_school_email" render={({
                       field
                     }) => <FormItem>
@@ -588,9 +606,9 @@ export const CompetitionSchoolRecord = () => {
                 </>}
 
               {/* Payment Status and Color - only for edit mode */}
-              {(isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-center">
-                    <Label className="text-right">Payment Status</Label>
+                    <Label className="text-left md:text-right font-semibold">Payment Status</Label>
                     <FormField control={form.control} name="paid" render={({
                     field
                   }) => <FormItem>
@@ -602,7 +620,7 @@ export const CompetitionSchoolRecord = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
-                    <Label className="text-right">Color</Label>
+                    <Label className="text-left md:text-right font-semibold">Color</Label>
                     <FormField control={form.control} name="color" render={({
                     field
                   }) => <FormItem>
@@ -615,9 +633,9 @@ export const CompetitionSchoolRecord = () => {
                 </div>}
 
               {/* Event Selection - only for edit/view mode */}
-              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && <div className="space-y-4">
-                  <Label className="text-base font-medium">Registered Events</Label>
-                  <div className="max-h-[300px] overflow-y-auto space-y-2 border rounded-md p-4">
+              {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+                  <Label className="text-base font-semibold">Registered Events</Label>
+                  <div className="max-h-[300px] overflow-y-auto space-y-2 border rounded-md p-4 bg-background/50">
                     {availableEvents.map(event => <div key={event.id} className="flex items-center space-x-3">
                         <Checkbox id={event.id} checked={selectedEvents.has(event.id)} onCheckedChange={checked => handleEventToggle(event.id, checked as boolean)} disabled={isViewMode} />
                         <Label htmlFor={event.id} className="flex-1 cursor-pointer">
@@ -637,9 +655,9 @@ export const CompetitionSchoolRecord = () => {
                   </div>
 
                   {/* Total Fee Display */}
-                  <div className="p-4 bg-muted/30 rounded-lg">
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
                     <div className="space-y-2">
-                      <Label className="text-base font-medium">Fee Breakdown:</Label>
+                      <Label className="text-base font-semibold">Fee Breakdown:</Label>
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
                           <span>Base Competition Fee:</span>
@@ -661,13 +679,13 @@ export const CompetitionSchoolRecord = () => {
                 </div>}
 
               {/* Notes (full width) - moved to bottom */}
-              <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start">
-                <Label className="text-right pt-2">Notes</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                <Label className="text-left md:text-right font-semibold pt-2">Notes</Label>
                 <FormField control={form.control} name="notes" render={({
                   field
                 }) => <FormItem>
                       <FormControl>
-                        <Textarea placeholder="Enter any notes" {...field} disabled={isViewMode} className="min-h-[100px]" />
+                        <Textarea placeholder="Enter any notes" {...field} disabled={isViewMode} className="min-h-[100px] resize-none" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
