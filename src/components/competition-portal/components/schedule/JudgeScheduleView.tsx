@@ -6,14 +6,20 @@ import { Printer } from 'lucide-react';
 import { useJudgeSchedule } from '@/hooks/competition-portal/useJudgeSchedule';
 import { convertToUI, getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-
 interface JudgeScheduleViewProps {
   competitionId: string;
 }
-
-export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => {
-  const { timeline, judgeAssignments, isLoading } = useJudgeSchedule(competitionId);
-  const { timezone } = useSchoolTimezone();
+export const JudgeScheduleView = ({
+  competitionId
+}: JudgeScheduleViewProps) => {
+  const {
+    timeline,
+    judgeAssignments,
+    isLoading
+  } = useJudgeSchedule(competitionId);
+  const {
+    timezone
+  } = useSchoolTimezone();
   const [selectedJudge, setSelectedJudge] = useState<string>('all');
 
   // Get unique judge names
@@ -34,53 +40,37 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
     if (selectedJudge === 'all') return true;
     return judgeName === selectedJudge;
   };
-
   const handlePrint = () => window.print();
 
   // Filter time slots based on selected judge
   const filteredTimeSlots = useMemo(() => {
     if (!timeline) return [];
     if (selectedJudge === 'all') return timeline.timeSlots;
-    
-    return timeline.timeSlots.filter(timeSlot =>
-      timeline.events.some(event => {
-        const judges = timeline.getJudgesForSlot(event.id, timeSlot);
-        return judges.some(judge => judge.name === selectedJudge);
-      })
-    );
+    return timeline.timeSlots.filter(timeSlot => timeline.events.some(event => {
+      const judges = timeline.getJudgesForSlot(event.id, timeSlot);
+      return judges.some(judge => judge.name === selectedJudge);
+    }));
   }, [timeline, selectedJudge]);
 
   // Get filtered judge assignments for individual print (must be before any early returns)
   const filteredJudgeAssignments = useMemo(() => {
     if (selectedJudge === 'all' || !judgeAssignments) return [];
-    return judgeAssignments
-      .filter(assignment => assignment.judge_name === selectedJudge)
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    return judgeAssignments.filter(assignment => assignment.judge_name === selectedJudge).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
   }, [judgeAssignments, selectedJudge]);
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
+    return <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-muted-foreground">Loading judge schedule...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!timeline || timeline.events.length === 0) {
-    return (
-      <div className="text-center p-8">
+    return <div className="text-center p-8">
         <p className="text-muted-foreground">No judge assignments found for this competition.</p>
-      </div>
-    );
+      </div>;
   }
-
-  
-
-  return (
-      <div className="schedule-print-container space-y-4">
+  return <div className="schedule-print-container space-y-4">
         {/* Print-only title */}
         <div className="print-only text-center mb-4">
           <h1 className="text-2xl font-bold">
@@ -102,9 +92,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
       		</SelectTrigger>
       		<SelectContent>
       			<SelectItem value="all">All Judges</SelectItem>
-      			{judgeNames.map(name => (
-      			<SelectItem key={name} value={name}>{name}</SelectItem>
-      			))}
+      			{judgeNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
       		</SelectContent>
       	</Select>
       	
@@ -126,70 +114,46 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                     Time Slots
                   </th>
                   {timeline.events.map(event => {
-                    // Get location from the first judge assignment for this event
-                    const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
-                    return (
-                      <th key={event.id} className="text-center p-4 min-w-[150px]">
+                  // Get location from the first judge assignment for this event
+                  const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
+                  return <th key={event.id} className="text-center p-4 min-w-[150px]">
                         <div className="font-medium text-sm truncate" title={event.name}>
                           {event.name}
                         </div>
-                        {eventLocation && (
-                          <div className="text-[10px] text-muted-foreground font-normal mt-1">
+                        {eventLocation && <div className="text-[10px] text-muted-foreground font-normal mt-1">
                             {eventLocation}
-                          </div>
-                        )}
-                      </th>
-                    );
-                  })}
+                          </div>}
+                      </th>;
+                })}
                 </tr>
               </thead>
               <tbody>
                 {filteredTimeSlots.map((timeSlot, index) => {
-                  const currentDateKey = getSchoolDateKey(timeSlot, timezone);
-                  const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
-                  const isNewDay = index === 0 || currentDateKey !== previousDateKey;
-
-                  return [
-                    isNewDay && (
-                      <tr key={`day-${index}`} className="bg-muted/50">
+                const currentDateKey = getSchoolDateKey(timeSlot, timezone);
+                const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
+                const isNewDay = index === 0 || currentDateKey !== previousDateKey;
+                return [isNewDay && <tr key={`day-${index}`} className="bg-muted/50">
                         <td colSpan={timeline.events.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
                           {convertToUI(timeSlot, timezone, 'date')}
                         </td>
-                      </tr>
-                    ),
-                    <tr
-                      key={timeSlot.toISOString()}
-                      className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
-                    >
+                      </tr>, <tr key={timeSlot.toISOString()} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
                         {convertToUI(timeSlot, timezone, 'time')}
                       </td>
                       {timeline.events.map(event => {
-                        const isEventActive = timeline.isEventActive(event.id, timeSlot);
-                        const judges = timeline.getJudgesForSlot(event.id, timeSlot);
-                        const filteredJudges = judges.filter(judge => shouldShowJudge(judge.name));
-                        
-                        return (
-                          <td key={event.id} className="p-2 text-center">
-                            {!isEventActive ? (
-                              <div className="text-muted-foreground/50 text-xs">-</div>
-                            ) : filteredJudges.length > 0 ? (
-                              <div className="text-xs text-foreground font-medium space-y-1">
-                                {filteredJudges.map((judge, idx) => (
-                                  <div key={idx}>
+                    const isEventActive = timeline.isEventActive(event.id, timeSlot);
+                    const judges = timeline.getJudgesForSlot(event.id, timeSlot);
+                    const filteredJudges = judges.filter(judge => shouldShowJudge(judge.name));
+                    return <td key={event.id} className="p-2 text-center">
+                            {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : filteredJudges.length > 0 ? <div className="text-xs text-foreground font-medium space-y-1">
+                                {filteredJudges.map((judge, idx) => <div key={idx} className="py-[4px]">
                                     {judge.name}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="text-muted-foreground text-xs">-</div>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ].filter(Boolean);
-                })}
+                                  </div>)}
+                              </div> : <div className="text-muted-foreground text-xs">-</div>}
+                          </td>;
+                  })}
+                    </tr>].filter(Boolean);
+              })}
               </tbody>
             </table>
           </div>
@@ -197,8 +161,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
       </Card>
 
       {/* Linear table for individual judge print */}
-      {selectedJudge !== 'all' && filteredJudgeAssignments.length > 0 && (
-        <div className="print-only">
+      {selectedJudge !== 'all' && filteredJudgeAssignments.length > 0 && <div className="print-only">
           <h2 className="text-xl font-bold mb-4">Judge Schedule – {selectedJudge}</h2>
           <table className="w-full border-collapse">
             <thead>
@@ -210,8 +173,7 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
               </tr>
             </thead>
             <tbody>
-              {filteredJudgeAssignments.map((assignment, index) => (
-                <tr key={assignment.id} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+              {filteredJudgeAssignments.map((assignment, index) => <tr key={assignment.id} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                   <td className="p-3">
                     {convertToUI(assignment.start_time, timezone, 'date')}
                   </td>
@@ -220,12 +182,9 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                   </td>
                   <td className="p-3">{assignment.event_name}</td>
                   <td className="p-3">{assignment.location || '-'}</td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
           </table>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
