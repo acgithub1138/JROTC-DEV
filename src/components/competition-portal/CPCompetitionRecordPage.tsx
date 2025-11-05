@@ -17,7 +17,6 @@ import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
 import { convertToUTC } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { supabase } from '@/integrations/supabase/client';
 interface FormData {
   name: string;
   description: string;
@@ -277,64 +276,8 @@ export const CPCompetitionRecordPage = () => {
         sop_text: formData.sop_text
       };
       if (isEditMode && competitionId) {
-        // Check if dates have changed to update event schedules
-        const oldStartDate = existingCompetition?.start_date ? new Date(existingCompetition.start_date) : null;
-        const oldEndDate = existingCompetition?.end_date ? new Date(existingCompetition.end_date) : null;
-        const newStartDate = new Date(startDateUTC);
-        const newEndDate = new Date(endDateUTC);
-        
-        const startDateChanged = oldStartDate && oldStartDate.getTime() !== newStartDate.getTime();
-        const endDateChanged = oldEndDate && oldEndDate.getTime() !== newEndDate.getTime();
-
         await updateCompetition(competitionId, submissionData);
-
-        // Update all event schedules if dates changed
-        if (startDateChanged || endDateChanged) {
-          try {
-            // Get all events for this competition with their current times
-            const { data: events, error: fetchError } = await supabase
-              .from('cp_comp_events')
-              .select('id, start_time, end_time')
-              .eq('competition_id', competitionId);
-
-            if (fetchError) throw fetchError;
-
-            if (events && events.length > 0) {
-              // Calculate the date shift in milliseconds
-              const dateShift = oldStartDate ? newStartDate.getTime() - oldStartDate.getTime() : 0;
-
-              // Update each event by shifting the date while preserving the time-of-day
-              for (const event of events) {
-                if (event.start_time && event.end_time) {
-                  const oldEventStart = new Date(event.start_time);
-                  const oldEventEnd = new Date(event.end_time);
-                  
-                  // Shift the dates while keeping the same time-of-day
-                  const newEventStart = new Date(oldEventStart.getTime() + dateShift);
-                  const newEventEnd = new Date(oldEventEnd.getTime() + dateShift);
-
-                  await supabase
-                    .from('cp_comp_events')
-                    .update({
-                      start_time: newEventStart.toISOString(),
-                      end_time: newEventEnd.toISOString(),
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('id', event.id);
-                }
-              }
-              
-              toast.success(`Competition and ${events.length} event schedule(s) updated successfully`);
-            } else {
-              toast.success('Competition updated successfully');
-            }
-          } catch (eventError) {
-            console.error('Error updating event schedules:', eventError);
-            toast.warning('Competition updated but some event schedules may need manual adjustment');
-          }
-        } else {
-          toast.success('Competition updated successfully');
-        }
+        toast.success('Competition updated successfully');
       } else {
         // Add school_id and created_by for new competitions
         const newCompetitionData = {
