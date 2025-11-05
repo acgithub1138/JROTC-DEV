@@ -70,48 +70,69 @@ const CompetitionDashboard = () => {
     icon: Target,
     color: 'text-purple-500'
   }];
-  return <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Competition Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of competition activities and performance metrics
-        </p>
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-8 space-y-8">
+      {/* Enhanced Header */}
+      <div className="relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-lg blur opacity-20" />
+        <div className="relative bg-background/80 backdrop-blur-sm border border-primary/20 rounded-lg p-6 shadow-lg">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Trophy className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Competition Dashboard
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-lg ml-14">
+            Overview of competition activities and performance metrics
+          </p>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {dashboardStats.map((stat, index) => <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+      {/* Stats Grid with Enhanced Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {dashboardStats.map((stat, index) => <Card key={index} className="group relative overflow-hidden border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-300">
+                <stat.icon className="h-5 w-5 text-primary" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="relative">
+              <div className="text-4xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent mb-1">
+                {stat.value}
+              </div>
+              <p className="text-sm text-muted-foreground">
                 {stat.description}
               </p>
             </CardContent>
           </Card>)}
       </div>
 
-      {/* Active Competition Widgets */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Active Competitions Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <RegisteredSchoolsWidget />
-          <EventsJudgesWidget />
-          <JudgesStatusWidget />
-          <ScoreSheetsWidget />
+      {/* Active Competition Widgets Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          <h2 className="text-2xl font-bold text-foreground">Active Competitions Overview</h2>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-
-        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="transition-all duration-300 hover:scale-[1.02]">
+            <RegisteredSchoolsWidget />
+          </div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
+            <EventsJudgesWidget />
+          </div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
+            <JudgesStatusWidget />
+          </div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
+            <ScoreSheetsWidget />
+          </div>
+        </div>
       </div>
     </div>;
 };

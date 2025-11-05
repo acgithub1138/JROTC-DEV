@@ -69,20 +69,24 @@ export const ScoreSheetsWidget = () => {
   });
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Score Sheets</CardTitle>
-        <FileText className="h-4 w-4 text-primary" />
+    <Card className="group relative overflow-hidden border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+        <CardTitle className="text-sm font-medium text-muted-foreground">Score Sheets</CardTitle>
+        <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-300">
+          <FileText className="h-4 w-4 text-primary" />
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">
+      <CardContent className="relative">
+        <div className="text-3xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
           {scoreSheetStats?.totalSubmitted ?? 0} / {scoreSheetStats?.totalNeeded ?? 0}
         </div>
-        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span>{scoreSheetStats?.uniqueEvents ?? 0} Events</span>
+          <span>•</span>
           <span>{scoreSheetStats?.uniqueSchools ?? 0} Schools</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">Submitted / Needed score sheets</p>
+        <p className="text-xs text-muted-foreground mt-2">Submitted / Needed</p>
       </CardContent>
     </Card>
   );

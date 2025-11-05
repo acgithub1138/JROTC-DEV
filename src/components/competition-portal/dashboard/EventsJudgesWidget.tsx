@@ -60,18 +60,28 @@ export const EventsJudgesWidget = () => {
   });
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Events Overview</CardTitle>
-        <Calendar className="h-4 w-4 text-primary" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{eventStats?.totalEvents ?? 0}</div>
-        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-          <span>Judges Needed: {eventStats?.totalJudgesNeeded ?? 0}</span>
-          <span>Registrations: {eventStats?.totalRegistrations ?? 0}</span>
+    <Card className="group relative overflow-hidden border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+        <CardTitle className="text-sm font-medium text-muted-foreground">Events & Judges</CardTitle>
+        <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-300">
+          <Calendar className="h-4 w-4 text-primary" />
         </div>
-        <p className="text-xs text-muted-foreground mt-2">Active competitions</p>
+      </CardHeader>
+      <CardContent className="relative">
+        <div className="text-3xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+          {eventStats?.totalEvents ?? 0}
+        </div>
+        <div className="space-y-1 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Judges Needed:</span>
+            <span className="font-medium">{eventStats?.totalJudgesNeeded ?? 0}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Registered:</span>
+            <span className="font-medium">{eventStats?.totalRegistrations ?? 0}</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
