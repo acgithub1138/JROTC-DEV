@@ -125,13 +125,22 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                   <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
                     Time Slots
                   </th>
-                  {timeline.events.map(event => (
-                    <th key={event.id} className="text-center p-4 min-w-[150px]">
-                      <div className="font-medium text-sm truncate" title={event.name}>
-                        {event.name}
-                      </div>
-                    </th>
-                  ))}
+                  {timeline.events.map(event => {
+                    // Get location from the first judge assignment for this event
+                    const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
+                    return (
+                      <th key={event.id} className="text-center p-4 min-w-[150px]">
+                        <div className="font-medium text-sm truncate" title={event.name}>
+                          {event.name}
+                        </div>
+                        {eventLocation && (
+                          <div className="text-[10px] text-muted-foreground font-normal mt-1">
+                            {eventLocation}
+                          </div>
+                        )}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -169,11 +178,6 @@ export const JudgeScheduleView = ({ competitionId }: JudgeScheduleViewProps) => 
                                 {filteredJudges.map((judge, idx) => (
                                   <div key={idx}>
                                     {judge.name}
-                                    {judge.location && (
-                                      <div className="text-[10px] text-muted-foreground mt-0.5">
-                                        ({judge.location})
-                                      </div>
-                                    )}
                                   </div>
                                 ))}
                               </div>
