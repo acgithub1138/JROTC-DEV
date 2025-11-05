@@ -54,6 +54,14 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
     onValueChange(newVal);
   };
 
+  // Include current value in options if it's not already there
+  const displayOptions = React.useMemo(() => {
+    if (internalValue && !options.includes(internalValue)) {
+      return [internalValue, ...options];
+    }
+    return options;
+  }, [options, internalValue]);
+
   if (isAdding) {
     return (
       <Input
@@ -74,7 +82,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
         <SelectItem value={ADD_NEW_MARKER} className="font-medium text-primary">
           + Add New Location
         </SelectItem>
-        {options.map((option) => (
+        {displayOptions.map((option) => (
           <SelectItem key={option} value={option}>
             {option}
           </SelectItem>
