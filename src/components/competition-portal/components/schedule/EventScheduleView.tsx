@@ -85,7 +85,7 @@ export const EventScheduleView = ({
           scheduleItems.push({
             date: convertToUI(timeSlot, timezone, 'date'),
             time: convertToUI(timeSlot, timezone, 'time'),
-            eventName: event.event_name,
+            eventName: event.event_initials || event.event_name,
             location: event.event_location || '-',
             sortKey: new Date(timeSlot).getTime()
           });
@@ -173,7 +173,7 @@ export const EventScheduleView = ({
                           ) : null}
                           {/* Print version */}
                           <div className="hidden print:block font-medium text-sm whitespace-normal break-words w-full">
-                            {event.event_name}
+                            {event.event_initials || event.event_name}
                           </div>
                           {event.event_location && (
                             <div className="text-[10px] text-muted-foreground font-normal mt-1">

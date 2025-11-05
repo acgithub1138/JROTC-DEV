@@ -28,6 +28,7 @@ export interface TimeSlot {
 export interface ScheduleEvent {
   id: string;
   event_name: string;
+  event_initials?: string;
   event_location?: string;
   start_time: string;
   end_time: string;
@@ -88,7 +89,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       const eventIds = eventsData?.map(e => e.event).filter(Boolean) || [];
       const { data: eventTypesData, error: eventTypesError } = await supabase
         .from('competition_event_types')
-        .select('id, name')
+        .select('id, name, initials')
         .in('id', eventIds)
         .abortSignal(abortController.signal);
 
@@ -96,7 +97,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       // Create event types map
       const eventTypesMap = new Map(
-        eventTypesData?.map(et => [et.id, et.name]) || []
+        eventTypesData?.map(et => [et.id, { name: et.name, initials: et.initials }]) || []
       );
 
       // Fetch all schedule slots for this competition
@@ -138,16 +139,20 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
 
       // Process events without individual time slots
-      const processedEvents: ScheduleEvent[] = eventsData?.map(event => ({
-        id: event.id,
-        event_name: eventTypesMap.get(event.event) || 'Unknown Event',
-        event_location: event.location,
-        start_time: event.start_time,
-        end_time: event.end_time,
-        interval: event.interval || 15,
-        lunch_start_time: event.lunch_start_time,
-        lunch_end_time: event.lunch_end_time
-      })) || [];
+      const processedEvents: ScheduleEvent[] = eventsData?.map(event => {
+        const eventType = eventTypesMap.get(event.event);
+        return {
+          id: event.id,
+          event_name: eventType?.name || 'Unknown Event',
+          event_initials: eventType?.initials,
+          event_location: event.location,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          interval: event.interval || 15,
+          lunch_start_time: event.lunch_start_time,
+          lunch_end_time: event.lunch_end_time
+        };
+      }) || [];
 
       // Generate unified competition timeline
       if (processedEvents.length > 0) {
