@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save, Gavel } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
@@ -212,17 +212,29 @@ export const CompetitionJudgesRecord = () => {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
   if (availableJudges.length === 0) {
-    return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleCancel}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit' : 'Assign'} Judge
-          </h1>
+    return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+        <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCancel}
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+                <Gavel className="h-5 w-5 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {isEditMode ? 'Edit' : 'Assign'} Judge
+              </h1>
+            </div>
+          </div>
         </div>
-        <Card>
+        <Card className="max-w-4xl mx-auto border-primary/20 shadow-lg bg-background/80 backdrop-blur-sm">
           <CardContent className="p-6">
             <p className="text-muted-foreground">
               No available judges. Please create judges and try again.
@@ -231,29 +243,54 @@ export const CompetitionJudgesRecord = () => {
         </Card>
       </div>;
   }
-  return <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={handleCancel}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Judges
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleCancel}
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Judges
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <Gavel className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Judge Assignment Details
+            </h1>
+          </div>
+        </div>
+        <Button 
+          type="submit" 
+          form="judge-form" 
+          disabled={isSaving}
+          className="flex items-center gap-2 hover:scale-105 transition-transform"
+        >
+          <Save className="h-4 w-4" />
+          {isSaving ? 'Saving...' : isEditMode ? 'Update' : 'Assign'}
         </Button>
-        
       </div>
 
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle>Judge Assignment Details</CardTitle>
+      <Card className="max-w-4xl mx-auto border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+        <CardHeader className="border-b border-primary/10">
+          <CardTitle className="text-xl font-semibold text-foreground/90">Judge Assignment Details</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField control={form.control} name="judges" rules={{
-              required: 'At least one judge is required',
-              validate: (value) => value && value.length > 0 || 'At least one judge is required'
-            }} render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Judge{!isEditMode && 's'} *</FormLabel>
+            <form id="judge-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
+                <FormField control={form.control} name="judges" rules={{
+                required: 'At least one judge is required',
+                validate: (value) => value && value.length > 0 || 'At least one judge is required'
+              }} render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
                     <FormControl>
                       <Select 
                         onValueChange={(value) => {
@@ -306,13 +343,15 @@ export const CompetitionJudgesRecord = () => {
                     )}
                     <FormMessage />
                   </FormItem>} />
+              </div>
 
-              <FormField control={form.control} name="event" rules={{
-              required: 'Event is required'
-            }} render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Event *</FormLabel>
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <FormField control={form.control} name="event" rules={{
+                required: 'Event is required'
+              }} render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="font-semibold">Event *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -331,23 +370,26 @@ export const CompetitionJudgesRecord = () => {
                     </Select>
                     <FormMessage />
                   </FormItem>} />
+              </div>
 
-              <FormField control={form.control} name="location" rules={{
-              required: 'Location is required'
-            }} render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Location *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter location" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
+              <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                <FormField control={form.control} name="location" rules={{
+                required: 'Location is required'
+              }} render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="font-semibold">Location *</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
                 {/* Start Time */}
                 <div className="flex items-center gap-2">
-                  <FormLabel className="w-24 text-left shrink-0">Start Time *</FormLabel>
+                  <FormLabel className="w-24 text-left shrink-0 font-semibold">Start Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField
                       control={form.control}
@@ -402,7 +444,7 @@ export const CompetitionJudgesRecord = () => {
 
                 {/* End Time */}
                 <div className="flex items-center gap-2">
-                  <FormLabel className="w-24 text-left shrink-0">End Time *</FormLabel>
+                  <FormLabel className="w-24 text-left shrink-0 font-semibold">End Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField
                       control={form.control}
@@ -456,24 +498,19 @@ export const CompetitionJudgesRecord = () => {
                 </div>
               </div>
 
-              <FormField control={form.control} name="assignment_details" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Assignment Details</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="Enter any additional details about this assignment" rows={4} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : isEditMode ? 'Update' : 'Assign'} Judge
-                </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <FormField control={form.control} name="assignment_details" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="font-semibold">Assignment Details</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder="Enter any additional details about this assignment" rows={4} className="resize-none" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
               </div>
+
+
             </form>
           </Form>
         </CardContent>
