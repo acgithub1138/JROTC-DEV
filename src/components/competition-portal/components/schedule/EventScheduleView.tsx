@@ -161,7 +161,7 @@ export const EventScheduleView = ({
                               <TooltipTrigger asChild>
                                 <button
                                   onClick={() => handleEditEvent(event)}
-                                  className="font-medium text-sm whitespace-normal break-words w-full hover:text-primary transition-colors cursor-pointer no-print"
+                                  className="font-medium text-sm whitespace-normal break-words w-full text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer no-print"
                                 >
                                   {event.event_name}
                                 </button>
