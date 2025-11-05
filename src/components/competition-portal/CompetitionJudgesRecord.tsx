@@ -17,7 +17,6 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUTC } from '@/utils/timezoneUtils';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
-
 interface JudgeFormData {
   judges: string[];
   event: string;
@@ -31,7 +30,7 @@ interface JudgeFormData {
 export const CompetitionJudgesRecord = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Extract competition ID from pathname since route isn't parameterized
   const competitionId = React.useMemo(() => {
     const match = location.pathname.match(/\/competition-details\/([^\/]+)\/judges_record/);
@@ -43,29 +42,27 @@ export const CompetitionJudgesRecord = () => {
     judges: allJudges,
     isLoading: judgesLoading
   } = useJudges();
-  
+
   // Fetch approved judge applications for this competition
-  const { data: approvedApplications = [] } = useQuery({
+  const {
+    data: approvedApplications = []
+  } = useQuery({
     queryKey: ['approved-judge-applications', competitionId],
     queryFn: async () => {
       if (!competitionId) return [];
-      
-      const { data, error } = await supabase
-        .from('cp_judge_competition_registrations')
-        .select('judge_id, cp_judges(*)')
-        .eq('competition_id', competitionId)
-        .eq('status', 'approved');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_judge_competition_registrations').select('judge_id, cp_judges(*)').eq('competition_id', competitionId).eq('status', 'approved');
       if (error) throw error;
       return data || [];
     },
-    enabled: !!competitionId,
+    enabled: !!competitionId
   });
-  
+
   // Filter to only show approved judges for this competition
   const availableJudges = React.useMemo(() => {
     if (!competitionId) return allJudges;
-    
     const approvedJudgeIds = new Set(approvedApplications.map(app => app.judge_id));
     return allJudges.filter(judge => approvedJudgeIds.has(judge.id));
   }, [allJudges, approvedApplications, competitionId]);
@@ -79,7 +76,9 @@ export const CompetitionJudgesRecord = () => {
     events: competitionEvents,
     isLoading: eventsLoading
   } = useCompetitionEvents(competitionId);
-  const { timezone } = useSchoolTimezone();
+  const {
+    timezone
+  } = useSchoolTimezone();
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<JudgeFormData>({
     defaultValues: {
@@ -111,12 +110,10 @@ export const CompetitionJudgesRecord = () => {
         // Convert UTC times to school timezone for editing
         const startInSchoolTz = judge.start_time ? toZonedTime(new Date(judge.start_time), timezone) : null;
         const endInSchoolTz = judge.end_time ? toZonedTime(new Date(judge.end_time), timezone) : null;
-        
         const startHour = startInSchoolTz ? startInSchoolTz.getHours().toString().padStart(2, '0') : '09';
         const startMinute = startInSchoolTz ? startInSchoolTz.getMinutes().toString().padStart(2, '0') : '00';
         const endHour = endInSchoolTz ? endInSchoolTz.getHours().toString().padStart(2, '0') : '17';
         const endMinute = endInSchoolTz ? endInSchoolTz.getMinutes().toString().padStart(2, '0') : '00';
-        
         form.reset({
           judges: [judge.judge],
           event: (judge as any).event || '',
@@ -132,18 +129,24 @@ export const CompetitionJudgesRecord = () => {
   }, [isEditMode, judgeId, judges, form, timezone]);
   const onSubmit = async (data: JudgeFormData) => {
     if (!competitionId) return;
-    
+
     // Validate that all required fields are filled
     if (!data.judges || data.judges.length === 0) {
-      form.setError('judges', { message: 'At least one judge is required' });
+      form.setError('judges', {
+        message: 'At least one judge is required'
+      });
       return;
     }
     if (!data.event) {
-      form.setError('event', { message: 'Event is required' });
+      form.setError('event', {
+        message: 'Event is required'
+      });
       return;
     }
     if (!data.location || data.location.trim() === '') {
-      form.setError('location', { message: 'Location is required' });
+      form.setError('location', {
+        message: 'Location is required'
+      });
       return;
     }
     if (!data.start_time_hour || !data.start_time_minute) {
@@ -152,25 +155,19 @@ export const CompetitionJudgesRecord = () => {
     if (!data.end_time_hour || !data.end_time_minute) {
       return;
     }
-    
     setIsSaving(true);
     try {
       // Get the event's start_time if an event is selected
       const selectedEventData = competitionEvents.find(e => e.id === data.event);
-      const dateStr = selectedEventData?.start_time 
-        ? new Date(selectedEventData.start_time).toISOString().split('T')[0]
-        : new Date().toISOString().split('T')[0];
-      
+      const dateStr = selectedEventData?.start_time ? new Date(selectedEventData.start_time).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
       // Create dates in school timezone, then convert to UTC
       const startDateInSchoolTz = new Date(`${dateStr}T${data.start_time_hour}:${data.start_time_minute}:00`);
       const endDateInSchoolTz = new Date(`${dateStr}T${data.end_time_hour}:${data.end_time_minute}:00`);
-      
       const startTimeUTC = fromZonedTime(startDateInSchoolTz, timezone);
       const endTimeUTC = fromZonedTime(endDateInSchoolTz, timezone);
-      
       const startTime = startTimeUTC.toISOString();
       const endTime = endTimeUTC.toISOString();
-      
       if (isEditMode) {
         // Edit mode: update single judge
         const judgeData: any = {
@@ -208,19 +205,14 @@ export const CompetitionJudgesRecord = () => {
   const handleCancel = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
   };
-  if (judgesLoading || eventsLoading || (isEditMode && isLoading)) {
+  if (judgesLoading || eventsLoading || isEditMode && isLoading) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
   if (availableJudges.length === 0) {
     return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
         <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleCancel}
-              className="flex items-center gap-2 hover:scale-105 transition-transform"
-            >
+            <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2 hover:scale-105 transition-transform">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -247,12 +239,7 @@ export const CompetitionJudgesRecord = () => {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCancel}
-            className="flex items-center gap-2 hover:scale-105 transition-transform"
-          >
+          <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2 hover:scale-105 transition-transform">
             <ArrowLeft className="h-4 w-4" />
             Back to Judges
           </Button>
@@ -265,12 +252,7 @@ export const CompetitionJudgesRecord = () => {
             </h1>
           </div>
         </div>
-        <Button 
-          type="submit" 
-          form="judge-form" 
-          disabled={isSaving}
-          className="flex items-center gap-2 hover:scale-105 transition-transform"
-        >
+        <Button type="submit" form="judge-form" disabled={isSaving} className="flex items-center gap-2 hover:scale-105 transition-transform">
           <Save className="h-4 w-4" />
           {isSaving ? 'Saving...' : isEditMode ? 'Update' : 'Assign'}
         </Button>
@@ -280,72 +262,59 @@ export const CompetitionJudgesRecord = () => {
         <CardHeader className="border-b border-primary/10">
           <CardTitle className="text-xl font-semibold text-foreground/90">Judge Assignment Details</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 py-[8px]">
           <Form {...form}>
             <form id="judge-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 <FormField control={form.control} name="judges" rules={{
                 required: 'At least one judge is required',
-                validate: (value) => value && value.length > 0 || 'At least one judge is required'
+                validate: value => value && value.length > 0 || 'At least one judge is required'
               }} render={({
                 field
               }) => <FormItem>
                       <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
                     <FormControl>
-                      <Select 
-                        onValueChange={(value) => {
-                          if (isEditMode) {
-                            // Edit mode: single selection
-                            field.onChange([value]);
-                          } else {
-                            // Create mode: toggle selection
-                            const current = field.value || [];
-                            if (current.includes(value)) {
-                              field.onChange(current.filter(id => id !== value));
-                            } else {
-                              field.onChange([...current, value]);
-                            }
-                          }
-                        }} 
-                        value={field.value?.[0] || ''}
-                      >
+                      <Select onValueChange={value => {
+                    if (isEditMode) {
+                      // Edit mode: single selection
+                      field.onChange([value]);
+                    } else {
+                      // Create mode: toggle selection
+                      const current = field.value || [];
+                      if (current.includes(value)) {
+                        field.onChange(current.filter(id => id !== value));
+                      } else {
+                        field.onChange([...current, value]);
+                      }
+                    }
+                  }} value={field.value?.[0] || ''}>
                         <SelectTrigger>
                           <SelectValue placeholder={isEditMode ? "Select a judge" : `${field.value?.length || 0} judge(s) selected`} />
                         </SelectTrigger>
                         <SelectContent>
                           {availableJudges.map(judge => {
-                            const isSelected = field.value?.includes(judge.id);
-                            return (
-                              <SelectItem 
-                                key={judge.id} 
-                                value={judge.id}
-                                className={isSelected && !isEditMode ? 'bg-accent' : ''}
-                              >
+                        const isSelected = field.value?.includes(judge.id);
+                        return <SelectItem key={judge.id} value={judge.id} className={isSelected && !isEditMode ? 'bg-accent' : ''}>
                                 {isSelected && !isEditMode && '✓ '}
                                 {judge.name} {!judge.available && '(Unavailable)'}
-                              </SelectItem>
-                            );
-                          })}
+                              </SelectItem>;
+                      })}
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    {!isEditMode && field.value && field.value.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
+                    {!isEditMode && field.value && field.value.length > 0 && <div className="flex flex-wrap gap-2 mt-2">
                         {field.value.map(judgeId => {
-                          const judge = availableJudges.find(j => j.id === judgeId);
-                          return judge ? (
-                            <Badge key={judgeId} variant="secondary" className="text-sm">
+                    const judge = availableJudges.find(j => j.id === judgeId);
+                    return judge ? <Badge key={judgeId} variant="secondary" className="text-sm">
                               {judge.name}
-                            </Badge>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
+                            </Badge> : null;
+                  })}
+                      </div>}
                     <FormMessage />
                   </FormItem>} />
               </div>
 
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                 <FormField control={form.control} name="event" rules={{
                 required: 'Event is required'
               }} render={({
@@ -359,20 +328,16 @@ export const CompetitionJudgesRecord = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background">
-                        {competitionEvents.length === 0 ? (
-                          <div className="p-2 text-sm text-muted-foreground">No events available</div>
-                        ) : (
-                          competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
+                        {competitionEvents.length === 0 ? <div className="p-2 text-sm text-muted-foreground">No events available</div> : competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
                             {event.event_name || 'Unnamed Event'}
-                          </SelectItem>)
-                        )}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>} />
               </div>
 
-              <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+              <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
                 <FormField control={form.control} name="location" rules={{
                 required: 'Location is required'
               }} render={({
@@ -386,17 +351,16 @@ export const CompetitionJudgesRecord = () => {
                     </FormItem>} />
               </div>
 
-              <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 {/* Start Time */}
                 <div className="flex items-center gap-2">
                   <FormLabel className="w-24 text-left shrink-0 font-semibold">Start Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
-                    <FormField
-                      control={form.control}
-                      name="start_time_hour"
-                      rules={{ required: 'Start hour is required' }}
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="start_time_hour" rules={{
+                    required: 'Start hour is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -404,23 +368,20 @@ export const CompetitionJudgesRecord = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                              {Array.from({ length: 24 }, (_, i) => (
-                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                   {i.toString().padStart(2, '0')}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="start_time_minute"
-                      rules={{ required: 'Start minute is required' }}
-                      render={({ field }) => (
-                        <FormItem>
+                        </FormItem>} />
+                    <FormField control={form.control} name="start_time_minute" rules={{
+                    required: 'Start minute is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -428,17 +389,13 @@ export const CompetitionJudgesRecord = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                                <SelectItem key={minute} value={minute}>
+                              {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                                   {minute}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
                 </div>
 
@@ -446,12 +403,11 @@ export const CompetitionJudgesRecord = () => {
                 <div className="flex items-center gap-2">
                   <FormLabel className="w-24 text-left shrink-0 font-semibold">End Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
-                    <FormField
-                      control={form.control}
-                      name="end_time_hour"
-                      rules={{ required: 'End hour is required' }}
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="end_time_hour" rules={{
+                    required: 'End hour is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -459,23 +415,20 @@ export const CompetitionJudgesRecord = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                              {Array.from({ length: 24 }, (_, i) => (
-                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                   {i.toString().padStart(2, '0')}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="end_time_minute"
-                      rules={{ required: 'End minute is required' }}
-                      render={({ field }) => (
-                        <FormItem>
+                        </FormItem>} />
+                    <FormField control={form.control} name="end_time_minute" rules={{
+                    required: 'End minute is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -483,22 +436,18 @@ export const CompetitionJudgesRecord = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
-                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                                <SelectItem key={minute} value={minute}>
+                              {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                                   {minute}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                 <FormField control={form.control} name="assignment_details" render={({
                 field
               }) => <FormItem>
