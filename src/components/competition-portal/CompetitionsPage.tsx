@@ -286,7 +286,7 @@ const CompetitionsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Competitions</h1>
-          <p className="text-muted-foreground">Manage tournament competitions and events</p>
+          <p className="text-muted-foreground">Manage drill competitions and events</p>
         </div>
         {canCreateCompetition && <Button onClick={() => navigate('/app/competition-portal/competitions/competition_record')}>
             <Plus className="w-4 h-4 mr-2" />
