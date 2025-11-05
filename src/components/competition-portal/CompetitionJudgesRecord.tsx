@@ -286,41 +286,43 @@ export const CompetitionJudgesRecord = () => {
                   </FormItem>} />
               </div>
 
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
-                <FormField control={form.control} name="event" rules={{
-                required: 'Event is required'
-              }} render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className="font-semibold">Event *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an event" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-background">
-                        {competitionEvents.length === 0 ? <div className="p-2 text-sm text-muted-foreground">No events available</div> : competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
-                            {event.event_name || 'Unnamed Event'}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>} />
-              </div>
-
-              <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
-                <FormField control={form.control} name="location" rules={{
-                required: 'Location is required'
-              }} render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className="font-semibold">Location *</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Enter location" readOnly className="bg-muted/50" />
-                      </FormControl>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
+                  <FormField control={form.control} name="event" rules={{
+                  required: 'Event is required'
+                }} render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className="font-semibold">Event *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an event" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-background">
+                          {competitionEvents.length === 0 ? <div className="p-2 text-sm text-muted-foreground">No events available</div> : competitionEvents.map(event => <SelectItem key={event.id} value={event.id}>
+                              {event.event_name || 'Unnamed Event'}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>} />
+                </div>
+
+                <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
+                  <FormField control={form.control} name="location" rules={{
+                  required: 'Location is required'
+                }} render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className="font-semibold">Location *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter location" readOnly className="bg-muted/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+                </div>
               </div>
 
               <div className="space-y-4 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
