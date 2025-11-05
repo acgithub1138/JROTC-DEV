@@ -1,13 +1,13 @@
-import { useMyAssignments } from '@/hooks/judges-portal/useMyAssignments';
-import { convertToUI } from '@/utils/timezoneUtils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Calendar, MapPin, Clock, ClipboardCheck } from 'lucide-react';
-import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMyAssignments } from "@/hooks/judges-portal/useMyAssignments";
+import { convertToUI } from "@/utils/timezoneUtils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Calendar, MapPin, Clock, ClipboardCheck } from "lucide-react";
+import { useSchoolTimezone } from "@/hooks/useSchoolTimezone";
+import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const MyAssignmentsWidget = () => {
   const { competitions, isLoading, error } = useMyAssignments();
@@ -36,9 +36,7 @@ export const MyAssignmentsWidget = () => {
           <CardTitle>My Assignments</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-destructive">
-            Error loading assignments: {error.message}
-          </p>
+          <p className="text-sm text-destructive">Error loading assignments: {error.message}</p>
         </CardContent>
       </Card>
     );
@@ -51,9 +49,7 @@ export const MyAssignmentsWidget = () => {
           <CardTitle>My Assignments</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No upcoming judging assignments
-          </p>
+          <p className="text-sm text-muted-foreground">No upcoming judging assignments</p>
         </CardContent>
       </Card>
     );
@@ -65,10 +61,10 @@ export const MyAssignmentsWidget = () => {
         <CardTitle>My Assignments</CardTitle>
       </CardHeader>
       <CardContent>
-        <Accordion type="multiple" defaultValue={competitions.map(c => c.competition_id)} className="space-y-4">
+        <Accordion type="multiple" defaultValue={competitions.map((c) => c.competition_id)} className="space-y-4">
           {competitions.map((competition) => (
-            <AccordionItem 
-              key={competition.competition_id} 
+            <AccordionItem
+              key={competition.competition_id}
               value={competition.competition_id}
               className="border-l-4 border-judge pl-3 border-b-0"
             >
@@ -79,10 +75,9 @@ export const MyAssignmentsWidget = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-3.5 w-3.5" />
                       <span>
-                        {convertToUI(competition.competition_start_date, timezone, 'date')}
-                        {competition.competition_start_date !== competition.competition_end_date && 
-                          ` - ${convertToUI(competition.competition_end_date, timezone, 'date')}`
-                        }
+                        {convertToUI(competition.competition_start_date, timezone, "date")}
+                        {competition.competition_start_date !== competition.competition_end_date &&
+                          ` - ${convertToUI(competition.competition_end_date, timezone, "date")}`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -95,23 +90,20 @@ export const MyAssignmentsWidget = () => {
 
               <AccordionContent className="ml-4 space-y-2 pb-4">
                 {competition.assignments.map((assignment) => (
-                  <div 
-                    key={assignment.assignment_id} 
+                  <div
+                    key={assignment.assignment_id}
                     className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                       <div className="flex-1 order-1 md:order-none">
-                        <div className="font-medium text-sm">
-                          {assignment.event_name || 'Event Assignment'}
-                        </div>
+                        <div className="font-medium text-lg">{assignment.event_name || "Event Assignment"}</div>
                         {assignment.event_start_time && (
                           <div className="hidden md:flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1 w-full">
                             <Clock className="h-3 w-3" />
                             <span>
-                              {convertToUI(assignment.event_start_time, timezone, 'time')}
-                              {assignment.event_end_time && 
-                                ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
-                              }
+                              {convertToUI(assignment.event_start_time, timezone, "time")}
+                              {assignment.event_end_time &&
+                                ` - ${convertToUI(assignment.event_end_time, timezone, "time")}`}
                             </span>
                             {assignment.event_location && (
                               <>
@@ -122,16 +114,14 @@ export const MyAssignmentsWidget = () => {
                           </div>
                         )}
                         {assignment.assignment_details && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {assignment.assignment_details}
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{assignment.assignment_details}</p>
                         )}
                       </div>
                       {assignment.event_id && (
                         <Button
                           size="sm"
                           onClick={() => {
-                            const path = isMobile 
+                            const path = isMobile
                               ? `/app/judges-portal/m_judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`
                               : `/app/judges-portal/judge_event/${assignment.event_id}?competitionId=${competition.competition_id}`;
                             navigate(path);
@@ -146,10 +136,9 @@ export const MyAssignmentsWidget = () => {
                         <div className="flex md:hidden flex-wrap items-center gap-2 text-xs text-muted-foreground w-full order-2">
                           <Clock className="h-3 w-3" />
                           <span>
-                            {convertToUI(assignment.event_start_time, timezone, 'time')}
-                            {assignment.event_end_time && 
-                              ` - ${convertToUI(assignment.event_end_time, timezone, 'time')}`
-                            }
+                            {convertToUI(assignment.event_start_time, timezone, "time")}
+                            {assignment.event_end_time &&
+                              ` - ${convertToUI(assignment.event_end_time, timezone, "time")}`}
                           </span>
                           {assignment.event_location && (
                             <>
