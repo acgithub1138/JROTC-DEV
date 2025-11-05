@@ -24,8 +24,31 @@ export const ScoreSheetsWidget = () => {
 
       const compIds = comps?.map(c => c.id) || [];
       if (compIds.length === 0) {
-        return { totalSubmitted: 0, uniqueEvents: 0, uniqueSchools: 0 };
+        return { totalSubmitted: 0, totalNeeded: 0, uniqueEvents: 0, uniqueSchools: 0 };
       }
+
+      // Get events with judges_needed
+      const { data: events, error: eventsError } = await supabase
+        .from('cp_comp_events')
+        .select('id, judges_needed')
+        .in('competition_id', compIds);
+
+      if (eventsError) throw eventsError;
+
+      // Get event registrations to count schools per event
+      const { data: registrations, error: regsError } = await supabase
+        .from('cp_event_registrations')
+        .select('event_id, school_id')
+        .in('competition_id', compIds);
+
+      if (regsError) throw regsError;
+
+      // Calculate total score sheets needed
+      let totalNeeded = 0;
+      events?.forEach(event => {
+        const schoolCount = registrations?.filter(r => r.event_id === event.id).length || 0;
+        totalNeeded += (event.judges_needed || 0) * schoolCount;
+      });
 
       // Get submitted score sheets
       const { data: scoreSheets, error: scoreSheetsError } = await supabase
@@ -40,7 +63,7 @@ export const ScoreSheetsWidget = () => {
       const uniqueEvents = new Set(scoreSheets?.map(s => s.event)).size;
       const uniqueSchools = new Set(scoreSheets?.map(s => s.school_id)).size;
 
-      return { totalSubmitted, uniqueEvents, uniqueSchools };
+      return { totalSubmitted, totalNeeded, uniqueEvents, uniqueSchools };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -52,12 +75,14 @@ export const ScoreSheetsWidget = () => {
         <FileText className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{scoreSheetStats?.totalSubmitted ?? 0}</div>
+        <div className="text-2xl font-bold">
+          {scoreSheetStats?.totalSubmitted ?? 0} / {scoreSheetStats?.totalNeeded ?? 0}
+        </div>
         <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
           <span>{scoreSheetStats?.uniqueEvents ?? 0} Events</span>
           <span>{scoreSheetStats?.uniqueSchools ?? 0} Schools</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">Submitted score sheets</p>
+        <p className="text-xs text-muted-foreground mt-2">Submitted / Needed score sheets</p>
       </CardContent>
     </Card>
   );
