@@ -251,28 +251,24 @@ export const CompetitionSchoolRecord = () => {
         error: filteredError
       } = await supabase.from('schools').select('id, name').not('jrotc_program', 'is', null).order('name');
       if (filteredError) throw filteredError;
-
       let schoolsList = filteredSchools || [];
 
       // If we're in edit/view mode and have a school registration, ensure the selected school is included
       if ((isEditMode || isViewMode) && schoolRegistration?.school_id) {
         const selectedSchoolExists = schoolsList.some(s => s.id === schoolRegistration.school_id);
-        
         if (!selectedSchoolExists) {
           // Fetch the selected school separately
           const {
             data: selectedSchool,
             error: selectedError
           } = await supabase.from('schools').select('id, name').eq('id', schoolRegistration.school_id).single();
-          
           if (!selectedError && selectedSchool) {
             schoolsList = [selectedSchool, ...schoolsList].sort((a, b) => a.name.localeCompare(b.name));
           }
         }
       }
-
       setSchools(schoolsList);
-      
+
       // Debug log to verify selected school is in the list
       if (schoolRegistration?.school_id) {
         const selectedSchoolInList = schoolsList.find(s => s.id === schoolRegistration.school_id);
@@ -437,12 +433,7 @@ export const CompetitionSchoolRecord = () => {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleBack}
-            className="flex items-center gap-2 hover:scale-105 transition-transform"
-          >
+          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
             <ArrowLeft className="h-4 w-4" />
             Back to Schools
           </Button>
@@ -457,20 +448,11 @@ export const CompetitionSchoolRecord = () => {
         </div>
         <div className="flex items-center gap-2">
           {canEdit && !isViewMode && <>
-              {canDelete && !isCreateMode && <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteDialog(true)}
-                className="flex items-center gap-2 hover:scale-105 transition-transform"
-              >
+              {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Trash2 className="h-4 w-4" />
                 Delete
               </Button>}
-              <Button 
-                type="submit" 
-                form="school-form" 
-                disabled={isSubmitting}
-                className="flex items-center gap-2 hover:scale-105 transition-transform"
-              >
+              <Button type="submit" form="school-form" disabled={isSubmitting} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Save className="h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
@@ -483,49 +465,35 @@ export const CompetitionSchoolRecord = () => {
           <CardHeader className="border-b border-primary/10">
             <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
           </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 py-[8px]">
           <Form {...form}>
             <form id="school-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Row 1: School and Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
                   <Label className="text-left md:text-right font-semibold">School *</Label>
-                  <FormField control={form.control} name="school_id" render={({ field }) => (
-                    <FormItem>
-                      {isCreateMode ? (
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode}>
+                  <FormField control={form.control} name="school_id" render={({
+                    field
+                  }) => <FormItem>
+                      {isCreateMode ? <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSchools || isViewMode}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="z-50 bg-background border border-border">
-                            {schools.map((school) => (
-                              <SelectItem key={school.id} value={school.id}>
+                            {schools.map(school => <SelectItem key={school.id} value={school.id}>
                                 {school.name}
-                              </SelectItem>
-                            ))}
+                              </SelectItem>)}
                             {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
                           </SelectContent>
-                        </Select>
-                      ) : (
-                        <>
-                          <Input
-                            readOnly
-                            className="bg-background"
-                            value={
-                              schoolRegistration?.school_name ||
-                              schools.find((s) => s.id === field.value)?.name ||
-                              ''
-                            }
-                          />
+                        </Select> : <>
+                          <Input readOnly className="bg-background" value={schoolRegistration?.school_name || schools.find(s => s.id === field.value)?.name || ''} />
                           {/* Keep the school_id in the form state */}
                           <input type="hidden" value={field.value} />
-                        </>
-                      )}
+                        </>}
                       <FormMessage />
-                    </FormItem>
-                  )} />
+                    </FormItem>} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
@@ -679,7 +647,7 @@ export const CompetitionSchoolRecord = () => {
                 </div>}
 
               {/* Notes (full width) - moved to bottom */}
-              <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+              <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
                 <Label className="text-left md:text-right font-semibold pt-2">Notes</Label>
                 <FormField control={form.control} name="notes" render={({
                   field
