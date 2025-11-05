@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 export interface CompetitionEventType {
   id: string;
   name: string;
+  initials?: string;
   is_active: boolean;
   is_default: boolean;
   sort_order: number;
@@ -39,7 +40,7 @@ export const useCompetitionEventTypes = () => {
   });
 
   const addEventTypeMutation = useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({ name, initials }: { name: string; initials?: string }) => {
       if (!user) throw new Error('User not authenticated');
 
       // Check if event type already exists
@@ -67,6 +68,7 @@ export const useCompetitionEventTypes = () => {
         .from('competition_event_types')
         .insert({
           name,
+          initials,
           sort_order: newSortOrder,
           created_by: user.id,
         })
@@ -92,8 +94,8 @@ export const useCompetitionEventTypes = () => {
     },
   });
 
-  const addEventType = (name: string) => {
-    return addEventTypeMutation.mutateAsync(name);
+  const addEventType = (name: string, initials?: string) => {
+    return addEventTypeMutation.mutateAsync({ name, initials });
   };
 
   return {

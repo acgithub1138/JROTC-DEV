@@ -28,6 +28,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
+  const [newEventTypeInitials, setNewEventTypeInitials] = useState('');
 
   // Only show for admin users since event types are global
   if (userProfile?.role !== 'admin') {
@@ -42,11 +43,13 @@ const CompetitionEventTypesManagement: React.FC = () => {
   }
   const handleOpenCreateDialog = () => {
     setNewEventTypeName('');
+    setNewEventTypeInitials('');
     setShowCreateDialog(true);
   };
   const handleCloseCreateDialog = () => {
     setShowCreateDialog(false);
     setNewEventTypeName('');
+    setNewEventTypeInitials('');
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +63,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
     }
     setIsSubmitting(true);
     try {
-      await addEventType(newEventTypeName.trim());
+      await addEventType(newEventTypeName.trim(), newEventTypeInitials.trim() || undefined);
       handleCloseCreateDialog();
     } catch (error) {
       console.error('Error creating event type:', error);
@@ -116,6 +119,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Initials</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -123,6 +127,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
               <TableBody>
                 {[...eventTypes].sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <TableRow key={eventType.id}>
                     <TableCell className="font-medium py-[8px]">{eventType.name}</TableCell>
+                    <TableCell className="py-[8px]">{eventType.initials || '-'}</TableCell>
                     <TableCell>
                       {eventType.is_default && <Badge variant="secondary" className="flex items-center gap-1 w-fit">
                           <Globe className="w-3 h-3" />
@@ -156,6 +161,10 @@ const CompetitionEventTypesManagement: React.FC = () => {
               <div className="grid gap-2">
                 <Label htmlFor="name">Event Type Name</Label>
                 <Input id="name" value={newEventTypeName} onChange={e => setNewEventTypeName(e.target.value)} placeholder="e.g., Armed Solo Exhibition, Unarmed Dual Exhibition" required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="initials">Initials (Optional)</Label>
+                <Input id="initials" value={newEventTypeInitials} onChange={e => setNewEventTypeInitials(e.target.value)} placeholder="e.g., ASE, UDE" maxLength={10} />
               </div>
             </div>
             <DialogFooter>
