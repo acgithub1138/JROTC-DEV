@@ -95,7 +95,7 @@ export const AllQuestionsStep = ({
       console.log("***AC_TEST: " + currentIndex);
 
       if (currentIndex >= 1) {
-        const prevFieldId = fields[currentIndex - 1].id;
+        const prevFieldId = fields[currentIndex].id;
         const prevElement = questionRefs.current[prevFieldId];
         if (prevElement) {
           // Scroll to previous element position
