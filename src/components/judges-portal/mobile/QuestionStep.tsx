@@ -68,13 +68,17 @@ export const QuestionStep = ({
     switch (field.type) {
       case "label":
         return (
-          <div className="space-y-4 text-center py-8">
+          <div className="space-y-6 text-center py-8 flex flex-col items-center justify-center min-h-[200px]">
             {field.fieldInfo && (
               <p className="text-lg text-muted-foreground whitespace-pre-wrap">{field.fieldInfo}</p>
             )}
-            {!field.fieldInfo && (
-              <p className="text-muted-foreground">Press Next to continue</p>
-            )}
+            <Button
+              onClick={onNext}
+              size="lg"
+              className="h-14 px-8 text-lg font-semibold mt-4"
+            >
+              Next
+            </Button>
           </div>
         );
       case "number":
