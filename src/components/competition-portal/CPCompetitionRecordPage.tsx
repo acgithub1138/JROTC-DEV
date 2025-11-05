@@ -291,24 +291,38 @@ export const CPCompetitionRecordPage = () => {
         // Update all event schedules if dates changed
         if (startDateChanged || endDateChanged) {
           try {
-            // Get all events for this competition
+            // Get all events for this competition with their current times
             const { data: events, error: fetchError } = await supabase
               .from('cp_comp_events')
-              .select('id')
+              .select('id, start_time, end_time')
               .eq('competition_id', competitionId);
 
             if (fetchError) throw fetchError;
 
             if (events && events.length > 0) {
-              // Update all events to use the new competition dates
-              await supabase
-                .from('cp_comp_events')
-                .update({
-                  start_time: startDateUTC,
-                  end_time: endDateUTC,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('competition_id', competitionId);
+              // Calculate the date shift in milliseconds
+              const dateShift = oldStartDate ? newStartDate.getTime() - oldStartDate.getTime() : 0;
+
+              // Update each event by shifting the date while preserving the time-of-day
+              for (const event of events) {
+                if (event.start_time && event.end_time) {
+                  const oldEventStart = new Date(event.start_time);
+                  const oldEventEnd = new Date(event.end_time);
+                  
+                  // Shift the dates while keeping the same time-of-day
+                  const newEventStart = new Date(oldEventStart.getTime() + dateShift);
+                  const newEventEnd = new Date(oldEventEnd.getTime() + dateShift);
+
+                  await supabase
+                    .from('cp_comp_events')
+                    .update({
+                      start_time: newEventStart.toISOString(),
+                      end_time: newEventEnd.toISOString(),
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('id', event.id);
+                }
+              }
               
               toast.success(`Competition and ${events.length} event schedule(s) updated successfully`);
             } else {
