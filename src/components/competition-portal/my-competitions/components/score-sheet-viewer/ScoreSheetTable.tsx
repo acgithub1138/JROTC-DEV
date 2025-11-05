@@ -117,16 +117,16 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-center bg-muted/30 px-2 min-w-32">Field</TableHead>
-              <TableHead className="text-center bg-muted/30 px-2 min-w-16">Max</TableHead>
+              <TableHead className="text-center bg-muted/30 px-3 min-w-32">Field</TableHead>
+              <TableHead className="text-center bg-muted/30 px-3 min-w-16">Max</TableHead>
               {events.map((event, index) => (
-                <TableHead key={event.id} className={`text-center border-r px-2 min-w-24 ${getJudgeColorClasses(index)}`}>
+                <TableHead key={event.id} className={`text-center border-r px-3 min-w-24 ${getJudgeColorClasses(index)}`}>
                   <div className="font-medium text-xs">
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
                 </TableHead>
               ))}
-              <TableHead className="text-center bg-muted/30 px-2 min-w-20">
+              <TableHead className="text-center bg-muted/30 px-3 min-w-20">
                 <div className="font-medium text-sm">Average</div>
               </TableHead>
             </TableRow>
@@ -137,10 +137,10 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
 
               return (
                 <TableRow key={fieldName}>
-                  <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
+                  <TableCell className="sticky left-0 bg-background font-medium border-r px-3 text-sm">
                     {getCleanFieldName(fieldName)}
                   </TableCell>
-                  <TableCell className="text-center bg-muted/30 font-medium border-r px-2 text-sm">
+                  <TableCell className="text-center bg-muted/30 font-medium border-r px-3 text-sm">
                     {getFieldMaxValue(fieldName)}
                   </TableCell>
                   {events.map((event, eventIndex) => {
@@ -148,7 +148,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
                     const judgeNumber = event.score_sheet?.judge_number || `Judge ${eventIndex + 1}`;
                     
                     return (
-                      <TableCell key={event.id} className={`text-center border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                      <TableCell key={event.id} className={`text-center border-r px-3 text-sm ${getJudgeColorClasses(eventIndex)}`}>
                         {(() => {
                           if (value === null || value === undefined) return '-';
                           if (typeof value === 'object') return JSON.stringify(value);
@@ -174,7 +174,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
                       </TableCell>
                     );
                   })}
-                  <TableCell className="text-center font-medium bg-muted/30 px-1 text-sm">
+                  <TableCell className="text-center font-medium bg-muted/30 px-3 text-sm">
                     {average}
                   </TableCell>
                 </TableRow>
@@ -183,28 +183,28 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
             
             {/* Total Points Row */}
             <TableRow className="bg-muted/50">
-              <TableCell className="sticky left-0 bg-muted/50 font-bold border-r px-2 text-sm">
+              <TableCell className="sticky left-0 bg-muted/50 font-bold border-r px-3 text-sm">
                 Total Points
               </TableCell>
-              <TableCell className="text-center bg-muted/50 font-bold border-r px-2 text-sm">
+              <TableCell className="text-center bg-muted/50 font-bold border-r px-3 text-sm">
                 -
               </TableCell>
               {events.map((event, eventIndex) => (
-                <TableCell key={event.id} className={`text-center font-bold border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                <TableCell key={event.id} className={`text-center font-bold border-r px-3 text-sm ${getJudgeColorClasses(eventIndex)}`}>
                   {event.total_points || 0}
                 </TableCell>
               ))}
-              <TableCell className="text-center font-bold bg-muted/50 px-1 text-sm">
+              <TableCell className="text-center font-bold bg-muted/50 px-3 text-sm">
                 {calculateTotalAverage(events)}
               </TableCell>
             </TableRow>
             
             {/* Grand Total Row */}
             <TableRow className="bg-primary/10 border-t-2">
-              <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary px-2 text-sm">
+              <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary px-3 text-sm">
                 Grand Total
               </TableCell>
-              <TableCell className="text-center font-bold text-primary px-1 text-sm" colSpan={events.length + 2}>
+              <TableCell className="text-center font-bold text-primary px-3 text-sm" colSpan={events.length + 2}>
                 {events.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
               </TableCell>
             </TableRow>

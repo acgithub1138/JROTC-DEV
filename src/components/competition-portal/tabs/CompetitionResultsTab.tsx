@@ -311,8 +311,8 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                   <tbody>
                     {group.schools.map((s, idx) => (
                       <tr key={s.schoolId} className="border-t">
-                        <td className="px-3 py-[8px]">{idx + 1}</td>
-                        <td className="px-3 py-[8px]">{s.schoolName}</td>
+                        <td className="px-3 py-2">{idx + 1}</td>
+                        <td className="px-3 py-2">{s.schoolName}</td>
                         {group.judgeNumbers.map((n) => {
                           const js = s.judges.find((j) => j.judgeNumber === n);
                           return (
@@ -321,8 +321,8 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                             </td>
                           );
                         })}
-                        <td className="px-3 font-medium py-[8px]">{s.total.toFixed(1)}</td>
-                        <td className="px-3 py-[2px]">
+                        <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
+                        <td className="px-3 py-2">
                           <div className="flex items-center justify-center gap-2">
                             {canViewDetails && (
                               <Button
