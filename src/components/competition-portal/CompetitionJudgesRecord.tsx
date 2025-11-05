@@ -380,7 +380,7 @@ export const CompetitionJudgesRecord = () => {
               }) => <FormItem>
                       <FormLabel className="font-semibold">Location *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter location" />
+                        <Input {...field} placeholder="Enter location" readOnly className="bg-muted/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
