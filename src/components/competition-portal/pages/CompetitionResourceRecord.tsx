@@ -23,7 +23,6 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResourceLocations } from '@/hooks/competition-portal/useResourceLocations';
 import { SelectWithAdd } from '@/components/competition-portal/components/SelectWithAdd';
-
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
@@ -35,41 +34,60 @@ const formSchema = z.object({
   end_time_minute: z.string().optional(),
   assignment_details: z.string().optional()
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 export const CompetitionResourceRecord: React.FC = () => {
-  const { '*': splat } = useParams();
+  const {
+    '*': splat
+  } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const resourceId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
-  
+
   // Extract competitionId from the splat parameter
   const competitionId = splat?.split('/')[2]; // competition-details/{competitionId}/resources_record
-  
+
   // Debug logs
   console.log('CompetitionResourceRecord - splat:', splat);
   console.log('CompetitionResourceRecord - competitionId:', competitionId);
   console.log('CompetitionResourceRecord - resourceId:', resourceId);
   console.log('CompetitionResourceRecord - mode:', mode);
-  
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { userProfile } = useAuth();
-  const { canCreate, canEdit, canDelete, canView } = useTablePermissions('cp_comp_resources');
-  const { users, isLoading: usersLoading } = useSchoolUsers(true);
-  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
-  const { resources, createResource, updateResource, deleteResource, isLoading: resourcesLoading } = useCompetitionResources(competitionId);
-  const { locations, isLoading: locationsLoading, refetch: refetchLocations } = useResourceLocations(competitionId);
-
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canCreate,
+    canEdit,
+    canDelete,
+    canView
+  } = useTablePermissions('cp_comp_resources');
+  const {
+    users,
+    isLoading: usersLoading
+  } = useSchoolUsers(true);
+  const {
+    timezone,
+    isLoading: timezoneLoading
+  } = useSchoolTimezone();
+  const {
+    resources,
+    createResource,
+    updateResource,
+    deleteResource,
+    isLoading: resourcesLoading
+  } = useCompetitionResources(competitionId);
+  const {
+    locations,
+    isLoading: locationsLoading,
+    refetch: refetchLocations
+  } = useResourceLocations(competitionId);
   const existingResource = resourceId ? resources.find(r => r.id === resourceId) : null;
   const isCreateMode = mode === 'create';
   const isEditMode = mode === 'edit';
   const isViewMode = mode === 'view';
-
   const initialFormData = {
     resource: '',
     location: '',
@@ -81,15 +99,15 @@ export const CompetitionResourceRecord: React.FC = () => {
     end_time_minute: '00',
     assignment_details: ''
   };
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialFormData
   });
-
   const [currentInitialData, setCurrentInitialData] = useState<FormData>(initialFormData);
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: currentInitialData,
     currentData: form.watch(),
     enabled: !isViewMode
@@ -104,7 +122,6 @@ export const CompetitionResourceRecord: React.FC = () => {
       const endDate = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'yyyy-MM-dd') : '';
       const endHour = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'HH') : '10';
       const endMinute = existingResource.end_time ? formatInTimeZone(new Date(existingResource.end_time), timezone, 'mm') : '00';
-      
       const updatedData: FormData = {
         resource: existingResource.resource || '',
         location: existingResource.location || '',
@@ -116,7 +133,6 @@ export const CompetitionResourceRecord: React.FC = () => {
         end_time_minute: endMinute,
         assignment_details: existingResource.assignment_details || ''
       };
-      
       form.reset(updatedData);
       setCurrentInitialData(updatedData);
     }
@@ -128,21 +144,16 @@ export const CompetitionResourceRecord: React.FC = () => {
       fetchCompetitionDate();
     }
   }, [isCreateMode, competitionId, timezoneLoading]);
-
   const fetchCompetitionDate = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('start_date, end_date')
-        .eq('id', competitionId)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
       if (error) throw error;
-
       if (data?.start_date) {
         const startDate = formatInTimeZone(new Date(data.start_date), timezone, 'yyyy-MM-dd');
         const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, 'yyyy-MM-dd') : startDate;
-        
         form.setValue('start_date', startDate);
         form.setValue('end_date', endDate);
       }
@@ -150,10 +161,8 @@ export const CompetitionResourceRecord: React.FC = () => {
       console.error('Error fetching competition date:', error);
     }
   };
-
   const handleSubmit = async (data: FormData) => {
     if (!competitionId || !userProfile?.school_id) return;
-
     setIsSubmitting(true);
     try {
       let startTime = null;
@@ -176,7 +185,6 @@ export const CompetitionResourceRecord: React.FC = () => {
         const endTimeUTC = fromZonedTime(endDateTime, timezone);
         endTime = endTimeUTC.toISOString();
       }
-
       const resourceData = {
         resource: data.resource,
         location: data.location,
@@ -186,7 +194,6 @@ export const CompetitionResourceRecord: React.FC = () => {
         start_time: startTime,
         end_time: endTime
       };
-
       if (isCreateMode) {
         await createResource(resourceData);
         toast.success('Resource added successfully');
@@ -194,7 +201,6 @@ export const CompetitionResourceRecord: React.FC = () => {
         await updateResource(resourceId, resourceData);
         toast.success('Resource updated successfully');
       }
-
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
     } catch (error) {
@@ -204,10 +210,8 @@ export const CompetitionResourceRecord: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleDelete = async () => {
     if (!resourceId) return;
-
     try {
       await deleteResource(resourceId);
       toast.success('Resource deleted successfully');
@@ -217,7 +221,6 @@ export const CompetitionResourceRecord: React.FC = () => {
       toast.error('Failed to delete resource');
     }
   };
-
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -225,56 +228,41 @@ export const CompetitionResourceRecord: React.FC = () => {
       navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
     }
   };
-
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
     navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
   };
-
   const handleCancelDiscard = () => {
     setShowUnsavedDialog(false);
   };
 
   // Show loading state
   if ((isEditMode || isViewMode) && resourceId && !existingResource && !resourcesLoading) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6">
             <p>Resource not found.</p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   if ((isEditMode || isViewMode) && resourcesLoading) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6">
             <p>Loading...</p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   const pageTitle = isCreateMode ? 'Add Resource' : isEditMode ? 'Edit Resource' : 'View Resource';
   const canEditResource = isCreateMode ? canCreate : canEdit;
-
-  return (
-    <>
+  return <>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleBack}
-              className="flex items-center gap-2 hover:scale-105 transition-transform"
-            >
+            <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
               <ArrowLeft className="h-4 w-4" />
               Back to Resources
             </Button>
@@ -288,29 +276,16 @@ export const CompetitionResourceRecord: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!isViewMode && canEditResource && (
-              <>
-                {(isEditMode || isViewMode) && canDelete && (
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="flex items-center gap-2 hover:scale-105 transition-transform"
-                  >
+            {!isViewMode && canEditResource && <>
+                {(isEditMode || isViewMode) && canDelete && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                     <Trash2 className="h-4 w-4" />
                     Delete
-                  </Button>
-                )}
-                <Button 
-                  type="submit" 
-                  form="resource-form" 
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 hover:scale-105 transition-transform"
-                >
+                  </Button>}
+                <Button type="submit" form="resource-form" disabled={isSubmitting} className="flex items-center gap-2 hover:scale-105 transition-transform">
                   <Save className="h-4 w-4" />
                   {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save'}
                 </Button>
-              </>
-            )}
+              </>}
           </div>
         </div>
 
@@ -319,264 +294,170 @@ export const CompetitionResourceRecord: React.FC = () => {
           <CardHeader className="border-b border-primary/10">
             <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 py-[8px]">
             <Form {...form}>
-              <form 
-                id="resource-form" 
-                onSubmit={form.handleSubmit(handleSubmit)} 
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <form id="resource-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                   <Label htmlFor="resource" className="text-left md:text-right font-semibold">Cadet *</Label>
-                  <FormField
-                    control={form.control}
-                    name="resource"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                          disabled={isViewMode || usersLoading}
-                        >
+                  <FormField control={form.control} name="resource" render={({
+                    field
+                  }) => <FormItem>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode || usersLoading}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue 
-                                placeholder={usersLoading ? "Loading users..." : "Select a cadet"} 
-                              />
+                              <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a cadet"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {users
-                              .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name))
-                              .map(user => (
-                                <SelectItem key={user.id} value={user.id}>
+                            {users.sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name)).map(user => <SelectItem key={user.id} value={user.id}>
                                   {user.last_name}, {user.first_name}
-                                </SelectItem>
-                              ))
-                            }
+                                </SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                   <Label htmlFor="location" className="text-left md:text-right font-semibold">Location</Label>
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="location" render={({
+                    field
+                  }) => <FormItem>
                         <FormControl>
-                          <SelectWithAdd
-                            value={field.value || ''}
-                            onValueChange={field.onChange}
-                            options={locations}
-                            placeholder={locationsLoading ? "Loading locations..." : "Select or add location"}
-                            disabled={isViewMode || locationsLoading}
-                            onAddNew={refetchLocations}
-                          />
+                          <SelectWithAdd value={field.value || ''} onValueChange={field.onChange} options={locations} placeholder={locationsLoading ? "Loading locations..." : "Select or add location"} disabled={isViewMode || locationsLoading} onAddNew={refetchLocations} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <Label className="text-left md:text-right pt-2 font-semibold">Start Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
                     <div className="col-span-1">
-                      <FormField
-                        control={form.control}
-                        name="start_date"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="start_date" render={({
+                        field
+                      }) => <FormItem>
                             <FormControl>
-                              <Input
-                                type="date"
-                                disabled={isViewMode}
-                                {...field}
-                                onChange={(e) => {
-                                  field.onChange(e);
-                                  // Auto-set end date when start date changes
-                                  if (e.target.value && !form.getValues('end_date')) {
-                                    form.setValue('end_date', e.target.value);
-                                  }
-                                }}
-                              />
+                              <Input type="date" disabled={isViewMode} {...field} onChange={e => {
+                            field.onChange(e);
+                            // Auto-set end date when start date changes
+                            if (e.target.value && !form.getValues('end_date')) {
+                              form.setValue('end_date', e.target.value);
+                            }
+                          }} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                     <div>
-                      <FormField
-                        control={form.control}
-                        name="start_time_hour"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select 
-                              value={field.value} 
-                              onValueChange={field.onChange}
-                              disabled={isViewMode}
-                            >
+                      <FormField control={form.control} name="start_time_hour" render={({
+                        field
+                      }) => <FormItem>
+                            <Select value={field.value} onValueChange={field.onChange} disabled={isViewMode}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Hour" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {Array.from({ length: 24 }, (_, i) => (
-                                  <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                {Array.from({
+                              length: 24
+                            }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                     {i.toString().padStart(2, '0')}
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                     <div>
-                      <FormField
-                        control={form.control}
-                        name="start_time_minute"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select 
-                              value={field.value} 
-                              onValueChange={field.onChange}
-                              disabled={isViewMode}
-                            >
+                      <FormField control={form.control} name="start_time_minute" render={({
+                        field
+                      }) => <FormItem>
+                            <Select value={field.value} onValueChange={field.onChange} disabled={isViewMode}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Min" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                                  <SelectItem key={minute} value={minute}>
+                                {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                                     {minute}
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <Label className="text-left md:text-right pt-2 font-semibold">End Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
                     <div className="col-span-1">
-                      <FormField
-                        control={form.control}
-                        name="end_date"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="end_date" render={({
+                        field
+                      }) => <FormItem>
                             <FormControl>
-                              <Input
-                                type="date"
-                                disabled={isViewMode}
-                                {...field}
-                              />
+                              <Input type="date" disabled={isViewMode} {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                     <div>
-                      <FormField
-                        control={form.control}
-                        name="end_time_hour"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select 
-                              value={field.value} 
-                              onValueChange={field.onChange}
-                              disabled={isViewMode}
-                            >
+                      <FormField control={form.control} name="end_time_hour" render={({
+                        field
+                      }) => <FormItem>
+                            <Select value={field.value} onValueChange={field.onChange} disabled={isViewMode}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Hour" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {Array.from({ length: 24 }, (_, i) => (
-                                  <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                {Array.from({
+                              length: 24
+                            }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                     {i.toString().padStart(2, '0')}
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                     <div>
-                      <FormField
-                        control={form.control}
-                        name="end_time_minute"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select 
-                              value={field.value} 
-                              onValueChange={field.onChange}
-                              disabled={isViewMode}
-                            >
+                      <FormField control={form.control} name="end_time_minute" render={({
+                        field
+                      }) => <FormItem>
+                            <Select value={field.value} onValueChange={field.onChange} disabled={isViewMode}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Min" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                                  <SelectItem key={minute} value={minute}>
+                                {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                                     {minute}
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
                   <Label htmlFor="assignment_details" className="text-left md:text-right pt-2 font-semibold">Assignment Details</Label>
-                  <FormField
-                    control={form.control}
-                    name="assignment_details"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="assignment_details" render={({
+                    field
+                  }) => <FormItem>
                         <FormControl>
-                          <Textarea 
-                            id="assignment_details"
-                            placeholder="Enter assignment details" 
-                            disabled={isViewMode}
-                            className="resize-none"
-                            rows={4}
-                            {...field} 
-                          />
+                          <Textarea id="assignment_details" placeholder="Enter assignment details" disabled={isViewMode} className="resize-none" rows={4} {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
               </form>
             </Form>
@@ -585,16 +466,10 @@ export const CompetitionResourceRecord: React.FC = () => {
         </div>
       </div>
 
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleCancelDiscard}
-      />
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleCancelDiscard} />
 
       {/* Delete confirmation dialog */}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      {showDeleteDialog && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <Card className="w-96">
             <CardHeader>
               <CardTitle>Delete Resource</CardTitle>
@@ -602,26 +477,18 @@ export const CompetitionResourceRecord: React.FC = () => {
             <CardContent>
               <p className="mb-4">Are you sure you want to delete this resource assignment? This action cannot be undone.</p>
               <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowDeleteDialog(false)}
-                >
+                <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={() => {
-                    setShowDeleteDialog(false);
-                    handleDelete();
-                  }}
-                >
+                <Button variant="destructive" onClick={() => {
+              setShowDeleteDialog(false);
+              handleDelete();
+            }}>
                   Delete
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
-    </>
-  );
+        </div>}
+    </>;
 };
