@@ -95,9 +95,9 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (eventTypesError) throw eventTypesError;
 
-      // Create event types map
+      // Create event types map with type assertion for initials field
       const eventTypesMap = new Map(
-        eventTypesData?.map(et => [et.id, { name: et.name, initials: et.initials }]) || []
+        eventTypesData?.map((et: any) => [et.id, { name: et.name, initials: et.initials }]) || []
       );
 
       // Fetch all schedule slots for this competition
