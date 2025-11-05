@@ -294,31 +294,21 @@ export const CPCompetitionRecordPage = () => {
             // Get all events for this competition
             const { data: events, error: fetchError } = await supabase
               .from('cp_comp_events')
-              .select('id, start_time, end_time')
+              .select('id')
               .eq('competition_id', competitionId);
 
             if (fetchError) throw fetchError;
 
             if (events && events.length > 0) {
-              const startTimeDiff = oldStartDate ? newStartDate.getTime() - oldStartDate.getTime() : 0;
-              const endTimeDiff = oldEndDate ? newEndDate.getTime() - oldEndDate.getTime() : 0;
-
-              // Update each event's times
-              for (const event of events) {
-                if (event.start_time && event.end_time) {
-                  const newEventStartTime = new Date(new Date(event.start_time).getTime() + startTimeDiff).toISOString();
-                  const newEventEndTime = new Date(new Date(event.end_time).getTime() + endTimeDiff).toISOString();
-
-                  await supabase
-                    .from('cp_comp_events')
-                    .update({
-                      start_time: newEventStartTime,
-                      end_time: newEventEndTime,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('id', event.id);
-                }
-              }
+              // Update all events to use the new competition dates
+              await supabase
+                .from('cp_comp_events')
+                .update({
+                  start_time: startDateUTC,
+                  end_time: endDateUTC,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('competition_id', competitionId);
               
               toast.success(`Competition and ${events.length} event schedule(s) updated successfully`);
             } else {
