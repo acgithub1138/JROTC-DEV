@@ -14,6 +14,7 @@ import {
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useOpenCompsOpenPermissions } from "@/hooks/useModuleSpecificPermissions";
+import DOMPurify from "dompurify";
 interface Competition {
   id: string;
   name: string;
@@ -269,7 +270,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
             <div
               className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-muted rounded-md"
               dangerouslySetInnerHTML={{
-                __html: selectedSopText,
+                __html: DOMPurify.sanitize(selectedSopText),
               }}
             ></div>
           </div>

@@ -20,6 +20,7 @@ import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useOpenCompsOpenPermissions, useOpenCompsRegisteredPermissions, useOpenCompsSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
+import DOMPurify from 'dompurify';
 
 const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
@@ -27,7 +28,7 @@ const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: 
       <DialogHeader>
         <DialogTitle>Standard Operating Procedure</DialogTitle>
       </DialogHeader>
-      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sopText }} />
+      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sopText) }} />
     </DialogContent>
   </Dialog>
 );

@@ -17,6 +17,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
+import DOMPurify from 'dompurify';
 
 interface TimeSlot {
   time: Date;
@@ -998,7 +999,7 @@ export const OpenCompetitionRecord: React.FC = () => {
             <div className="max-h-[60vh] overflow-y-auto">
               <div 
                 className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-muted rounded-md" 
-                dangerouslySetInnerHTML={{ __html: competition.sop_text }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(competition.sop_text) }}
               />
             </div>
             <AlertDialogFooter>

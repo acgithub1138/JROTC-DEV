@@ -9,6 +9,7 @@ import { Calendar, MapPin, Building2, DollarSign, Users, ArrowLeft } from 'lucid
 import { format } from 'date-fns';
 import { useJudgeApplications } from '@/hooks/judges-portal/useJudgeApplications';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
+import DOMPurify from 'dompurify';
 
 export const CompetitionDetailsPage = () => {
   const { competitionId } = useParams<{ competitionId: string }>();
@@ -202,7 +203,7 @@ export const CompetitionDetailsPage = () => {
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Standard Operating Procedures</h2>
             {competition.sop_text && (
-              <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: competition.sop_text }} />
+              <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(competition.sop_text) }} />
             )}
             {competition.sop_link && (
               <Button variant="outline" asChild>
