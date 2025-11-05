@@ -4,22 +4,47 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
-/* Print styles */
+/* Print styles - Optimized for "Fit to printable area" */
 @media print {
   @page {
-    size: auto;
-    margin: 10mm;
+    size: landscape;
+    margin: 0.5in;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
   
   body {
-    zoom: fit;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    margin: 0;
+    padding: 0;
   }
   
   .schedule-print-container {
     width: 100%;
     max-width: 100%;
+    overflow: visible;
+  }
+  
+  table {
+    page-break-inside: auto;
+    width: 100%;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  /* Hide scrollbars in print */
+  .overflow-x-auto {
+    overflow: visible !important;
   }
 }
 
