@@ -78,6 +78,7 @@ export const CompetitionEventRecord: React.FC = () => {
     template_name: string;
     jrotc_program: string;
   }>>([]);
+  const [existingCompEventIds, setExistingCompEventIds] = useState<string[]>([]);
   const {
     timezone,
     isLoading: timezoneLoading
@@ -128,6 +129,16 @@ export const CompetitionEventRecord: React.FC = () => {
   const isViewMode = mode === 'view';
   const isCreateMode = mode === 'create';
 
+  // Filter out events that are already added to the competition
+  const availableEvents = React.useMemo(() => {
+    if (isEditMode && existingEvent) {
+      // In edit mode, include the current event being edited
+      return eventsWithTemplates;
+    }
+    // In create mode, exclude events that are already added
+    return eventsWithTemplates.filter(event => !existingCompEventIds.includes(event.id));
+  }, [eventsWithTemplates, existingCompEventIds, isEditMode, existingEvent]);
+
   // Fetch existing event data for edit/view modes
   useEffect(() => {
     if ((isEditMode || isViewMode) && eventId && competitionId) {
@@ -160,6 +171,7 @@ export const CompetitionEventRecord: React.FC = () => {
   useEffect(() => {
     if (competitionId) {
       fetchCompetitionProgram();
+      fetchExistingCompEvents();
     }
     if (isCreateMode && competitionId && !timezoneLoading && timezone) {
       fetchCompetitionDate();
@@ -269,6 +281,23 @@ export const CompetitionEventRecord: React.FC = () => {
       setCompetitionProgram(data?.program || null);
     } catch (error) {
       console.error('Error fetching competition program:', error);
+    }
+  };
+
+  const fetchExistingCompEvents = async () => {
+    if (!competitionId) return;
+    try {
+      const { data, error } = await supabase
+        .from('cp_comp_events')
+        .select('event')
+        .eq('competition_id', competitionId);
+      
+      if (error) throw error;
+      
+      const eventIds = data?.map(e => e.event).filter(Boolean) as string[];
+      setExistingCompEventIds(eventIds);
+    } catch (error) {
+      console.error('Error fetching existing competition events:', error);
     }
   };
 
@@ -529,7 +558,7 @@ export const CompetitionEventRecord: React.FC = () => {
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
                   <SelectContent className="z-[1000] bg-background">
-                    {eventsWithTemplates.map(event => (
+                    {availableEvents.map(event => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.name}
                       </SelectItem>
