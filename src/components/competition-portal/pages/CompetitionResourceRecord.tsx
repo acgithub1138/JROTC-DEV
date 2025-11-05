@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -265,55 +265,69 @@ export const CompetitionResourceRecord: React.FC = () => {
 
   return (
     <>
-      <div className="p-6 space-y-6">
-        <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm" onClick={handleBack}>
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Resources
-                </Button>
-                <CardTitle>{pageTitle}</CardTitle>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBack}
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Resources
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex items-center gap-2">
-                {!isViewMode && canEditResource && (
-                  <>
-                    <Button type="button" variant="outline" onClick={handleBack}>
-                      Cancel
-                    </Button>
-                    {(isEditMode || isViewMode) && canDelete && (
-                      <Button 
-                        variant="destructive" 
-                        onClick={() => setShowDeleteDialog(true)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </Button>
-                    )}
-                    <Button 
-                      type="submit" 
-                      form="resource-form" 
-                      disabled={isSubmitting}
-                    >
-                      <Save className="h-4 w-4" />
-                      {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save'}
-                    </Button>
-                  </>
-                )}
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {pageTitle}
+              </h1>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isViewMode && canEditResource && (
+              <>
+                {(isEditMode || isViewMode) && canDelete && (
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="flex items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                )}
+                <Button 
+                  type="submit" 
+                  form="resource-form" 
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                  <Save className="h-4 w-4" />
+                  {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save'}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+        <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+          <CardHeader className="border-b border-primary/10">
+            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Form {...form}>
               <form 
                 id="resource-form" 
                 onSubmit={form.handleSubmit(handleSubmit)} 
                 className="space-y-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label htmlFor="resource" className="text-right">Cadet *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+                  <Label htmlFor="resource" className="text-left md:text-right font-semibold">Cadet *</Label>
                   <FormField
                     control={form.control}
                     name="resource"
@@ -348,8 +362,8 @@ export const CompetitionResourceRecord: React.FC = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label htmlFor="location" className="text-right">Location</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+                  <Label htmlFor="location" className="text-left md:text-right font-semibold">Location</Label>
                   <FormField
                     control={form.control}
                     name="location"
@@ -371,8 +385,8 @@ export const CompetitionResourceRecord: React.FC = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-                  <Label className="text-right pt-2">Start Date & Time</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <Label className="text-left md:text-right pt-2 font-semibold">Start Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
                     <div className="col-span-1">
                       <FormField
@@ -460,8 +474,8 @@ export const CompetitionResourceRecord: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-                  <Label className="text-right pt-2">End Date & Time</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <Label className="text-left md:text-right pt-2 font-semibold">End Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
                     <div className="col-span-1">
                       <FormField
@@ -542,8 +556,8 @@ export const CompetitionResourceRecord: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-                  <Label htmlFor="assignment_details" className="text-right pt-2">Assignment Details</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                  <Label htmlFor="assignment_details" className="text-left md:text-right pt-2 font-semibold">Assignment Details</Label>
                   <FormField
                     control={form.control}
                     name="assignment_details"
@@ -554,6 +568,8 @@ export const CompetitionResourceRecord: React.FC = () => {
                             id="assignment_details"
                             placeholder="Enter assignment details" 
                             disabled={isViewMode}
+                            className="resize-none"
+                            rows={4}
                             {...field} 
                           />
                         </FormControl>
