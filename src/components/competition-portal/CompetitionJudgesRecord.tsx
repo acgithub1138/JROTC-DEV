@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, Gavel } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
+import { MultiSelectJudges } from '@/components/competition-portal/components/MultiSelectJudges';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUTC } from '@/utils/timezoneUtils';
@@ -274,42 +275,13 @@ export const CompetitionJudgesRecord = () => {
               }) => <FormItem>
                       <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
                     <FormControl>
-                      <Select onValueChange={value => {
-                    if (isEditMode) {
-                      // Edit mode: single selection
-                      field.onChange([value]);
-                    } else {
-                      // Create mode: toggle selection
-                      const current = field.value || [];
-                      if (current.includes(value)) {
-                        field.onChange(current.filter(id => id !== value));
-                      } else {
-                        field.onChange([...current, value]);
-                      }
-                    }
-                  }} value={field.value?.[0] || ''}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={isEditMode ? "Select a judge" : `${field.value?.length || 0} judge(s) selected`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableJudges.map(judge => {
-                        const isSelected = field.value?.includes(judge.id);
-                        return <SelectItem key={judge.id} value={judge.id} className={isSelected && !isEditMode ? 'bg-accent' : ''}>
-                                {isSelected && !isEditMode && '✓ '}
-                                {judge.name} {!judge.available && '(Unavailable)'}
-                              </SelectItem>;
-                      })}
-                        </SelectContent>
-                      </Select>
+                      <MultiSelectJudges 
+                        judges={availableJudges.map(j => ({ id: j.id, name: j.name }))}
+                        selectedJudgeIds={field.value || []}
+                        onChange={field.onChange}
+                        disabled={isEditMode}
+                      />
                     </FormControl>
-                    {!isEditMode && field.value && field.value.length > 0 && <div className="flex flex-wrap gap-2 mt-2">
-                        {field.value.map(judgeId => {
-                    const judge = availableJudges.find(j => j.id === judgeId);
-                    return judge ? <Badge key={judgeId} variant="secondary" className="text-sm">
-                              {judge.name}
-                            </Badge> : null;
-                  })}
-                      </div>}
                     <FormMessage />
                   </FormItem>} />
               </div>
