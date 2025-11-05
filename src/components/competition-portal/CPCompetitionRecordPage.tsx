@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trophy, Save } from 'lucide-react';
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
 import { RichTextBodyField } from '@/components/email-management/dialogs/components/RichTextBodyField';
 import { useAuth } from '@/contexts/AuthContext';
@@ -332,33 +332,59 @@ export const CPCompetitionRecordPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={handleBackClick}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">
-            {isViewMode ? 'View Competition' : isEditMode ? 'Edit Competition' : 'Create Competition'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isViewMode ? 'Competition details (read-only)' : isEditMode ? 'Update the competition details below' : 'Fill in the details to create a new competition'}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleBackClick}
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <Trophy className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {isViewMode ? 'View Competition' : isEditMode ? 'Edit Competition' : 'Create Competition'}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {isViewMode ? 'Competition details (read-only)' : isEditMode ? 'Update the competition details below' : 'Fill in the details to create a new competition'}
+              </p>
+            </div>
+          </div>
         </div>
+        {!isViewMode && (
+          <Button 
+            type="submit" 
+            form="competition-form" 
+            disabled={isSubmitting}
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
+          >
+            <Save className="h-4 w-4" />
+            {isSubmitting 
+              ? (isEditMode ? 'Updating...' : 'Creating...') 
+              : (isEditMode ? 'Update' : 'Create')
+            }
+          </Button>
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Competition Details</CardTitle>
+        <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+          <CardHeader className="border-b border-primary/10">
+            <CardTitle className="text-xl font-semibold text-foreground/90">Competition Details</CardTitle>
           </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="pt-6">
+          <form id="competition-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Competition Name & JROTC Program */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label htmlFor="name" className="text-right font-medium">
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <Label htmlFor="name" className="text-left md:text-right font-semibold">
                 Competition Name *
               </Label>
               <div className="col-span-3">
@@ -370,7 +396,7 @@ export const CPCompetitionRecordPage = () => {
                   required
                 />
               </div>
-              <Label className="text-right font-medium">JROTC Program *</Label>
+              <Label className="text-left md:text-right font-semibold">JROTC Program *</Label>
               <div className="col-span-3">
                 <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)} disabled={isViewMode}>
                   <SelectTrigger>
@@ -389,8 +415,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Description */}
-            <div className="grid grid-cols-8 items-start gap-4">
-              <Label htmlFor="description" className="text-right font-medium pt-2">
+            <div className="grid grid-cols-8 items-start gap-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+              <Label htmlFor="description" className="text-left md:text-right font-semibold pt-2">
                 Description
               </Label>
               <div className="col-span-7">
@@ -401,13 +427,14 @@ export const CPCompetitionRecordPage = () => {
                   placeholder="Enter competition description"
                   rows={3}
                   disabled={isViewMode}
+                  className="resize-none"
                 />
               </div>
             </div>
 
             {/* Start Date & Time */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label className="text-right font-medium">Start Date & Time *</Label>
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
               <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
@@ -452,8 +479,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label className="text-right font-medium">End Date & Time *</Label>
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
               <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
@@ -498,8 +525,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Registration Deadline */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label className="text-right font-medium">Registration Deadline</Label>
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <Label className="text-left md:text-right font-semibold">Registration Deadline</Label>
               <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
@@ -543,8 +570,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Hosting School & Location */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label htmlFor="hosting_school" className="text-right font-medium">
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+              <Label htmlFor="hosting_school" className="text-left md:text-right font-semibold">
                 Hosting School
               </Label>
               <div className="col-span-3">
@@ -556,7 +583,7 @@ export const CPCompetitionRecordPage = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <Label className="text-right font-medium">Location *</Label>
+              <Label className="text-left md:text-right font-semibold">Location *</Label>
               <div className="col-span-3">
                 <AddressLookupField
                   value={formData.location}
@@ -568,8 +595,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Entry Fee & Max Participants */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label className="text-right font-medium">Entry Fee</Label>
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+              <Label className="text-left md:text-right font-semibold">Entry Fee</Label>
               <div className="col-span-3">
                 <Input
                   type="number"
@@ -581,7 +608,7 @@ export const CPCompetitionRecordPage = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <Label className="text-right font-medium">Max Participants</Label>
+              <Label className="text-left md:text-right font-semibold">Max Participants</Label>
               <div className="col-span-3">
                 <Input
                   type="number"
@@ -595,8 +622,8 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Competition SOP */}
-            <div className="grid grid-cols-8 items-center gap-4">
-              <Label className="text-right font-medium">Competition SOP</Label>
+            <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Label className="text-left md:text-right font-semibold">Competition SOP</Label>
               <div className="col-span-7">
                 <Select value={formData.sop} onValueChange={(value) => updateFormData('sop', value)} disabled={isViewMode}>
                   <SelectTrigger>
@@ -613,8 +640,8 @@ export const CPCompetitionRecordPage = () => {
 
             {/* SOP Link */}
             {formData.sop === 'Link' && (
-              <div className="grid grid-cols-8 items-center gap-4">
-                <Label htmlFor="sop_link" className="text-right font-medium">
+              <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                <Label htmlFor="sop_link" className="text-left md:text-right font-semibold">
                   SOP Link
                 </Label>
                 <div className="col-span-7">
@@ -632,8 +659,8 @@ export const CPCompetitionRecordPage = () => {
 
             {/* SOP Text */}
             {formData.sop === 'Text' && (
-              <div className="grid grid-cols-8 items-start gap-4">
-                <Label className="text-right font-medium pt-2">SOP Text</Label>
+              <div className="grid grid-cols-8 items-start gap-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+                <Label className="text-left md:text-right font-semibold pt-2">SOP Text</Label>
                 <div className="col-span-7">
                   <div className="border rounded-md">
                     <ReactQuill
@@ -649,30 +676,13 @@ export const CPCompetitionRecordPage = () => {
               </div>
             )}
 
-            {/* Form Actions */}
-            {!isViewMode && (
-              <div className="flex justify-end gap-4 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBackClick}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting 
-                    ? (isEditMode ? 'Updating...' : 'Creating...') 
-                    : (isEditMode ? 'Update Competition' : 'Create Competition')
-                  }
-                </Button>
-              </div>
-            )}
+            {/* Form Actions - Only show in view mode for back button */}
             {isViewMode && (
               <div className="flex justify-end gap-4 pt-6">
                 <Button 
                   type="button"
                   onClick={handleBackClick}
+                  className="hover:scale-105 transition-transform"
                 >
                   Back to Competitions
                 </Button>
