@@ -4,6 +4,10 @@ import { Trophy, Calendar, Users, Target, TrendingUp, Award } from 'lucide-react
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { RegisteredSchoolsWidget } from './dashboard/RegisteredSchoolsWidget';
+import { EventsJudgesWidget } from './dashboard/EventsJudgesWidget';
+import { JudgesStatusWidget } from './dashboard/JudgesStatusWidget';
+import { ScoreSheetsWidget } from './dashboard/ScoreSheetsWidget';
 const CompetitionDashboard = () => {
   const {
     userProfile
@@ -90,6 +94,17 @@ const CompetitionDashboard = () => {
               </p>
             </CardContent>
           </Card>)}
+      </div>
+
+      {/* Active Competition Widgets */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Active Competitions Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <RegisteredSchoolsWidget />
+          <EventsJudgesWidget />
+          <JudgesStatusWidget />
+          <ScoreSheetsWidget />
+        </div>
       </div>
 
       {/* Recent Activity */}
