@@ -215,7 +215,7 @@ export const EventScheduleView = ({
                                   </div>
                                   {/* Plain text version for print */}
                                   <div className="hidden print:block text-xs font-medium">
-                                    {selectedSchoolFilter === 'all' ? assignedSchool.initials || assignedSchool.name : assignedSchool.name}
+                                    {assignedSchool.initials || assignedSchool.name}
                                   </div>
                                 </> : <div className="text-muted-foreground text-xs">-</div>}
                             </td>;
