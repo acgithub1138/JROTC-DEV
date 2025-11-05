@@ -56,7 +56,9 @@ interface FormData {
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userProfile } = useAuth();
+  const {
+    userProfile
+  } = useAuth();
   const queryClient = useQueryClient();
 
   // Extract competition ID from pathname since route isn't parameterized
@@ -271,36 +273,30 @@ export const CompetitionEventRecord: React.FC = () => {
   const fetchCompetitionProgram = async () => {
     if (!competitionId) return;
     try {
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('program')
-        .eq('id', competitionId)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('program').eq('id', competitionId).single();
       if (error) throw error;
       setCompetitionProgram(data?.program || null);
     } catch (error) {
       console.error('Error fetching competition program:', error);
     }
   };
-
   const fetchExistingCompEvents = async () => {
     if (!competitionId) return;
     try {
-      const { data, error } = await supabase
-        .from('cp_comp_events')
-        .select('event')
-        .eq('competition_id', competitionId);
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_events').select('event').eq('competition_id', competitionId);
       if (error) throw error;
-      
       const eventIds = data?.map(e => e.event).filter(Boolean) as string[];
       setExistingCompEventIds(eventIds);
     } catch (error) {
       console.error('Error fetching existing competition events:', error);
     }
   };
-
   const fetchCompetitionDate = async () => {
     if (!competitionId || !timezone) return;
     try {
@@ -461,11 +457,14 @@ export const CompetitionEventRecord: React.FC = () => {
         if (error) throw error;
         toast.success('Event updated successfully');
       }
-      
+
       // Invalidate and refetch the events list before navigating
-      await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
-      await queryClient.refetchQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
-      
+      await queryClient.invalidateQueries({
+        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+      });
+      await queryClient.refetchQueries({
+        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+      });
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
@@ -484,11 +483,14 @@ export const CompetitionEventRecord: React.FC = () => {
       } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
       if (error) throw error;
       toast.success('Event deleted successfully');
-      
+
       // Invalidate and refetch the events list before navigating
-      await queryClient.invalidateQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
-      await queryClient.refetchQueries({ queryKey: ['competition-events', competitionId, userProfile?.school_id] });
-      
+      await queryClient.invalidateQueries({
+        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+      });
+      await queryClient.refetchQueries({
+        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+      });
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -518,12 +520,7 @@ export const CompetitionEventRecord: React.FC = () => {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleBack} 
-            className="flex items-center gap-2 hover:scale-105 transition-transform"
-          >
+          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
@@ -538,21 +535,11 @@ export const CompetitionEventRecord: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           {canEditForm && <>
-              {isEditMode && canDelete && <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={() => setShowDeleteDialog(true)} 
-                className="flex items-center gap-2 hover:scale-105 transition-transform"
-              >
+              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Trash2 className="h-4 w-4" />
                 Delete
               </Button>}
-              <Button 
-                type="submit" 
-                form="event-form" 
-                disabled={isSaving} 
-                className="flex items-center gap-2 hover:scale-105 transition-transform"
-              >
+              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Save className="h-4 w-4" />
                 {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
               </Button>
@@ -568,7 +555,7 @@ export const CompetitionEventRecord: React.FC = () => {
         <CardContent className="pt-6">
           <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="event" className="text-left md:text-right font-semibold">Event *</Label>
                 <Select value={formData.event} onValueChange={value => setFormData(prev => ({
@@ -579,11 +566,9 @@ export const CompetitionEventRecord: React.FC = () => {
                     <SelectValue placeholder="Select an event" />
                   </SelectTrigger>
                   <SelectContent className="z-[1000] bg-background">
-                    {availableEvents.map(event => (
-                      <SelectItem key={event.id} value={event.id}>
+                    {availableEvents.map(event => <SelectItem key={event.id} value={event.id}>
                         {event.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -594,14 +579,11 @@ export const CompetitionEventRecord: React.FC = () => {
                     ...prev,
                     score_sheet: value
                   }));
-                  
+
                   // Auto-fill judges_needed from template
-                  const { data: template } = await supabase
-                    .from('competition_templates')
-                    .select('judges')
-                    .eq('id', value)
-                    .single();
-                  
+                  const {
+                    data: template
+                  } = await supabase.from('competition_templates').select('judges').eq('id', value).single();
                   if (template?.judges) {
                     setFormData(prev => ({
                       ...prev,
@@ -613,18 +595,16 @@ export const CompetitionEventRecord: React.FC = () => {
                     <SelectValue placeholder="Select a score template" />
                   </SelectTrigger>
                   <SelectContent className="z-[1000] bg-background">
-                    {scoreSheets.map(sheet => (
-                      <SelectItem key={sheet.id} value={sheet.id}>
+                    {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
                         {sheet.template_name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {/* Fee & Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="fee" className="text-left md:text-right font-semibold">Fee *</Label>
                 <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
@@ -642,7 +622,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Interval & Max Participants */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="interval" className="text-left md:text-right font-semibold">Interval (minutes) *</Label>
                 <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
@@ -660,7 +640,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Start Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
@@ -723,7 +703,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Lunch Start Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-secondary/10 border border-secondary/20">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">Lunch Break</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1 flex items-center justify-center">
@@ -809,7 +789,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-1">
@@ -858,7 +838,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
 
             {/* Judges Needed */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20 mx-0 py-[8px] px-[16px]">
               <Label htmlFor="judges_needed" className="text-left md:text-right font-semibold">Judges Needed</Label>
               <Input id="judges_needed" type="number" min="0" value={formData.judges_needed} onChange={e => setFormData(prev => ({
                 ...prev,
@@ -867,7 +847,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
               <Label htmlFor="notes" className="mt-2 text-left md:text-right font-semibold">Notes</Label>
               <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
                 ...prev,
