@@ -86,8 +86,8 @@ export const AllQuestionsStep = ({
     const questionElement = questionRefs.current[fieldId];
     const container = scrollContainerRef.current;
     if (questionElement && container) {
-      // If not first question, try to show previous question too
-      if (currentIndex > 0) {
+      // Only scroll after Q2 (when moving from Q2 to Q3 and beyond)
+      if (currentIndex >= 1) {
         const prevFieldId = fields[currentIndex - 1].id;
         const prevElement = questionRefs.current[prevFieldId];
         if (prevElement) {
