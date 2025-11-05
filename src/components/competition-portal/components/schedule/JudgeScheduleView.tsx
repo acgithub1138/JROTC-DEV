@@ -116,7 +116,7 @@ export const JudgeScheduleView = ({
                   {timeline.events.map(event => {
                   // Get location from the first judge assignment for this event
                   const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
-                  return <th key={event.id} className="text-center p-4 min-w-[150px]">
+                  return <th key={event.id} className="text-center p-4 min-w-[150px] py-[8px]">
                         <div className="font-medium text-sm truncate" title={event.name}>
                           {event.name}
                         </div>
