@@ -241,7 +241,7 @@ export const AllQuestionsStep = ({
           }
         };
         return <div className="space-y-4">
-            {field.penaltyType === "points" && field.pointValue && <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+            {field.penaltyType === "points" && field.pointValue && <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20 py-[4px] px-[4px]">
                 <p className="text-sm font-medium text-destructive">Each violation: {field.pointValue} points</p>
               </div>}
             {(field.penaltyType === "split" || field.splitFirstValue && field.splitSubsequentValue) && <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
@@ -343,9 +343,7 @@ export const AllQuestionsStep = ({
                       <h3 className="font-semibold truncate">{field.name}</h3>
                     </div>
                     {isAnswered && <Badge className="bg-blue-600 hover:bg-blue-600 text-white text-base shrink-0">
-                        {(field.type === "penalty" || field.type === "penalty_checkbox") 
-                          ? formatPenaltyDeduction(field, answers[field.id]) 
-                          : answers[field.id]}
+                        {field.type === "penalty" || field.type === "penalty_checkbox" ? formatPenaltyDeduction(field, answers[field.id]) : answers[field.id]}
                       </Badge>}
                     <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform shrink-0", isExpanded && "transform rotate-180")} />
                   </div>
