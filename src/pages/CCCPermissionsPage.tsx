@@ -8,42 +8,45 @@ import { useDynamicRoles } from '@/hooks/useDynamicRoles';
 import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
-
 import { PortalPermissionsTable } from '@/components/role-management/PortalPermissionsTable';
 import ProtectedRoute from '@/components/ProtectedRoute';
-
 const CCCPermissionsPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const [localPermissions, setLocalPermissions] = useState<Record<string, Record<string, boolean>>>({});
   const [pendingCells, setPendingCells] = useState<Set<string>>(new Set());
-  
   const cellKey = (moduleId: string, actionId: string) => `${moduleId}:${actionId}`;
   const isCellPending = (moduleId: string, actionId: string) => pendingCells.has(cellKey(moduleId, actionId));
-  
   const {
     modules,
     actions,
     updatePermission,
     refreshData
   } = useRoleManagement();
-  
   const {
     allRoles,
     isLoadingAllRoles,
     error: rolesError
   } = useDynamicRoles();
-  
-  const { data: permissionTest } = usePermissionTest();
-  const { toast } = useToast();
+  const {
+    data: permissionTest
+  } = usePermissionTest();
+  const {
+    toast
+  } = useToast();
 
   // Convert dynamic roles to the expected format
   const availableRoles = useMemo(() => {
     if (!allRoles?.length) {
-      return [
-        { value: 'instructor' as UserRole, label: 'Instructor' },
-        { value: 'command_staff' as UserRole, label: 'Command Staff' },
-        { value: 'cadet' as UserRole, label: 'Cadet' }
-      ];
+      return [{
+        value: 'instructor' as UserRole,
+        label: 'Instructor'
+      }, {
+        value: 'command_staff' as UserRole,
+        label: 'Command Staff'
+      }, {
+        value: 'cadet' as UserRole,
+        label: 'Cadet'
+      }];
     }
     return allRoles.map(role => ({
       value: role.role_name as UserRole,
@@ -52,60 +55,59 @@ const CCCPermissionsPage: React.FC = () => {
   }, [allRoles]);
 
   // Use role-scoped permissions map
-  const { rolePermissionsMap } = useRolePermissionMap(selectedRole);
-  
+  const {
+    rolePermissionsMap
+  } = useRolePermissionMap(selectedRole);
+
   // Sync local permissions with fetched permissions
   useEffect(() => {
     setLocalPermissions(rolePermissionsMap);
   }, [rolePermissionsMap]);
-  
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
     const key = cellKey(moduleId, actionId);
     const previous = localPermissions;
-
     setPendingCells(prev => new Set(prev).add(key));
     setLocalPermissions(prev => ({
       ...prev,
       [moduleId]: {
         ...(prev[moduleId] || {}),
-        [actionId]: enabled,
-      },
-    }));
-
-    updatePermission(
-      { role: selectedRole, moduleId, actionId, enabled },
-      {
-        onSuccess: () => {
-          setPendingCells(prev => {
-            const next = new Set(prev);
-            next.delete(key);
-            return next;
-          });
-          toast({
-            title: 'Permission updated',
-            description: `${enabled ? 'Enabled' : 'Disabled'} permission successfully.`,
-          });
-        },
-        onError: (error: any) => {
-          setPendingCells(prev => {
-            const next = new Set(prev);
-            next.delete(key);
-            return next;
-          });
-          setLocalPermissions(previous);
-          toast({
-            title: 'Error updating permission',
-            description: error.message,
-            variant: 'destructive',
-          });
-        },
+        [actionId]: enabled
       }
-    );
+    }));
+    updatePermission({
+      role: selectedRole,
+      moduleId,
+      actionId,
+      enabled
+    }, {
+      onSuccess: () => {
+        setPendingCells(prev => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+        toast({
+          title: 'Permission updated',
+          description: `${enabled ? 'Enabled' : 'Disabled'} permission successfully.`
+        });
+      },
+      onError: (error: any) => {
+        setPendingCells(prev => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+        setLocalPermissions(previous);
+        toast({
+          title: 'Error updating permission',
+          description: error.message,
+          variant: 'destructive'
+        });
+      }
+    });
   };
-
   if (rolesError) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <Card>
           <CardHeader>
             <CardTitle>Error Loading Roles</CardTitle>
@@ -120,26 +122,14 @@ const CCCPermissionsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <ProtectedRoute module="ccc_permissions" requirePermission="read">
+  return <ProtectedRoute module="ccc_permissions" requirePermission="read">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">CCC Permissions Management</h1>
-          <p className="text-muted-foreground">
-            Configure portal permissions and dashboard widgets for each user role.
-          </p>
-          {permissionTest && (
-            <div className="mt-2 text-sm text-muted-foreground">
-              System Status: {'success' in permissionTest && permissionTest.success ? '✅ Working' : '❌ Error'} | 
-              Current Role: {'userRole' in permissionTest ? permissionTest.userRole : 'Unknown'} | 
-              Can Read Users: {'canReadUsers' in permissionTest ? permissionTest.canReadUsers ? '✅' : '❌' : '❌'} | 
-              Can Create Users: {'canCreateUsers' in permissionTest ? permissionTest.canCreateUsers ? '✅' : '❌' : '❌'}
-            </div>
-          )}
+          <h1 className="text-3xl font-bold">CCC Portal Permissions</h1>
+          
+          {permissionTest}
         </div>
 
         <Card className="mb-6">
@@ -155,19 +145,13 @@ const CCCPermissionsPage: React.FC = () => {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {isLoadingAllRoles ? (
-                        <SelectItem value="loading" disabled>
+                      {isLoadingAllRoles ? <SelectItem value="loading" disabled>
                           Loading roles...
-                        </SelectItem>
-                      ) : (
-                        availableRoles.map(role => (
-                          <SelectItem key={role.value} value={role.value}>
+                        </SelectItem> : availableRoles.map(role => <SelectItem key={role.value} value={role.value}>
                             <div className="flex items-center justify-between w-full">
                               <span>{role.label}</span>
                             </div>
-                          </SelectItem>
-                        ))
-                      )}
+                          </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -180,19 +164,10 @@ const CCCPermissionsPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PortalPermissionsTable 
-              portal="ccc" 
-              modules={modules} 
-              actions={actions} 
-              rolePermissions={localPermissions} 
-              isCellPending={isCellPending}
-              handlePermissionChange={handlePermissionChange} 
-            />
+            <PortalPermissionsTable portal="ccc" modules={modules} actions={actions} rolePermissions={localPermissions} isCellPending={isCellPending} handlePermissionChange={handlePermissionChange} />
           </CardContent>
         </Card>
       </div>
-    </ProtectedRoute>
-  );
+    </ProtectedRoute>;
 };
-
 export default CCCPermissionsPage;
