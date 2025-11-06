@@ -258,12 +258,12 @@ export const AllQuestionsStep = ({
               </div>}
 
             <div className="flex gap-2 justify-center">
-              <Button type="button" variant="outline" size="lg" onClick={handleDecrement} className="h-16 w-16 p-0">
-                <Minus className="h-6 w-6" />
+              <Button type="button" variant="outline" size="lg" onClick={handleDecrement} className="h-8 w-8 p-0">
+                <Minus className="h-4 w-4" />
               </Button>
-              <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue ?? ""} onChange={e => handleValueChange(e.target.value)} placeholder="0" className="h-16 w-20 text-center text-lg" />
-              <Button type="button" variant="outline" size="lg" onClick={handleIncrement} className="h-16 w-16 p-0">
-                <Plus className="h-6 w-6" />
+              <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue ?? ""} onChange={e => handleValueChange(e.target.value)} placeholder="0" className="h-8 w-16 text-center text-base" />
+              <Button type="button" variant="outline" size="lg" onClick={handleIncrement} className="h-8 w-8 p-0">
+                <Plus className="h-4 w-4" />
               </Button>
             </div>
           </div>;
