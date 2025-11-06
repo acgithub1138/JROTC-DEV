@@ -8,7 +8,7 @@ import { useDynamicRoles } from '@/hooks/useDynamicRoles';
 import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
-import { AddRoleDialog } from '@/components/role-management/AddRoleDialog';
+
 import { DashboardWidgetsTable } from '@/components/role-management/DashboardWidgetsTable';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -173,13 +173,10 @@ const WidgetPermissionsPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <AddRoleDialog />
-                <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Refresh
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
