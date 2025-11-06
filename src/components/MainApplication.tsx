@@ -325,6 +325,7 @@ const MainApplication = () => {
             <Route path="competition-portal/open-competitions" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/open-competitions/:competitionId/open_comp_record" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/my-competitions" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/my-competitions-analytics" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/my-competitions/*" element={<CompetitionPortalLayout />} />
             
             <Route path="*" element={<NotFound />} />

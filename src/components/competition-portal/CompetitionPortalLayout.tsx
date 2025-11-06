@@ -5,6 +5,7 @@ import { CompetitionSidebar } from './CompetitionSidebar';
 import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
 import MyCompetitionsPage from './my-competitions/MyCompetitionsPage';
+import MyCompetitionsAnalyticsPage from './my-competitions/MyCompetitionsAnalyticsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
@@ -47,6 +48,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/dashboard': 'cp_dashboard',
     '/app/competition-portal/competitions': 'cp_competitions',
     '/app/competition-portal/my-competitions': 'competitions',
+    '/app/competition-portal/my-competitions-analytics': 'my_competitions_analytics',
     '/app/competition-portal/score-sheets': 'cp_score_sheets',
     '/app/competition-portal/judges': 'cp_judges',
     '/app/competition-portal/analytics': 'analytics',
@@ -59,6 +61,7 @@ const CompetitionPortalLayout = () => {
     'cp_dashboard': '/app/competition-portal/dashboard',
     'cp_competitions': '/app/competition-portal/competitions',
     'competitions': '/app/competition-portal/my-competitions',
+    'my_competitions_analytics': '/app/competition-portal/my-competitions-analytics',
     'cp_score_sheets': '/app/competition-portal/score-sheets',
     'cp_judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
@@ -79,6 +82,7 @@ const CompetitionPortalLayout = () => {
       '/competitions': 'cp_competitions',
       '/competition-details': 'cp_competitions',
       '/my-competitions': 'competitions',
+      '/my-competitions-analytics': 'my_competitions_analytics',
       '/score-sheets': 'cp_score_sheets',
       '/judges': 'cp_judges',
       '/open-competitions': 'open_competitions',
@@ -139,6 +143,8 @@ const CompetitionPortalLayout = () => {
       return <AddCompetitionPage />;
     } else if (path === '/app/competition-portal/my-competitions') {
       return <MyCompetitionsPage />;
+    } else if (path === '/app/competition-portal/my-competitions-analytics') {
+      return <MyCompetitionsAnalyticsPage />;
     } else if (path.startsWith('/app/competition-portal/my-competitions/score-sheets/')) {
       return <ScoreSheetPage />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/events_record')) {

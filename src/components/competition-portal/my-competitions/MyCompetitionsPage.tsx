@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useModuleTabs } from '@/hooks/useModuleTabs';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
-import { ReportsTab } from './tabs/ReportsTab';
-import { useCompetitionPermissions, useMyCompetitionsPermissions, useMyCompetitionsReportsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionPermissions, useMyCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const MyCompetitionsPage = () => {
   // Use hardcoded parent module ID for now  
@@ -15,12 +14,10 @@ const MyCompetitionsPage = () => {
   } = useCompetitionPermissions();
   
   const { canAccess: canAccessMyCompetitions } = useMyCompetitionsPermissions();
-  const { canAccess: canAccessReports } = useMyCompetitionsReportsPermissions();
 
   // Filter tabs based on permissions
   const filteredTabs = tabs.filter(tab => {
     if (tab.name === 'competitions') return canAccessMyCompetitions;
-    if (tab.name === 'reports') return canAccessReports;
     return false; // Default to false for unknown tabs
   });
 
@@ -57,7 +54,6 @@ const MyCompetitionsPage = () => {
             <TabsContent key={tab.id} value={tab.name} className="space-y-6">
               {/* Render tab content based on tab name */}
               {tab.name === 'competitions' && canAccessMyCompetitions && <CompetitionsTab readOnly={!canCreate} />}
-              {tab.name === 'reports' && canAccessReports && <ReportsTab />}
             </TabsContent>
           ))}
         </Tabs>
