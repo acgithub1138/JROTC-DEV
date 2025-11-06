@@ -220,9 +220,13 @@ const ModulesManagement: React.FC = () => {
   };
   const handleSave = () => {
     if (!editingModule) return;
+    const saveData = {
+      ...editForm,
+      parent_module: editForm.parent_module || null
+    };
     updateMutation.mutate({
       id: editingModule,
-      ...editForm
+      ...saveData
     });
   };
   const handleCancel = () => {
@@ -231,7 +235,11 @@ const ModulesManagement: React.FC = () => {
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    const submitData = {
+      ...formData,
+      parent_module: formData.parent_module || null
+    };
+    createMutation.mutate(submitData);
   };
   const openIconModal = (type: 'create' | 'edit') => {
     setIconModalType(type);
