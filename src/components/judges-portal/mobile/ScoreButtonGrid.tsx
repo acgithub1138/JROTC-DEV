@@ -14,19 +14,15 @@ export const ScoreButtonGrid = ({
   onSelect,
   startFrom = 0 
 }: ScoreButtonGridProps) => {
-  // Calculate columns based on maxValue
-  // For 0-7: 2 columns, For 8+: 6 columns
-  const columns = maxValue <= 7 ? 2 : 6;
+  // Always use 10 columns for all number questions
+  const columns = 10;
   
   // Generate array of values from high to low
   const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => maxValue - i);
   
   return (
     <div 
-      className={cn(
-        "grid w-full",
-        columns === 2 ? "grid-cols-2 gap-3" : "grid-cols-6 gap-1.5"
-      )}
+      className="grid w-full grid-cols-10 gap-1.5"
     >
       {values.map((value) => (
         <Button
