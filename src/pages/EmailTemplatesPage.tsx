@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 
 const EmailTemplatesPage: React.FC = () => {
   return (
-    <ProtectedRoute module="email" requirePermission="read">
+    <ProtectedRoute module="email_templates" requirePermission="read">
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-3">
           <Mail className="w-8 h-8 text-primary" />

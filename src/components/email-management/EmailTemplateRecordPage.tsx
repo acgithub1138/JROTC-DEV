@@ -53,7 +53,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
   } = useEmailTemplates();
   
   const { userProfile } = useAuth();
-  const permissions = useTablePermissions('email_management');
+  const permissions = useTablePermissions('email_templates');
   const {
     data: availableTables = []
   } = useAvailableTables();

@@ -26,7 +26,7 @@ export const useEmailTemplates = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userProfile } = useAuth();
-  const { canView, canViewDetails, canEdit, canDelete, canCreate } = useTablePermissions('email');
+  const { canView, canViewDetails, canEdit, canDelete, canCreate } = useTablePermissions('email_templates');
   const [showOnlyMyTemplates, setShowOnlyMyTemplates] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
