@@ -65,6 +65,8 @@ const fetchCompetitionMenuItemsFromDatabase = async (
         sort_order: module.sort_order || 0
       }));
 
+    console.log('All competition modules from DB:', allCompetitionModules);
+
     // First filter by school-level flags, then by role permissions
     const schoolFilteredModules = filterCompetitionModulesBySchoolFlags(
       allCompetitionModules,
@@ -181,6 +183,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   };
   
   const handleMenuItemClick = (item: any) => {
+    console.log('Menu item clicked:', item, 'Current activeModule:', activeModule);
     navigate(item.path);
     if (isMobile && setSidebarOpen) {
       setSidebarOpen(false);
