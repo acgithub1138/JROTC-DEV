@@ -278,19 +278,24 @@ const ModulesManagement: React.FC = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
+                  <Label htmlFor="label">Display Label</Label>
+                  <Input id="label" value={formData.label} onChange={e => {
+                  const displayLabel = e.target.value;
+                  const moduleName = displayLabel.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                  setFormData({
+                    ...formData,
+                    label: displayLabel,
+                    name: moduleName
+                  });
+                }} required placeholder="e.g., Cadets, Tasks, Budget" />
+                </div>
+
+                <div>
                   <Label htmlFor="name">Module Name</Label>
                   <Input id="name" value={formData.name} onChange={e => setFormData({
                   ...formData,
                   name: e.target.value
                 })} required placeholder="e.g., cadets, tasks, budget" />
-                </div>
-
-                <div>
-                  <Label htmlFor="label">Display Label</Label>
-                  <Input id="label" value={formData.label} onChange={e => setFormData({
-                  ...formData,
-                  label: e.target.value
-                })} required placeholder="e.g., Cadets, Tasks, Budget" />
                 </div>
                 
                 <div>
