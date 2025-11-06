@@ -93,7 +93,7 @@ export const InspectionEditPage = () => {
       queryClient.invalidateQueries({ queryKey: ['uniform-inspection', inspectionId] });
       toast.success('Inspection updated successfully');
       setHasUnsavedChanges(false);
-      navigate('/app/cadets');
+      navigate(-1);
     },
     onError: (error) => {
       console.error('Error updating inspection:', error);
@@ -114,7 +114,7 @@ export const InspectionEditPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uniform-inspections'] });
       toast.success('Inspection deleted successfully');
-      navigate('/app/cadets');
+      navigate(-1);
     },
     onError: (error) => {
       console.error('Error deleting inspection:', error);
@@ -173,13 +173,13 @@ export const InspectionEditPage = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
     } else {
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
   const confirmLeave = () => {
     setShowConfirmDialog(false);
-    navigate('/app/cadets');
+    navigate(-1);
   };
 
   const saveAndLeave = async () => {
@@ -191,7 +191,7 @@ export const InspectionEditPage = () => {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">No inspection ID provided</p>
-        <Button onClick={() => navigate('/app/cadets')} className="mt-4">
+        <Button onClick={() => navigate(-1)} className="mt-4">
           Back to Cadets
         </Button>
       </div>
@@ -210,7 +210,7 @@ export const InspectionEditPage = () => {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Inspection not found</p>
-        <Button onClick={() => navigate('/app/cadets')} className="mt-4">
+        <Button onClick={() => navigate(-1)} className="mt-4">
           Back to Cadets
         </Button>
       </div>

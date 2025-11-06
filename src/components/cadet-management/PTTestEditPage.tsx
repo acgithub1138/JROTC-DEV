@@ -133,7 +133,7 @@ export const PTTestEditPage = () => {
 
     updatePTTest({ id: ptTest.id, data: updateData }, {
       onSuccess: () => {
-        navigate('/app/cadets');
+        navigate(-1);
       }
     });
   };
@@ -143,7 +143,7 @@ export const PTTestEditPage = () => {
 
     deletePTTest(ptTest.id, {
       onSuccess: () => {
-        navigate('/app/cadets');
+        navigate(-1);
       }
     });
   };
@@ -152,13 +152,13 @@ export const PTTestEditPage = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    navigate('/app/cadets');
+    navigate(-1);
   };
 
   const handleCancelClose = () => {
@@ -171,7 +171,7 @@ export const PTTestEditPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold">PT Test Not Found</h2>
           <p className="text-muted-foreground mt-2">No PT test ID provided.</p>
-          <Button onClick={() => navigate('/app/cadets')} className="mt-4">
+          <Button onClick={() => navigate(-1)} className="mt-4">
             Back to Cadets
           </Button>
         </div>
@@ -196,7 +196,7 @@ export const PTTestEditPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold">PT Test Not Found</h2>
           <p className="text-muted-foreground mt-2">The requested PT test could not be found.</p>
-          <Button onClick={() => navigate('/app/cadets')} className="mt-4">
+          <Button onClick={() => navigate(-1)} className="mt-4">
             Back to Cadets
           </Button>
         </div>

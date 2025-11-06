@@ -50,7 +50,7 @@ export const InspectionCreatePage = () => {
     if (success) {
       setHasUnsavedChanges(false);
       toast.success('Uniform inspections saved successfully');
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
@@ -58,7 +58,7 @@ export const InspectionCreatePage = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
     } else {
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
@@ -66,7 +66,7 @@ export const InspectionCreatePage = () => {
     setShowConfirmDialog(false);
     setHasUnsavedChanges(false);
     resetData();
-    navigate('/app/cadets');
+    navigate(-1);
   };
 
   const saveAndLeave = async () => {

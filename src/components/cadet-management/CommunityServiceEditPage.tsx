@@ -81,7 +81,7 @@ export const CommunityServiceEditPage: React.FC = () => {
 
     updateRecord(updateData);
     setHasUnsavedChanges(false);
-    navigate('/app/cadets');
+    navigate(-1);
   };
 
   const handleNavigation = (path: string) => {
@@ -96,10 +96,12 @@ export const CommunityServiceEditPage: React.FC = () => {
   const handleDiscardChanges = () => {
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
-    if (pendingNavigation) {
+    if (pendingNavigation === 'back') {
+      navigate(-1);
+    } else if (pendingNavigation) {
       navigate(pendingNavigation);
-      setPendingNavigation(null);
     }
+    setPendingNavigation(null);
   };
 
   const handleCancelNavigation = () => {
@@ -144,7 +146,7 @@ export const CommunityServiceEditPage: React.FC = () => {
         <div className="text-center py-8">
           <h1 className="text-2xl font-bold mb-2">Record Not Found</h1>
           <p className="text-muted-foreground mb-4">The community service record you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/app/cadets')}>
+          <Button onClick={() => navigate(-1)}>
             Back to Cadets
           </Button>
         </div>
@@ -159,7 +161,14 @@ export const CommunityServiceEditPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => handleNavigation('/app/cadets')}
+            onClick={() => {
+              if (hasUnsavedChanges) {
+                setPendingNavigation('back');
+                setShowUnsavedDialog(true);
+              } else {
+                navigate(-1);
+              }
+            }}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -262,7 +271,14 @@ export const CommunityServiceEditPage: React.FC = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => handleNavigation('/app/cadets')}
+                onClick={() => {
+                  if (hasUnsavedChanges) {
+                    setPendingNavigation('back');
+                    setShowUnsavedDialog(true);
+                  } else {
+                    navigate(-1);
+                  }
+                }}
               >
                 Cancel
               </Button>
