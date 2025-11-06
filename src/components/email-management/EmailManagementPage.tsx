@@ -1,12 +1,9 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Clock, Settings } from 'lucide-react';
+import React from 'react';
+import { Mail, Clock } from 'lucide-react';
 import { EmailQueueTab } from './tabs/EmailQueueTab';
-import { EmailRulesTab } from './tabs/EmailRulesTab';
 
 const EmailManagementPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('rules');
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -15,26 +12,17 @@ const EmailManagementPage: React.FC = () => {
         <h1 className="text-3xl font-bold">Email Management</h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="rules" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Rules
-          </TabsTrigger>
-          <TabsTrigger value="queue" className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Queue
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex items-center gap-3 mb-6">
+        <Clock className="w-5 h-5 text-primary" />
+        <div>
+          <h2 className="text-lg font-semibold">Email Queue</h2>
+          <p className="text-sm text-muted-foreground">
+            Monitor and manage email queue status
+          </p>
+        </div>
+      </div>
 
-        <TabsContent value="rules" className="space-y-4">
-          <EmailRulesTab />
-        </TabsContent>
-
-        <TabsContent value="queue" className="space-y-4">
-          <EmailQueueTab />
-        </TabsContent>
-      </Tabs>
+      <EmailQueueTab />
     </div>
   );
 };
