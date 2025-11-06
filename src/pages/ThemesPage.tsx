@@ -10,8 +10,8 @@ const ThemesPageContent: React.FC = () => {
   const { hasPermission } = usePermissionContext();
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Themes</h1>
           <p className="text-muted-foreground mt-1">
