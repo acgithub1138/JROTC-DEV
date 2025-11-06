@@ -86,13 +86,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
     });
   };
 
-  // Check if any descendant is active (recursive)
+  // Check if any descendant is active (recursive) - only checks children, not self
   const hasActiveDescendant = (item: MenuItem): boolean => {
-    if (item.id === activeModule) return true;
-    if (item.children) {
-      return item.children.some(child => hasActiveDescendant(child));
-    }
-    return false;
+    if (!item.children) return false;
+    return item.children.some(
+      (child) => child.id === activeModule || hasActiveDescendant(child)
+    );
   };
 
   // Auto-expand parent groups if child is active
@@ -152,13 +151,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                 if (!isActive) {
                   e.currentTarget.style.backgroundColor = 'transparent';
                   e.currentTarget.style.color = currentTheme.link_text;
-                }
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                // Navigate to parent path if it exists
-                if (item.path) {
-                  onModuleChange(item.id);
                 }
               }}
             >
