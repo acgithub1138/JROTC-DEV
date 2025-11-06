@@ -26,6 +26,7 @@ import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermis
 import { useEventsWithTemplates } from '@/hooks/competition-portal/useEventsWithTemplates';
 import { MultiSelectJudges } from '../components/MultiSelectJudges';
 import { MultiSelectResources } from '../components/MultiSelectResources';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   competition_event_types?: {
     name: string;
@@ -854,6 +855,19 @@ export const CompetitionEventRecord: React.FC = () => {
                 notes: e.target.value
               }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} className="resize-none" />
             </div>
+
+            {/* Attachments */}
+            {eventId && (isEditMode || isViewMode) && (
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
+                <Label className="mt-2 text-left md:text-right font-semibold">Attachments</Label>
+                <AttachmentSection
+                  recordType="cp_comp_event"
+                  recordId={eventId}
+                  canEdit={!isViewMode}
+                  showContentOnly={true}
+                />
+              </div>
+            )}
 
 
           </form>

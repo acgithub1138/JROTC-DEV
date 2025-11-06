@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
 import { convertToUTC } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface FormData {
   name: string;
   description: string;
@@ -567,6 +568,21 @@ export const CPCompetitionRecordPage = () => {
                   </div>
                 </div>
               </div>}
+
+            {/* Attachments */}
+            {competitionId && (
+              <div className="grid grid-cols-8 items-start gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <Label className="text-left md:text-right font-semibold pt-2">Attachments</Label>
+                <div className="col-span-7">
+                  <AttachmentSection
+                    recordType="cp_competition"
+                    recordId={competitionId}
+                    canEdit={!isViewMode}
+                    showContentOnly={true}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Form Actions - Only show in view mode for back button */}
             {isViewMode && <div className="flex justify-end gap-4 pt-6">
