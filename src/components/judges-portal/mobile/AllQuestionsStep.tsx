@@ -214,10 +214,6 @@ export const AllQuestionsStep = ({
                   </div>
                 </Card>
               </div>
-              {penaltyDeduction !== null && <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
-                  <p className="text-3xl font-bold text-destructive">{penaltyDeduction} points</p>
-                </div>}
             </div>;
         }
         if (field.values && field.values.length > 0) {
@@ -272,11 +268,6 @@ export const AllQuestionsStep = ({
                 </Button>
               </div>
             </div>
-
-            {penaltyDeduction !== null && <div className="text-center">
-                <p className="text-sm text-muted-foreground">Penalty Assessed:</p>
-                <p className="text-3xl font-bold text-destructive">{penaltyDeduction} points</p>
-              </div>}
           </div>;
       case "scoring_scale":
         const ranges = field.scaleRanges || {
@@ -352,7 +343,9 @@ export const AllQuestionsStep = ({
                       <h3 className="font-semibold truncate">{field.name}</h3>
                     </div>
                     {isAnswered && <Badge className="bg-blue-600 hover:bg-blue-600 text-white text-base shrink-0">
-                        {answers[field.id]}
+                        {(field.type === "penalty" || field.type === "penalty_checkbox") 
+                          ? formatPenaltyDeduction(field, answers[field.id]) 
+                          : answers[field.id]}
                       </Badge>}
                     <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform shrink-0", isExpanded && "transform rotate-180")} />
                   </div>
