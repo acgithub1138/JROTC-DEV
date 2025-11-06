@@ -121,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
       return (
         <Collapsible
           key={item.id}
-          open={isOpen || hasActiveChild}
+          open={isOpen}
           onOpenChange={() => toggleGroup(item.id)}
         >
           <CollapsibleTrigger asChild>
@@ -154,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
             >
               <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3 shrink-0" />
               <span className="flex-1">{item.label}</span>
-              {(isOpen || hasActiveChild) ? 
+              {isOpen ? 
                 <ChevronDown className="w-4 h-4 shrink-0" /> : 
                 <ChevronRight className="w-4 h-4 shrink-0" />
               }
