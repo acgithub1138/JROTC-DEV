@@ -64,6 +64,9 @@ import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 import ParentProfilePage from '@/pages/ParentProfilePage';
+import PTTestsPage from '@/pages/PTTestsPage';
+import UniformInspectionPage from '@/pages/UniformInspectionPage';
+import CommunityServicePage from '@/pages/CommunityServicePage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -229,6 +232,9 @@ const MainApplication = () => {
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
             <Route path="cadets/cadet_bulk_upload" element={<CadetBulkUploadPage />} />
             <Route path="cadets/my_service_record" element={<MyServiceRecordPage />} />
+            <Route path="cadets/pt_tests" element={<PTTestsPage />} />
+            <Route path="cadets/uniform_inspection" element={<UniformInspectionPage />} />
+            <Route path="cadets/community_service" element={<CommunityServicePage />} />
           <Route path="cadets/pt_test_create" element={<PTTestCreatePage />} />
           <Route path="cadets/pt_test_edit" element={<PTTestEditPage />} />
           <Route path="cadets/inspection_create" element={<InspectionCreatePage />} />
