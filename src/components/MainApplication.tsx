@@ -257,7 +257,7 @@ const MainApplication = () => {
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
             <Route path="email/email_preview_record" element={<EmailPreviewRecordPage />} />
             <Route path="settings" element={<SettingsPage />} />
-            <Route path="task_status_options" element={<TaskStatusOptionsPage />} />
+            <Route path="task_status" element={<TaskStatusOptionsPage />} />
             <Route path="task_priority_options" element={<TaskPriorityOptionsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />

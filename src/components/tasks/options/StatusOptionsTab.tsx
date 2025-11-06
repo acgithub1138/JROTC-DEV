@@ -26,9 +26,9 @@ export const StatusOptionsTab: React.FC = () => {
     is_active: true
   });
 
-  const canCreate = hasPermission('task_status_options', 'create');
-  const canUpdate = hasPermission('task_status_options', 'update');
-  const canDelete = hasPermission('task_status_options', 'delete');
+  const canCreate = hasPermission('task_status', 'create');
+  const canUpdate = hasPermission('task_status', 'update');
+  const canDelete = hasPermission('task_status', 'delete');
 
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();

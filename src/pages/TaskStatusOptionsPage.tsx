@@ -4,7 +4,7 @@ import { StatusOptionsTab } from '@/components/tasks/options/StatusOptionsTab';
 
 const TaskStatusOptionsPage: React.FC = () => {
   return (
-    <ProtectedRoute module="task_status_options" requirePermission="read">
+    <ProtectedRoute module="task_status" requirePermission="read">
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
