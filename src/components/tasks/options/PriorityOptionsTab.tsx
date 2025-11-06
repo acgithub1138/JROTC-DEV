@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 import { OptionDialog } from './OptionDialog';
 import { OptionsTable } from './OptionsTable';
 
@@ -14,6 +15,7 @@ interface OptionFormData {
 
 export const PriorityOptionsTab: React.FC = () => {
   const { priorityOptions, createPriorityOption, updatePriorityOption, deletePriorityOption } = useTaskPriorityOptions();
+  const { hasPermission } = usePermissionContext();
   const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
   const [editingPriority, setEditingPriority] = useState<any>(null);
   const [priorityForm, setPriorityForm] = useState<OptionFormData>({
@@ -23,6 +25,10 @@ export const PriorityOptionsTab: React.FC = () => {
     sort_order: 0,
     is_active: true
   });
+
+  const canCreate = hasPermission('task_priority_options', 'create');
+  const canUpdate = hasPermission('task_priority_options', 'update');
+  const canDelete = hasPermission('task_priority_options', 'delete');
 
   const handlePrioritySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,22 +69,24 @@ export const PriorityOptionsTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Priority Options</h3>
-        <OptionDialog
-          open={priorityDialogOpen}
-          onOpenChange={setPriorityDialogOpen}
-          formData={priorityForm}
-          setFormData={setPriorityForm}
-          onSubmit={handlePrioritySubmit}
-          isEditing={!!editingPriority}
-          type="priority"
-          optionsLength={priorityOptions.length}
-          onAddClick={handleAddPriority}
-        />
+        {canCreate && (
+          <OptionDialog
+            open={priorityDialogOpen}
+            onOpenChange={setPriorityDialogOpen}
+            formData={priorityForm}
+            setFormData={setPriorityForm}
+            onSubmit={handlePrioritySubmit}
+            isEditing={!!editingPriority}
+            type="priority"
+            optionsLength={priorityOptions.length}
+            onAddClick={handleAddPriority}
+          />
+        )}
       </div>
       <OptionsTable
         options={priorityOptions}
-        onEdit={editPriority}
-        onDelete={deletePriorityOption}
+        onEdit={canUpdate ? editPriority : undefined}
+        onDelete={canDelete ? deletePriorityOption : undefined}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useTaskStatusOptions } from '@/hooks/useTaskOptions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 import { OptionDialog } from './OptionDialog';
 import { OptionsTable } from './OptionsTable';
 
@@ -14,6 +15,7 @@ interface OptionFormData {
 
 export const StatusOptionsTab: React.FC = () => {
   const { statusOptions, createStatusOption, updateStatusOption, deleteStatusOption } = useTaskStatusOptions();
+  const { hasPermission } = usePermissionContext();
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<any>(null);
   const [statusForm, setStatusForm] = useState<OptionFormData>({
@@ -23,6 +25,10 @@ export const StatusOptionsTab: React.FC = () => {
     sort_order: 0,
     is_active: true
   });
+
+  const canCreate = hasPermission('task_status_options', 'create');
+  const canUpdate = hasPermission('task_status_options', 'update');
+  const canDelete = hasPermission('task_status_options', 'delete');
 
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,22 +69,24 @@ export const StatusOptionsTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Status Options</h3>
-        <OptionDialog
-          open={statusDialogOpen}
-          onOpenChange={setStatusDialogOpen}
-          formData={statusForm}
-          setFormData={setStatusForm}
-          onSubmit={handleStatusSubmit}
-          isEditing={!!editingStatus}
-          type="status"
-          optionsLength={statusOptions.length}
-          onAddClick={handleAddStatus}
-        />
+        {canCreate && (
+          <OptionDialog
+            open={statusDialogOpen}
+            onOpenChange={setStatusDialogOpen}
+            formData={statusForm}
+            setFormData={setStatusForm}
+            onSubmit={handleStatusSubmit}
+            isEditing={!!editingStatus}
+            type="status"
+            optionsLength={statusOptions.length}
+            onAddClick={handleAddStatus}
+          />
+        )}
       </div>
       <OptionsTable
         options={statusOptions}
-        onEdit={editStatus}
-        onDelete={deleteStatusOption}
+        onEdit={canUpdate ? editStatus : undefined}
+        onDelete={canDelete ? deleteStatusOption : undefined}
       />
     </div>
   );

@@ -75,6 +75,8 @@ import ParentProfilePage from '@/pages/ParentProfilePage';
 import PTTestsPage from '@/pages/PTTestsPage';
 import UniformInspectionPage from '@/pages/UniformInspectionPage';
 import CommunityServicePage from '@/pages/CommunityServicePage';
+import TaskStatusOptionsPage from '@/pages/TaskStatusOptionsPage';
+import TaskPriorityOptionsPage from '@/pages/TaskPriorityOptionsPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -255,6 +257,8 @@ const MainApplication = () => {
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
             <Route path="email/email_preview_record" element={<EmailPreviewRecordPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="task_status_options" element={<TaskStatusOptionsPage />} />
+            <Route path="task_priority_options" element={<TaskPriorityOptionsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
             <Route path="cadets/cadet_bulk_upload" element={<CadetBulkUploadPage />} />
@@ -335,17 +339,13 @@ const SettingsPage = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs defaultValue="incidents" className="w-full">
         <TabsList>
-          <TabsTrigger value="tasks">Task Options</TabsTrigger>
           <TabsTrigger value="incidents">Incident Options</TabsTrigger>
           <TabsTrigger value="event-types">Event Types</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="themes">Themes</TabsTrigger>
         </TabsList>
-        <TabsContent value="tasks">
-          <TaskOptionsManagement />
-        </TabsContent>
         <TabsContent value="incidents">
           <IncidentOptionsManagement />
         </TabsContent>
