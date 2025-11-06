@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
 import { useRolePermissionMap } from '@/hooks/useRolePermissionMap';
 import { useDynamicRoles } from '@/hooks/useDynamicRoles';
-import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
 import { PortalPermissionsTable } from '@/components/role-management/PortalPermissionsTable';
@@ -27,9 +26,6 @@ const CCCPermissionsPage: React.FC = () => {
     isLoadingAllRoles,
     error: rolesError
   } = useDynamicRoles();
-  const {
-    data: permissionTest
-  } = usePermissionTest();
   const {
     toast
   } = useToast();
@@ -128,8 +124,6 @@ const CCCPermissionsPage: React.FC = () => {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">CCC Portal Permissions</h1>
-          
-          {permissionTest}
         </div>
 
         <Card className="mb-6">
