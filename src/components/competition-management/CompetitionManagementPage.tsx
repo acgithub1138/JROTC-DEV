@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { TemplatesTab } from './tabs/TemplatesTab';
-import { ReportsTab } from './tabs/ReportsTab';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 const CompetitionManagementPage = () => {
   const [activeTab, setActiveTab] = useState('competitions');
@@ -17,10 +16,9 @@ const CompetitionManagementPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="competitions">My Competitions</TabsTrigger>
           <TabsTrigger value="templates">Score Sheet Templates</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         
         <TabsContent value="competitions" className="space-y-6">
@@ -29,10 +27,6 @@ const CompetitionManagementPage = () => {
         
         <TabsContent value="templates" className="space-y-6">
           <TemplatesTab readOnly={!canCreate} />
-        </TabsContent>
-        
-        <TabsContent value="reports" className="space-y-6">
-          <ReportsTab />
         </TabsContent>
       </Tabs>
     </div>;
