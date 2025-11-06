@@ -28,13 +28,11 @@ const ModulesManagement: React.FC = () => {
     toast
   } = useToast();
   const queryClient = useQueryClient();
-  const [editingModule, setEditingModule] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isIconModalOpen, setIsIconModalOpen] = useState(false);
-  const [iconModalType, setIconModalType] = useState<'create' | 'edit'>('create');
   const [sortColumn, setSortColumn] = useState<SortColumn>('sort_order');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
 
   // Form state for new module
   const [formData, setFormData] = useState({
@@ -128,8 +126,9 @@ const ModulesManagement: React.FC = () => {
       toast({
         title: 'Module updated successfully'
       });
-      setEditingModule(null);
-      setEditForm({});
+      setEditingModuleId(null);
+      resetForm();
+      setIsDialogOpen(false);
     },
     onError: (error: any) => {
       toast({
@@ -204,10 +203,11 @@ const ModulesManagement: React.FC = () => {
       is_competition_portal: false,
       sort_order: 0
     });
+    setEditingModuleId(null);
   };
   const handleEdit = (module: any) => {
-    setEditingModule(module.id);
-    setEditForm({
+    setEditingModuleId(module.id);
+    setFormData({
       name: module.name,
       label: module.label,
       icon: (module as any).icon || 'FileText',
@@ -217,21 +217,7 @@ const ModulesManagement: React.FC = () => {
       is_competition_portal: (module as any).is_competition_portal || false,
       sort_order: (module as any).sort_order || 0
     });
-  };
-  const handleSave = () => {
-    if (!editingModule) return;
-    const saveData = {
-      ...editForm,
-      parent_module: editForm.parent_module || null
-    };
-    updateMutation.mutate({
-      id: editingModule,
-      ...saveData
-    });
-  };
-  const handleCancel = () => {
-    setEditingModule(null);
-    setEditForm({});
+    setIsDialogOpen(true);
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,24 +225,21 @@ const ModulesManagement: React.FC = () => {
       ...formData,
       parent_module: formData.parent_module || null
     };
-    createMutation.mutate(submitData);
-  };
-  const openIconModal = (type: 'create' | 'edit') => {
-    setIconModalType(type);
-    setIsIconModalOpen(true);
+    
+    if (editingModuleId) {
+      updateMutation.mutate({
+        id: editingModuleId,
+        ...submitData
+      });
+    } else {
+      createMutation.mutate(submitData);
+    }
   };
   const handleIconSelect = (iconName: string) => {
-    if (iconModalType === 'create') {
-      setFormData({
-        ...formData,
-        icon: iconName
-      });
-    } else if (editingModule) {
-      setEditForm(prev => ({
-        ...prev,
-        icon: iconName
-      }));
-    }
+    setFormData({
+      ...formData,
+      icon: iconName
+    });
   };
   if (isLoading) {
     return <Card>
@@ -282,7 +265,7 @@ const ModulesManagement: React.FC = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create New Module</DialogTitle>
+                <DialogTitle>{editingModuleId ? 'Edit Module' : 'Create New Module'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -309,7 +292,7 @@ const ModulesManagement: React.FC = () => {
                 <div>
                   <Label htmlFor="icon">Icon</Label>
                   <div className="flex items-center gap-2">
-                    <Button type="button" variant="outline" onClick={() => openIconModal('create')} className="flex items-center gap-2">
+                    <Button type="button" variant="outline" onClick={() => setIsIconModalOpen(true)} className="flex items-center gap-2">
                       {formData.icon ? <>
                           {React.createElement(getIconComponent(formData.icon), {
                         className: "h-4 w-4"
@@ -375,10 +358,13 @@ const ModulesManagement: React.FC = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button type="submit" disabled={createMutation.isPending || !formData.name.trim() || !formData.label.trim()}>
-                    Create
+                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending || !formData.name.trim() || !formData.label.trim()}>
+                    {editingModuleId ? 'Save Changes' : 'Create'}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => {
+                    setIsDialogOpen(false);
+                    resetForm();
+                  }}>
                     Cancel
                   </Button>
                 </div>
@@ -436,86 +422,53 @@ const ModulesManagement: React.FC = () => {
           <TableBody>
             {modules.map(module => <TableRow key={module.id}>
                 <TableCell>
-                  {editingModule === module.id ? <Input type="number" value={editForm.sort_order || 0} onChange={e => setEditForm(prev => ({
-                ...prev,
-                sort_order: parseInt(e.target.value) || 0
-              }))} className="w-20" min="0" /> : <div className="flex items-center">
-                      <GripVertical className="w-4 h-4 text-muted-foreground" />
-                      <span className="ml-2 text-sm">{(module as any).sort_order || 0}</span>
-                    </div>}
+                  <div className="flex items-center">
+                    <GripVertical className="w-4 h-4 text-muted-foreground" />
+                    <span className="ml-2 text-sm">{(module as any).sort_order || 0}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="py-[8px]">
-                  {editingModule === module.id ? <Input value={editForm.label || ''} onChange={e => setEditForm(prev => ({
-                ...prev,
-                label: e.target.value
-              }))} className="w-full" /> : <span className="font-medium">{module.label}</span>}
+                  <span className="font-medium">{module.label}</span>
                 </TableCell>
                 <TableCell>
-                  {editingModule === module.id ? <Button variant="outline" size="sm" onClick={() => openIconModal('edit')} className="flex items-center gap-2">
-                      {React.createElement(getIconComponent(editForm.icon || 'FileText'), {
-                  className: "h-4 w-4"
-                })}
-                      <span>{editForm.icon || 'FileText'}</span>
-                    </Button> : <div className="flex items-center space-x-2">
-                      {(() => {
-                  const IconComponent = getIconComponent((module as any).icon || 'FileText');
-                  return <IconComponent className="w-4 h-4" />;
-                })()}
-                      <Badge variant="outline">{(module as any).icon || 'FileText'}</Badge>
-                    </div>}
+                  <div className="flex items-center space-x-2">
+                    {(() => {
+                      const IconComponent = getIconComponent((module as any).icon || 'FileText');
+                      return <IconComponent className="w-4 h-4" />;
+                    })()}
+                    <Badge variant="outline">{(module as any).icon || 'FileText'}</Badge>
+                  </div>
                 </TableCell>
                 <TableCell>
-                  {editingModule === module.id ? <Input value={editForm.path || ''} onChange={e => setEditForm(prev => ({
-                ...prev,
-                path: e.target.value
-              }))} className="w-full" placeholder="/app/module-name" /> : <span className="text-sm text-muted-foreground">
-                      {(module as any).path || 'Not set'}
-                    </span>}
+                  <span className="text-sm text-muted-foreground">
+                    {(module as any).path || 'Not set'}
+                  </span>
                 </TableCell>
                 <TableCell>
-                  {editingModule === module.id ? <div className="flex items-center space-x-2">
-                      <Switch checked={editForm.is_competition_portal || false} onCheckedChange={checked => setEditForm(prev => ({
-                  ...prev,
-                  is_competition_portal: checked
-                }))} />
-                      <Label className="text-sm">Competition</Label>
-                    </div> : <Badge variant={(module as any).is_competition_portal ? 'default' : 'secondary'}>
-                      {(module as any).is_competition_portal ? 'Competition' : 'CCC'}
-                    </Badge>}
+                  <Badge variant={(module as any).is_competition_portal ? 'default' : 'secondary'}>
+                    {(module as any).is_competition_portal ? 'Competition' : 'CCC'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  {editingModule === module.id ? <div className="flex items-center space-x-2">
-                      <Switch checked={editForm.is_active !== false} onCheckedChange={checked => setEditForm(prev => ({
-                  ...prev,
-                  is_active: checked
-                }))} />
-                      <Label className="text-sm">Active</Label>
-                    </div> : <Badge variant={(module as any).is_active !== false ? 'default' : 'secondary'}>
-                      {(module as any).is_active !== false ? 'Active' : 'Inactive'}
-                    </Badge>}
+                  <Badge variant={(module as any).is_active !== false ? 'default' : 'secondary'}>
+                    {(module as any).is_active !== false ? 'Active' : 'Inactive'}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingModule === module.id ? <div className="flex justify-end space-x-2">
-                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleCancel} disabled={updateMutation.isPending}>
-                        <X className="w-3 h-3" />
-                      </Button>
-                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleSave} disabled={updateMutation.isPending || !editForm.label?.trim()}>
-                        <Save className="w-3 h-3" />
-                      </Button>
-                    </div> : <div className="flex items-center justify-center gap-2">
-                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(module)} disabled={updateMutation.isPending}>
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteMutation.mutate(module.id)} disabled={deleteMutation.isPending}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>}
+                  <div className="flex items-center justify-center gap-2">
+                    <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(module)}>
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteMutation.mutate(module.id)} disabled={deleteMutation.isPending}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>)}
           </TableBody>
         </Table>
 
-        <IconSelectionModal isOpen={isIconModalOpen} onClose={() => setIsIconModalOpen(false)} selectedIcon={iconModalType === 'create' ? formData.icon : editForm.icon || ''} onIconSelect={handleIconSelect} />
+        <IconSelectionModal isOpen={isIconModalOpen} onClose={() => setIsIconModalOpen(false)} selectedIcon={formData.icon} onIconSelect={handleIconSelect} />
       </CardContent>
     </Card>;
 };
