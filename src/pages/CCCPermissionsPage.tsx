@@ -127,7 +127,7 @@ const CCCPermissionsPage: React.FC = () => {
         </div>
 
         <Card className="mb-6">
-          <CardHeader className="py-0">
+          <CardHeader className="py-[8px]">
             <CardTitle className="flex items-center justify-between py-0">
               <div className="flex items-center gap-4 mb-6">
                 <label className="text-sm font-medium whitespace-nowrap">
