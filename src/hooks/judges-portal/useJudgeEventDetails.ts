@@ -15,6 +15,7 @@ export interface EventDetails {
 export interface RegisteredSchool {
   school_id: string;
   school_name: string;
+  scheduled_time?: string | null;
 }
 
 export const useJudgeEventDetails = (eventId: string | undefined, competitionId: string | undefined) => {
@@ -61,8 +62,8 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
   });
 
   const { data: registeredSchools = [], isLoading: isLoadingSchools, error: schoolsError } = useQuery({
-    queryKey: ["judge-event-registered-schools", competitionId],
-    enabled: !!competitionId,
+    queryKey: ["judge-event-registered-schools", competitionId, eventId],
+    enabled: !!competitionId && !!eventId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cp_comp_schools")
@@ -71,15 +72,38 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
           school_name
         `)
         .eq("competition_id", competitionId as string)
-        .eq("status", "registered")
-        .order("school_name", { ascending: true });
+        .eq("status", "registered");
 
       if (error) throw error;
       
-      return (data || []).map(school => ({
+      // Fetch schedule data for these schools
+      const { data: scheduleData } = await supabase
+        .from("cp_event_schedules")
+        .select("school_id, scheduled_time")
+        .eq("competition_id", competitionId as string)
+        .eq("event_id", eventId as string);
+
+      // Create a map of school_id to scheduled_time
+      const scheduleMap = new Map(
+        scheduleData?.map(s => [s.school_id, s.scheduled_time]) || []
+      );
+      
+      // Combine school data with schedule times and sort by scheduled_time
+      const schoolsWithSchedule = (data || []).map(school => ({
         school_id: school.school_id || '',
         school_name: school.school_name || 'Unknown School',
+        scheduled_time: scheduleMap.get(school.school_id || '') || null,
       })) as RegisteredSchool[];
+
+      // Sort by scheduled_time (nulls last), then by name
+      return schoolsWithSchedule.sort((a, b) => {
+        if (!a.scheduled_time && !b.scheduled_time) {
+          return a.school_name.localeCompare(b.school_name);
+        }
+        if (!a.scheduled_time) return 1;
+        if (!b.scheduled_time) return -1;
+        return new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime();
+      });
     },
     staleTime: 0,
     refetchOnMount: true,

@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MobileNavButtons } from './MobileNavButtons';
-import { Search, CheckCircle2 } from 'lucide-react';
+import { Search, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { convertToUI } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface RegisteredSchool {
   school_id: string;
   school_name: string;
+  scheduled_time?: string | null;
 }
 interface SchoolSelectionStepProps {
   schools: RegisteredSchool[];
@@ -27,6 +30,7 @@ export const SchoolSelectionStep = ({
   isTransitioning = false
 }: SchoolSelectionStepProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { timezone } = useSchoolTimezone();
   const filteredSchools = schools.filter(school => school.school_name.toLowerCase().includes(searchQuery.toLowerCase()));
   return <div className="h-[calc(100dvh-4rem)] bg-background flex flex-col overflow-hidden">
       <div className="flex-1 min-h-0 p-6 overflow-y-auto pb-28">
@@ -83,7 +87,15 @@ export const SchoolSelectionStep = ({
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="text-lg font-medium">{school.school_name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-lg font-medium">{school.school_name}</p>
+                      {school.scheduled_time && (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground shrink-0">
+                          <Clock className="w-4 h-4" />
+                          <span>{convertToUI(school.scheduled_time, timezone, 'time')}</span>
+                        </div>
+                      )}
+                    </div>
                     {isSubmitted && (
                       <p className="text-xs text-green-700 dark:text-green-500 mt-1">Score sheet submitted</p>
                     )}
