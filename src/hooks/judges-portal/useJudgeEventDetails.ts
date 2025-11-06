@@ -65,17 +65,30 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
     queryKey: ["judge-event-registered-schools", competitionId, eventId],
     enabled: !!competitionId && !!eventId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("cp_comp_schools")
-        .select(`
-          school_id,
-          school_name
-        `)
+      // Get schools registered for THIS specific event
+      const { data: eventRegs, error: regError } = await supabase
+        .from("cp_event_registrations")
+        .select("school_id")
         .eq("competition_id", competitionId as string)
+        .eq("event_id", eventId as string)
         .eq("status", "registered");
 
-      if (error) throw error;
+      if (regError) throw regError;
       
+      // If no schools registered, return empty array
+      if (!eventRegs || eventRegs.length === 0) {
+        return [];
+      }
+
+      // Get school names for registered schools
+      const schoolIds = eventRegs.map(r => r.school_id).filter(Boolean);
+      const { data: schools, error: schoolError } = await supabase
+        .from("cp_comp_schools")
+        .select("school_id, school_name")
+        .in("school_id", schoolIds);
+
+      if (schoolError) throw schoolError;
+
       // Fetch schedule data for these schools
       const { data: scheduleData } = await supabase
         .from("cp_event_schedules")
@@ -83,16 +96,19 @@ export const useJudgeEventDetails = (eventId: string | undefined, competitionId:
         .eq("competition_id", competitionId as string)
         .eq("event_id", eventId as string);
 
-      // Create a map of school_id to scheduled_time
+      // Create maps
       const scheduleMap = new Map(
         scheduleData?.map(s => [s.school_id, s.scheduled_time]) || []
       );
+      const schoolNameMap = new Map(
+        schools?.map(s => [s.school_id, s.school_name]) || []
+      );
       
-      // Combine school data with schedule times and sort by scheduled_time
-      const schoolsWithSchedule = (data || []).map(school => ({
-        school_id: school.school_id || '',
-        school_name: school.school_name || 'Unknown School',
-        scheduled_time: scheduleMap.get(school.school_id || '') || null,
+      // Map with schedule times
+      const schoolsWithSchedule = eventRegs.map(reg => ({
+        school_id: reg.school_id || '',
+        school_name: schoolNameMap.get(reg.school_id || '') || 'Unknown School',
+        scheduled_time: scheduleMap.get(reg.school_id || '') || null,
       })) as RegisteredSchool[];
 
       // Sort by scheduled_time (nulls last), then by name
