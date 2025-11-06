@@ -317,15 +317,15 @@ const ModulesManagement: React.FC = () => {
 
                 <div>
                   <Label htmlFor="parent_module">Parent Module (optional)</Label>
-                  <Select value={formData.parent_module} onValueChange={value => setFormData({
+                  <Select value={formData.parent_module || "none"} onValueChange={value => setFormData({
                   ...formData,
-                  parent_module: value
+                  parent_module: value === "none" ? '' : value
                 })}>
                     <SelectTrigger id="parent_module">
                       <SelectValue placeholder="Select parent module" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {modules.map(module => (
                         <SelectItem key={module.id} value={module.id}>
                           {module.label}
