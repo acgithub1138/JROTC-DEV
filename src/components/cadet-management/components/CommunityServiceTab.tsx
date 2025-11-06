@@ -21,9 +21,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useIsMobile } from '@/hooks/use-mobile';
 interface CommunityServiceTabProps {
   searchTerm?: string;
+  selectedDate?: Date;
 }
 export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
-  searchTerm
+  searchTerm,
+  selectedDate
 }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -37,7 +39,6 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
     canDelete,
     canCreate
   } = useTablePermissions('community_service');
-  const [selectedDate, setSelectedDate] = useState<Date>();
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
   const {
@@ -112,35 +113,6 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
       </div>;
   }
   return <div className="space-y-6">
-      {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Date Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : <span>Filter by date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus className="p-3 pointer-events-auto" />
-              <div className="p-3 border-t">
-                <Button variant="outline" size="sm" onClick={() => setSelectedDate(undefined)} className="w-full">
-                  Clear Filter
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        {canCreate && (
-          <Button onClick={() => navigate('/app/cadets/service_record')} className="bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Community Service
-          </Button>
-        )}
-      </div>
-
       {/* Community Service Display */}
       {sortedData.length === 0 ? <Card className="p-8">
           <div className="text-center">
