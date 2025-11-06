@@ -20,10 +20,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import IncidentOptionsManagement from './incident-management/IncidentOptionsManagement';
-import ThemeManagement from './themes/ThemeManagement';
-import EventTypesManagement from './event-types/EventTypesManagement';
-import CompetitionEventTypesManagement from './competition-management/CompetitionEventTypesManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
+import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
 import CalendarEventTypesPage from '@/pages/CalendarEventTypesPage';
 import CompetitionEventTypesPage from '@/pages/CompetitionEventTypesPage';
 import ThemesPage from '@/pages/ThemesPage';
@@ -267,6 +265,9 @@ const MainApplication = () => {
             <Route path="incident_status" element={<IncidentStatusOptionsPage />} />
             <Route path="incident_priority" element={<IncidentPriorityOptionsPage />} />
             <Route path="incident_category" element={<IncidentCategoryOptionsPage />} />
+            <Route path="themes" element={<ThemesPage />} />
+            <Route path="cal_event_types" element={<CalendarEventTypesPage />} />
+            <Route path="comp_event_types" element={<CompetitionEventTypesPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
             <Route path="cadets/cadet_bulk_upload" element={<CadetBulkUploadPage />} />
