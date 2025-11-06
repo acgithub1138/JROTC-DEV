@@ -31,7 +31,9 @@ export const SchoolSelectionStep = ({
 }: SchoolSelectionStepProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { timezone } = useSchoolTimezone();
-  const filteredSchools = schools.filter(school => school.school_name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredSchools = schools
+    .filter(school => !submittedSchoolIds.has(school.school_id))
+    .filter(school => school.school_name.toLowerCase().includes(searchQuery.toLowerCase()));
   return <div className="h-[calc(100dvh-4rem)] bg-background flex flex-col overflow-hidden">
       <div className="flex-1 min-h-0 p-6 overflow-y-auto pb-28">
         <div className="mb-6">
