@@ -17,6 +17,7 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   competition_event_types?: { name: string } | null;
@@ -620,6 +621,19 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
               rows={3}
             />
           </div>
+
+          {/* Attachments */}
+          {event && (
+            <div className="space-y-2">
+              <Label>Attachments</Label>
+              <AttachmentSection
+                recordType="cp_comp_event"
+                recordId={event.id}
+                canEdit={true}
+                showContentOnly={true}
+              />
+            </div>
+          )}
 
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={handleClose}>

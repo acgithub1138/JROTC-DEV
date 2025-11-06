@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { JROTC_PROGRAM_OPTIONS } from '@/components/competition-management/utils/constants';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface Competition {
   id: string;
   name: string;
@@ -441,6 +442,19 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                 </div>
               </div>}
           </div>
+
+          {/* Attachments */}
+          {competition && (
+            <div className="space-y-2">
+              <Label>Attachments</Label>
+              <AttachmentSection
+                recordType="cp_competition"
+                recordId={competition.id}
+                canEdit={true}
+                showContentOnly={true}
+              />
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
