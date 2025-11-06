@@ -349,6 +349,7 @@ export const AllQuestionsStep = ({
                   <div className="p-4 flex items-center justify-between py-[6px]">
                     <div className="flex-1 text-left">
                       <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{field.name}</h3>
                         {isAnswered && (
                           <span className={cn(
                             "font-semibold",
@@ -359,7 +360,6 @@ export const AllQuestionsStep = ({
                             {answers[field.id]}
                           </span>
                         )}
-                        <h3 className="font-semibold">{field.name}</h3>
                       </div>
                     </div>
                     <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", isExpanded && "transform rotate-180")} />
