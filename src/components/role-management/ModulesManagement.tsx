@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Edit2, Save, X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +42,7 @@ const ModulesManagement: React.FC = () => {
     label: '',
     icon: 'FileText',
     path: '',
+    parent_module: '',
     is_active: true,
     is_competition_portal: false,
     sort_order: 0
@@ -197,6 +199,7 @@ const ModulesManagement: React.FC = () => {
       label: '',
       icon: 'FileText',
       path: '',
+      parent_module: '',
       is_active: true,
       is_competition_portal: false,
       sort_order: 0
@@ -209,6 +212,7 @@ const ModulesManagement: React.FC = () => {
       label: module.label,
       icon: (module as any).icon || 'FileText',
       path: (module as any).path || '',
+      parent_module: (module as any).parent_module || '',
       is_active: (module as any).is_active !== false,
       is_competition_portal: (module as any).is_competition_portal || false,
       sort_order: (module as any).sort_order || 0
@@ -309,6 +313,26 @@ const ModulesManagement: React.FC = () => {
                   ...formData,
                   path: e.target.value
                 })} placeholder="/app/module-name" />
+                </div>
+
+                <div>
+                  <Label htmlFor="parent_module">Parent Module (optional)</Label>
+                  <Select value={formData.parent_module} onValueChange={value => setFormData({
+                  ...formData,
+                  parent_module: value
+                })}>
+                    <SelectTrigger id="parent_module">
+                      <SelectValue placeholder="Select parent module" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {modules.map(module => (
+                        <SelectItem key={module.id} value={module.id}>
+                          {module.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
