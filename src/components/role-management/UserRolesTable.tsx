@@ -57,12 +57,7 @@ export const UserRolesTable = () => {
       </Card>;
   }
   return <Card>
-      <CardHeader>
-        <CardTitle>User Roles Management</CardTitle>
-        <CardDescription>
-          Manage existing user roles, their permissions, and assignment restrictions.
-        </CardDescription>
-      </CardHeader>
+      
       <CardContent>
         <Table>
           <TableHeader>
