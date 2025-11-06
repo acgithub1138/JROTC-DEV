@@ -63,6 +63,7 @@ import { ChainOfCommandRecordPage } from '@/components/cadets/ChainOfCommandReco
 import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
+import ModulesManagementPage from '@/pages/ModulesManagementPage';
 import ParentProfilePage from '@/pages/ParentProfilePage';
 import PTTestsPage from '@/pages/PTTestsPage';
 import UniformInspectionPage from '@/pages/UniformInspectionPage';
@@ -124,6 +125,7 @@ const MainApplication = () => {
       'calendar': '/app/calendar',
       'announcements': '/app/announcements',
       'role_management': '/app/roles',
+      'modules': '/app/modules',
       'settings': '/app/settings'
     };
     
@@ -175,6 +177,7 @@ const MainApplication = () => {
           'calendar': '/app/calendar',
           'announcements': '/app/announcements',
           'role_management': '/app/roles',
+          'modules': '/app/modules',
           'settings': '/app/settings'
         });
       }
@@ -268,6 +271,7 @@ const MainApplication = () => {
             <Route path="announcements" element={<AnnouncementManagementPage />} />
             <Route path="announcements/announcements_record" element={<AnnouncementRecordPage />} />
             <Route path="roles" element={<RoleManagementPage />} />
+            <Route path="modules" element={<ModulesManagementPage />} />
             <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}
