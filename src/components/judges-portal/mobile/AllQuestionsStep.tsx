@@ -346,23 +346,21 @@ export const AllQuestionsStep = ({
         return <Collapsible key={field.id} open={isExpanded} onOpenChange={() => toggleQuestion(field.id)}>
               <Card ref={el => questionRefs.current[field.id] = el} className={cn("overflow-hidden transition-all", isAnswered && "border-primary/50 bg-primary/5")}>
                 <CollapsibleTrigger className="w-full">
-                  <div className="p-4 flex items-center justify-between py-[6px]">
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{field.name}</h3>
-                        {isAnswered && (
-                          <span className={cn(
-                            "font-semibold",
-                            String(answers[field.id]).startsWith('-') 
-                              ? "text-destructive" 
-                              : "text-green-600"
-                          )}>
-                            {answers[field.id]}
-                          </span>
-                        )}
-                      </div>
+                  <div className="p-4 flex items-center justify-between gap-3 py-[6px]">
+                    <div className="flex-1 text-left min-w-0">
+                      <h3 className="font-semibold truncate">{field.name}</h3>
                     </div>
-                    <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", isExpanded && "transform rotate-180")} />
+                    {isAnswered && (
+                      <span className={cn(
+                        "font-semibold shrink-0",
+                        String(answers[field.id]).startsWith('-') 
+                          ? "text-destructive" 
+                          : "text-green-600"
+                      )}>
+                        {answers[field.id]}
+                      </span>
+                    )}
+                    <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform shrink-0", isExpanded && "transform rotate-180")} />
                   </div>
                 </CollapsibleTrigger>
 
