@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +8,9 @@ import { IncidentCategoryOptionsTab } from './options/IncidentCategoryOptionsTab
 
 const IncidentOptionsManagement: React.FC = () => {
   const { userProfile } = useAuth();
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
 
   // Only show for admin users since options are now global
   if (userProfile?.role !== 'admin') {
@@ -42,15 +45,15 @@ const IncidentOptionsManagement: React.FC = () => {
           </TabsList>
           
           <TabsContent value="status" className="space-y-4">
-            <IncidentStatusOptionsTab />
+            <IncidentStatusOptionsTab isDialogOpen={statusDialogOpen} setIsDialogOpen={setStatusDialogOpen} />
           </TabsContent>
           
           <TabsContent value="priority" className="space-y-4">
-            <IncidentPriorityOptionsTab />
+            <IncidentPriorityOptionsTab isDialogOpen={priorityDialogOpen} setIsDialogOpen={setPriorityDialogOpen} />
           </TabsContent>
           
           <TabsContent value="category" className="space-y-4">
-            <IncidentCategoryOptionsTab />
+            <IncidentCategoryOptionsTab isDialogOpen={categoryDialogOpen} setIsDialogOpen={setCategoryDialogOpen} />
           </TabsContent>
         </Tabs>
       </CardContent>

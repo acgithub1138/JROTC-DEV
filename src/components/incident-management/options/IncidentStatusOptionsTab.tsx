@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentOptions';
 import { OptionDialog } from '@/components/tasks/options/OptionDialog';
 import { OptionsTable } from '@/components/tasks/options/OptionsTable';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 interface OptionFormData {
   value: string;
@@ -13,9 +12,14 @@ interface OptionFormData {
   is_active: boolean;
 }
 
-export const IncidentStatusOptionsTab: React.FC = () => {
+interface IncidentStatusOptionsTabProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+export const IncidentStatusOptionsTab: React.FC<IncidentStatusOptionsTabProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const { statusOptions, createStatusOption, updateStatusOption, deleteStatusOption } = useIncidentStatusOptions();
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const { hasPermission } = usePermissionContext();
   const [editingStatus, setEditingStatus] = useState<any>(null);
   const [statusForm, setStatusForm] = useState<OptionFormData>({
     value: '',
@@ -25,6 +29,9 @@ export const IncidentStatusOptionsTab: React.FC = () => {
     is_active: true
   });
 
+  const canUpdate = hasPermission('incident_status', 'update');
+  const canDelete = hasPermission('incident_status', 'delete');
+
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingStatus) {
@@ -32,7 +39,7 @@ export const IncidentStatusOptionsTab: React.FC = () => {
     } else {
       createStatusOption(statusForm);
     }
-    setStatusDialogOpen(false);
+    setIsDialogOpen(false);
     setEditingStatus(null);
     setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0, is_active: true });
   };
@@ -46,33 +53,26 @@ export const IncidentStatusOptionsTab: React.FC = () => {
       sort_order: status.sort_order,
       is_active: status.is_active
     });
-    setStatusDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
-  const handleAddStatus = () => {
-    setEditingStatus(null);
-    setStatusForm({ 
-      value: '', 
-      label: '', 
-      color_class: 'bg-gray-100 text-gray-800', 
-      sort_order: statusOptions.length + 1, 
-      is_active: true 
-    });
-    setStatusDialogOpen(true);
-  };
+  React.useEffect(() => {
+    if (isDialogOpen && !editingStatus) {
+      setStatusForm({ 
+        value: '', 
+        label: '', 
+        color_class: 'bg-gray-100 text-gray-800', 
+        sort_order: statusOptions.length + 1, 
+        is_active: true 
+      });
+    }
+  }, [isDialogOpen, editingStatus, statusOptions.length]);
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Incident Status Options</h3>
-        <Button onClick={handleAddStatus}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add incident status
-        </Button>
-      </div>
       <OptionDialog
-        open={statusDialogOpen}
-        onOpenChange={setStatusDialogOpen}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         formData={statusForm}
         setFormData={setStatusForm}
         onSubmit={handleStatusSubmit}
@@ -81,8 +81,8 @@ export const IncidentStatusOptionsTab: React.FC = () => {
       />
       <OptionsTable
         options={statusOptions}
-        onEdit={editStatus}
-        onDelete={deleteStatusOption}
+        onEdit={canUpdate ? editStatus : undefined}
+        onDelete={canDelete ? deleteStatusOption : undefined}
       />
     </div>
   );

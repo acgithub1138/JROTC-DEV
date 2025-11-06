@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useIncidentPriorityOptions } from '@/hooks/incidents/useIncidentOptions';
 import { OptionDialog } from '@/components/tasks/options/OptionDialog';
 import { OptionsTable } from '@/components/tasks/options/OptionsTable';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 interface OptionFormData {
   value: string;
@@ -13,9 +12,14 @@ interface OptionFormData {
   is_active: boolean;
 }
 
-export const IncidentPriorityOptionsTab: React.FC = () => {
+interface IncidentPriorityOptionsTabProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+export const IncidentPriorityOptionsTab: React.FC<IncidentPriorityOptionsTabProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const { priorityOptions, createPriorityOption, updatePriorityOption, deletePriorityOption } = useIncidentPriorityOptions();
-  const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
+  const { hasPermission } = usePermissionContext();
   const [editingPriority, setEditingPriority] = useState<any>(null);
   const [priorityForm, setPriorityForm] = useState<OptionFormData>({
     value: '',
@@ -25,6 +29,9 @@ export const IncidentPriorityOptionsTab: React.FC = () => {
     is_active: true
   });
 
+  const canUpdate = hasPermission('incident_priority', 'update');
+  const canDelete = hasPermission('incident_priority', 'delete');
+
   const handlePrioritySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingPriority) {
@@ -32,7 +39,7 @@ export const IncidentPriorityOptionsTab: React.FC = () => {
     } else {
       createPriorityOption(priorityForm);
     }
-    setPriorityDialogOpen(false);
+    setIsDialogOpen(false);
     setEditingPriority(null);
     setPriorityForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0, is_active: true });
   };
@@ -46,33 +53,26 @@ export const IncidentPriorityOptionsTab: React.FC = () => {
       sort_order: priority.sort_order,
       is_active: priority.is_active
     });
-    setPriorityDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
-  const handleAddPriority = () => {
-    setEditingPriority(null);
-    setPriorityForm({ 
-      value: '', 
-      label: '', 
-      color_class: 'bg-gray-100 text-gray-800', 
-      sort_order: priorityOptions.length + 1, 
-      is_active: true 
-    });
-    setPriorityDialogOpen(true);
-  };
+  React.useEffect(() => {
+    if (isDialogOpen && !editingPriority) {
+      setPriorityForm({ 
+        value: '', 
+        label: '', 
+        color_class: 'bg-gray-100 text-gray-800', 
+        sort_order: priorityOptions.length + 1, 
+        is_active: true 
+      });
+    }
+  }, [isDialogOpen, editingPriority, priorityOptions.length]);
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Incident Priority Options</h3>
-        <Button onClick={handleAddPriority}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add incident priority
-        </Button>
-      </div>
       <OptionDialog
-        open={priorityDialogOpen}
-        onOpenChange={setPriorityDialogOpen}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         formData={priorityForm}
         setFormData={setPriorityForm}
         onSubmit={handlePrioritySubmit}
@@ -81,8 +81,8 @@ export const IncidentPriorityOptionsTab: React.FC = () => {
       />
       <OptionsTable
         options={priorityOptions}
-        onEdit={editPriority}
-        onDelete={deletePriorityOption}
+        onEdit={canUpdate ? editPriority : undefined}
+        onDelete={canDelete ? deletePriorityOption : undefined}
       />
     </div>
   );

@@ -77,6 +77,9 @@ import UniformInspectionPage from '@/pages/UniformInspectionPage';
 import CommunityServicePage from '@/pages/CommunityServicePage';
 import TaskStatusOptionsPage from '@/pages/TaskStatusOptionsPage';
 import TaskPriorityOptionsPage from '@/pages/TaskPriorityOptionsPage';
+import IncidentStatusOptionsPage from '@/pages/IncidentStatusOptionsPage';
+import IncidentPriorityOptionsPage from '@/pages/IncidentPriorityOptionsPage';
+import IncidentCategoryOptionsPage from '@/pages/IncidentCategoryOptionsPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -259,6 +262,9 @@ const MainApplication = () => {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="task_status" element={<TaskStatusOptionsPage />} />
             <Route path="task_priority" element={<TaskPriorityOptionsPage />} />
+            <Route path="incident_status" element={<IncidentStatusOptionsPage />} />
+            <Route path="incident_priority" element={<IncidentPriorityOptionsPage />} />
+            <Route path="incident_category" element={<IncidentCategoryOptionsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
             <Route path="cadets/cadet_bulk_upload" element={<CadetBulkUploadPage />} />
