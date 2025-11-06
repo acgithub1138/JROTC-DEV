@@ -65,6 +65,7 @@ import TeamRecordPage from '@/components/teams/TeamRecordPage';
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 import ModulesManagementPage from '@/pages/ModulesManagementPage';
 import ActionsManagementPage from '@/pages/ActionsManagementPage';
+import CCCPermissionsPage from '@/pages/CCCPermissionsPage';
 import ParentProfilePage from '@/pages/ParentProfilePage';
 import PTTestsPage from '@/pages/PTTestsPage';
 import UniformInspectionPage from '@/pages/UniformInspectionPage';
@@ -128,6 +129,7 @@ const MainApplication = () => {
       'role_management': '/app/roles',
       'modules': '/app/modules',
       'actions': '/app/actions',
+      'ccc_permissions': '/app/ccc_permissions',
       'settings': '/app/settings'
     };
     
@@ -181,6 +183,7 @@ const MainApplication = () => {
           'role_management': '/app/roles',
           'modules': '/app/modules',
           'actions': '/app/actions',
+          'ccc_permissions': '/app/ccc_permissions',
           'settings': '/app/settings'
         });
       }
@@ -276,6 +279,7 @@ const MainApplication = () => {
             <Route path="roles" element={<RoleManagementPage />} />
             <Route path="modules" element={<ModulesManagementPage />} />
             <Route path="actions" element={<ActionsManagementPage />} />
+            <Route path="ccc_permissions" element={<CCCPermissionsPage />} />
             <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}
