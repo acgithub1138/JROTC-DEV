@@ -10,15 +10,20 @@ import { Edit, Edit2, Save, X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-export const ActionsManagement: React.FC = () => {
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface ActionsManagementProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+export const ActionsManagement: React.FC<ActionsManagementProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const {
     toast
   } = useToast();
   const queryClient = useQueryClient();
   const [editingAction, setEditingAction] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Form state for new action
   const [formData, setFormData] = useState({
@@ -165,18 +170,13 @@ export const ActionsManagement: React.FC = () => {
   }
   return <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Permission Actions Management
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-              resetForm();
-              setIsDialogOpen(true);
-            }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Action
-              </Button>
-            </DialogTrigger>
+        <CardTitle>Permission Actions Management</CardTitle>
+        <CardDescription>
+          Manage permission actions that can be assigned to roles for each module.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Action</DialogTitle>
@@ -233,12 +233,6 @@ export const ActionsManagement: React.FC = () => {
               </form>
             </DialogContent>
           </Dialog>
-        </CardTitle>
-        <CardDescription>
-          Manage permission actions that can be assigned to roles for each module.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
