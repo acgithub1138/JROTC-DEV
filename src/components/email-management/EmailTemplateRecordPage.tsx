@@ -177,7 +177,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
       }, {
         onSuccess: () => {
           resetChanges();
-          navigate('/app/Email Templates');
+          navigate('/app/email_templates');
           toast.success('Template updated successfully');
         }
       });
@@ -188,7 +188,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
       }, {
         onSuccess: () => {
           resetChanges();
-          navigate('/app/Email Templates');
+          navigate('/app/email_templates');
           toast.success('Template created successfully');
         }
       });
@@ -257,7 +257,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
       <div className="container mx-auto p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Template Not Found</h1>
-          <Button onClick={() => navigate('/app/Email Templates')}>
+          <Button onClick={() => navigate('/app/email_templates')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Email Templates
           </Button>
@@ -273,7 +273,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => handleNavigation('/app/Email Templates')}
+            onClick={() => handleNavigation('/app/email_templates')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Email Templates
@@ -477,7 +477,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleNavigation('/app/Email Templates')}
+              onClick={() => handleNavigation('/app/email_templates')}
             >
               Cancel
             </Button>

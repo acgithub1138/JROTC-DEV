@@ -246,7 +246,7 @@ const MainApplication = () => {
             <Route path="users" element={<UserAdminPage />} />
             <Route path="users/users_record" element={<UserRecordPage />} />
             <Route path="email" element={<EmailManagementPage />} />
-            <Route path="Email Templates" element={<EmailTemplatesPage />} />
+            <Route path="email_templates" element={<EmailTemplatesPage />} />
             <Route path="email/template_record" element={<EmailTemplateRecordPage />} />
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
             <Route path="email/email_preview_record" element={<EmailPreviewRecordPage />} />
