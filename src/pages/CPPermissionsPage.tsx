@@ -145,32 +145,30 @@ const CPPermissionsPage: React.FC = () => {
         <Card className="mb-6">
           <CardHeader className="py-0">
             <CardTitle className="flex items-center justify-between py-0">
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
+              <div className="flex items-center gap-4 mb-6">
+                <label className="text-sm font-medium whitespace-nowrap">
                   Select Role
                 </label>
-                <div className="flex items-center gap-4">
-                  <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
-                    <SelectTrigger className="w-64">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoadingAllRoles ? (
-                        <SelectItem value="loading" disabled>
-                          Loading roles...
+                <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isLoadingAllRoles ? (
+                      <SelectItem value="loading" disabled>
+                        Loading roles...
+                      </SelectItem>
+                    ) : (
+                      availableRoles.map(role => (
+                        <SelectItem key={role.value} value={role.value}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{role.label}</span>
+                          </div>
                         </SelectItem>
-                      ) : (
-                        availableRoles.map(role => (
-                          <SelectItem key={role.value} value={role.value}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>{role.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               
               <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
