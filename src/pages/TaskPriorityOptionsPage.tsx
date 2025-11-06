@@ -4,7 +4,7 @@ import { PriorityOptionsTab } from '@/components/tasks/options/PriorityOptionsTa
 
 const TaskPriorityOptionsPage: React.FC = () => {
   return (
-    <ProtectedRoute module="task_priority_options" requirePermission="read">
+    <ProtectedRoute module="task_priority" requirePermission="read">
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>

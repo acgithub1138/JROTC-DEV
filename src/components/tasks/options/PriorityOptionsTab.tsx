@@ -26,9 +26,9 @@ export const PriorityOptionsTab: React.FC = () => {
     is_active: true
   });
 
-  const canCreate = hasPermission('task_priority_options', 'create');
-  const canUpdate = hasPermission('task_priority_options', 'update');
-  const canDelete = hasPermission('task_priority_options', 'delete');
+  const canCreate = hasPermission('task_priority', 'create');
+  const canUpdate = hasPermission('task_priority', 'update');
+  const canDelete = hasPermission('task_priority', 'delete');
 
   const handlePrioritySubmit = (e: React.FormEvent) => {
     e.preventDefault();
