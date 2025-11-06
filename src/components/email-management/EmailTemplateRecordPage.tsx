@@ -177,7 +177,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
       }, {
         onSuccess: () => {
           resetChanges();
-          navigate('/app/email');
+          navigate('/app/Email Templates');
           toast.success('Template updated successfully');
         }
       });
@@ -188,7 +188,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
       }, {
         onSuccess: () => {
           resetChanges();
-          navigate('/app/email');
+          navigate('/app/Email Templates');
           toast.success('Template created successfully');
         }
       });
@@ -257,9 +257,9 @@ export const EmailTemplateRecordPage: React.FC = () => {
       <div className="container mx-auto p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Template Not Found</h1>
-          <Button onClick={() => navigate('/app/email')}>
+          <Button onClick={() => navigate('/app/Email Templates')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Email Management
+            Back to Email Templates
           </Button>
         </div>
       </div>
@@ -273,10 +273,10 @@ export const EmailTemplateRecordPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => handleNavigation('/app/email')}
+            onClick={() => handleNavigation('/app/Email Templates')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Email Management
+            Back to Email Templates
           </Button>
           <h1 className="text-3xl font-bold">{getTitle()}</h1>
         </div>
@@ -477,7 +477,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleNavigation('/app/email')}
+              onClick={() => handleNavigation('/app/Email Templates')}
             >
               Cancel
             </Button>

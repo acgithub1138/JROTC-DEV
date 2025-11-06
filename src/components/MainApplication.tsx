@@ -24,6 +24,7 @@ import ThemeManagement from './themes/ThemeManagement';
 import EventTypesManagement from './event-types/EventTypesManagement';
 import CompetitionEventTypesManagement from './competition-management/CompetitionEventTypesManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
+import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
 import { EmailTemplateRecordPage } from './email-management/EmailTemplateRecordPage';
 import { EmailPreviewRecordPage } from './email-management/EmailPreviewRecordPage';
 import { CPCompetitionRecordPage } from './competition-portal/CPCompetitionRecordPage';
@@ -245,6 +246,7 @@ const MainApplication = () => {
             <Route path="users" element={<UserAdminPage />} />
             <Route path="users/users_record" element={<UserRecordPage />} />
             <Route path="email" element={<EmailManagementPage />} />
+            <Route path="Email Templates" element={<EmailTemplatesPage />} />
             <Route path="email/template_record" element={<EmailTemplateRecordPage />} />
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
             <Route path="email/email_preview_record" element={<EmailPreviewRecordPage />} />

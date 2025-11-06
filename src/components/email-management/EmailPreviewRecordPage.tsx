@@ -31,7 +31,7 @@ export const EmailPreviewRecordPage: React.FC = () => {
     if (location.state?.from) {
       navigate(location.state.from);
     } else {
-      navigate('/app/email');
+      navigate('/app/Email Templates');
     }
   };
 
