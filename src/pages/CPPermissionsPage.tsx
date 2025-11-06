@@ -10,11 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
 import { AddRoleDialog } from '@/components/role-management/AddRoleDialog';
 import { PortalPermissionsTable } from '@/components/role-management/PortalPermissionsTable';
-import { DashboardWidgetsTable } from '@/components/role-management/DashboardWidgetsTable';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
-const CCCPermissionsPage: React.FC = () => {
+const CPPermissionsPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const [localPermissions, setLocalPermissions] = useState<Record<string, Record<string, boolean>>>({});
   const [pendingCells, setPendingCells] = useState<Set<string>>(new Set());
@@ -127,12 +125,12 @@ const CCCPermissionsPage: React.FC = () => {
   }
 
   return (
-    <ProtectedRoute module="ccc_permissions" requirePermission="read">
+    <ProtectedRoute module="cp_permissions" requirePermission="read">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">CCC Permissions Management</h1>
+          <h1 className="text-3xl font-bold">Competition Portal Permissions</h1>
           <p className="text-muted-foreground">
-            Configure portal permissions and dashboard widgets for each user role.
+            Configure competition portal permissions for each user role.
           </p>
           {permissionTest && (
             <div className="mt-2 text-sm text-muted-foreground">
@@ -185,33 +183,14 @@ const CCCPermissionsPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="ccc" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
-                <TabsTrigger value="dashboard">Dashboard Widgets</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="ccc">
-                <PortalPermissionsTable 
-                  portal="ccc" 
-                  modules={modules} 
-                  actions={actions} 
-                  rolePermissions={localPermissions} 
-                  isCellPending={isCellPending}
-                  handlePermissionChange={handlePermissionChange} 
-                />
-              </TabsContent>
-
-              <TabsContent value="dashboard">
-                <DashboardWidgetsTable
-                  modules={modules} 
-                  actions={actions} 
-                  rolePermissions={localPermissions} 
-                  isCellPending={isCellPending}
-                  handlePermissionChange={handlePermissionChange} 
-                />
-              </TabsContent>
-            </Tabs>
+            <PortalPermissionsTable 
+              portal="competition" 
+              modules={modules} 
+              actions={actions} 
+              rolePermissions={localPermissions} 
+              isCellPending={isCellPending}
+              handlePermissionChange={handlePermissionChange} 
+            />
           </CardContent>
         </Card>
       </div>
@@ -219,4 +198,4 @@ const CCCPermissionsPage: React.FC = () => {
   );
 };
 
-export default CCCPermissionsPage;
+export default CPPermissionsPage;
