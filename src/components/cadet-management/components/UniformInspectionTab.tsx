@@ -22,6 +22,7 @@ import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useIsMobile } from '@/hooks/use-mobile';
 interface UniformInspectionTabProps {
   searchTerm?: string;
+  selectedDate?: Date;
 }
 interface UniformInspection {
   id: string;
@@ -37,7 +38,8 @@ interface UniformInspection {
   };
 }
 export const UniformInspectionTab = ({
-  searchTerm: externalSearchTerm = ''
+  searchTerm: externalSearchTerm = '',
+  selectedDate
 }: UniformInspectionTabProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -56,7 +58,6 @@ export const UniformInspectionTab = ({
   } = useSchoolTimezone();
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-  const [selectedDate, setSelectedDate] = useState<Date>();
   const [showBulkDialog, setShowBulkDialog] = useState(false);
 
   // Query uniform inspections from the database
@@ -145,37 +146,6 @@ export const UniformInspectionTab = ({
       </div>;
   }
   return <div className="space-y-6">
-      {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Date Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : <span>Filter by date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus className="p-3 pointer-events-auto" />
-              <div className="p-3 border-t">
-                <Button variant="outline" size="sm" onClick={() => setSelectedDate(undefined)} className="w-full">
-                  Clear Filter
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Add Button */}
-        <div className="flex gap-2">
-          {canCreate && <Button variant="outline" onClick={() => navigate('/app/cadets/inspection_create')}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Inspection
-            </Button>}
-        </div>
-      </div>
-
       {/* Uniform Inspections Display */}
       {sortedData.length === 0 ? <Card>
           <CardContent className="text-center py-8">
