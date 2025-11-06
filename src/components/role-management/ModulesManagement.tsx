@@ -23,12 +23,20 @@ const getIconComponent = (iconName: string) => {
 };
 type SortColumn = 'sort_order' | 'label' | 'icon' | 'path' | 'is_competition_portal' | 'is_active';
 type SortDirection = 'asc' | 'desc' | null;
-const ModulesManagement: React.FC = () => {
+
+interface ModulesManagementProps {
+  isDialogOpen?: boolean;
+  setIsDialogOpen?: (open: boolean) => void;
+}
+
+const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: externalDialogOpen, setIsDialogOpen: externalSetDialogOpen }) => {
   const {
     toast
   } = useToast();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [internalDialogOpen, setInternalDialogOpen] = useState(false);
+  const isDialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
+  const setIsDialogOpen = externalSetDialogOpen || setInternalDialogOpen;
   const [isIconModalOpen, setIsIconModalOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<SortColumn>('sort_order');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -249,24 +257,15 @@ const ModulesManagement: React.FC = () => {
         </CardHeader>
       </Card>;
   }
-  return <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Permission Modules Management
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-              resetForm();
-              setIsDialogOpen(true);
-            }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Module
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingModuleId ? 'Edit Module' : 'Create New Module'}</DialogTitle>
-              </DialogHeader>
+  return <>
+    <Dialog open={isDialogOpen} onOpenChange={(open) => {
+      setIsDialogOpen(open);
+      if (!open) resetForm();
+    }}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{editingModuleId ? 'Edit Module' : 'Create New Module'}</DialogTitle>
+        </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="label">Display Label</Label>
@@ -371,6 +370,11 @@ const ModulesManagement: React.FC = () => {
               </form>
             </DialogContent>
           </Dialog>
+    
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          Permission Modules Management
         </CardTitle>
         <CardDescription>
           Manage permission modules that appear in sidebars and role permissions.
@@ -470,6 +474,7 @@ const ModulesManagement: React.FC = () => {
 
         <IconSelectionModal isOpen={isIconModalOpen} onClose={() => setIsIconModalOpen(false)} selectedIcon={formData.icon} onIconSelect={handleIconSelect} />
       </CardContent>
-    </Card>;
+    </Card>
+  </>;
 };
 export default ModulesManagement;
