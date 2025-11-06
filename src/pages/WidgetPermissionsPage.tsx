@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
 import { useRolePermissionMap } from '@/hooks/useRolePermissionMap';
 import { useDynamicRoles } from '@/hooks/useDynamicRoles';
-
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
 import { DashboardWidgetsTable } from '@/components/role-management/DashboardWidgetsTable';
@@ -129,7 +128,7 @@ const WidgetPermissionsPage: React.FC = () => {
 
         <Card className="mb-6">
           <CardHeader className="py-0">
-            <CardTitle className="flex items-center justify-between py-0">
+            <CardTitle className="flex items-center justify-between py-[8px]">
               <div className="flex items-center gap-4 mb-6">
                 <label className="text-sm font-medium whitespace-nowrap">
                   Select Role
