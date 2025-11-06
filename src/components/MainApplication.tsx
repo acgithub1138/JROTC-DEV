@@ -79,12 +79,12 @@ const MainApplication = () => {
   const getModuleFromPath = (path: string, routes: { [key: string]: string }): string => {
     if (path === '/app' || path === '/app/') return 'dashboard';
     
-    // Find module by matching path
-    const moduleEntry = Object.entries(routes).find(([_, route]) => 
-      path.startsWith(route) && route !== '/app'
-    );
+    // Find all matching routes and sort by length (longest first) to prioritize child routes
+    const matchingModules = Object.entries(routes)
+      .filter(([_, route]) => path.startsWith(route) && route !== '/app')
+      .sort((a, b) => b[1].length - a[1].length);
     
-    return moduleEntry ? moduleEntry[0] : 'dashboard';
+    return matchingModules.length > 0 ? matchingModules[0][0] : 'dashboard';
   };
 
   const [activeModule, setActiveModule] = useState(() => {
@@ -113,6 +113,9 @@ const MainApplication = () => {
       'user_admin': '/app/users',
       'email': '/app/email',
       'cadets': '/app/cadets',
+      'pt_tests': '/app/cadets/pt_tests',
+      'uniform_inspection': '/app/cadets/uniform_inspection',
+      'community_service': '/app/cadets/community_service',
       'job_board': '/app/job-board',
       'teams': '/app/teams',
       'inventory': '/app/inventory',
@@ -161,6 +164,9 @@ const MainApplication = () => {
           'user_admin': '/app/users',
           'email': '/app/email',
           'cadets': '/app/cadets',
+          'pt_tests': '/app/cadets/pt_tests',
+          'uniform_inspection': '/app/cadets/uniform_inspection',
+          'community_service': '/app/cadets/community_service',
           'job_board': '/app/job-board',
           'teams': '/app/teams',
           'inventory': '/app/inventory',

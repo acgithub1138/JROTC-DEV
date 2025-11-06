@@ -122,7 +122,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <Collapsible
           key={item.id}
           open={isOpen}
-          onOpenChange={() => toggleGroup(item.id)}
+          onOpenChange={(open) => {
+            if (open) {
+              setOpenGroups(prev => new Set(prev).add(item.id));
+            } else {
+              setOpenGroups(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(item.id);
+                return newSet;
+              });
+            }
+          }}
         >
           <CollapsibleTrigger asChild>
             <Button
