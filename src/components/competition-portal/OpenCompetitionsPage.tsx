@@ -21,17 +21,24 @@ import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useOpenCompsOpenPermissions, useOpenCompsRegisteredPermissions, useOpenCompsSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 import DOMPurify from 'dompurify';
-
-const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
-  <Dialog open={isOpen} onOpenChange={onClose}>
+const SOPTextModal = ({
+  isOpen,
+  onClose,
+  sopText
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  sopText: string;
+}) => <Dialog open={isOpen} onOpenChange={onClose}>
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Standard Operating Procedure</DialogTitle>
       </DialogHeader>
-      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sopText) }} />
+      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{
+      __html: DOMPurify.sanitize(sopText)
+    }} />
     </DialogContent>
-  </Dialog>
-);
+  </Dialog>;
 export const OpenCompetitionsPage = () => {
   const {
     toast
@@ -41,10 +48,17 @@ export const OpenCompetitionsPage = () => {
     userProfile
   } = useAuth();
   const isMobile = useIsMobile();
-  const { deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
+  const {
+    deleteEvent
+  } = useEvents({
+    eventType: '',
+    assignedTo: ''
+  });
   const openPermissions = useOpenCompsOpenPermissions();
   const registeredPermissions = useOpenCompsRegisteredPermissions();
-  const { canAccess: canAccessSchedule } = useOpenCompsSchedulePermissions();
+  const {
+    canAccess: canAccessSchedule
+  } = useOpenCompsSchedulePermissions();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -101,7 +115,6 @@ export const OpenCompetitionsPage = () => {
     enabled: !!userProfile?.school_id
   });
 
-
   // Query to get current registrations for the selected competition
   const {
     data: currentRegistrations
@@ -152,7 +165,6 @@ export const OpenCompetitionsPage = () => {
         ascending: true
       });
       if (error) throw error;
-      
       const transformedData = data.map(event => ({
         ...event,
         event: {
@@ -189,12 +201,9 @@ export const OpenCompetitionsPage = () => {
     if (!competitionToCancel || !userProfile?.school_id) return;
     try {
       // Get the calendar_event_id before deleting the registration
-      const { data: compSchool } = await supabase
-        .from('cp_comp_schools')
-        .select('calendar_event_id')
-        .eq('competition_id', competitionToCancel)
-        .eq('school_id', userProfile.school_id)
-        .single();
+      const {
+        data: compSchool
+      } = await supabase.from('cp_comp_schools').select('calendar_event_id').eq('competition_id', competitionToCancel).eq('school_id', userProfile.school_id).single();
 
       // Delete calendar event if it exists
       if (compSchool?.calendar_event_id) {
@@ -250,7 +259,7 @@ export const OpenCompetitionsPage = () => {
   }
   return <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Open Competitions</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Competition Registration</h1>
         <p className="text-gray-600 mt-2">
           Browse and register interest in upcoming competitions hosted by other schools.
         </p>
@@ -276,18 +285,13 @@ export const OpenCompetitionsPage = () => {
               </CardContent>
             </Card>)}
         </div> : <Tabs defaultValue="open">
-          <TabsList className={`grid w-full grid-cols-${[
-            openPermissions.canAccess,
-            registeredPermissions.canAccess,
-            canAccessSchedule
-          ].filter(Boolean).length}`}>
+          <TabsList className={`grid w-full grid-cols-${[openPermissions.canAccess, registeredPermissions.canAccess, canAccessSchedule].filter(Boolean).length}`}>
             {openPermissions.canAccess && <TabsTrigger value="open">Open ({openCompetitionsList?.length || 0})</TabsTrigger>}
             {registeredPermissions.canAccess && <TabsTrigger value="registered">Registered ({registeredCompetitionsList?.length || 0})</TabsTrigger>}
             {canAccessSchedule && <TabsTrigger value="schedule">Schedule</TabsTrigger>}
           </TabsList>
 
-          {openPermissions.canAccess && (
-            <TabsContent value="open">
+          {openPermissions.canAccess && <TabsContent value="open">
               {openCompetitionsList && openCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={openCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} permissions={openPermissions} /> : <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
@@ -296,11 +300,9 @@ export const OpenCompetitionsPage = () => {
                     Check back later for new opportunities!
                   </p>
                 </div>}
-            </TabsContent>
-          )}
+            </TabsContent>}
 
-          {registeredPermissions.canAccess && (
-            <TabsContent value="registered">
+          {registeredPermissions.canAccess && <TabsContent value="registered">
               {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={registeredCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} permissions={registeredPermissions} /> : <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Competitions</h3>
@@ -308,24 +310,19 @@ export const OpenCompetitionsPage = () => {
                     You have not registered for any competitions yet.
                   </p>
                 </div>}
-            </TabsContent>
-          )}
+            </TabsContent>}
 
-          {canAccessSchedule && (
-            <TabsContent value="schedule">
+          {canAccessSchedule && <TabsContent value="schedule">
               <ScheduleTab registeredCompetitions={registeredCompetitionsList} />
-            </TabsContent>
-          )}
+            </TabsContent>}
 
-          {!openPermissions.canAccess && !registeredPermissions.canAccess && !canAccessSchedule && (
-            <div className="text-center py-12">
+          {!openPermissions.canAccess && !registeredPermissions.canAccess && !canAccessSchedule && <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
               <p className="text-gray-600">
                 You don't have permission to view this content.
               </p>
-            </div>
-          )}
+            </div>}
         </Tabs>}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -431,10 +428,6 @@ export const OpenCompetitionsPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <SOPTextModal 
-        isOpen={isSOPModalOpen} 
-        onClose={() => setIsSOPModalOpen(false)} 
-        sopText={selectedSOPText} 
-      />
+      <SOPTextModal isOpen={isSOPModalOpen} onClose={() => setIsSOPModalOpen(false)} sopText={selectedSOPText} />
     </div>;
 };
