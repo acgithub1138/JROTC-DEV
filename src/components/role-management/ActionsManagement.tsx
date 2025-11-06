@@ -11,13 +11,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
 interface ActionsManagementProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }
-
-export const ActionsManagement: React.FC<ActionsManagementProps> = ({ isDialogOpen, setIsDialogOpen }) => {
+export const ActionsManagement: React.FC<ActionsManagementProps> = ({
+  isDialogOpen,
+  setIsDialogOpen
+}) => {
   const {
     toast
   } = useToast();
@@ -169,12 +170,7 @@ export const ActionsManagement: React.FC<ActionsManagementProps> = ({ isDialogOp
       </Card>;
   }
   return <Card>
-      <CardHeader>
-        <CardTitle>Permission Actions Management</CardTitle>
-        <CardDescription>
-          Manage permission actions that can be assigned to roles for each module.
-        </CardDescription>
-      </CardHeader>
+      
       <CardContent>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent>
@@ -185,40 +181,40 @@ export const ActionsManagement: React.FC<ActionsManagementProps> = ({ isDialogOp
                 <div>
                   <Label htmlFor="name">Action Name</Label>
                   <Input id="name" value={formData.name} onChange={e => setFormData({
-                  ...formData,
-                  name: e.target.value
-                })} required placeholder="e.g., create, read, update, delete" />
+                ...formData,
+                name: e.target.value
+              })} required placeholder="e.g., create, read, update, delete" />
                 </div>
 
                 <div>
                   <Label htmlFor="label">Display Label</Label>
                   <Input id="label" value={formData.label} onChange={e => setFormData({
-                  ...formData,
-                  label: e.target.value
-                })} required placeholder="e.g., Create, Read, Update, Delete" />
+                ...formData,
+                label: e.target.value
+              })} required placeholder="e.g., Create, Read, Update, Delete" />
                 </div>
                 
                 <div>
                   <Label htmlFor="description">Description (optional)</Label>
                   <Input id="description" value={formData.description} onChange={e => setFormData({
-                  ...formData,
-                  description: e.target.value
-                })} placeholder="Brief description of what this action allows" />
+                ...formData,
+                description: e.target.value
+              })} placeholder="Brief description of what this action allows" />
                 </div>
                 
                 <div>
                   <Label htmlFor="sort_order">Sort Order</Label>
                   <Input id="sort_order" type="number" value={formData.sort_order} onChange={e => setFormData({
-                  ...formData,
-                  sort_order: parseInt(e.target.value) || 0
-                })} />
+                ...formData,
+                sort_order: parseInt(e.target.value) || 0
+              })} />
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Switch id="is_active" checked={formData.is_active} onCheckedChange={checked => setFormData({
-                  ...formData,
-                  is_active: !!checked
-                })} />
+                ...formData,
+                is_active: !!checked
+              })} />
                   <Label htmlFor="is_active">Active</Label>
                 </div>
                 
