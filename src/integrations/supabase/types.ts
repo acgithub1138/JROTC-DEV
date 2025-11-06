@@ -242,6 +242,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          initials: string | null
           is_active: boolean
           is_default: boolean
           name: string
@@ -253,6 +254,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          initials?: string | null
           is_active?: boolean
           is_default?: boolean
           name: string
@@ -264,6 +266,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          initials?: string | null
           is_active?: boolean
           is_default?: boolean
           name?: string
@@ -348,6 +351,13 @@ export type Database = {
             columns: ["event"]
             isOneToOne: false
             referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
             referencedColumns: ["id"]
           },
           {
@@ -581,6 +591,13 @@ export type Database = {
             columns: ["event"]
             isOneToOne: false
             referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_templates_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
             referencedColumns: ["id"]
           },
           {
@@ -901,6 +918,13 @@ export type Database = {
             columns: ["event"]
             isOneToOne: false
             referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
             referencedColumns: ["id"]
           },
           {
@@ -3981,25 +4005,6 @@ export type Database = {
       }
     }
     Views: {
-      competition_events_with_competitions: {
-        Row: {
-          cadet_ids: string[] | null
-          competition_date: string | null
-          competition_event_id: string | null
-          competition_id: string | null
-          competition_name: string | null
-          competition_source: string | null
-          created_at: string | null
-          event: string | null
-          event_name: string | null
-          school_id: string | null
-          score_sheet: Json | null
-          team_name: string | null
-          total_points: number | null
-          updated_at: string | null
-        }
-        Relationships: []
-      }
       competition_events_with_registrations: {
         Row: {
           active: boolean | null
@@ -4138,6 +4143,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cp_comp_events_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -4152,6 +4164,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cp_events_with_templates: {
+        Row: {
+          id: string | null
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
+          name: string | null
+        }
+        Relationships: []
       }
       cp_judge_assignment_view: {
         Row: {
@@ -4280,6 +4300,13 @@ export type Database = {
             columns: ["event"]
             isOneToOne: false
             referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
             referencedColumns: ["id"]
           },
           {
@@ -4774,6 +4801,7 @@ export type Database = {
         Args: { role_name: string }
         Returns: undefined
       }
+      update_competition_statuses: { Args: never; Returns: Json }
       validate_incident_category: {
         Args: { category_value: string }
         Returns: boolean
