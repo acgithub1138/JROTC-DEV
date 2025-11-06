@@ -126,15 +126,15 @@ export const EmailQueueTab: React.FC = () => {
               error: error.message || 'Unknown error'
             });
             failed++;
-            } else if (data?.success) {
-              processed++;
-              details.push({
-                emailId: email.id,
-                recipient: email.recipient_email,
-                status: 'sent',
-                processingTime: data.processingTime,
-                emailDetails: data.emailDetails
-              });
+          } else if (data?.success) {
+            processed++;
+            details.push({
+              emailId: email.id,
+              recipient: email.recipient_email,
+              status: 'sent',
+              processingTime: data.processingTime,
+              emailDetails: data.emailDetails
+            });
           } else {
             // Handle retry scenarios or other non-success responses
             const isRetryScheduled = data?.emailDetails?.retryScheduled;
@@ -260,33 +260,7 @@ export const EmailQueueTab: React.FC = () => {
   };
   return <>
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Email Queue
-                <Badge variant="secondary" className="ml-2">
-                  {queueItems.length} items
-                </Badge>
-                {pendingCount > 0 && <Badge variant="outline" className="bg-yellow-50 text-yellow-800">
-                    {pendingCount} pending
-                  </Badge>}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              
-              {pendingCount > 0 && <Button onClick={handleManualProcess} disabled={isProcessing} size="sm" className="flex items-center gap-2">
-                  <Play className="w-4 h-4" />
-                  {isProcessing ? 'Processing...' : 'Process Now'}
-                </Button>}
-              <Button onClick={handleRefresh} variant="outline" size="sm" className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
+        
         <CardContent>
           {queueItems.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">
               <Mail className="w-12 h-12 text-muted-foreground mb-4" />
