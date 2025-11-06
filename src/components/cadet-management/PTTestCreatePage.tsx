@@ -145,34 +145,41 @@ export const PTTestCreatePage = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Add PT Test Records</h1>
-            <p className="text-muted-foreground">
-              Create PT test records for cadets
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant={mode === 'single' ? 'default' : 'outline'}
-            onClick={() => setMode('single')}
-          >
-            Single Cadet
-          </Button>
-          <Button 
-            variant={mode === 'bulk' ? 'default' : 'outline'}
-            onClick={() => setMode('bulk')}
-          >
-            Bulk Entry
-          </Button>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" onClick={handleBack} size="sm">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Add PT Test Records</h1>
+          <p className="text-muted-foreground">
+            Create PT test records for cadets
+          </p>
         </div>
       </div>
+
+      {/* Mode Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Entry Mode</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Button 
+              variant={mode === 'single' ? 'default' : 'outline'}
+              onClick={() => setMode('single')}
+            >
+              Single Cadet
+            </Button>
+            <Button 
+              variant={mode === 'bulk' ? 'default' : 'outline'}
+              onClick={() => setMode('bulk')}
+            >
+              Bulk Entry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Single Cadet Form */}
       {mode === 'single' && (
