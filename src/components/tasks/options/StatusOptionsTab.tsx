@@ -13,10 +13,14 @@ interface OptionFormData {
   is_active: boolean;
 }
 
-export const StatusOptionsTab: React.FC = () => {
+interface StatusOptionsTabProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+export const StatusOptionsTab: React.FC<StatusOptionsTabProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const { statusOptions, createStatusOption, updateStatusOption, deleteStatusOption } = useTaskStatusOptions();
   const { hasPermission } = usePermissionContext();
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<any>(null);
   const [statusForm, setStatusForm] = useState<OptionFormData>({
     value: '',
@@ -37,7 +41,7 @@ export const StatusOptionsTab: React.FC = () => {
     } else {
       createStatusOption(statusForm);
     }
-    setStatusDialogOpen(false);
+    setIsDialogOpen(false);
     setEditingStatus(null);
     setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0, is_active: true });
   };
@@ -51,7 +55,7 @@ export const StatusOptionsTab: React.FC = () => {
       sort_order: status.sort_order,
       is_active: status.is_active
     });
-    setStatusDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
   const handleAddStatus = () => {
@@ -67,22 +71,19 @@ export const StatusOptionsTab: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Status Options</h3>
-        {canCreate && (
-          <OptionDialog
-            open={statusDialogOpen}
-            onOpenChange={setStatusDialogOpen}
-            formData={statusForm}
-            setFormData={setStatusForm}
-            onSubmit={handleStatusSubmit}
-            isEditing={!!editingStatus}
-            type="status"
-            optionsLength={statusOptions.length}
-            onAddClick={handleAddStatus}
-          />
-        )}
-      </div>
+      {canCreate && (
+        <OptionDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          formData={statusForm}
+          setFormData={setStatusForm}
+          onSubmit={handleStatusSubmit}
+          isEditing={!!editingStatus}
+          type="status"
+          optionsLength={statusOptions.length}
+          onAddClick={handleAddStatus}
+        />
+      )}
       <OptionsTable
         options={statusOptions}
         onEdit={canUpdate ? editStatus : undefined}
