@@ -393,21 +393,14 @@ const ThemeManagement: React.FC<ThemeManagementProps> = ({ isDialogOpen, setIsDi
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Theme Management</CardTitle>
-            <CardDescription>
-              Manage visual themes for different JROTC programs
-            </CardDescription>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditingTheme(null)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Theme
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <CardTitle>Theme Management</CardTitle>
+        <CardDescription>
+          Manage visual themes for different JROTC programs
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingTheme ? 'Edit Theme' : 'Add New Theme'}
@@ -427,9 +420,6 @@ const ThemeManagement: React.FC<ThemeManagementProps> = ({ isDialogOpen, setIsDi
               />
             </DialogContent>
           </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
         {themes.length === 0 ? (
           <div className="text-center py-8">
             <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
