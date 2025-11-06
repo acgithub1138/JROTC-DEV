@@ -314,10 +314,17 @@ const ThemeCard: React.FC<{
   );
 };
 
-const ThemeManagement: React.FC = () => {
+import { usePermissionContext } from '@/contexts/PermissionContext';
+
+interface ThemeManagementProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+const ThemeManagement: React.FC<ThemeManagementProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const { userProfile } = useAuth();
   const { themes, loading, createTheme, updateTheme, deleteTheme } = useThemes();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { hasPermission } = usePermissionContext();
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -347,7 +354,7 @@ const ThemeManagement: React.FC = () => {
       } else {
         await createTheme({ ...data, school_id: userProfile!.school_id, is_active: true });
       }
-      setDialogOpen(false);
+      setIsDialogOpen(false);
       setEditingTheme(null);
     } catch (error) {
       // Error handling is done in the hook
@@ -358,7 +365,7 @@ const ThemeManagement: React.FC = () => {
 
   const handleEdit = (theme: Theme) => {
     setEditingTheme(theme);
-    setDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -368,7 +375,7 @@ const ThemeManagement: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setDialogOpen(false);
+    setIsDialogOpen(false);
     setEditingTheme(null);
   };
 
@@ -393,7 +400,7 @@ const ThemeManagement: React.FC = () => {
               Manage visual themes for different JROTC programs
             </CardDescription>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingTheme(null)}>
                 <Plus className="h-4 w-4 mr-2" />

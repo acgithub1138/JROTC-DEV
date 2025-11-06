@@ -24,7 +24,9 @@ import ThemeManagement from './themes/ThemeManagement';
 import EventTypesManagement from './event-types/EventTypesManagement';
 import CompetitionEventTypesManagement from './competition-management/CompetitionEventTypesManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
-import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
+import CalendarEventTypesPage from '@/pages/CalendarEventTypesPage';
+import CompetitionEventTypesPage from '@/pages/CompetitionEventTypesPage';
+import ThemesPage from '@/pages/ThemesPage';
 import EmailRulesPage from '@/pages/EmailRulesPage';
 import EmailQueuePage from '@/pages/EmailQueuePage';
 import { EmailTemplateRecordPage } from './email-management/EmailTemplateRecordPage';
@@ -348,21 +350,9 @@ const SettingsPage = () => {
       <Tabs defaultValue="incidents" className="w-full">
         <TabsList>
           <TabsTrigger value="incidents">Incident Options</TabsTrigger>
-          <TabsTrigger value="event-types">Event Types</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="themes">Themes</TabsTrigger>
         </TabsList>
         <TabsContent value="incidents">
           <IncidentOptionsManagement />
-        </TabsContent>
-        <TabsContent value="event-types">
-          <EventTypesManagement />
-        </TabsContent>
-        <TabsContent value="events">
-          <CompetitionEventTypesManagement />
-        </TabsContent>
-        <TabsContent value="themes">
-          <ThemeManagement />
         </TabsContent>
       </Tabs>
     </div>

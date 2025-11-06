@@ -11,12 +11,18 @@ import { useEventTypes, EventType } from '@/components/calendar/hooks/useEventTy
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 interface EventTypeFormData {
   value: string;
   label: string;
   color: string;
 }
-const EventTypesManagement: React.FC = () => {
+interface EventTypesManagementProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+const EventTypesManagement: React.FC<EventTypesManagementProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const {
     userProfile
   } = useAuth();
@@ -27,10 +33,8 @@ const EventTypesManagement: React.FC = () => {
     updateEventType,
     deleteEventType
   } = useEventTypes();
-  const {
-    toast
-  } = useToast();
-  const [showDialog, setShowDialog] = useState(false);
+  const { toast } = useToast();
+  const { hasPermission } = usePermissionContext();
   const [editingEventType, setEditingEventType] = useState<EventType | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<EventType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,10 +71,10 @@ const EventTypesManagement: React.FC = () => {
         color: '#3B82F6'
       });
     }
-    setShowDialog(true);
+    setIsDialogOpen(true);
   };
   const handleCloseDialog = () => {
-    setShowDialog(false);
+    setIsDialogOpen(false);
     setEditingEventType(null);
     setFormData({
       value: '',
@@ -132,26 +136,8 @@ const EventTypesManagement: React.FC = () => {
       </Card>;
   }
   return <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Event Types & Colors
-              </CardTitle>
-              <CardDescription>
-                Manage event types and their associated colors for the calendar system.
-                As an admin, you can edit both custom and global default event types.
-              </CardDescription>
-            </div>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Event Type
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <Card className="bg-white">
+        <CardContent className="pt-6">
           {eventTypes.length === 0 ? <div className="text-center text-muted-foreground py-8">
               No event types found. Create your first event type to get started.
             </div> : <Table>
@@ -181,12 +167,16 @@ const EventTypesManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(eventType)} title="Edit">
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDelete(eventType)} title="Delete" disabled={eventType.is_default}>
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                        {hasPermission('cal_event_types', 'update') && (
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(eventType)} title="Edit">
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                        )}
+                        {hasPermission('cal_event_types', 'delete') && (
+                          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDelete(eventType)} title="Delete" disabled={eventType.is_default}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>)}
@@ -196,7 +186,7 @@ const EventTypesManagement: React.FC = () => {
       </Card>
 
       {/* Create/Edit Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>

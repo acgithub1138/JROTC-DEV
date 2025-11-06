@@ -11,7 +11,14 @@ import { useCompetitionEventTypes } from './hooks/useCompetitionEventTypes';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-const CompetitionEventTypesManagement: React.FC = () => {
+import { usePermissionContext } from '@/contexts/PermissionContext';
+
+interface CompetitionEventTypesManagementProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}
+
+const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementProps> = ({ isDialogOpen, setIsDialogOpen }) => {
   const {
     userProfile
   } = useAuth();
@@ -21,10 +28,8 @@ const CompetitionEventTypesManagement: React.FC = () => {
     addEventType,
     isAddingEventType
   } = useCompetitionEventTypes();
-  const {
-    toast
-  } = useToast();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { toast } = useToast();
+  const { hasPermission } = usePermissionContext();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
@@ -44,10 +49,10 @@ const CompetitionEventTypesManagement: React.FC = () => {
   const handleOpenCreateDialog = () => {
     setNewEventTypeName('');
     setNewEventTypeInitials('');
-    setShowCreateDialog(true);
+    setIsDialogOpen(true);
   };
   const handleCloseCreateDialog = () => {
-    setShowCreateDialog(false);
+    setIsDialogOpen(false);
     setNewEventTypeName('');
     setNewEventTypeInitials('');
   };
@@ -94,25 +99,8 @@ const CompetitionEventTypesManagement: React.FC = () => {
       </Card>;
   }
   return <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                Competition Event Types
-              </CardTitle>
-              <CardDescription>
-                Manage competition event types for drill competitions
-              </CardDescription>
-            </div>
-            <Button onClick={handleOpenCreateDialog} disabled={isAddingEventType}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Event Type
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <Card className="bg-white">
+        <CardContent className="pt-6">
           {eventTypes.length === 0 ? <div className="text-center text-muted-foreground py-8">
               No event types found. Create your first competition event type to get started.
             </div> : <Table>
@@ -136,7 +124,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {!eventType.is_default ? <Button variant="outline" size="icon" onClick={() => handleDelete(eventType.name)} className="text-red-600 hover:text-red-700 h-8 w-8 p-0" title="Delete event type">
+                        {!eventType.is_default && hasPermission('comp_event_types', 'delete') ? <Button variant="outline" size="icon" onClick={() => handleDelete(eventType.name)} className="text-red-600 hover:text-red-700 h-8 w-8 p-0" title="Delete event type">
                             <Trash2 className="w-4 h-4" />
                           </Button> : <Badge variant="outline">Protected</Badge>}
                       </div>
@@ -148,7 +136,7 @@ const CompetitionEventTypesManagement: React.FC = () => {
       </Card>
 
       {/* Create Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Competition Event Type</DialogTitle>
