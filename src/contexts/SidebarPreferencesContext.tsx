@@ -11,6 +11,9 @@ export interface MenuItem {
   path: string;
   isVisible: boolean;
   order: number;
+  parent_module?: string;
+  children?: MenuItem[];
+  level?: number;
 }
 
 interface SidebarPreferencesContextType {
@@ -62,16 +65,17 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       icon: 'LayoutDashboard',
       path: '/app/dashboard',
       isVisible: hasDashboardPermission,
-      order: 1
+      order: 1,
+      level: 1
     };
 
-    // Try to query permission_modules table directly
+    // Try to query permission_modules table directly with parent_module
     let modules: any[] = [];
     
     try {
       const { data: moduleResult, error } = await supabase
         .from('permission_modules')
-        .select('id, name, label, path, icon, sort_order')
+        .select('id, name, label, path, icon, sort_order, parent_module')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
@@ -79,7 +83,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         modules = moduleResult;
       }
     } catch (tableError) {
-      // Fallback to hardcoded modules if table not available
+      console.error('Error fetching modules:', tableError);
     }
 
     // Comprehensive fallback modules if database query fails
@@ -102,33 +106,72 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       ];
     }
 
-    // Generate menu items dynamically from modules
-    const menuItems: MenuItem[] = [];
+    // Filter modules by permissions first
+    const permittedModules = modules.filter(module => {
+      // Skip dashboard and competition portal modules
+      if (module.name === 'dashboard' || module.path?.startsWith('/app/competition-portal')) return false;
+      return hasPermission(module.name, 'sidebar');
+    });
+
+    // Build hierarchy: Create a map of all modules by ID
+    const moduleMap = new Map<string, MenuItem>();
     
-    // Add dashboard only if user has permission
-    if (hasDashboardPermission) {
-      menuItems.push(dashboardItem);
-    }
+    // First pass: Create all menu items
+    permittedModules.forEach(module => {
+      moduleMap.set(module.id, {
+        id: module.name,
+        label: module.label || module.name,
+        icon: module.icon || 'Circle',
+        path: module.path || `/app/${module.name}`,
+        isVisible: true,
+        order: module.sort_order,
+        parent_module: module.parent_module,
+        children: [],
+        level: 1
+      });
+    });
+
+    // Second pass: Build parent-child relationships
+    const rootItems: MenuItem[] = [];
     
-    for (const module of modules) {
-      // Skip dashboard and competition portal modules since dashboard is already added
-      if (module.name === 'dashboard' || module.path?.startsWith('/app/competition-portal')) continue;
-      
-      // Check if user has sidebar permission for this module
-      const hasSidebarPermission = hasPermission(module.name, 'sidebar');
-      
-      if (hasSidebarPermission) {
-        menuItems.push({
-          id: module.name,
-          label: module.label || module.name,
-          icon: module.icon || 'Circle',
-          path: module.path || `/app/${module.name}`,
-          isVisible: true,
-          order: menuItems.length + 1
-        });
+    moduleMap.forEach((item, id) => {
+      if (item.parent_module && moduleMap.has(item.parent_module)) {
+        // This item has a parent
+        const parent = moduleMap.get(item.parent_module)!;
+        parent.children = parent.children || [];
+        parent.children.push(item);
+        item.level = (parent.level || 1) + 1;
+        
+        // Validate max 3 levels
+        if (item.level && item.level > 3) {
+          console.warn(`Module "${item.id}" exceeds maximum nesting level of 3`);
+        }
+      } else if (!item.parent_module) {
+        // This is a root item
+        rootItems.push(item);
       }
+    });
+
+    // Third pass: Sort children by order recursively
+    const sortChildren = (items: MenuItem[]) => {
+      items.sort((a, b) => a.order - b.order);
+      items.forEach(item => {
+        if (item.children && item.children.length > 0) {
+          sortChildren(item.children);
+        }
+      });
+    };
+    
+    sortChildren(rootItems);
+
+    // Add dashboard at the beginning if user has permission
+    const finalMenuItems: MenuItem[] = [];
+    if (hasDashboardPermission) {
+      finalMenuItems.push(dashboardItem);
     }
-    return menuItems;
+    finalMenuItems.push(...rootItems);
+
+    return finalMenuItems;
   } catch (error) {
     console.error('Exception in fetchMenuItemsFromDatabase:', error);
     // Fallback to dashboard only if user has permission
@@ -139,7 +182,8 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       icon: 'LayoutDashboard',
       path: '/app/dashboard',
       isVisible: true,
-      order: 1
+      order: 1,
+      level: 1
     }] : [];
   }
 };

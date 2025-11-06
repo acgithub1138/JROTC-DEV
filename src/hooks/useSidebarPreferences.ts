@@ -7,6 +7,9 @@ export interface MenuItem {
   path: string;
   isVisible: boolean;
   order: number;
+  parent_module?: string;
+  children?: MenuItem[];
+  level?: number;
 }
 
 // Updated hook to use the context

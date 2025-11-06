@@ -1,15 +1,20 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+import { useSidebarPreferences, MenuItem } from '@/hooks/useSidebarPreferences';
 import { useThemes } from '@/hooks/useThemes';
 import { usePortal } from '@/contexts/PortalContext';
 import { useNavigate } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
-import { Shield, Home, Trophy, Youtube } from 'lucide-react';
+import { Shield, Home, Trophy, Youtube, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible';
 
 interface SidebarProps {
   className?: string;
@@ -50,6 +55,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
   const { themes } = useThemes();
   const { setPortal, canAccessCompetitionPortal } = usePortal();
   const navigate = useNavigate();
+  
+  // State for tracking open/collapsed groups
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => 
@@ -63,6 +71,131 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
     link_text: (activeTheme as any)?.link_text || DEFAULT_THEME.link_text,
     link_selected_text: (activeTheme as any)?.link_selected_text || DEFAULT_THEME.link_selected_text,
     link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover,
+  };
+
+  // Toggle group open/closed
+  const toggleGroup = (itemId: string) => {
+    setOpenGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if any descendant is active (recursive)
+  const hasActiveDescendant = (item: MenuItem): boolean => {
+    if (item.id === activeModule) return true;
+    if (item.children) {
+      return item.children.some(child => hasActiveDescendant(child));
+    }
+    return false;
+  };
+
+  // Auto-expand parent groups if child is active
+  useEffect(() => {
+    const expandParentsOfActive = (items: MenuItem[]) => {
+      items.forEach(item => {
+        if (item.children && hasActiveDescendant(item)) {
+          setOpenGroups(prev => new Set(prev).add(item.id));
+          expandParentsOfActive(item.children);
+        }
+      });
+    };
+    expandParentsOfActive(menuItems);
+  }, [activeModule, menuItems]);
+
+  // Recursive menu item renderer
+  const renderMenuItem = (item: MenuItem, level: number = 1): React.ReactNode => {
+    const hasChildren = item.children && item.children.length > 0;
+    const isActive = activeModule === item.id;
+    const isOpen = openGroups.has(item.id);
+    const hasActiveChild = hasChildren && hasActiveDescendant(item);
+
+    const indentClass = level === 2 ? 'pl-8' : level === 3 ? 'pl-12' : '';
+
+    if (hasChildren) {
+      return (
+        <Collapsible
+          key={item.id}
+          open={isOpen || hasActiveChild}
+          onOpenChange={() => toggleGroup(item.id)}
+        >
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn("w-full justify-start text-left font-normal", indentClass)}
+              style={{
+                backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
+                color: isActive ? currentTheme.link_selected_text : currentTheme.link_text,
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+                  e.currentTarget.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = currentTheme.link_text;
+                }
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                // Navigate to parent path if it exists
+                if (item.path) {
+                  onModuleChange(item.id);
+                }
+              }}
+            >
+              <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              {(isOpen || hasActiveChild) ? 
+                <ChevronDown className="w-4 h-4 shrink-0" /> : 
+                <ChevronRight className="w-4 h-4 shrink-0" />
+              }
+            </Button>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="space-y-1">
+            {item.children!.map(child => renderMenuItem(child, level + 1))}
+          </CollapsibleContent>
+        </Collapsible>
+      );
+    }
+
+    // Leaf node (no children)
+    return (
+      <Button
+        key={item.id}
+        variant="ghost"
+        className={cn("w-full justify-start text-left font-normal", indentClass)}
+        style={{
+          backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
+          color: isActive ? currentTheme.link_selected_text : currentTheme.link_text,
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+            e.currentTarget.style.color = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = currentTheme.link_text;
+          }
+        }}
+        onClick={() => onModuleChange(item.id)}
+      >
+        <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3" />
+        {item.label}
+      </Button>
+    );
   };
 
   if (isLoading) {
@@ -119,36 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
         <ScrollArea className="flex-1 px-3">
           <div className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = activeModule === item.id;
-              return (
-                <Button
-                  key={item.id}
-                  variant="ghost"
-                  className="w-full justify-start text-left font-normal"
-                  style={{
-                    backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
-                    color: isActive ? currentTheme.link_selected_text : currentTheme.link_text,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-                      e.currentTarget.style.color = '#ffffff';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = currentTheme.link_text;
-                    }
-                  }}
-                  onClick={() => onModuleChange(item.id)}
-                >
-                  <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3" />
-                  {item.label}
-                </Button>
-              );
-            })}
+            {menuItems.map((item) => renderMenuItem(item, 1))}
 
             {/* Competition Portal Access Button */}
             {canAccessCompetitionPortal && (
