@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
+  selectedDate?: Date;
 }
 interface PTTest {
   id: string;
@@ -42,7 +43,8 @@ interface PTTest {
 }
 export const PTTestsTab = ({
   onOpenBulkDialog,
-  searchTerm: externalSearchTerm = ''
+  searchTerm: externalSearchTerm = '',
+  selectedDate
 }: PTTestsTabProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -61,7 +63,6 @@ export const PTTestsTab = ({
   } = useSchoolTimezone();
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-  const [selectedDate, setSelectedDate] = useState<Date>();
   const {
     deletePTTest,
     isDeleting
@@ -171,27 +172,6 @@ export const PTTestsTab = ({
       </div>;
   }
   return <div className="space-y-6">
-      {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Date Filter */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDate ? format(selectedDate, "PPP") : <span>Filter by date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus className="p-3 pointer-events-auto" />
-            <div className="p-3 border-t">
-              <Button variant="outline" size="sm" onClick={() => setSelectedDate(undefined)} className="w-full">
-                Clear Filter
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-
       {/* PT Tests Display */}
       {sortedData.length === 0 ? <Card>
           <CardContent className="text-center py-8">
