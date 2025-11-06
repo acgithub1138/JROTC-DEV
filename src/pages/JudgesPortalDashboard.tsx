@@ -10,9 +10,7 @@ export const JudgesPortalDashboard = () => {
             <h1 className="font-bold text-foreground text-4xl">
               Welcome to Judges Portal
             </h1>
-            <p className="text-muted-foreground mt-3 text-lg">
-              Manage your judging assignments and scoring
-            </p>
+            
           </div>
         </div>
 
