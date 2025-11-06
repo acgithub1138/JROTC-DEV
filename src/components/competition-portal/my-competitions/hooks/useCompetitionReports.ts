@@ -61,12 +61,19 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     try {
       setIsLoadingCompetitions(true);
       
-      // Use the unified view to get competitions with score sheets for the selected event
+      // Get competition events with their related competition details
       const { data: competitionsData, error } = await supabase
-        .from('competition_events_with_competitions')
-        .select('competition_id, competition_name, competition_date')
+        .from('competition_events')
+        .select(`
+          competition_id,
+          competition_event_types!inner(name),
+          competitions!inner(
+            name,
+            competition_date
+          )
+        `)
         .eq('school_id', userProfile.school_id)
-        .eq('event_name', selectedEvent);
+        .eq('competition_event_types.name', selectedEvent);
 
       if (error) throw error;
 
@@ -77,8 +84,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
         if (!uniqueCompetitions.has(comp.competition_id)) {
           uniqueCompetitions.set(comp.competition_id, {
             id: comp.competition_id,
-            name: comp.competition_name,
-            competition_date: comp.competition_date
+            name: comp.competitions?.name || 'Unknown',
+            competition_date: comp.competitions?.competition_date || ''
           });
         }
       });
@@ -115,10 +122,17 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       setIsLoading(true);
       
       let query = supabase
-        .from('competition_events_with_competitions')
-        .select('*')
+        .from('competition_events')
+        .select(`
+          *,
+          competition_event_types!inner(name),
+          competitions!inner(
+            name,
+            competition_date
+          )
+        `)
         .eq('school_id', userProfile.school_id)
-        .eq('event_name', selectedEvent);
+        .eq('competition_event_types.name', selectedEvent);
       
       // Filter by specific competitions if selected
       if (selectedCompetitions && selectedCompetitions.length > 0) {
@@ -268,8 +282,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
 
     data.forEach(item => {
-      // Get competition date from the unified view
-      const date = item.competition_date || 'Unknown Date';
+      // Get competition date from the joined competitions table
+      const date = item.competitions?.competition_date || 'Unknown Date';
       
       if (!groupedByDate[date]) {
         groupedByDate[date] = {};
