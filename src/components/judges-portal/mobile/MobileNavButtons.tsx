@@ -30,13 +30,13 @@ export const MobileNavButtons = ({
         {/* Left Section - Previous/Exit Button */}
         <div>
           {showExit && onExit && (
-            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-14 text-base">
+            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-10 text-base">
               <X className="h-5 w-5 mr-2" />
             </Button>
           )}
 
           {showPrevious && onPrevious && (
-            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-14 text-base text-left">
+            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-10 text-base text-left">
               <ChevronLeft className="h-5 w-5 mr-2" />
             </Button>
           )}
@@ -54,7 +54,7 @@ export const MobileNavButtons = ({
         {/* Right Section - Next Button */}
         <div>
           {onNext && (
-            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-14 text-base text-right">
+            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-10 text-base text-right">
               <ChevronRight className="h-5 w-5 ml-2" />
             </Button>
           )}
