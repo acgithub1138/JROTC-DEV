@@ -128,7 +128,7 @@ const CPPermissionsPage: React.FC = () => {
 
         <Card className="mb-6">
           <CardHeader className="py-0">
-            <CardTitle className="flex items-center justify-between py-0">
+            <CardTitle className="flex items-center justify-between py-[8px]">
               <div className="flex items-center gap-4 mb-6">
                 <label className="text-sm font-medium whitespace-nowrap">
                   Select Role
