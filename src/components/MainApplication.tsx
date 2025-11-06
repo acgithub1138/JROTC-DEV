@@ -64,6 +64,7 @@ import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 import ModulesManagementPage from '@/pages/ModulesManagementPage';
+import ActionsManagementPage from '@/pages/ActionsManagementPage';
 import ParentProfilePage from '@/pages/ParentProfilePage';
 import PTTestsPage from '@/pages/PTTestsPage';
 import UniformInspectionPage from '@/pages/UniformInspectionPage';
@@ -126,6 +127,7 @@ const MainApplication = () => {
       'announcements': '/app/announcements',
       'role_management': '/app/roles',
       'modules': '/app/modules',
+      'actions': '/app/actions',
       'settings': '/app/settings'
     };
     
@@ -178,6 +180,7 @@ const MainApplication = () => {
           'announcements': '/app/announcements',
           'role_management': '/app/roles',
           'modules': '/app/modules',
+          'actions': '/app/actions',
           'settings': '/app/settings'
         });
       }
@@ -272,6 +275,7 @@ const MainApplication = () => {
             <Route path="announcements/announcements_record" element={<AnnouncementRecordPage />} />
             <Route path="roles" element={<RoleManagementPage />} />
             <Route path="modules" element={<ModulesManagementPage />} />
+            <Route path="actions" element={<ActionsManagementPage />} />
             <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}

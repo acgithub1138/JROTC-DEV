@@ -13,7 +13,6 @@ import { AddRoleDialog } from './AddRoleDialog';
 import { PortalPermissionsTable } from './PortalPermissionsTable';
 import { DashboardWidgetsTable } from './DashboardWidgetsTable';
 import { UserRolesTable } from './UserRolesTable';
-import { ActionsManagement } from './ActionsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Helper function to get role colors
@@ -192,7 +191,6 @@ export const RoleManagementPage: React.FC = () => {
         <TabsList className="mb-6">
           <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
           <TabsTrigger value="roles">Manage Roles</TabsTrigger>
-          <TabsTrigger value="actions">Actions</TabsTrigger>
         </TabsList>
         
         <TabsContent value="permissions">
@@ -276,10 +274,6 @@ export const RoleManagementPage: React.FC = () => {
 
         <TabsContent value="roles">
           <UserRolesTable />
-        </TabsContent>
-
-        <TabsContent value="actions">
-          <ActionsManagement />
         </TabsContent>
       </Tabs>
     </div>;
