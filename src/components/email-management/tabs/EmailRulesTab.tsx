@@ -79,15 +79,7 @@ export const EmailRulesTab: React.FC = () => {
       </div>;
   }
   return <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Settings className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-lg font-semibold">Email Rules</h2>
-          <p className="text-sm text-muted-foreground">
-            Configure automated email notifications for task, subtask, and competition events
-          </p>
-        </div>
-      </div>
+      
 
       {userProfile?.role === 'admin' && <Card>
           
