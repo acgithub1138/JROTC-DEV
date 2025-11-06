@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { PTTestsTab } from '@/components/cadet-management/components/PTTestsTab';
 
 const PTTestsPage = () => {
@@ -18,6 +19,10 @@ const PTTestsPage = () => {
             View and manage Physical Training test records
           </p>
         </div>
+        <Button variant="outline" onClick={() => navigate('/app/cadets/pt_test_create?mode=bulk')}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add PT Tests
+        </Button>
       </div>
 
       <Card>
