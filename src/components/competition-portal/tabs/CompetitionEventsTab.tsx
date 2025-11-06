@@ -43,7 +43,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   // Add sorting functionality
   const { sortedData: sortedEvents, sortConfig, handleSort } = useSortableTable({
     data: events,
-    defaultSort: { key: 'start_time', direction: 'asc' }
+    defaultSort: { key: 'event_name', direction: 'asc' }
   });
   // Modal states removed - using page navigation instead
   const [showJudgesModal, setShowJudgesModal] = useState(false);
