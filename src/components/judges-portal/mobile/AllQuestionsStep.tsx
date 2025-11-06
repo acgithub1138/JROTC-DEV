@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScoreButtonGrid } from "./ScoreButtonGrid";
 import { AudioRecordingControls } from "./AudioRecordingControls";
@@ -505,14 +506,9 @@ export const AllQuestionsStep = ({
                       <h3 className="font-semibold truncate">{field.name}</h3>
                     </div>
                     {isAnswered && (
-                      <span
-                        className={cn(
-                          "font-bold shrink-0",
-                          String(answers[field.id]).startsWith("-") ? "text-destructive" : "text-green-600",
-                        )}
-                      >
+                      <Badge className="bg-blue-600 hover:bg-blue-600 text-white shrink-0">
                         {answers[field.id]}
-                      </span>
+                      </Badge>
                     )}
                     <ChevronDown
                       className={cn(
