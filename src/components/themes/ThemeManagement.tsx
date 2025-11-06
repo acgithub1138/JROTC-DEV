@@ -337,7 +337,7 @@ const ThemeManagement: React.FC<ThemeManagementProps> = ({
   };
   if (loading) {
     return <Card>
-        <CardHeader>
+        <CardHeader className="py-[8px]">
           
           
         </CardHeader>
@@ -345,10 +345,8 @@ const ThemeManagement: React.FC<ThemeManagementProps> = ({
   }
   return <Card>
       <CardHeader>
-        <CardTitle>Theme Management</CardTitle>
-        <CardDescription>
-          Manage visual themes for different JROTC programs
-        </CardDescription>
+        
+        
       </CardHeader>
       <CardContent className="space-y-4">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
