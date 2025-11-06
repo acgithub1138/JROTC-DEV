@@ -154,7 +154,7 @@ export const AllQuestionsStep = ({
     switch (field.type) {
       case "label":
         return (
-          <div className="space-y-4 text-center py-8">
+          <div className="space-y-2 text-center py-2">
             {field.fieldInfo && <p className="text-lg text-muted-foreground whitespace-pre-wrap">{field.fieldInfo}</p>}
           </div>
         );
