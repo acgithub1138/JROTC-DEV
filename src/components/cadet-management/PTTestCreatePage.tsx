@@ -102,7 +102,7 @@ export const PTTestCreatePage = () => {
         description: "PT test record created successfully."
       });
 
-      navigate('/app/cadets');
+      navigate(-1);
     } catch (error) {
       console.error('Error creating PT test:', error);
       toast({
@@ -121,7 +121,7 @@ export const PTTestCreatePage = () => {
     const success = await savePTTests(bulkDate, cadetDataWithPushUps);
     if (success) {
       setHasUnsavedChanges(false);
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
@@ -129,13 +129,13 @@ export const PTTestCreatePage = () => {
     if (mode === 'bulk' && hasUnsavedChanges) {
       setShowConfirmDialog(true);
     } else {
-      navigate('/app/cadets');
+      navigate(-1);
     }
   };
 
   const confirmLeave = () => {
     setShowConfirmDialog(false);
-    navigate('/app/cadets');
+    navigate(-1);
   };
 
   const stayOnForm = () => {
