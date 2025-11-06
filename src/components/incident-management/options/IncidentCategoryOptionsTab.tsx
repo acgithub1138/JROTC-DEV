@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentOptions';
 import { OptionDialog } from '@/components/tasks/options/OptionDialog';
 import { OptionsTable } from '@/components/tasks/options/OptionsTable';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface OptionFormData {
   value: string;
@@ -56,24 +58,27 @@ export const IncidentCategoryOptionsTab: React.FC = () => {
       sort_order: categoryOptions.length + 1, 
       is_active: true 
     });
+    setCategoryDialogOpen(true);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Incident Category Options</h3>
-        <OptionDialog
-          open={categoryDialogOpen}
-          onOpenChange={setCategoryDialogOpen}
-          formData={categoryForm}
-          setFormData={setCategoryForm}
-          onSubmit={handleCategorySubmit}
-          isEditing={!!editingCategory}
-          type="incident category"
-          optionsLength={categoryOptions.length}
-          onAddClick={handleAddCategory}
-        />
+        <Button onClick={handleAddCategory}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add incident category
+        </Button>
       </div>
+      <OptionDialog
+        open={categoryDialogOpen}
+        onOpenChange={setCategoryDialogOpen}
+        formData={categoryForm}
+        setFormData={setCategoryForm}
+        onSubmit={handleCategorySubmit}
+        isEditing={!!editingCategory}
+        type="incident category"
+      />
       <OptionsTable
         options={categoryOptions}
         onEdit={editCategory}

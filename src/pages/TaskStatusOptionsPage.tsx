@@ -1,8 +1,15 @@
 import React from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { StatusOptionsTab } from '@/components/tasks/options/StatusOptionsTab';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 const TaskStatusOptionsPage: React.FC = () => {
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const { hasPermission } = usePermissionContext();
+  const canCreate = hasPermission('task_status', 'create');
+
   return (
     <ProtectedRoute module="task_status" requirePermission="read">
       <div className="p-6 space-y-6">
@@ -13,8 +20,14 @@ const TaskStatusOptionsPage: React.FC = () => {
               Manage global status options for all tasks
             </p>
           </div>
+          {canCreate && (
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Status
+            </Button>
+          )}
         </div>
-        <StatusOptionsTab />
+        <StatusOptionsTab isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
       </div>
     </ProtectedRoute>
   );

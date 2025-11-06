@@ -1,7 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { OptionForm } from './OptionForm';
 interface OptionFormData {
   value: string;
@@ -18,8 +16,6 @@ interface OptionDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isEditing: boolean;
   type: 'status' | 'priority' | 'incident status' | 'incident priority' | 'incident category';
-  optionsLength: number;
-  onAddClick: () => void;
 }
 export const OptionDialog: React.FC<OptionDialogProps> = ({
   open,
@@ -28,17 +24,10 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
   setFormData,
   onSubmit,
   isEditing,
-  type,
-  optionsLength,
-  onAddClick
+  type
 }) => {
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button onClick={onAddClick}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add {type}
-        </Button>
-      </DialogTrigger>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -50,5 +39,6 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
         </DialogHeader>
         <OptionForm formData={formData} setFormData={setFormData} onSubmit={onSubmit} isEditing={isEditing} type={type} />
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentOptions';
 import { OptionDialog } from '@/components/tasks/options/OptionDialog';
 import { OptionsTable } from '@/components/tasks/options/OptionsTable';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface OptionFormData {
   value: string;
@@ -56,24 +58,27 @@ export const IncidentStatusOptionsTab: React.FC = () => {
       sort_order: statusOptions.length + 1, 
       is_active: true 
     });
+    setStatusDialogOpen(true);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Incident Status Options</h3>
-        <OptionDialog
-          open={statusDialogOpen}
-          onOpenChange={setStatusDialogOpen}
-          formData={statusForm}
-          setFormData={setStatusForm}
-          onSubmit={handleStatusSubmit}
-          isEditing={!!editingStatus}
-          type="incident status"
-          optionsLength={statusOptions.length}
-          onAddClick={handleAddStatus}
-        />
+        <Button onClick={handleAddStatus}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add incident status
+        </Button>
       </div>
+      <OptionDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        formData={statusForm}
+        setFormData={setStatusForm}
+        onSubmit={handleStatusSubmit}
+        isEditing={!!editingStatus}
+        type="incident status"
+      />
       <OptionsTable
         options={statusOptions}
         onEdit={editStatus}

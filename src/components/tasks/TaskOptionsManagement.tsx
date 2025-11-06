@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +7,8 @@ import { PriorityOptionsTab } from './options/PriorityOptionsTab';
 
 const TaskOptionsManagement: React.FC = () => {
   const { userProfile } = useAuth();
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
 
   // Only show for admin users since options are now global
   if (userProfile?.role !== 'admin') {
@@ -41,11 +42,11 @@ const TaskOptionsManagement: React.FC = () => {
           </TabsList>
           
           <TabsContent value="status" className="space-y-4">
-            <StatusOptionsTab />
+            <StatusOptionsTab isDialogOpen={statusDialogOpen} setIsDialogOpen={setStatusDialogOpen} />
           </TabsContent>
           
           <TabsContent value="priority" className="space-y-4">
-            <PriorityOptionsTab />
+            <PriorityOptionsTab isDialogOpen={priorityDialogOpen} setIsDialogOpen={setPriorityDialogOpen} />
           </TabsContent>
         </Tabs>
       </CardContent>

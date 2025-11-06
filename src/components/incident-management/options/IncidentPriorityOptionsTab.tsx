@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useIncidentPriorityOptions } from '@/hooks/incidents/useIncidentOptions';
 import { OptionDialog } from '@/components/tasks/options/OptionDialog';
 import { OptionsTable } from '@/components/tasks/options/OptionsTable';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface OptionFormData {
   value: string;
@@ -56,24 +58,27 @@ export const IncidentPriorityOptionsTab: React.FC = () => {
       sort_order: priorityOptions.length + 1, 
       is_active: true 
     });
+    setPriorityDialogOpen(true);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Incident Priority Options</h3>
-        <OptionDialog
-          open={priorityDialogOpen}
-          onOpenChange={setPriorityDialogOpen}
-          formData={priorityForm}
-          setFormData={setPriorityForm}
-          onSubmit={handlePrioritySubmit}
-          isEditing={!!editingPriority}
-          type="incident priority"
-          optionsLength={priorityOptions.length}
-          onAddClick={handleAddPriority}
-        />
+        <Button onClick={handleAddPriority}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add incident priority
+        </Button>
       </div>
+      <OptionDialog
+        open={priorityDialogOpen}
+        onOpenChange={setPriorityDialogOpen}
+        formData={priorityForm}
+        setFormData={setPriorityForm}
+        onSubmit={handlePrioritySubmit}
+        isEditing={!!editingPriority}
+        type="incident priority"
+      />
       <OptionsTable
         options={priorityOptions}
         onEdit={editPriority}
