@@ -9,10 +9,10 @@ import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw } from 'lucide-react';
 import { AddRoleDialog } from '@/components/role-management/AddRoleDialog';
-import { PortalPermissionsTable } from '@/components/role-management/PortalPermissionsTable';
+import { DashboardWidgetsTable } from '@/components/role-management/DashboardWidgetsTable';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
-const CCCPermissionsPage: React.FC = () => {
+const WidgetPermissionsPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const [localPermissions, setLocalPermissions] = useState<Record<string, Record<string, boolean>>>({});
   const [pendingCells, setPendingCells] = useState<Set<string>>(new Set());
@@ -125,12 +125,12 @@ const CCCPermissionsPage: React.FC = () => {
   }
 
   return (
-    <ProtectedRoute module="ccc_permissions" requirePermission="read">
+    <ProtectedRoute module="widget_permissions" requirePermission="read">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">CCC Permissions Management</h1>
+          <h1 className="text-3xl font-bold">Dashboard Widget Permissions</h1>
           <p className="text-muted-foreground">
-            Configure portal permissions and dashboard widgets for each user role.
+            Configure dashboard widget visibility for each user role.
           </p>
           {permissionTest && (
             <div className="mt-2 text-sm text-muted-foreground">
@@ -183,8 +183,7 @@ const CCCPermissionsPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PortalPermissionsTable 
-              portal="ccc" 
+            <DashboardWidgetsTable
               modules={modules} 
               actions={actions} 
               rolePermissions={localPermissions} 
@@ -198,4 +197,4 @@ const CCCPermissionsPage: React.FC = () => {
   );
 };
 
-export default CCCPermissionsPage;
+export default WidgetPermissionsPage;

@@ -67,6 +67,7 @@ import ModulesManagementPage from '@/pages/ModulesManagementPage';
 import ActionsManagementPage from '@/pages/ActionsManagementPage';
 import CCCPermissionsPage from '@/pages/CCCPermissionsPage';
 import CPPermissionsPage from '@/pages/CPPermissionsPage';
+import WidgetPermissionsPage from '@/pages/WidgetPermissionsPage';
 import ParentProfilePage from '@/pages/ParentProfilePage';
 import PTTestsPage from '@/pages/PTTestsPage';
 import UniformInspectionPage from '@/pages/UniformInspectionPage';
@@ -132,6 +133,7 @@ const MainApplication = () => {
       'actions': '/app/actions',
       'ccc_permissions': '/app/ccc_permissions',
       'cp_permissions': '/app/cp_permissions',
+      'widget_permissions': '/app/widget_permissions',
       'settings': '/app/settings'
     };
     
@@ -187,6 +189,7 @@ const MainApplication = () => {
           'actions': '/app/actions',
           'ccc_permissions': '/app/ccc_permissions',
           'cp_permissions': '/app/cp_permissions',
+          'widget_permissions': '/app/widget_permissions',
           'settings': '/app/settings'
         });
       }
@@ -284,6 +287,7 @@ const MainApplication = () => {
             <Route path="actions" element={<ActionsManagementPage />} />
             <Route path="ccc_permissions" element={<CCCPermissionsPage />} />
             <Route path="cp_permissions" element={<CPPermissionsPage />} />
+            <Route path="widget_permissions" element={<WidgetPermissionsPage />} />
             <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}
