@@ -257,16 +257,14 @@ export const AllQuestionsStep = ({
                 <p className="text-sm font-medium text-destructive">Penalty: {field.penaltyValue} points</p>
               </div>}
 
-            <div className="space-y-3">
-              <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue ?? ""} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base w-full" />
-              <div className="grid grid-cols-2 gap-3">
-                <Button type="button" variant="outline" size="lg" onClick={handleDecrement} className="h-16 text-lg font-semibold">
-                  <Minus className="h-6 w-6 mr-2" />
-                </Button>
-                <Button type="button" variant="outline" size="lg" onClick={handleIncrement} className="h-16 text-lg font-semibold">
-                  <Plus className="h-6 w-6 mr-2" />
-                </Button>
-              </div>
+            <div className="flex gap-2">
+              <Input type="number" inputMode="numeric" pattern="[0-9]*" value={localValue ?? ""} onChange={e => handleValueChange(e.target.value)} placeholder="Enter penalty value..." className="h-12 text-base flex-1" />
+              <Button type="button" variant="outline" size="lg" onClick={handleDecrement} className="h-12 w-12 p-0">
+                <Minus className="h-5 w-5" />
+              </Button>
+              <Button type="button" variant="outline" size="lg" onClick={handleIncrement} className="h-12 w-12 p-0">
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
           </div>;
       case "scoring_scale":
