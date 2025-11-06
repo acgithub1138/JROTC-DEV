@@ -506,7 +506,7 @@ export const AllQuestionsStep = ({
                       <h3 className="font-semibold truncate">{field.name}</h3>
                     </div>
                     {isAnswered && (
-                      <Badge className="bg-blue-600 hover:bg-blue-600 text-white text-lg shrink-0">
+                      <Badge className="bg-blue-600 hover:bg-blue-600 text-white text-base shrink-0">
                         {answers[field.id]}
                       </Badge>
                     )}
