@@ -17,8 +17,8 @@ export const ScoreButtonGrid = ({
   // Always use 10 columns for all number questions
   const columns = 10;
   
-  // Generate array of values from high to low
-  const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => maxValue - i);
+  // Generate array of values from low to high
+  const values = Array.from({ length: maxValue + 1 - startFrom }, (_, i) => startFrom + i);
   
   return (
     <div 
