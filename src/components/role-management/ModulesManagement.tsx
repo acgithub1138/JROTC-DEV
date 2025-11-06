@@ -23,13 +23,14 @@ const getIconComponent = (iconName: string) => {
 };
 type SortColumn = 'sort_order' | 'label' | 'icon' | 'path' | 'is_competition_portal' | 'is_active';
 type SortDirection = 'asc' | 'desc' | null;
-
 interface ModulesManagementProps {
   isDialogOpen?: boolean;
   setIsDialogOpen?: (open: boolean) => void;
 }
-
-const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: externalDialogOpen, setIsDialogOpen: externalSetDialogOpen }) => {
+const ModulesManagement: React.FC<ModulesManagementProps> = ({
+  isDialogOpen: externalDialogOpen,
+  setIsDialogOpen: externalSetDialogOpen
+}) => {
   const {
     toast
   } = useToast();
@@ -233,7 +234,6 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
       ...formData,
       parent_module: formData.parent_module || null
     };
-    
     if (editingModuleId) {
       updateMutation.mutate({
         id: editingModuleId,
@@ -258,7 +258,7 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
       </Card>;
   }
   return <>
-    <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    <Dialog open={isDialogOpen} onOpenChange={open => {
       setIsDialogOpen(open);
       if (!open) resetForm();
     }}>
@@ -270,22 +270,22 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                 <div>
                   <Label htmlFor="label">Display Label</Label>
                   <Input id="label" value={formData.label} onChange={e => {
-                  const displayLabel = e.target.value;
-                  const moduleName = displayLabel.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-                  setFormData({
-                    ...formData,
-                    label: displayLabel,
-                    name: moduleName
-                  });
-                }} required placeholder="e.g., Cadets, Tasks, Budget" />
+              const displayLabel = e.target.value;
+              const moduleName = displayLabel.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+              setFormData({
+                ...formData,
+                label: displayLabel,
+                name: moduleName
+              });
+            }} required placeholder="e.g., Cadets, Tasks, Budget" />
                 </div>
 
                 <div>
                   <Label htmlFor="name">Module Name</Label>
                   <Input id="name" value={formData.name} onChange={e => setFormData({
-                  ...formData,
-                  name: e.target.value
-                })} required placeholder="e.g., cadets, tasks, budget" />
+              ...formData,
+              name: e.target.value
+            })} required placeholder="e.g., cadets, tasks, budget" />
                 </div>
                 
                 <div>
@@ -294,8 +294,8 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                     <Button type="button" variant="outline" onClick={() => setIsIconModalOpen(true)} className="flex items-center gap-2">
                       {formData.icon ? <>
                           {React.createElement(getIconComponent(formData.icon), {
-                        className: "h-4 w-4"
-                      })}
+                    className: "h-4 w-4"
+                  })}
                           <span>{formData.icon}</span>
                         </> : <span>Browse Icons</span>}
                     </Button>
@@ -305,27 +305,25 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                 <div>
                   <Label htmlFor="path">Path (optional)</Label>
                   <Input id="path" value={formData.path} onChange={e => setFormData({
-                  ...formData,
-                  path: e.target.value
-                })} placeholder="/app/module-name" />
+              ...formData,
+              path: e.target.value
+            })} placeholder="/app/module-name" />
                 </div>
 
                 <div>
                   <Label htmlFor="parent_module">Parent Module (optional)</Label>
                   <Select value={formData.parent_module || "none"} onValueChange={value => setFormData({
-                  ...formData,
-                  parent_module: value === "none" ? '' : value
-                })}>
+              ...formData,
+              parent_module: value === "none" ? '' : value
+            })}>
                     <SelectTrigger id="parent_module">
                       <SelectValue placeholder="Select parent module" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">None</SelectItem>
-                      {modules.map(module => (
-                        <SelectItem key={module.id} value={module.id}>
+                      {modules.map(module => <SelectItem key={module.id} value={module.id}>
                           {module.label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -333,25 +331,25 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                 <div>
                   <Label htmlFor="sort_order">Sort Order</Label>
                   <Input id="sort_order" type="number" value={formData.sort_order} onChange={e => setFormData({
-                  ...formData,
-                  sort_order: parseInt(e.target.value) || 0
-                })} />
+              ...formData,
+              sort_order: parseInt(e.target.value) || 0
+            })} />
                 </div>
                 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <Switch id="is_active" checked={formData.is_active} onCheckedChange={checked => setFormData({
-                    ...formData,
-                    is_active: !!checked
-                  })} />
+                ...formData,
+                is_active: !!checked
+              })} />
                     <Label htmlFor="is_active">Active</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <Switch id="is_competition_portal" checked={formData.is_competition_portal} onCheckedChange={checked => setFormData({
-                    ...formData,
-                    is_competition_portal: !!checked
-                  })} />
+                ...formData,
+                is_competition_portal: !!checked
+              })} />
                     <Label htmlFor="is_competition_portal">Competition Portal</Label>
                   </div>
                 </div>
@@ -361,9 +359,9 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                     {editingModuleId ? 'Save Changes' : 'Create'}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => {
-                    setIsDialogOpen(false);
-                    resetForm();
-                  }}>
+              setIsDialogOpen(false);
+              resetForm();
+            }}>
                     Cancel
                   </Button>
                 </div>
@@ -372,14 +370,7 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
           </Dialog>
     
     <Card>
-      <CardHeader>
-        <CardTitle>
-          Permission Modules Management
-        </CardTitle>
-        <CardDescription>
-          Manage permission modules that appear in sidebars and role permissions.
-        </CardDescription>
-      </CardHeader>
+      
       <CardContent>
         <Table>
           <TableHeader>
@@ -437,9 +428,9 @@ const ModulesManagement: React.FC<ModulesManagementProps> = ({ isDialogOpen: ext
                 <TableCell>
                   <div className="flex items-center space-x-2">
                     {(() => {
-                      const IconComponent = getIconComponent((module as any).icon || 'FileText');
-                      return <IconComponent className="w-4 h-4" />;
-                    })()}
+                    const IconComponent = getIconComponent((module as any).icon || 'FileText');
+                    return <IconComponent className="w-4 h-4" />;
+                  })()}
                     <Badge variant="outline">{(module as any).icon || 'FileText'}</Badge>
                   </div>
                 </TableCell>
