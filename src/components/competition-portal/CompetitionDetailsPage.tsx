@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 import { useCompetitionEventsPermissions, useCompetitionResourcesPermissions, useCompetitionSchoolsPermissions, useCompetitionSchedulePermissions, useCompetitionResultsPermissions, useCompetitionJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CompetitionDetailsSidebar } from './CompetitionDetailsSidebar';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
@@ -9,9 +11,9 @@ import { CompetitionResultsTab } from './tabs/CompetitionResultsTab';
 import { JudgesAssignedView } from './views/JudgesAssignedView';
 import { ApplicationStatusView } from './views/ApplicationStatusView';
 import { ScheduleView } from './views/ScheduleView';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 export const CompetitionDetailsPage = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
@@ -147,35 +149,42 @@ export const CompetitionDetailsPage = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-[calc(100vh-4rem)] w-full">
-        <CompetitionDetailsSidebar 
-          competitionId={competitionId} 
-          permissions={{
-            events: eventsPermissions,
-            judges: judgesPermissions,
-            resources: resourcesPermissions,
-            schools: schoolsPermissions,
-            schedule: schedulePermissions,
-            results: resultsPermissions
-          }}
-        />
+    <div className="flex h-[calc(100vh-4rem)] w-full">
+      <CompetitionDetailsSidebar 
+        competitionId={competitionId} 
+        permissions={{
+          events: eventsPermissions,
+          judges: judgesPermissions,
+          resources: resourcesPermissions,
+          schools: schoolsPermissions,
+          schedule: schedulePermissions,
+          results: resultsPermissions
+        }}
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      />
+      
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Mobile Menu Button */}
+        <div className="sticky top-0 z-10 bg-background border-b p-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-4 w-4 mr-2" />
+            Menu
+          </Button>
+        </div>
         
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          {/* Mobile Menu Button */}
-          <div className="md:hidden sticky top-0 z-10 bg-background border-b p-4">
-            <SidebarTrigger />
-          </div>
-          
-          <div className="p-6 space-y-6">
-            {/* Dynamic content based on route */}
-            <div className="mt-6">
-              {renderContent()}
-            </div>
+        <div className="p-6 space-y-6">
+          {/* Dynamic content based on route */}
+          <div className="mt-6">
+            {renderContent()}
           </div>
         </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
