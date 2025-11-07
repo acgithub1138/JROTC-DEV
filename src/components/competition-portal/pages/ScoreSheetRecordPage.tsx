@@ -327,8 +327,8 @@ export const ScoreSheetRecordPage = () => {
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Action Buttons - Desktop */}
+        <div className="hidden md:flex items-center gap-2">
           {(mode === 'create' || mode === 'edit') && (
             <Button onClick={() => setUseBuilder(!useBuilder)} variant="outline" size="sm">
               {useBuilder ? 'Manual JSON' : 'Field Builder'}
@@ -336,6 +336,23 @@ export const ScoreSheetRecordPage = () => {
           )}
         </div>
       </div>
+
+      {/* Mobile Action Buttons */}
+      {(mode === 'create' || mode === 'edit') && (
+        <div className="md:hidden grid grid-cols-2 gap-2">
+          <Button onClick={handleCancel} variant="outline" className="w-full">
+            Cancel
+          </Button>
+          <Button onClick={() => {
+            const form = document.querySelector('form');
+            if (form) {
+              form.requestSubmit();
+            }
+          }} className="w-full">
+            {mode === 'create' ? 'Create' : 'Save'}
+          </Button>
+        </div>
+      )}
 
       {/* Content */}
       <div className="space-y-6">
