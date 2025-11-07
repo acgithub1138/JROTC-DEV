@@ -472,25 +472,19 @@ export const CompetitionSchoolRecord = () => {
 
       <div className="max-w-4xl mx-auto space-y-4">
         {/* Mobile Action Buttons - Above Card */}
-        {canEdit && !isViewMode && (
-          <div className="md:hidden grid grid-cols-2 gap-2">
-            {canDelete && !isCreateMode && (
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
+        {canEdit && !isViewMode && <div className="md:hidden grid grid-cols-2 gap-2">
+            {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Trash2 className="h-4 w-4" />
                 Delete
-              </Button>
-            )}
+              </Button>}
             <Button type="submit" form="school-form" disabled={isSubmitting} className={`flex items-center gap-2 hover:scale-105 transition-transform ${!canDelete || isCreateMode ? 'col-span-2' : ''}`}>
               <Save className="h-4 w-4" />
               {isSubmitting ? 'Saving...' : 'Save'}
             </Button>
-          </div>
-        )}
+          </div>}
 
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
-          <CardHeader className="border-b border-primary/10">
-            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
-          </CardHeader>
+          
         <CardContent className="pt-6 py-[8px]">
           <Form {...form}>
             <form id="school-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
