@@ -680,47 +680,49 @@ export const CompetitionEventRecord: React.FC = () => {
                     }
                   }} disabled={isViewMode} required />
                 </div>
-                <div>
-                  <Select value={formData.start_hour} onValueChange={value => {
-                    setFormData(prev => ({
-                      ...prev,
-                      start_hour: value
-                    }));
-                    if (value && !formData.end_hour) {
-                      const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                  <div>
+                    <Select value={formData.start_hour} onValueChange={value => {
                       setFormData(prev => ({
                         ...prev,
-                        end_hour: nextHour > '23' ? '23' : nextHour
+                        start_hour: value
                       }));
-                    }
-                  }} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hour" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    start_minute: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Min" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="00">00</SelectItem>
-                      <SelectItem value="15">15</SelectItem>
-                      <SelectItem value="30">30</SelectItem>
-                      <SelectItem value="45">45</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      if (value && !formData.end_hour) {
+                        const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                        setFormData(prev => ({
+                          ...prev,
+                          end_hour: nextHour > '23' ? '23' : nextHour
+                        }));
+                      }
+                    }} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      start_minute: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="00">00</SelectItem>
+                        <SelectItem value="15">15</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="45">45</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -732,38 +734,40 @@ export const CompetitionEventRecord: React.FC = () => {
                 <div className="md:col-span-1 flex items-center justify-center">
                   <Label className="text-sm font-medium">Start Time</Label>
                 </div>
-                <div>
-                  <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_hour: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hour" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                        {i.toString().padStart(2, '0')}
-                      </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_minute: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Min" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="00">00</SelectItem>
-                      <SelectItem value="15">15</SelectItem>
-                      <SelectItem value="30">30</SelectItem>
-                      <SelectItem value="45">45</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                  <div>
+                    <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      lunch_start_hour: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      lunch_start_minute: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="00">00</SelectItem>
+                        <SelectItem value="15">15</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="45">45</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -775,38 +779,40 @@ export const CompetitionEventRecord: React.FC = () => {
                 <div className="md:col-span-1 flex items-center justify-center">
                   <Label className="text-sm font-medium">End Time</Label>
                 </div>
-                <div>
-                  <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_hour: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hour" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                        {i.toString().padStart(2, '0')}
-                      </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_minute: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Min" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="00">00</SelectItem>
-                      <SelectItem value="15">15</SelectItem>
-                      <SelectItem value="30">30</SelectItem>
-                      <SelectItem value="45">45</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                  <div>
+                    <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      lunch_end_hour: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      lunch_end_minute: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="00">00</SelectItem>
+                        <SelectItem value="15">15</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="45">45</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -821,38 +827,40 @@ export const CompetitionEventRecord: React.FC = () => {
                     end_date: e.target.value
                   }))} disabled={isViewMode} required />
                 </div>
-                <div>
-                  <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    end_hour: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hour" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
-                    ...prev,
-                    end_minute: value
-                  }))} disabled={isViewMode}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Min" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="00">00</SelectItem>
-                      <SelectItem value="15">15</SelectItem>
-                      <SelectItem value="30">30</SelectItem>
-                      <SelectItem value="45">45</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                  <div>
+                    <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      end_hour: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      end_minute: value
+                    }))} disabled={isViewMode}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="00">00</SelectItem>
+                        <SelectItem value="15">15</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="45">45</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
