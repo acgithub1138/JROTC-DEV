@@ -58,9 +58,9 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
           Manage judge assignments for this competition
         </p>
         {canCreate && (
-          <Button onClick={handleCreateJudge}>
-            <Plus className="h-4 w-4 mr-2" />
-            Assign Judge
+          <Button onClick={handleCreateJudge} size="icon" className="md:w-auto md:px-4">
+            <Plus className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Assign Judge</span>
           </Button>
         )}
       </div>
