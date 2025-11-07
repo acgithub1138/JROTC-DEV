@@ -104,7 +104,7 @@ export const EmailTemplatesCards: React.FC<EmailTemplatesCardsProps> = ({
                 </div>
               </div>
               
-              <div className="grid grid-cols-4 gap-2 pt-2">
+              <div className="grid grid-cols-2 gap-2 pt-2">
                 {canViewTemplate?.(template) && onView && (
                   <Button 
                     variant="outline" 
