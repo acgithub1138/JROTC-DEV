@@ -406,37 +406,39 @@ export const CPCompetitionRecordPage = () => {
             <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
               <div className="col-span-7">
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-2">
                     <Input type="date" value={formData.start_date} onChange={e => updateFormData('start_date', e.target.value)} required disabled={isViewMode} />
                   </div>
-                  <div>
-                    <Select value={formData.start_time_hour} onValueChange={value => updateFormData('start_time_hour', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Select value={formData.start_time_minute} onValueChange={value => updateFormData('start_time_minute', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 60
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select value={formData.start_time_hour} onValueChange={value => updateFormData('start_time_hour', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select value={formData.start_time_minute} onValueChange={value => updateFormData('start_time_minute', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 60
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -446,37 +448,39 @@ export const CPCompetitionRecordPage = () => {
             <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
               <div className="col-span-7">
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-2">
                     <Input type="date" value={formData.end_date} onChange={e => updateFormData('end_date', e.target.value)} required disabled={isViewMode} />
                   </div>
-                  <div>
-                    <Select value={formData.end_time_hour} onValueChange={value => updateFormData('end_time_hour', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Select value={formData.end_time_minute} onValueChange={value => updateFormData('end_time_minute', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 60
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select value={formData.end_time_hour} onValueChange={value => updateFormData('end_time_hour', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select value={formData.end_time_minute} onValueChange={value => updateFormData('end_time_minute', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 60
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -486,37 +490,39 @@ export const CPCompetitionRecordPage = () => {
             <div className="grid grid-cols-8 items-center gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
               <Label className="text-left md:text-right font-semibold">Registration Deadline</Label>
               <div className="col-span-7">
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-2">
                     <Input type="date" value={formData.registration_deadline_date} onChange={e => updateFormData('registration_deadline_date', e.target.value)} disabled={isViewMode} />
                   </div>
-                  <div>
-                    <Select value={formData.registration_deadline_hour} onValueChange={value => updateFormData('registration_deadline_hour', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Select value={formData.registration_deadline_minute} onValueChange={value => updateFormData('registration_deadline_minute', value)} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 60
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select value={formData.registration_deadline_hour} onValueChange={value => updateFormData('registration_deadline_hour', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select value={formData.registration_deadline_minute} onValueChange={value => updateFormData('registration_deadline_minute', value)} disabled={isViewMode}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({
+                            length: 60
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                              {i.toString().padStart(2, '0')}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
