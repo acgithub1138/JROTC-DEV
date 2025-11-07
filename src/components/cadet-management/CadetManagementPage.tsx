@@ -166,20 +166,20 @@ const CadetManagementPage = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               {userProfile?.user_roles?.role_name === 'admin' && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setPasswordRecoveryOpen(true)}
-                  className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                  className="text-orange-600 border-orange-600 hover:bg-orange-50 w-full sm:w-auto"
                 >
                   Fix Missing Passwords
                 </Button>
               )}
-              <div className="text-sm text-muted-foreground">New users will get their password in an email and must reset it when they log in.</div>
+              <div className="text-sm text-muted-foreground text-left">New users will get their password in an email and must reset it when they log in.</div>
             </div>
           </div>
         </CardHeader>
