@@ -68,8 +68,8 @@ export const JobBoardTable = ({
                 {formatCadetName(job.cadet)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-1 gap-2 text-sm">
+            <CardContent>
+              <div className="grid grid-cols-1 gap-2 text-sm mb-4">
                 <div>
                   <span className="text-muted-foreground font-medium">Role:</span>
                   <p>{job.role}</p>
@@ -88,15 +88,18 @@ export const JobBoardTable = ({
                 </div>
               </div>
               
-              <div className="flex justify-end pt-2">
-                <TableActionButtons
-                  canEdit={canEdit}
-                  canDelete={canDelete}
-                  onEdit={onEditJob ? () => onEditJob(job) : undefined}
-                  onDelete={onDeleteJob ? () => onDeleteJob(job) : undefined}
-                  readOnly={readOnly}
-                />
-              </div>
+              {!readOnly && (canEdit || canDelete) && (
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+                  <TableActionButtons
+                    canEdit={canEdit}
+                    canDelete={canDelete}
+                    onEdit={onEditJob ? () => onEditJob(job) : undefined}
+                    onDelete={onDeleteJob ? () => onDeleteJob(job) : undefined}
+                    readOnly={readOnly}
+                    mobileFullButtons={true}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
