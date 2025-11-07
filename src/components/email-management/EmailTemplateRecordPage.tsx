@@ -18,6 +18,7 @@ import { VariablesPanel } from './dialogs/components/VariablesPanel';
 import { extractVariables } from '@/utils/templateProcessor';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import 'react-quill/dist/quill.snow.css';
 
 const modules = {
@@ -44,6 +45,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || (id ? 'view' : 'create');
+  const isMobile = useIsMobile();
   
   const {
     templates,
@@ -267,49 +269,100 @@ export const EmailTemplateRecordPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 overflow-x-hidden">
+      {/* Back Button - Above header on mobile */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          onClick={() => handleNavigation('/app/email_templates')}
+          className="w-fit"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Email Templates
+        </Button>
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => handleNavigation('/app/email_templates')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Email Templates
-          </Button>
+      <div className={`flex ${isMobile ? 'flex-col gap-4' : 'items-center justify-between'}`}>
+        <div className={`flex items-center ${isMobile ? 'flex-col items-start' : 'gap-4'}`}>
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              onClick={() => handleNavigation('/app/email_templates')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Email Templates
+            </Button>
+          )}
           <h1 className="text-3xl font-bold">{getTitle()}</h1>
         </div>
 
-        <div className="flex items-center gap-2">
-          {mode === 'view' && permissions.canEdit && (
-            <Button
-              onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}
-            >
-              Edit Template
-            </Button>
-          )}
-          {mode !== 'view' && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                navigate('/app/email/email_preview_record', {
-                  state: {
-                    subject: formData.subject,
-                    body: formData.body,
-                    sourceTable: formData.source_table,
-                    from: location.pathname + location.search
-                  }
-                });
-              }}
-              disabled={!canPreview}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview Email
-            </Button>
-          )}
-        </div>
+        {!isMobile && (
+          <div className="flex items-center gap-2">
+            {mode === 'view' && permissions.canEdit && (
+              <Button
+                onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}
+              >
+                Edit Template
+              </Button>
+            )}
+            {mode !== 'view' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigate('/app/email/email_preview_record', {
+                    state: {
+                      subject: formData.subject,
+                      body: formData.body,
+                      sourceTable: formData.source_table,
+                      from: location.pathname + location.search
+                    }
+                  });
+                }}
+                disabled={!canPreview}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Preview Email
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Mobile Action Buttons - Below header */}
+        {isMobile && (
+          <div className="grid grid-cols-2 gap-2 w-full">
+            {mode === 'view' && permissions.canEdit && (
+              <Button
+                onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}
+                className="w-full"
+              >
+                Edit Template
+              </Button>
+            )}
+            {mode !== 'view' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigate('/app/email/email_preview_record', {
+                    state: {
+                      subject: formData.subject,
+                      body: formData.body,
+                      sourceTable: formData.source_table,
+                      from: location.pathname + location.search
+                    }
+                  });
+                }}
+                disabled={!canPreview}
+                className="w-full col-span-2"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Preview Email
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -318,10 +371,10 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <CardTitle>Template Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-6">
+            <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-3 gap-6'}`}>
               {/* Template Name */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="name" className="w-32 text-right">Template Name</Label>
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+                <Label htmlFor="name" className={isMobile ? '' : 'w-32 text-right'}>Template Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -334,8 +387,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
               </div>
 
               {/* Source Table */}
-              <div className="flex items-center gap-4">
-                <Label className="w-32 text-right">Source Table</Label>
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+                <Label className={isMobile ? '' : 'w-32 text-right'}>Source Table</Label>
                 <Select
                   value={formData.source_table}
                   onValueChange={(value) => {
@@ -358,8 +411,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
               </div>
 
               {/* Active Status */}
-              <div className="flex items-center gap-4">
-                <Label className="w-32 text-right">Active Status</Label>
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+                <Label className={isMobile ? '' : 'w-32 text-right'}>Active Status</Label>
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={formData.is_active}
@@ -375,8 +428,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
 
             {/* Global Template Checkbox - Only for Admins */}
             {userProfile?.role === 'admin' && (
-              <div className="flex items-center gap-4 mt-6">
-                <Label className="w-32 text-right">Global Template</Label>
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
+                <Label className={isMobile ? '' : 'w-32 text-right'}>Global Template</Label>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="is_global"
@@ -392,14 +445,14 @@ export const EmailTemplateRecordPage: React.FC = () => {
             )}
 
             {/* Email Recipient Field */}
-            <div className="flex items-center gap-4 mt-6">
-              <Label className="w-32 text-right">Email Recipient</Label>
+            <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
+              <Label className={isMobile ? '' : 'w-32 text-right'}>Email Recipient</Label>
               <Select 
                 value={formData.recipient_field} 
                 onValueChange={value => handleFormChange({ recipient_field: value })} 
                 disabled={!formData.source_table || isReadOnly}
               >
-                <SelectTrigger className="w-1/3">
+                <SelectTrigger className={isMobile ? 'w-full' : 'w-1/3'}>
                   <SelectValue placeholder="Select recipient" />
                 </SelectTrigger>
                 <SelectContent>
@@ -411,8 +464,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-3 space-y-6">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
+          <div className={isMobile ? 'space-y-6' : 'col-span-3 space-y-6'}>
             {/* Subject Field */}
             <Card>
               <CardHeader>
@@ -473,15 +526,16 @@ export const EmailTemplateRecordPage: React.FC = () => {
 
         {/* Actions */}
         {mode !== 'view' && (
-          <div className="flex justify-end space-x-2">
+          <div className={`${isMobile ? 'grid grid-cols-2 gap-2' : 'flex justify-end space-x-2'}`}>
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => handleNavigation('/app/email_templates')}
+              className={isMobile ? 'w-full' : ''}
             >
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" className={isMobile ? 'w-full' : ''}>
               {mode === 'edit' ? 'Update Template' : 'Create Template'}
             </Button>
           </div>
