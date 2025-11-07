@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCommunityService } from './hooks/useCommunityService';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CadetOption {
   id: string;
@@ -29,6 +30,7 @@ interface CadetOption {
 
 export const CommunityServiceCreatePage: React.FC = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { userProfile } = useAuth();
   const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -165,6 +167,38 @@ export const CommunityServiceCreatePage: React.FC = () => {
           Create community service records for one or multiple cadets
         </p>
       </div>
+
+      {/* Mobile Action Buttons */}
+      {isMobile && (
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              if (hasUnsavedChanges) {
+                setPendingNavigation('back');
+                setShowUnsavedDialog(true);
+              } else {
+                navigate(-1);
+              }
+            }}
+            className="w-full"
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isBulkCreating || selectedCadetIds.length === 0}
+            onClick={handleSubmit}
+            className="w-full"
+          >
+            {isBulkCreating 
+              ? 'Creating...' 
+              : `Add for ${selectedCadetIds.length}`
+            }
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -307,34 +341,34 @@ export const CommunityServiceCreatePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  if (hasUnsavedChanges) {
-                    setPendingNavigation('back');
-                    setShowUnsavedDialog(true);
-                  } else {
-                    navigate(-1);
+            {/* Desktop Action Buttons */}
+            {!isMobile && (
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    if (hasUnsavedChanges) {
+                      setPendingNavigation('back');
+                      setShowUnsavedDialog(true);
+                    } else {
+                      navigate(-1);
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isBulkCreating || selectedCadetIds.length === 0}
+                >
+                  {isBulkCreating 
+                    ? 'Creating Records...' 
+                    : `Add Service for ${selectedCadetIds.length} Cadet${selectedCadetIds.length !== 1 ? 's' : ''}`
                   }
-                }}
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isBulkCreating || selectedCadetIds.length === 0}
-                className="w-full sm:w-auto"
-              >
-                {isBulkCreating 
-                  ? 'Creating Records...' 
-                  : `Add Service for ${selectedCadetIds.length} Cadet${selectedCadetIds.length !== 1 ? 's' : ''}`
-                }
-              </Button>
-            </div>
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
