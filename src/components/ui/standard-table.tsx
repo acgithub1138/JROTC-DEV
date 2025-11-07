@@ -50,9 +50,12 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
         <Input placeholder={searchPlaceholder} value={searchValue} onChange={e => onSearchChange(e.target.value)} className="pl-10 w-full" />
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
-        <div>{stockCounter}</div>
-        <div className="flex items-center gap-2 sm:gap-4 sm:ml-4 flex-wrap">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+        {/* Stock Counter - own row on mobile */}
+        <div className="flex justify-center sm:justify-start">{stockCounter}</div>
+        
+        {/* Columns and controls - own row on mobile */}
+        <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-4 sm:ml-4 flex-wrap">
           {columns && onToggleColumn && <ColumnSelector columns={columns} onToggleColumn={onToggleColumn} isLoading={columnsLoading} />}
           {extraControls}
           {selectedCount > 0 && onBulkDelete && <>
