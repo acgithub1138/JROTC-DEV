@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
-import { usePTTestEdit } from './hooks/usePTTestEdit';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { usePTTestEdit } from "./hooks/usePTTestEdit";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PTTest {
   id: string;
@@ -33,32 +43,31 @@ export const PTTestEditPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { userProfile } = useAuth();
-  const ptTestId = searchParams.get('id');
-  
-  const [pushUps, setPushUps] = useState('');
-  const [sitUps, setSitUps] = useState('');
-  const [plankTime, setPlankTime] = useState('');
-  const [mileTime, setMileTime] = useState('');
+  const ptTestId = searchParams.get("id");
+
+  const [pushUps, setPushUps] = useState("");
+  const [sitUps, setSitUps] = useState("");
+  const [plankTime, setPlankTime] = useState("");
+  const [mileTime, setMileTime] = useState("");
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  const { 
-    updatePTTest, 
-    deletePTTest, 
-    isUpdating, 
-    isDeleting, 
-    parseTimeToSeconds, 
-    formatSecondsToTime 
-  } = usePTTestEdit();
+  const { updatePTTest, deletePTTest, isUpdating, isDeleting, parseTimeToSeconds, formatSecondsToTime } =
+    usePTTestEdit();
 
   // Fetch PT test data
-  const { data: ptTest, isLoading, error } = useQuery({
-    queryKey: ['pt-test', ptTestId],
+  const {
+    data: ptTest,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["pt-test", ptTestId],
     queryFn: async () => {
       if (!ptTestId || !userProfile?.school_id) return null;
 
       const { data, error } = await supabase
-        .from('pt_tests')
-        .select(`
+        .from("pt_tests")
+        .select(
+          `
           id,
           cadet_id,
           date,
@@ -72,9 +81,10 @@ export const PTTestEditPage = () => {
             grade,
             rank
           )
-        `)
-        .eq('id', ptTestId)
-        .eq('school_id', userProfile.school_id)
+        `,
+        )
+        .eq("id", ptTestId)
+        .eq("school_id", userProfile.school_id)
         .single();
 
       if (error) throw error;
@@ -84,17 +94,19 @@ export const PTTestEditPage = () => {
   });
 
   // Initial data for comparison
-  const initialData = ptTest ? {
-    pushUps: ptTest.push_ups?.toString() || '',
-    sitUps: ptTest.sit_ups?.toString() || '',
-    plankTime: formatSecondsToTime(ptTest.plank_time),
-    mileTime: formatSecondsToTime(ptTest.mile_time),
-  } : {
-    pushUps: '',
-    sitUps: '',
-    plankTime: '',
-    mileTime: '',
-  };
+  const initialData = ptTest
+    ? {
+        pushUps: ptTest.push_ups?.toString() || "",
+        sitUps: ptTest.sit_ups?.toString() || "",
+        plankTime: formatSecondsToTime(ptTest.plank_time),
+        mileTime: formatSecondsToTime(ptTest.mile_time),
+      }
+    : {
+        pushUps: "",
+        sitUps: "",
+        plankTime: "",
+        mileTime: "",
+      };
 
   // Current data for comparison
   const currentData = {
@@ -113,8 +125,8 @@ export const PTTestEditPage = () => {
   // Populate form when ptTest loads
   useEffect(() => {
     if (ptTest) {
-      setPushUps(ptTest.push_ups?.toString() || '');
-      setSitUps(ptTest.sit_ups?.toString() || '');
+      setPushUps(ptTest.push_ups?.toString() || "");
+      setSitUps(ptTest.sit_ups?.toString() || "");
       setPlankTime(formatSecondsToTime(ptTest.plank_time));
       setMileTime(formatSecondsToTime(ptTest.mile_time));
       resetChanges();
@@ -131,11 +143,14 @@ export const PTTestEditPage = () => {
       mile_time: parseTimeToSeconds(mileTime),
     };
 
-    updatePTTest({ id: ptTest.id, data: updateData }, {
-      onSuccess: () => {
-        navigate(-1);
-      }
-    });
+    updatePTTest(
+      { id: ptTest.id, data: updateData },
+      {
+        onSuccess: () => {
+          navigate(-1);
+        },
+      },
+    );
   };
 
   const handleDelete = () => {
@@ -144,7 +159,7 @@ export const PTTestEditPage = () => {
     deletePTTest(ptTest.id, {
       onSuccess: () => {
         navigate(-1);
-      }
+      },
     });
   };
 
@@ -229,7 +244,9 @@ export const PTTestEditPage = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="flex items-center gap-4">
-                <Label htmlFor="push-ups" className="w-24 text-right shrink-0">Push-Ups</Label>
+                <Label htmlFor="push-ups" className="w-24 text-right shrink-0">
+                  Push-Ups
+                </Label>
                 <Input
                   id="push-ups"
                   type="number"
@@ -241,7 +258,9 @@ export const PTTestEditPage = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                <Label htmlFor="sit-ups" className="w-24 text-right shrink-0">Sit-Ups</Label>
+                <Label htmlFor="sit-ups" className="w-24 text-right shrink-0">
+                  Sit-Ups
+                </Label>
                 <Input
                   id="sit-ups"
                   type="number"
@@ -254,7 +273,9 @@ export const PTTestEditPage = () => {
 
               <div>
                 <div className="flex items-center gap-4">
-                  <Label htmlFor="plank-time" className="w-24 text-right shrink-0">Plank Time</Label>
+                  <Label htmlFor="plank-time" className="w-24 text-right shrink-0">
+                    Plank Time
+                  </Label>
                   <Input
                     id="plank-time"
                     placeholder="MM:SS or seconds"
@@ -267,7 +288,9 @@ export const PTTestEditPage = () => {
 
               <div>
                 <div className="flex items-center gap-4">
-                  <Label htmlFor="mile-time" className="w-24 text-right shrink-0">Mile Time</Label>
+                  <Label htmlFor="mile-time" className="w-24 text-right shrink-0">
+                    Mile Time
+                  </Label>
                   <Input
                     id="mile-time"
                     placeholder="MM:SS or seconds"
@@ -288,7 +311,12 @@ export const PTTestEditPage = () => {
           <div className="flex flex-col md:flex-row md:justify-between gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" disabled={isDeleting || isUpdating} className="w-full md:w-auto">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={isDeleting || isUpdating}
+                  className="w-full md:w-auto"
+                >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
@@ -310,11 +338,16 @@ export const PTTestEditPage = () => {
               </AlertDialogContent>
             </AlertDialog>
 
-            <Button variant="outline" onClick={handleBack} disabled={isUpdating || isDeleting} className="w-full md:w-auto">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={isUpdating || isDeleting}
+              className="w-full md:w-auto"
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               disabled={!hasUnsavedChanges || isUpdating || isDeleting}
               className="w-full md:w-auto"
             >
