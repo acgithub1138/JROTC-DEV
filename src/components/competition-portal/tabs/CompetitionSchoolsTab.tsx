@@ -155,10 +155,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         {canUpdate && <>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}>
-                                  <Plus className="w-4 h-4 mr-1" />
-                                  Add Score
-                                </Button>
+                                
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>Add event score sheet</p>
