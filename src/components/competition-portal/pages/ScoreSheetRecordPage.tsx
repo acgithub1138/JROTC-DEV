@@ -310,21 +310,21 @@ export const ScoreSheetRecordPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Back Button */}
+      <Button onClick={handleBack} variant="outline" size="sm">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Templates
+      </Button>
+
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button onClick={handleBack} variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Templates
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{getPageTitle()}</h1>
-            {template && (
-              <p className="text-muted-foreground">
-                Template: {template.template_name}
-              </p>
-            )}
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{getPageTitle()}</h1>
+          {template && (
+            <p className="text-muted-foreground">
+              Template: {template.template_name}
+            </p>
+          )}
         </div>
 
         {/* Action Buttons */}
