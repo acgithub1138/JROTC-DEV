@@ -116,13 +116,27 @@ const AnnouncementManagementPage = () => {
             
             <div className={isMobile ? "grid grid-cols-2 gap-2 pt-2" : "flex justify-end gap-2 pt-2"}>
               {canEdit && (
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEdit(announcement)} title="Edit">
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "default" : "icon"} 
+                  className={isMobile ? "w-full" : "h-8 w-8"} 
+                  onClick={() => handleEdit(announcement)} 
+                  title="Edit"
+                >
                   <Edit className="w-4 h-4" />
+                  {isMobile && <span className="ml-2">Edit</span>}
                 </Button>
               )}
               {canDelete && (
-                <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "default" : "icon"} 
+                  className={isMobile ? "w-full text-red-600 hover:text-red-700 hover:border-red-300" : "h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300"} 
+                  onClick={() => setDeleteAnnouncementId(announcement.id)} 
+                  title="Delete"
+                >
                   <Trash2 className="w-4 h-4" />
+                  {isMobile && <span className="ml-2">Delete</span>}
                 </Button>
               )}
             </div>
