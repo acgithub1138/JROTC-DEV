@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight, Users, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronRight, Users, X } from "lucide-react";
 
 interface Judge {
   id: string;
@@ -22,24 +22,20 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
   judges,
   selectedJudgeIds,
   onChange,
-  disabled = false
+  disabled = false,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const filteredJudges = judges.filter(judge => 
-    judge.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredJudges = judges.filter((judge) => judge.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const selectedJudges = judges.filter(judge => 
-    selectedJudgeIds.includes(judge.id)
-  );
+  const selectedJudges = judges.filter((judge) => selectedJudgeIds.includes(judge.id));
 
   const handleToggleJudge = (judgeId: string) => {
     if (disabled) return;
-    
+
     if (selectedJudgeIds.includes(judgeId)) {
-      onChange(selectedJudgeIds.filter(id => id !== judgeId));
+      onChange(selectedJudgeIds.filter((id) => id !== judgeId));
     } else {
       onChange([...selectedJudgeIds, judgeId]);
     }
@@ -47,7 +43,7 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
 
   const handleRemove = (judgeId: string) => {
     if (disabled) return;
-    onChange(selectedJudgeIds.filter(id => id !== judgeId));
+    onChange(selectedJudgeIds.filter((id) => id !== judgeId));
   };
 
   return (
@@ -56,14 +52,10 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
       {selectedJudges.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedJudges.map((judge) => (
-            <Badge key={judge.id} variant="secondary" className="gap-1">
+            <Badge key={judge.id} variant="secondary" className="gap-1 text-lg">
               {judge.name}
               {!disabled && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(judge.id)}
-                  className="ml-1 hover:text-destructive"
-                >
+                <button type="button" onClick={() => handleRemove(judge.id)} className="ml-1 hover:text-destructive">
                   <X className="w-3 h-3" />
                 </button>
               )}
@@ -81,9 +73,7 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
                 <Users className="w-4 h-4" />
                 <span>Add Judge</span>
                 {selectedJudgeIds.length > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    ({selectedJudgeIds.length} selected)
-                  </span>
+                  <span className="text-sm text-muted-foreground">({selectedJudgeIds.length} selected)</span>
                 )}
               </div>
               {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -100,22 +90,17 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
             <div className="max-h-[200px] overflow-y-auto space-y-1 border rounded-md p-2">
               {filteredJudges.length > 0 ? (
                 filteredJudges.map((judge) => (
-                  <div
-                    key={judge.id}
-                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
-                  >
+                  <div key={judge.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md">
                     <Checkbox
                       checked={selectedJudgeIds.includes(judge.id)}
                       onCheckedChange={() => handleToggleJudge(judge.id)}
                     />
-                    <div className="flex-1 cursor-pointer">
-                      {judge.name}
-                    </div>
+                    <div className="flex-1 cursor-pointer">{judge.name}</div>
                   </div>
                 ))
               ) : (
                 <div className="text-center text-muted-foreground py-4">
-                  {searchTerm ? 'No judges found' : 'No judges available'}
+                  {searchTerm ? "No judges found" : "No judges available"}
                 </div>
               )}
             </div>
