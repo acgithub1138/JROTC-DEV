@@ -534,7 +534,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           {canEditForm && <>
               {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Trash2 className="h-4 w-4" />
@@ -873,6 +873,20 @@ export const CompetitionEventRecord: React.FC = () => {
           </form>
         </CardContent>
         </Card>
+
+        {/* Mobile action buttons - shown below the card */}
+        <div className="md:hidden flex flex-col gap-2 mt-4">
+          {canEditForm && <>
+              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="w-full flex items-center justify-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>}
+              <Button type="submit" form="event-form" disabled={isSaving} className="w-full flex items-center justify-center gap-2">
+                <Save className="h-4 w-4" />
+                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
+              </Button>
+            </>}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
