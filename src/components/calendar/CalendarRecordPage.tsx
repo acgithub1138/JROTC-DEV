@@ -15,6 +15,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { Event } from './CalendarManagementPage';
 import { useEvents } from './hooks/useEvents';
@@ -51,6 +52,7 @@ export const CalendarRecordPage: React.FC = () => {
   const { canUpdate, canDelete, canCreate } = useCalendarPermissions();
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const eventId = searchParams.get('id');
   const selectedDateParam = searchParams.get('date');
@@ -453,25 +455,63 @@ export const CalendarRecordPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden min-w-0">
+      {/* Mobile: Back button above header */}
+      {isMobile && (
         <Button
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="flex items-center gap-2"
+          className="w-fit -ml-2"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Calendar
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold">
-            {isViewMode ? 'View Event' : isEditMode ? 'Edit Event' : 'Add Event'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isViewMode ? 'View event details' : isEditMode ? 'Update event information' : 'Create a new calendar event'}
-          </p>
+      )}
+
+      <div className="space-y-3">
+        <div className="flex items-center gap-4">
+          {/* Desktop: Back button + Title side by side */}
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Calendar
+            </Button>
+          )}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-3xl font-bold truncate">
+              {isViewMode ? 'View Event' : isEditMode ? 'Edit Event' : 'Add Event'}
+            </h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">
+              {isViewMode ? 'View event details' : isEditMode ? 'Update event information' : 'Create a new calendar event'}
+            </p>
+          </div>
         </div>
+
+        {/* Mobile: Action buttons below header */}
+        {isMobile && !isViewMode && canEdit && (
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleBack}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={form.handleSubmit(handleSubmit)}
+              className="flex-1"
+            >
+              {isEditMode ? 'Update Event' : 'Create Event'}
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -481,16 +521,16 @@ export const CalendarRecordPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
               {/* Row 1: Title - Event Type */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Title *</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Title *</FormLabel>
+                      <div className="flex-1 min-w-0">
                         <FormControl>
                           <Input 
                             placeholder="Enter event title" 
@@ -508,9 +548,9 @@ export const CalendarRecordPage: React.FC = () => {
                   control={form.control}
                   name="event_type"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Type</FormLabel>
-                      <div className="flex-1 flex gap-2">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Type</FormLabel>
+                      <div className="flex-1 flex gap-2 min-w-0">
                         <Select 
                           value={field.value} 
                           onValueChange={(value) => handleFieldChange('event_type', value)}
@@ -532,7 +572,7 @@ export const CalendarRecordPage: React.FC = () => {
                         {canEdit && (
                           <Dialog open={showAddEventTypeDialog} onOpenChange={setShowAddEventTypeDialog}>
                             <DialogTrigger asChild>
-                              <Button type="button" variant="outline" size="sm" title="Add new Event Type">
+                              <Button type="button" variant="outline" size="sm" className="flex-shrink-0" title="Add new Event Type">
                                 <Plus className="w-4 h-4" />
                               </Button>
                             </DialogTrigger>
@@ -578,14 +618,14 @@ export const CalendarRecordPage: React.FC = () => {
               </div>
 
               {/* Row 2: Location - All Day */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Location</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Location</FormLabel>
+                      <div className="flex-1 min-w-0">
                         <FormControl>
                           <AddressLookupField
                             value={field.value || ''}
@@ -604,9 +644,9 @@ export const CalendarRecordPage: React.FC = () => {
                   control={form.control}
                   name="is_all_day"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">All Day</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">All Day</FormLabel>
+                      <div className="flex-1 min-w-0">
                         <FormControl>
                           <div className="flex items-center space-x-2">
                             <Switch
@@ -628,9 +668,9 @@ export const CalendarRecordPage: React.FC = () => {
               {!form.watch('is_all_day') && (
                 <div className="space-y-4">
                   {/* Start Date & Time */}
-                  <div className="flex items-center gap-2">
-                    <FormLabel className="w-16 text-left shrink-0">Start *</FormLabel>
-                    <div className="flex-1 grid grid-cols-4 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Start *</FormLabel>
+                    <div className="flex-1 grid grid-cols-4 gap-2 min-w-0">
                       <div className="col-span-2">
                         <FormField
                           control={form.control}
@@ -703,9 +743,9 @@ export const CalendarRecordPage: React.FC = () => {
                   </div>
 
                   {/* End Date & Time */}
-                  <div className="flex items-center gap-2">
-                    <FormLabel className="w-16 text-left shrink-0">End</FormLabel>
-                    <div className="flex-1 grid grid-cols-4 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">End</FormLabel>
+                    <div className="flex-1 grid grid-cols-4 gap-2 min-w-0">
                       <div className="col-span-2">
                         <FormField
                           control={form.control}
@@ -782,9 +822,9 @@ export const CalendarRecordPage: React.FC = () => {
               {/* All Day Date Fields */}
               {form.watch('is_all_day') && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <FormLabel className="w-16 text-left shrink-0">Start *</FormLabel>
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Start *</FormLabel>
+                    <div className="flex-1 min-w-0">
                       <FormField
                         control={form.control}
                         name="start_date"
@@ -812,9 +852,9 @@ export const CalendarRecordPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <FormLabel className="w-16 text-left shrink-0">End</FormLabel>
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">End</FormLabel>
+                    <div className="flex-1 min-w-0">
                       <FormField
                         control={form.control}
                         name="end_date"
@@ -844,9 +884,9 @@ export const CalendarRecordPage: React.FC = () => {
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem className="flex items-start gap-2">
-                    <FormLabel className="w-32 text-left shrink-0 pt-2">Description</FormLabel>
-                    <div className="flex-1">
+                  <FormItem className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <FormLabel className="sm:w-32 sm:text-left sm:shrink-0 sm:pt-2">Description</FormLabel>
+                    <div className="flex-1 min-w-0">
                       <FormControl>
                         <Textarea 
                           placeholder="Enter event description" 
@@ -874,9 +914,9 @@ export const CalendarRecordPage: React.FC = () => {
 
               {/* Attachments (create only) */}
               {!isEditMode && (
-                <div className="flex items-start gap-2">
-                  <FormLabel className="w-32 text-left shrink-0 pt-2">Attachments</FormLabel>
-                  <div className="flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                  <FormLabel className="sm:w-32 sm:text-left sm:shrink-0 sm:pt-2">Attachments</FormLabel>
+                  <div className="flex-1 min-w-0">
                     <input
                       type="file"
                       multiple
@@ -930,31 +970,34 @@ export const CalendarRecordPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex justify-between pt-6">
-                {event && canDeleteEvent && !isViewMode && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDelete}
-                  >
-                    Delete Event
-                  </Button>
-                )}
-                <div className="flex gap-2 ml-auto">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBack}
-                  >
-                    {isViewMode ? 'Back' : 'Cancel'}
-                  </Button>
-                  {!isViewMode && canEdit && (
-                    <Button type="submit">
-                      {isEditMode ? 'Update Event' : 'Create Event'}
+              {/* Desktop: Action buttons at bottom */}
+              {!isMobile && (
+                <div className="flex justify-between pt-6">
+                  {event && canDeleteEvent && !isViewMode && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleDelete}
+                    >
+                      Delete Event
                     </Button>
                   )}
+                  <div className="flex gap-2 ml-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBack}
+                    >
+                      {isViewMode ? 'Back' : 'Cancel'}
+                    </Button>
+                    {!isViewMode && canEdit && (
+                      <Button type="submit">
+                        {isEditMode ? 'Update Event' : 'Create Event'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </form>
           </Form>
         </CardContent>
