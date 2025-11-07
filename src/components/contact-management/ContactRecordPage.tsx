@@ -17,6 +17,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 
 const contactSchema = z.object({
@@ -53,6 +54,7 @@ export const ContactRecordPage: React.FC = () => {
   const { userProfile } = useAuth();
   const { createContact, updateContact } = useContacts();
   const { canCreate, canEdit, canView } = useTablePermissions('contacts');
+  const isMobile = useIsMobile();
   
   // Extract mode and record ID from URL parameters
   const mode = (searchParams.get('mode') as ContactRecordMode) || 'view';
@@ -253,28 +255,76 @@ export const ContactRecordPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden min-w-0">
+      {/* Mobile: Back button above header */}
+      {isMobile && (
         <Button
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="flex items-center gap-2"
+          className="w-fit -ml-2"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Contacts
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold">
-            {isCreateMode ? 'Add Contact' : isEditMode ? 'Edit Contact' : 'View Contact'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isCreateMode ? 'Create a new contact record' : isEditMode ? 'Update contact information' : 'Contact details'}
-          </p>
+      )}
+
+      <div className="space-y-3">
+        <div className="flex items-center gap-4">
+          {/* Desktop: Back button + Title side by side */}
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Contacts
+            </Button>
+          )}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-3xl font-bold truncate">
+              {isCreateMode ? 'Add Contact' : isEditMode ? 'Edit Contact' : 'View Contact'}
+            </h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">
+              {isCreateMode ? 'Create a new contact record' : isEditMode ? 'Update contact information' : 'Contact details'}
+            </p>
+          </div>
         </div>
+
+        {/* Mobile: Action buttons below header */}
+        {isMobile && (
+          <>
+            {isViewMode && canEdit && (
+              <Button onClick={handleEdit} className="w-full">
+                Edit Contact
+              </Button>
+            )}
+            {!isViewMode && (
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={form.handleSubmit(handleSubmit)}
+                  className="flex-1"
+                >
+                  {isEditMode ? 'Update Contact' : 'Add Contact'}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {isViewMode && canEdit && (
+      {/* Desktop: View mode edit button */}
+      {!isMobile && isViewMode && canEdit && (
         <div className="flex justify-end">
           <Button onClick={handleEdit}>
             Edit Contact
@@ -289,16 +339,16 @@ export const ContactRecordPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
               {/* Row 1: Name - Status */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                     <FormItem className="flex items-center gap-2">
-                       <FormLabel className="w-16 text-left shrink-0">Name *</FormLabel>
-                       <div className="flex-1">
+                     <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                       <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Name *</FormLabel>
+                       <div className="flex-1 min-w-0">
                          <FormControl>
                            <Input placeholder="Enter contact name" {...field} disabled={isViewMode} />
                          </FormControl>
@@ -312,9 +362,9 @@ export const ContactRecordPage: React.FC = () => {
                   control={form.control}
                   name="status"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Status *</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Status *</FormLabel>
+                      <div className="flex-1 min-w-0">
                         <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
@@ -335,14 +385,14 @@ export const ContactRecordPage: React.FC = () => {
               </div>
 
               {/* Row 2: Phone - Email */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Phone *</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Phone *</FormLabel>
+                      <div className="flex-1 min-w-0">
                          <FormControl>
                            <Input placeholder="Phone number" {...field} disabled={isViewMode} />
                          </FormControl>
@@ -356,9 +406,9 @@ export const ContactRecordPage: React.FC = () => {
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Email</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Email</FormLabel>
+                      <div className="flex-1 min-w-0">
                          <FormControl>
                            <Input type="email" placeholder="Email address" {...field} disabled={isViewMode} />
                          </FormControl>
@@ -370,14 +420,14 @@ export const ContactRecordPage: React.FC = () => {
               </div>
 
               {/* Row 3: Cadet */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="cadet_id"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Cadet</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Cadet</FormLabel>
+                      <div className="flex-1 min-w-0">
                          <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
@@ -398,18 +448,18 @@ export const ContactRecordPage: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                <div></div>
+                <div className="hidden sm:block"></div>
               </div>
 
               {/* Row 4: Type - Other */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <FormField
                   control={form.control}
                   name="type"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Type *</FormLabel>
-                      <div className="flex-1">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Type *</FormLabel>
+                      <div className="flex-1 min-w-0">
                          <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                           <FormControl>
                             <SelectTrigger>
@@ -434,9 +484,9 @@ export const ContactRecordPage: React.FC = () => {
                     control={form.control}
                     name="type_other"
                     render={({ field }) => (
-                      <FormItem className="flex items-center gap-2">
-                        <FormLabel className="w-16 text-left shrink-0">Other</FormLabel>
-                        <div className="flex-1">
+                      <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <FormLabel className="sm:w-16 sm:text-left sm:shrink-0">Other</FormLabel>
+                        <div className="flex-1 min-w-0">
                            <FormControl>
                              <Input placeholder="Specify other type" {...field} disabled={isViewMode} />
                            </FormControl>
@@ -446,7 +496,7 @@ export const ContactRecordPage: React.FC = () => {
                     )}
                   />
                 ) : (
-                  <div></div>
+                  <div className="hidden sm:block"></div>
                 )}
               </div>
 
@@ -456,9 +506,9 @@ export const ContactRecordPage: React.FC = () => {
                 control={form.control}
                 name="notes"
                 render={({ field }) => (
-                  <FormItem className="flex items-start gap-2">
-                    <FormLabel className="w-16 text-left shrink-0 pt-2">Notes</FormLabel>
-                    <div className="flex-1">
+                  <FormItem className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <FormLabel className="sm:w-16 sm:text-left sm:shrink-0 sm:pt-2">Notes</FormLabel>
+                    <div className="flex-1 min-w-0">
                        <FormControl>
                          <Textarea 
                            placeholder="Additional notes" 
@@ -473,7 +523,8 @@ export const ContactRecordPage: React.FC = () => {
                 )}
               />
 
-              {!isViewMode && (
+              {/* Desktop: Action buttons at bottom */}
+              {!isMobile && !isViewMode && (
                 <div className="flex justify-end gap-2 pt-6">
                   <Button
                     type="button"
