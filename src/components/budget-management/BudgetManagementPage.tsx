@@ -9,6 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { BudgetSummaryCards } from './components/BudgetSummaryCards';
 import { BudgetTable } from './components/BudgetTable';
@@ -53,6 +63,7 @@ const BudgetManagementPage = () => {
   const { exportToExcel, isExporting } = useExportBudgetTransactions();
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
   const [deletingItem, setDeletingItem] = useState<BudgetTransaction | null>(null);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [filters, setFilters] = useState<BudgetFilters>({
     search: '',
     category: '',
@@ -72,10 +83,15 @@ const BudgetManagementPage = () => {
   } = useBudgetTransactions(filters);
   const isMobile = useIsMobile();
   
-  const handleArchiveAll = async () => {
+  const handleArchiveAll = () => {
+    setShowArchiveDialog(true);
+  };
+
+  const handleConfirmArchive = async () => {
     const currentYear = new Date().getFullYear();
     const budgetYear = `${currentYear - 1} - ${currentYear}`;
     await archiveAllTransactions(budgetYear);
+    setShowArchiveDialog(false);
   };
 
   const handleDeleteTransaction = (transaction: BudgetTransaction) => {
@@ -254,6 +270,23 @@ const BudgetManagementPage = () => {
         onConfirm={handleConfirmDelete} 
         loading={false}
       />
+
+      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive Expenses</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to archive all expenses from the previous budget year? This will move all transactions to the archive and they will no longer appear in the active budget view.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmArchive}>
+              Archive All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
