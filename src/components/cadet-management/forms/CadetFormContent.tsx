@@ -13,12 +13,14 @@ interface CadetFormContentProps {
   cadet?: Profile;
   onSuccess: (cadet: Profile) => void;
   onCancel: () => void;
+  hideActionButtons?: boolean;
 }
 export const CadetFormContent: React.FC<CadetFormContentProps> = ({
   mode,
   cadet,
   onSuccess,
-  onCancel
+  onCancel,
+  hideActionButtons = false
 }) => {
   const {
     form,
@@ -73,7 +75,7 @@ export const CadetFormContent: React.FC<CadetFormContentProps> = ({
   }
   return <div className="bg-background p-6 rounded-lg border">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6" id="cadet-form">
           {/* Basic Information Section */}
           <div className="space-y-6 p-6 border rounded-lg bg-card px-[24px] py-[8px]">
             
@@ -87,14 +89,16 @@ export const CadetFormContent: React.FC<CadetFormContentProps> = ({
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isFormDisabled}>
-              {isSubmitting ? 'Saving...' : mode === 'create' ? 'Add Cadet' : 'Update Cadet'}
-            </Button>
-          </div>
+          {!hideActionButtons && (
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isFormDisabled}>
+                {isSubmitting ? 'Saving...' : mode === 'create' ? 'Add Cadet' : 'Update Cadet'}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
 

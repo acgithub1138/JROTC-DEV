@@ -241,7 +241,7 @@ export const CadetRecordPage: React.FC = () => {
   // Create mode
   if (currentMode === 'create') {
     return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Cadets
@@ -251,13 +251,32 @@ export const CadetRecordPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Add New Cadet
-              </CardTitle>
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Add New Cadet
+                </CardTitle>
+                
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancel}
+                    className="w-full sm:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    form="cadet-form"
+                    className="w-full sm:w-auto"
+                  >
+                    Add Cadet
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <CadetFormContent mode="create" onSuccess={handleCadetCreated} onCancel={handleCancel} />
+              <CadetFormContent mode="create" onSuccess={handleCadetCreated} onCancel={handleCancel} hideActionButtons={true} />
             </CardContent>
           </Card>
         </div>
@@ -280,7 +299,7 @@ export const CadetRecordPage: React.FC = () => {
   // Edit mode
   if (currentMode === 'edit') {
     return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Cadets
@@ -293,13 +312,32 @@ export const CadetRecordPage: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Edit Cadet - {currentCadet.last_name}, {currentCadet.first_name}
-              </CardTitle>
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Edit Cadet - {currentCadet.last_name}, {currentCadet.first_name}
+                </CardTitle>
+                
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancel}
+                    className="w-full sm:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    form="cadet-form"
+                    className="w-full sm:w-auto"
+                  >
+                    Update Cadet
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <CadetFormContent mode="edit" cadet={currentCadet} onSuccess={handleCadetUpdated} onCancel={handleCancel} />
+              <CadetFormContent mode="edit" cadet={currentCadet} onSuccess={handleCadetUpdated} onCancel={handleCancel} hideActionButtons={true} />
             </CardContent>
           </Card>
 
