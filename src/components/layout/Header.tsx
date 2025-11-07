@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +5,7 @@ import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { User, LogOut, Settings, Menu, Shield, Trophy, Building2, UserCircle } from 'lucide-react';
+import { User, LogOut, Settings, Menu, Shield, Trophy, Building2, UserCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { SchoolProfileModal } from '@/components/school/SchoolProfileModal';
@@ -36,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [schoolProfileOpen, setSchoolProfileOpen] = useState(false);
   const [linkedCadetId, setLinkedCadetId] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const {
     menuItems
   } = useSidebarPreferences();
@@ -102,6 +102,18 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const toggleItemExpanded = (itemId: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
   return <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center">
         {/* Left side - Mobile Menu Button */}
@@ -131,17 +143,28 @@ export const Header: React.FC<HeaderProps> = ({
                     <div key={item.id}>
                       <Button 
                         variant={activeModule === item.id ? 'secondary' : 'ghost'} 
-                        className="w-full justify-start" 
+                        className="w-full justify-between" 
                         onClick={() => {
-                          onModuleChange(item.id);
-                          setMobileMenuOpen(false);
+                          if (item.children && item.children.length > 0) {
+                            toggleItemExpanded(item.id);
+                          } else {
+                            onModuleChange(item.id);
+                            setMobileMenuOpen(false);
+                          }
                         }}
                       >
-                        {item.label}
+                        <span>{item.label}</span>
+                        {item.children && item.children.length > 0 && (
+                          expandedItems.has(item.id) ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )
+                        )}
                       </Button>
                       
-                      {/* Render sub-items if they exist */}
-                      {item.children && item.children.length > 0 && (
+                      {/* Render sub-items if they exist and parent is expanded */}
+                      {item.children && item.children.length > 0 && expandedItems.has(item.id) && (
                         <div className="ml-4 mt-1 space-y-1">
                           {item.children.map(subItem => (
                             <Button
