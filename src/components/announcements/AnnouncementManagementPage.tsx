@@ -223,7 +223,7 @@ const AnnouncementManagementPage = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-center'}`}>
         <div>
           <h1 className="text-3xl font-bold">Announcements</h1>
           <p className="text-muted-foreground">
@@ -231,7 +231,7 @@ const AnnouncementManagementPage = () => {
           </p>
         </div>
         {canCreate && 
-          <Button onClick={handleCreate}>
+          <Button onClick={handleCreate} className={isMobile ? 'w-full' : ''}>
             <Plus className="w-4 h-4 mr-2" />
             Create Announcement
           </Button>
