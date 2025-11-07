@@ -430,34 +430,60 @@ export const CompetitionSchoolRecord = () => {
   }
   const pageTitle = isCreateMode ? 'Register School' : isEditMode ? 'Edit School Registration' : 'View School Registration';
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Back Button - Mobile above, Desktop in header */}
+      <div className="md:hidden">
+        <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Schools
+        </Button>
+      </div>
+
       {/* Enhanced Header */}
-      <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Schools
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
-              <School className="h-5 w-5 text-primary" />
+      <div className="p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={handleBack} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Schools
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+                <School className="h-5 w-5 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {pageTitle}
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {pageTitle}
-            </h1>
+          </div>
+          <div className="hidden md:flex items-center gap-2">
+            {canEdit && !isViewMode && <>
+                {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>}
+                <Button type="submit" form="school-form" disabled={isSubmitting} className="flex items-center gap-2 hover:scale-105 transition-transform">
+                  <Save className="h-4 w-4" />
+                  {isSubmitting ? 'Saving...' : 'Save'}
+                </Button>
+              </>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {canEdit && !isViewMode && <>
-              {canDelete && !isCreateMode && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
+        
+        {/* Mobile Action Buttons - Below Header */}
+        {canEdit && !isViewMode && (
+          <div className="md:hidden grid grid-cols-2 gap-2">
+            {canDelete && !isCreateMode && (
+              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                 <Trash2 className="h-4 w-4" />
                 Delete
-              </Button>}
-              <Button type="submit" form="school-form" disabled={isSubmitting} className="flex items-center gap-2 hover:scale-105 transition-transform">
-                <Save className="h-4 w-4" />
-                {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
-            </>}
-        </div>
+            )}
+            <Button type="submit" form="school-form" disabled={isSubmitting} className={`flex items-center gap-2 hover:scale-105 transition-transform ${!canDelete || isCreateMode ? 'col-span-2' : ''}`}>
+              <Save className="h-4 w-4" />
+              {isSubmitting ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto">
