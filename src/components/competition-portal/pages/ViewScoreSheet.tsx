@@ -112,17 +112,16 @@ export const ViewScoreSheet: React.FC = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Score Sheet Details</h1>
-          <p className="text-muted-foreground">
-            {eventName ? `${eventName} - ${schoolName}` : `Event ${eventId} - ${schoolName}`}
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/results`)} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Results
-        </Button>
+      <Button variant="outline" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/results`)} className="flex items-center gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Results
+      </Button>
+      
+      <div>
+        <h1 className="text-3xl font-bold">Score Sheet Details</h1>
+        <p className="text-muted-foreground">
+          {eventName ? `${eventName} - ${schoolName}` : `Event ${eventId} - ${schoolName}`}
+        </p>
       </div>
 
       <Card>
