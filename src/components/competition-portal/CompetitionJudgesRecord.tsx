@@ -237,10 +237,18 @@ export const CompetitionJudgesRecord = () => {
       </div>;
   }
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Mobile Back Button - shown above header */}
+      <div className="md:hidden mb-4">
+        <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Judges
+        </Button>
+      </div>
+
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          <Button variant="outline" size="sm" onClick={handleCancel} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
             <ArrowLeft className="h-4 w-4" />
             Back to Judges
           </Button>
@@ -253,13 +261,22 @@ export const CompetitionJudgesRecord = () => {
             </h1>
           </div>
         </div>
-        <Button type="submit" form="judge-form" disabled={isSaving} className="flex items-center gap-2 hover:scale-105 transition-transform">
+        <Button type="submit" form="judge-form" disabled={isSaving} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
           <Save className="h-4 w-4" />
           {isSaving ? 'Saving...' : isEditMode ? 'Update' : 'Assign'}
         </Button>
       </div>
 
-      <Card className="max-w-4xl mx-auto border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
+      <div className="max-w-4xl mx-auto">
+        {/* Mobile action button - shown above the card */}
+        <div className="md:hidden mb-4">
+          <Button type="submit" form="judge-form" disabled={isSaving} className="w-full flex items-center justify-center gap-2">
+            <Save className="h-4 w-4" />
+            {isSaving ? 'Saving...' : isEditMode ? 'Update' : 'Assign'}
+          </Button>
+        </div>
+
+        <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
         <CardHeader className="border-b border-primary/10">
           <CardTitle className="text-xl font-semibold text-foreground/90">Judge Assignment Details</CardTitle>
         </CardHeader>
@@ -438,5 +455,6 @@ export const CompetitionJudgesRecord = () => {
           </Form>
         </CardContent>
       </Card>
+      </div>
     </div>;
 };
