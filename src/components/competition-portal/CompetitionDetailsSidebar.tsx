@@ -2,11 +2,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
 import { ChevronDown, ChevronRight, Trophy, Users, FileText, School, Calendar, Award, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CompetitionDetailsSidebarProps {
   competitionId: string;
@@ -18,15 +17,14 @@ interface CompetitionDetailsSidebarProps {
     schedule: { canAccess: boolean };
     results: { canAccess: boolean };
   };
-  sidebarOpen?: boolean;
-  setSidebarOpen?: (open: boolean) => void;
 }
 
-export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarOpen, setSidebarOpen }: CompetitionDetailsSidebarProps) => {
+
+export const CompetitionDetailsSidebar = ({ competitionId, permissions }: CompetitionDetailsSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
-  const isMobile = useIsMobile();
+  const { isMobile } = useSidebar();
 
   const [judgesOpen, setJudgesOpen] = useState(currentPath.includes('/judges'));
   const [applicationsOpen, setApplicationsOpen] = useState(currentPath.includes('/applications'));
@@ -34,9 +32,6 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarO
 
   const navigateTo = (path: string) => {
     navigate(`/app/competition-portal/competition-details/${competitionId}${path}`);
-    if (isMobile && setSidebarOpen) {
-      setSidebarOpen(false);
-    }
   };
 
   const isActive = (path: string) => currentPath === `/app/competition-portal/competition-details/${competitionId}${path}`;
@@ -102,149 +97,110 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarO
     },
   ];
 
-  const renderMenuContent = () => (
-    <>
-      {menuItems.map((item) => {
-        if (!item.canAccess) return null;
-
-        // Item with children (collapsible)
-        if (item.children) {
-          const isJudges = item.id === 'judges';
-          const isSchedules = item.id === 'schedules';
-          const isOpen = isJudges ? judgesOpen : isSchedules ? schedulesOpen : false;
-          const setOpen = isJudges ? setJudgesOpen : isSchedules ? setSchedulesOpen : () => {};
-
-          return (
-            <Collapsible key={item.id} open={isOpen} onOpenChange={setOpen}>
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between font-normal hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-2">
-                    {item.icon && <item.icon className="h-4 w-4" />}
-                    <span>{item.label}</span>
-                  </div>
-                  {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="ml-4 space-y-1 mt-1">
-                {item.children.map((child) => {
-                  // Nested children (applications)
-                  if (child.children) {
-                    return (
-                      <Collapsible key={child.id} open={applicationsOpen} onOpenChange={setApplicationsOpen}>
-                        <CollapsibleTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-between font-normal text-sm hover:bg-muted/50"
-                          >
-                            <span>{child.label}</span>
-                            {applicationsOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                          </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="ml-4 space-y-1 mt-1">
-                          {child.children.map((subChild) => (
-                            <Button
-                              key={subChild.id}
-                              variant="ghost"
-                              className={cn(
-                                "w-full justify-start font-normal text-sm hover:bg-muted/50",
-                                isActive(subChild.path) && "bg-muted text-primary font-medium"
-                              )}
-                              onClick={() => navigateTo(subChild.path)}
-                            >
-                              {subChild.label}
-                            </Button>
-                          ))}
-                        </CollapsibleContent>
-                      </Collapsible>
-                    );
-                  }
-
-                  // Regular child item
-                  return (
-                    <Button
-                      key={child.id}
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start font-normal text-sm hover:bg-muted/50",
-                        isActive(child.path) && "bg-muted text-primary font-medium"
-                      )}
-                      onClick={() => navigateTo(child.path)}
-                    >
-                      {child.label}
-                    </Button>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
-          );
-        }
-
-        // Simple menu item
-        return (
-          <Button
-            key={item.id}
-            variant="ghost"
-            className={cn(
-              "w-full justify-start font-normal hover:bg-muted/50",
-              isActive(item.path) && "bg-muted text-primary font-medium"
-            )}
-            onClick={() => navigateTo(item.path)}
-          >
-            {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-            {item.label}
-          </Button>
-        );
-      })}
-    </>
-  );
-
-  if (isMobile) {
-    return (
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="top" className="h-[80vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
-              Competition Details
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-1">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                navigate('/app/competition-portal/competitions');
-                if (setSidebarOpen) setSidebarOpen(false);
-              }}
-              className="w-full justify-start font-normal hover:bg-muted/50 mb-2"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Competitions
-            </Button>
-            {renderMenuContent()}
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <div className="w-64 border-r bg-background h-full">
-      <ScrollArea className="h-full">
-        <div className="p-4 space-y-1">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/app/competition-portal/competitions')} 
-            className="w-full justify-start font-normal hover:bg-muted/50 mb-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Competitions
-          </Button>
-          {renderMenuContent()}
-        </div>
-      </ScrollArea>
-    </div>
+    <Sidebar collapsible="icon">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Competition Details</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Back to Competitions */}
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => navigate('/app/competition-portal/competitions')}>
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Competitions</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {menuItems.map((item) => {
+                if (!item.canAccess) return null;
+
+                // Item with children (collapsible)
+                if (item.children) {
+                  const isJudges = item.id === 'judges';
+                  const isSchedules = item.id === 'schedules';
+                  const isOpen = isJudges ? judgesOpen : isSchedules ? schedulesOpen : false;
+                  const setOpen = isJudges ? setJudgesOpen : isSchedules ? setSchedulesOpen : () => {};
+
+                  return (
+                    <Collapsible key={item.id} open={isOpen} onOpenChange={setOpen}>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            {item.icon && <item.icon className="h-4 w-4" />}
+                            <span>{item.label}</span>
+                            {isOpen ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.children.map((child) => {
+                              // Nested children (applications)
+                              if (child.children) {
+                                return (
+                                  <Collapsible key={child.id} open={applicationsOpen} onOpenChange={setApplicationsOpen}>
+                                    <SidebarMenuSubItem>
+                                      <CollapsibleTrigger asChild>
+                                        <SidebarMenuSubButton>
+                                          <span>{child.label}</span>
+                                          {applicationsOpen ? <ChevronDown className="ml-auto h-3 w-3" /> : <ChevronRight className="ml-auto h-3 w-3" />}
+                                        </SidebarMenuSubButton>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent>
+                                        <SidebarMenuSub>
+                                          {child.children.map((subChild) => (
+                                            <SidebarMenuSubItem key={subChild.id}>
+                                              <SidebarMenuSubButton
+                                                onClick={() => navigateTo(subChild.path)}
+                                                isActive={isActive(subChild.path)}
+                                              >
+                                                <span>{subChild.label}</span>
+                                              </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                          ))}
+                                        </SidebarMenuSub>
+                                      </CollapsibleContent>
+                                    </SidebarMenuSubItem>
+                                  </Collapsible>
+                                );
+                              }
+
+                              // Regular child item
+                              return (
+                                <SidebarMenuSubItem key={child.id}>
+                                  <SidebarMenuSubButton
+                                    onClick={() => navigateTo(child.path)}
+                                    isActive={isActive(child.path)}
+                                  >
+                                    <span>{child.label}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
+                // Simple menu item
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      onClick={() => navigateTo(item.path)}
+                      isActive={isActive(item.path)}
+                    >
+                      {item.icon && <item.icon className="h-4 w-4" />}
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
