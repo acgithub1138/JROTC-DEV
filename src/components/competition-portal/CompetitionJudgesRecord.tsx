@@ -204,7 +204,7 @@ export const CompetitionJudgesRecord = () => {
     }
   };
   const handleCancel = () => {
-    navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
+    navigate(-1);
   };
   if (judgesLoading || eventsLoading || isEditMode && isLoading) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
