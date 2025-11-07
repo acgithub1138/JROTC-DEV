@@ -374,75 +374,145 @@ export const PTTestCreatePage = () => {
                 </div>
 
                 {cadets.length > 0 && (
-                  <div className="border rounded-lg overflow-hidden">
-                    {/* Header */}
-                    <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
-                      <div className="col-span-2">Cadet</div>
-                      <div>Push-Ups</div>
-                      <div>Sit-Ups</div>
-                      <div>Plank Time</div>
-                      <div>Mile Time</div>
+                  <>
+                    {/* Desktop Grid View */}
+                    <div className="hidden md:block border rounded-lg overflow-hidden">
+                      {/* Header */}
+                      <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
+                        <div className="col-span-2">Cadet</div>
+                        <div>Push-Ups</div>
+                        <div>Sit-Ups</div>
+                        <div>Plank Time</div>
+                        <div>Mile Time</div>
+                      </div>
+
+                      {/* Cadet Rows */}
+                      <div className="divide-y">
+                        {cadets.map((cadet) => {
+                          const scores = getCadetScores(cadet.id);
+                          return (
+                            <div key={cadet.id} className="grid grid-cols-6 gap-2 p-3 items-center">
+                              <div className="col-span-2">
+                                <div className="font-medium">
+                                  {cadet.last_name}, {cadet.first_name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+                                </div>
+                              </div>
+
+                              <div>
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  min="0"
+                                  value={scores.pushUps}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'pushUps', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div>
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  min="0"
+                                  value={scores.sitUps}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'sitUps', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div>
+                                <Input
+                                  placeholder="MM:SS or seconds"
+                                  value={scores.plankTime}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'plankTime', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div>
+                                <Input
+                                  placeholder="MM:SS or seconds"
+                                  value={scores.mileTime}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'mileTime', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {/* Cadet Rows */}
-                    <div className="divide-y">
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {cadets.map((cadet) => {
                         const scores = getCadetScores(cadet.id);
                         return (
-                          <div key={cadet.id} className="grid grid-cols-6 gap-2 p-3 items-center">
-                            <div className="col-span-2">
-                              <div className="font-medium">
-                                {cadet.last_name}, {cadet.first_name}
+                          <Card key={cadet.id}>
+                            <CardContent className="p-4 space-y-4">
+                              {/* Cadet Name */}
+                              <div>
+                                <h4 className="font-medium">
+                                  {cadet.last_name}, {cadet.first_name}
+                                </h4>
+                                {/* Cadet Details */}
+                                <p className="text-sm text-muted-foreground">
+                                  {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+                                </p>
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+
+                              {/* Push Ups / Sit-Ups */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Push-Ups</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    min="0"
+                                    value={scores.pushUps}
+                                    onChange={(e) => updateCadetScore(cadet.id, 'pushUps', e.target.value)}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Sit-Ups</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    min="0"
+                                    value={scores.sitUps}
+                                    onChange={(e) => updateCadetScore(cadet.id, 'sitUps', e.target.value)}
+                                  />
+                                </div>
                               </div>
-                            </div>
 
-                            <div>
-                              <Input
-                                type="number"
-                                placeholder="0"
-                                min="0"
-                                value={scores.pushUps}
-                                onChange={(e) => updateCadetScore(cadet.id, 'pushUps', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-
-                            <div>
-                              <Input
-                                type="number"
-                                placeholder="0"
-                                min="0"
-                                value={scores.sitUps}
-                                onChange={(e) => updateCadetScore(cadet.id, 'sitUps', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-
-                            <div>
-                              <Input
-                                placeholder="MM:SS or seconds"
-                                value={scores.plankTime}
-                                onChange={(e) => updateCadetScore(cadet.id, 'plankTime', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-
-                            <div>
-                              <Input
-                                placeholder="MM:SS or seconds"
-                                value={scores.mileTime}
-                                onChange={(e) => updateCadetScore(cadet.id, 'mileTime', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
+                              {/* Plank Time / Mile Time */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Plank Time</Label>
+                                  <Input
+                                    placeholder="MM:SS"
+                                    value={scores.plankTime}
+                                    onChange={(e) => updateCadetScore(cadet.id, 'plankTime', e.target.value)}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Mile Time</Label>
+                                  <Input
+                                    placeholder="MM:SS"
+                                    value={scores.mileTime}
+                                    onChange={(e) => updateCadetScore(cadet.id, 'mileTime', e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>
-                  </div>
+                  </>
                 )}
 
                 {selectedFlight && !cadetsLoading && cadets.length === 0 && (
