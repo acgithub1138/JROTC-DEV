@@ -518,10 +518,18 @@ export const CompetitionEventRecord: React.FC = () => {
   const pageTitle = isCreateMode ? 'Add Competition Event' : isEditMode ? 'Edit Competition Event' : 'View Competition Event';
   const canEditForm = isCreateMode && canCreate || isEditMode && canEdit;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+      {/* Mobile Back Button - shown above header */}
+      <div className="md:hidden mb-4">
+        <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Events
+        </Button>
+      </div>
+
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          <Button variant="outline" size="sm" onClick={handleBack} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
