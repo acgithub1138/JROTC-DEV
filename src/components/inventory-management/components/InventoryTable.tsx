@@ -158,51 +158,52 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       <>
         <div className="space-y-4">
           {paginatedItems.map(item => (
-            <Card key={item.id} className="w-full">
+            <Card key={item.id} className="w-full max-w-full overflow-hidden">
               <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <Checkbox 
                       checked={selectedItems.includes(item.id)} 
                       onCheckedChange={checked => handleSelectItem(item.id, !!checked)} 
+                      className="flex-shrink-0"
                     />
-                    <CardTitle className="text-lg">
+                    <CardTitle className="text-lg truncate">
                       {canViewDetails ? (
-                        <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                        <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium truncate block max-w-full">
                           {item.item_id}
                         </button>
                       ) : (
-                        <span className="font-medium">{item.item_id}</span>
+                        <span className="font-medium truncate block">{item.item_id}</span>
                       )}
                     </CardTitle>
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 flex-shrink-0">
                     {getAvailabilityStatus(item)}
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div>
-                  <h4 className="font-medium">{item.item}</h4>
-                  <p className="text-sm text-muted-foreground">{item.category}</p>
+                <div className="min-w-0">
+                  <h4 className="font-medium break-words">{item.item}</h4>
+                  <p className="text-sm text-muted-foreground break-words">{item.category}</p>
                 </div>
                 
                 {isColumnVisible('sub_category') && item.sub_category && (
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-sm text-muted-foreground">Sub Category:</span>
-                    <p className="text-sm">{item.sub_category}</p>
+                    <p className="text-sm break-words">{item.sub_category}</p>
                   </div>
                 )}
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {isColumnVisible('size') && item.size && (
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-muted-foreground">Size:</span>
-                      <p className="font-medium">{item.size}</p>
+                      <p className="font-medium break-words">{item.size}</p>
                     </div>
                   )}
                   {isColumnVisible('gender') && item.gender && (
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-muted-foreground">Gender:</span>
                       <p>{getGenderBadge(item.gender)}</p>
                     </div>
@@ -211,41 +212,41 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   {isColumnVisible('qty_total') && (
-                    <div>
-                      <span className="text-muted-foreground">Total:</span>
+                    <div className="min-w-0">
+                      <span className="text-muted-foreground block text-xs">Total:</span>
                       <p className="font-medium">{item.qty_total || 0}</p>
                     </div>
                   )}
                   {isColumnVisible('qty_issued') && (
-                    <div>
-                      <span className="text-muted-foreground">Issued:</span>
+                    <div className="min-w-0">
+                      <span className="text-muted-foreground block text-xs">Issued:</span>
                       <p className="font-medium">{item.qty_issued || 0}</p>
                     </div>
                   )}
                   {isColumnVisible('qty_available') && (
-                    <div>
-                      <span className="text-muted-foreground">Available:</span>
+                    <div className="min-w-0">
+                      <span className="text-muted-foreground block text-xs">Available:</span>
                       <p className="font-medium">{item.qty_available || 0}</p>
                     </div>
                   )}
                 </div>
 
                 {isColumnVisible('stock_number') && item.stock_number && (
-                  <div className="text-sm">
+                  <div className="text-sm min-w-0">
                     <span className="text-muted-foreground">Stock #:</span>
-                    <span className="ml-1">{item.stock_number}</span>
+                    <span className="ml-1 break-all">{item.stock_number}</span>
                   </div>
                 )}
 
                 {isColumnVisible('unit_of_measure') && item.unit_of_measure && (
-                  <div className="text-sm">
+                  <div className="text-sm min-w-0">
                     <span className="text-muted-foreground">Unit:</span>
                     <span className="ml-1">{getUnitOfMeasureBadge(item.unit_of_measure)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center pt-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center pt-2 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     {item.issued_to && item.issued_to.length > 0 && canViewDetails && (
                       <IssuedUsersPopover issuedTo={item.issued_to} />
                     )}
