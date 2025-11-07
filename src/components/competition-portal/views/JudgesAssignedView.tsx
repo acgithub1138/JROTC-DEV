@@ -129,24 +129,10 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
             {judges.map(judge => (
               <Card key={judge.id} className="border-primary/20 shadow-sm">
                 <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
+                  <div>
                     <h3 className="font-semibold text-lg">
                       {judge.judge_profile?.name || 'Unknown'}
                     </h3>
-                    {(canUpdate || canDelete) && (
-                      <div className="flex gap-2">
-                        {canUpdate && (
-                          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEdit(judge.id)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {canDelete && (
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-2 text-sm">
@@ -185,6 +171,23 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
                       </div>
                     )}
                   </div>
+
+                  {(canUpdate || canDelete) && (
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                      {canUpdate && (
+                        <Button variant="outline" className="w-full" onClick={() => handleEdit(judge.id)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button variant="outline" className="w-full text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(judge.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
