@@ -106,8 +106,8 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
+                    <TableHead className="hidden md:table-cell">Email</TableHead>
+                    <TableHead className="hidden md:table-cell">Phone</TableHead>
                     <TableHead>Start Time</TableHead>
                     <TableHead>End Time</TableHead>
                     <TableHead>Location</TableHead>
@@ -117,8 +117,8 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
                   {judges.map(judge => (
                     <TableRow key={judge.id}>
                       <TableCell className="py-[4px]">{judge.judge_profile?.name || '-'}</TableCell>
-                      <TableCell>{judge.judge_profile?.email || '-'}</TableCell>
-                      <TableCell>{judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}</TableCell>
+                      <TableCell className="hidden md:table-cell">{judge.judge_profile?.email || '-'}</TableCell>
+                      <TableCell className="hidden md:table-cell">{judge.judge_profile?.phone ? formatPhoneNumber(judge.judge_profile.phone) : '-'}</TableCell>
                       <TableCell>{judge.start_time ? format(new Date(judge.start_time), 'MMM d, HH:mm') : '-'}</TableCell>
                       <TableCell>{judge.end_time ? format(new Date(judge.end_time), 'MMM d, HH:mm') : '-'}</TableCell>
                       <TableCell>{judge.location || '-'}</TableCell>
