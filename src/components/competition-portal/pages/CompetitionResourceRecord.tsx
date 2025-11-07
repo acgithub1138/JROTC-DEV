@@ -326,9 +326,7 @@ export const CompetitionResourceRecord: React.FC = () => {
 
         <div className="max-w-4xl mx-auto">
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
-          <CardHeader className="border-b border-primary/10">
-            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
-          </CardHeader>
+          
           <CardContent className="pt-6 py-[8px]">
             <Form {...form}>
               <form id="resource-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
