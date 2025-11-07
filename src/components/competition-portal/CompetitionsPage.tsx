@@ -5,18 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CopyCompetitionModal } from './components/CopyCompetitionModal';
-import { CompetitionCards } from './components/CompetitionCards';
-import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 import { useHostedCompetitions } from '@/hooks/competition-portal/useHostedCompetitions';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -64,7 +60,6 @@ const CompetitionsPage = () => {
   const {
     userProfile
   } = useAuth();
-  const isMobile = useIsMobile();
   const {
     canCreate
   } = useTablePermissions('cp_competitions');
@@ -75,9 +70,6 @@ const CompetitionsPage = () => {
     canManage
   } = useCPCompetitionPermissions();
   const {
-    copyCompetition
-  } = useCompetitions();
-  const {
     competitions,
     isLoading: loading,
     refetch: refetchCompetitions
@@ -87,8 +79,6 @@ const CompetitionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
-  const [sortField, setSortField] = useState<string>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [isCopying, setIsCopying] = useState(false);
@@ -151,18 +141,6 @@ const CompetitionsPage = () => {
         return 'secondary';
     }
   };
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-  const getSortIcon = (field: string) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
-    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
-  };
   const filteredAndSortedCompetitions = competitions.filter(competition => {
     const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
@@ -171,37 +149,6 @@ const CompetitionsPage = () => {
     const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
     const matchesTab = activeTab === 'active' ? isActive : !isActive;
     return matchesSearch && matchesStatus && matchesTab;
-  }).sort((a, b) => {
-    if (!sortField) return 0;
-    let aValue: any = '';
-    let bValue: any = '';
-    switch (sortField) {
-      case 'name':
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
-        break;
-      case 'description':
-        aValue = (a.description || '').toLowerCase();
-        bValue = (b.description || '').toLowerCase();
-        break;
-      case 'date':
-        aValue = new Date(a.start_date);
-        bValue = new Date(b.start_date);
-        break;
-      case 'status':
-        aValue = a.status;
-        bValue = b.status;
-        break;
-      case 'registrations':
-        aValue = registrationCounts[a.id] || 0;
-        bValue = registrationCounts[b.id] || 0;
-        break;
-      default:
-        return 0;
-    }
-    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-    return 0;
   });
   // Remove unused modal functions and state
   const canCreateCompetition = canCreate;
@@ -245,12 +192,35 @@ const CompetitionsPage = () => {
     if (!selectedCompetition) return;
     try {
       setIsCopying(true);
-      await copyCompetition(selectedCompetition.id, name, startDate, endDate);
+      
+      // Copy competition logic
+      const { data: newCompetition, error: copyError } = await supabase
+        .from('cp_competitions')
+        .insert({
+          name,
+          description: selectedCompetition.description,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          location: selectedCompetition.location,
+          max_participants: selectedCompetition.max_participants,
+          registration_deadline: selectedCompetition.registration_deadline,
+          status: 'draft',
+          is_public: selectedCompetition.is_public,
+          school_id: selectedCompetition.school_id,
+          created_by: userProfile?.id
+        })
+        .select()
+        .single();
+
+      if (copyError) throw copyError;
+      
+      toast.success('Competition copied successfully');
       setShowCopyModal(false);
       setSelectedCompetition(null);
-      refetchCompetitions(); // Refresh the list
+      refetchCompetitions();
     } catch (error) {
-      // Error is already handled in the copyCompetition function
+      console.error('Error copying competition:', error);
+      toast.error('Failed to copy competition');
     } finally {
       setIsCopying(false);
     }
@@ -334,163 +304,140 @@ const CompetitionsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Competitions Table/Cards */}
+      {/* Competitions Grid */}
       {filteredAndSortedCompetitions.length === 0 ? <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
               {competitions.length === 0 ? 'No competitions found.' : 'No competitions match your search criteria.'}
             </div>
           </CardContent>
-        </Card> : isMobile ? <CompetitionCards competitions={filteredAndSortedCompetitions} registrationCounts={registrationCounts} userProfile={userProfile} getStatusBadgeVariant={getStatusBadgeVariant} handleViewCompetition={handleViewCompetition} handleEditCompetition={handleOpenEdit} handleCancelCompetitionClick={handleCancelCompetitionClick} handleStatusChange={handleStatusChange} updatingStatus={updatingStatus} getSchoolName={getSchoolName} /> : <Card>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      <button onClick={() => handleSort('name')} className="flex items-center gap-2 hover:text-foreground font-medium">
-                        Name {getSortIcon('name')}
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button onClick={() => handleSort('description')} className="flex items-center gap-2 hover:text-foreground font-medium">
-                        Description {getSortIcon('description')}
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button onClick={() => handleSort('date')} className="flex items-center gap-2 hover:text-foreground font-medium">
-                        Date {getSortIcon('date')}
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button onClick={() => handleSort('status')} className="flex items-center gap-2 hover:text-foreground font-medium">
-                        Status {getSortIcon('status')}
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button onClick={() => handleSort('registrations')} className="flex items-center gap-2 hover:text-foreground font-medium">
-                        Registered Schools {getSortIcon('registrations')}
-                      </button>
-                    </TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAndSortedCompetitions.map(competition => <TableRow key={competition.id}>
-                      <TableCell className="py-[8px]">
-                        {canManage ? <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
-                            {competition.name}
-                          </button> : <span className="font-medium">{competition.name}</span>}
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          {competition.description ? <span className="text-sm">{competition.description}</span> : <span className="text-sm text-muted-foreground">-</span>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center text-sm">
-                            <CalendarDays className="w-4 h-4 mr-1 text-muted-foreground" />
-                            {format(new Date(competition.start_date), 'MMM d, yyyy')}
-                          </div>
-                          {competition.start_date !== competition.end_date && <div className="text-xs text-muted-foreground">
-                              to {format(new Date(competition.end_date), 'MMM d, yyyy')}
-                            </div>}
-                        </div>
-                      </TableCell>
-                       <TableCell>
-                         {canManage ? <Select value={competition.status} onValueChange={value => handleStatusChange(competition.id, value)} disabled={updatingStatus === competition.id}>
-                             <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
-                               <Badge variant={getStatusBadgeVariant(competition.status)} className="cursor-pointer">
-                                 {competition.status.replace('_', ' ').toUpperCase()}
-                               </Badge>
-                             </SelectTrigger>
-                             <SelectContent className="bg-background border shadow-md z-50">
-                               {STATUS_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
-                                   {option.label}
-                                 </SelectItem>)}
-                             </SelectContent>
-                           </Select> : <Badge variant={getStatusBadgeVariant(competition.status)}>
-                             {competition.status.replace('_', ' ').toUpperCase()}
-                           </Badge>}
-                       </TableCell>
-                       <TableCell>
-                         <div className="flex items-center">
-                           <Users className="w-4 h-4 mr-1 text-muted-foreground" />
-                           {registrationCounts[competition.id] || 0}
-                           {competition.max_participants && ` / ${competition.max_participants}`}
-                         </div>
-                       </TableCell>
-                      <TableCell>
-  <div className="flex items-center justify-center gap-2">
-    {/* View Competition */}
-    {canViewDetails && <Tooltip>
-        <TooltipTrigger asChild>
-          
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>View</p>
-        </TooltipContent>
-      </Tooltip>}
+        </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAndSortedCompetitions.map(competition => <Card key={competition.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    {canManage ? <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-semibold text-lg text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left w-full truncate">
+                        {competition.name}
+                      </button> : <h3 className="font-semibold text-lg truncate">{competition.name}</h3>}
+                  </div>
+                  {canManage ? <Select value={competition.status} onValueChange={value => handleStatusChange(competition.id, value)} disabled={updatingStatus === competition.id}>
+                      <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
+                        <Badge variant={getStatusBadgeVariant(competition.status)} className="cursor-pointer whitespace-nowrap">
+                          {competition.status.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-md z-50">
+                        {STATUS_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select> : <Badge variant={getStatusBadgeVariant(competition.status)} className="whitespace-nowrap">
+                      {competition.status.replace('_', ' ').toUpperCase()}
+                    </Badge>}
+                </div>
+                {competition.description && <CardDescription className="mt-2 line-clamp-2">
+                    {competition.description}
+                  </CardDescription>}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Date Information */}
+                <div className="space-y-1">
+                  <div className="flex items-center text-sm">
+                    <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <span className="font-medium">
+                      {format(new Date(competition.start_date), 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                  {competition.start_date !== competition.end_date && <div className="text-xs text-muted-foreground ml-6">
+                      to {format(new Date(competition.end_date), 'MMM d, yyyy')}
+                    </div>}
+                </div>
 
-    {/* Edit Competition */}
-    {canEdit && <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
-            <Edit className="w-3 h-3" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Edit</p>
-        </TooltipContent>
-      </Tooltip>}
+                {/* Location */}
+                <div className="flex items-center text-sm">
+                  <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <span className="truncate">{competition.location}</span>
+                </div>
 
-    {/* Copy Competition */}
-    {canCreate && <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleCopyCompetition(competition)}>
-            <Copy className="w-3 h-3" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Copy</p>
-        </TooltipContent>
-      </Tooltip>}
+                {/* Registered Schools */}
+                <div className="flex items-center text-sm">
+                  <Users className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <span>
+                    {registrationCounts[competition.id] || 0}
+                    {competition.max_participants && ` / ${competition.max_participants}`} Schools
+                  </span>
+                </div>
 
-    {canManage && <>
-        {/* Manage Competition */}
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+                  {/* View Competition */}
+                  {canViewDetails && <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleViewCompetition(competition)}>
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View Competition</p>
+                      </TooltipContent>
+                    </Tooltip>}
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)}>
-              <GitCompareArrows className="w-3 h-3" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Manage Competition</p>
-          </TooltipContent>
-        </Tooltip>
-      </>}
-                                
-    {/* Cancel Competition */}
-    {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleCancelCompetitionClick(competition)}>
-            <X className="w-3 h-3" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Cancel Competition</p>
-        </TooltipContent>
-      </Tooltip>}
-                          </div>
-                       </TableCell>
-                    </TableRow>)}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>}
+                  {/* Edit Competition */}
+                  {canEdit && <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleOpenEdit(competition)}>
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit Competition</p>
+                      </TooltipContent>
+                    </Tooltip>}
+
+                  {/* Copy Competition */}
+                  {canCreate && <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleCopyCompetition(competition)}>
+                          <Copy className="w-4 h-4 mr-1" />
+                          Copy
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy Competition</p>
+                      </TooltipContent>
+                    </Tooltip>}
+
+                  {/* Manage Competition */}
+                  {canManage && <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)}>
+                          <GitCompareArrows className="w-4 h-4 mr-1" />
+                          Manage
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Manage Competition</p>
+                      </TooltipContent>
+                    </Tooltip>}
+
+                  {/* Cancel Competition */}
+                  {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleCancelCompetitionClick(competition)}>
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Cancel Competition</p>
+                      </TooltipContent>
+                    </Tooltip>}
+                </div>
+              </CardContent>
+            </Card>)}
+        </div>}
 
         </TabsContent>
       </Tabs>
