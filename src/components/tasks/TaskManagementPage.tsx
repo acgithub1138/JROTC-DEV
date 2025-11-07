@@ -78,10 +78,10 @@ const TaskManagementPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <h1 className="text-3xl font-bold">Task Management</h1>
         {canCreate && (
-          <Button onClick={handleCreateTask} className="flex items-center gap-2">
+          <Button onClick={handleCreateTask} className="flex items-center gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             Create Task
           </Button>
