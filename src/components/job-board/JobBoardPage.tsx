@@ -70,12 +70,14 @@ const JobBoardPage = () => {
   }
   return <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
-          {canCreate && <Button onClick={() => navigate('/app/job-board/coc_record?mode=create')}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Role
-            </Button>}
+        <div className="mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
+            {canCreate && <Button onClick={() => navigate('/app/job-board/coc_record?mode=create')} className="w-full sm:w-auto">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Role
+              </Button>}
+          </div>
         </div>
 
         <Card>
