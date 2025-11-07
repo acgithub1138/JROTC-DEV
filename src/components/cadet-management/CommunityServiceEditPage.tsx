@@ -13,8 +13,10 @@ import { cn } from '@/lib/utils';
 import { useCommunityService } from './hooks/useCommunityService';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
 export const CommunityServiceEditPage: React.FC = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     id
   } = useParams<{
@@ -165,6 +167,25 @@ export const CommunityServiceEditPage: React.FC = () => {
         </p>
       </div>
 
+      {/* Mobile Action Buttons */}
+      {isMobile && (
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <Button type="button" variant="outline" onClick={() => {
+            if (hasUnsavedChanges) {
+              setPendingNavigation('back');
+              setShowUnsavedDialog(true);
+            } else {
+              navigate(-1);
+            }
+          }} className="w-full">
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isUpdating} onClick={handleSubmit} className="w-full">
+            {isUpdating ? 'Updating...' : 'Update Record'}
+          </Button>
+        </div>
+      )}
+
       <Card>
         
         <CardContent className="py-[8px]">
@@ -215,22 +236,24 @@ export const CommunityServiceEditPage: React.FC = () => {
               <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add details about the event..." rows={3} />
             </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end sm:space-x-2">
-              <Button type="button" variant="outline" onClick={() => {
-              if (hasUnsavedChanges) {
-                setPendingNavigation('back');
-                setShowUnsavedDialog(true);
-              } else {
-                navigate(-1);
-              }
-            }} className="w-full sm:w-auto">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
-                {isUpdating ? 'Updating...' : 'Update Record'}
-              </Button>
-            </div>
+            {/* Desktop Action Buttons */}
+            {!isMobile && (
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => {
+                if (hasUnsavedChanges) {
+                  setPendingNavigation('back');
+                  setShowUnsavedDialog(true);
+                } else {
+                  navigate(-1);
+                }
+              }}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? 'Updating...' : 'Update Record'}
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
