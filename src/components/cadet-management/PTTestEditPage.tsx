@@ -205,19 +205,19 @@ export const PTTestEditPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Back Button */}
+      <Button variant="outline" onClick={handleBack} size="sm">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={handleBack} size="sm">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Edit PT Test</h1>
-          <p className="text-muted-foreground">
-            {ptTest.profiles?.first_name} {ptTest.profiles?.last_name} - {new Date(ptTest.date).toLocaleDateString()}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold">Edit PT Test</h1>
+        <p className="text-muted-foreground">
+          {ptTest.profiles?.first_name} {ptTest.profiles?.last_name} - {new Date(ptTest.date).toLocaleDateString()}
+        </p>
       </div>
 
       {/* Edit Form */}
