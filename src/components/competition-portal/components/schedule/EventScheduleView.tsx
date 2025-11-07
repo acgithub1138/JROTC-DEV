@@ -172,7 +172,7 @@ export const EventScheduleView = ({
                             </Tooltip>
                           ) : (
                             <div className="font-medium text-sm whitespace-normal break-words w-full no-print">
-                              {event.event_initials || event.event_name}
+                              {event.event_name}
                             </div>
                           )}
                           {/* Print version */}
