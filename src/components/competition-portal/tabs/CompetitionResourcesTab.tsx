@@ -140,21 +140,8 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
                       <p className="text-sm">{resource.end_time ? convertToUI(resource.end_time, timezone, 'datetime') : '-'}</p>
                     </div>
-                     {(canViewDetails || canEdit || canDelete) && (
+                     {(canEdit || canDelete) && (
                        <div className="grid grid-cols-2 gap-2 pt-2">
-                         {canViewDetails && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => handleView(resource.id)}>
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View Resource</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
                          {canEdit && (
                           <Tooltip>
                             <TooltipTrigger asChild>
