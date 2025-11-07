@@ -192,8 +192,8 @@ export const CommunityServiceCreatePage: React.FC = () => {
             )}
 
             {/* Cadet Selection */}
-            <div className="flex items-start gap-4">
-              <Label className="w-32 text-right shrink-0 pt-2">Select Cadets *</Label>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-start sm:gap-4">
+              <Label className="sm:w-32 sm:text-right text-left sm:shrink-0 sm:pt-2">Select Cadets *</Label>
               <div className="flex-1 space-y-3">
                 <Input
                   placeholder="Search cadets..."
@@ -232,8 +232,8 @@ export const CommunityServiceCreatePage: React.FC = () => {
 
             <div className="space-y-4">
               {/* Date */}
-              <div className="flex items-center gap-4">
-                <Label className="w-32 text-right shrink-0">Date *</Label>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                <Label className="sm:w-32 sm:text-right text-left sm:shrink-0">Date *</Label>
                 <div className="flex-1">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -261,8 +261,8 @@ export const CommunityServiceCreatePage: React.FC = () => {
               </div>
 
               {/* Hours */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="hours" className="w-32 text-right shrink-0">Hours *</Label>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                <Label htmlFor="hours" className="sm:w-32 sm:text-right text-left sm:shrink-0">Hours *</Label>
                 <div className="flex-1">
                   <Input
                     id="hours"
@@ -279,8 +279,8 @@ export const CommunityServiceCreatePage: React.FC = () => {
               </div>
 
               {/* Activity/Event */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="event" className="w-32 text-right shrink-0">Activity/Event *</Label>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                <Label htmlFor="event" className="sm:w-32 sm:text-right text-left sm:shrink-0">Activity/Event *</Label>
                 <div className="flex-1">
                   <Input
                     id="event"
@@ -294,8 +294,8 @@ export const CommunityServiceCreatePage: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div className="flex items-start gap-4">
-              <Label htmlFor="notes" className="w-32 text-right shrink-0 pt-2">Event Description</Label>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-start sm:gap-4">
+              <Label htmlFor="notes" className="sm:w-32 sm:text-right text-left sm:shrink-0 sm:pt-2">Event Description</Label>
               <div className="flex-1">
                 <Textarea
                   id="notes"
@@ -308,7 +308,7 @@ export const CommunityServiceCreatePage: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -320,12 +320,14 @@ export const CommunityServiceCreatePage: React.FC = () => {
                     navigate(-1);
                   }
                 }}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={isBulkCreating || selectedCadetIds.length === 0}
+                className="w-full sm:w-auto"
               >
                 {isBulkCreating 
                   ? 'Creating Records...' 
