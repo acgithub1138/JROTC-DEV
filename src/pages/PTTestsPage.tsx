@@ -17,14 +17,32 @@ const PTTestsPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">PT Tests</h1>
-          <p className="text-muted-foreground">
-            View and manage Physical Training test records
-          </p>
+      {/* Header */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">PT Tests</h1>
+            <p className="text-muted-foreground">
+              View and manage Physical Training test records
+            </p>
+          </div>
+          {/* Desktop button */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/app/cadets/pt_test_create?mode=bulk')}
+            className="hidden md:flex"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add PT Tests
+          </Button>
         </div>
-        <Button variant="outline" onClick={() => navigate('/app/cadets/pt_test_create?mode=bulk')}>
+        
+        {/* Mobile button */}
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/app/cadets/pt_test_create?mode=bulk')}
+          className="md:hidden w-full"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add PT Tests
         </Button>
