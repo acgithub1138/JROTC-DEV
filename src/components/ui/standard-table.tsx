@@ -44,24 +44,27 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
     
 
     {/* Search and Controls Section */}
-    <div className="flex items-center justify-between gap-4">
-      <div className="relative flex-1 max-w-md">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative w-full sm:flex-1 sm:max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input placeholder={searchPlaceholder} value={searchValue} onChange={e => onSearchChange(e.target.value)} className="pl-10" />
+        <Input placeholder={searchPlaceholder} value={searchValue} onChange={e => onSearchChange(e.target.value)} className="pl-10 w-full" />
       </div>
-      <div>{stockCounter}</div>
-      <div className="flex items-center gap-4 ml-4">
-        {columns && onToggleColumn && <ColumnSelector columns={columns} onToggleColumn={onToggleColumn} isLoading={columnsLoading} />}
-        {extraControls}
-        {selectedCount > 0 && onBulkDelete && <>
-            <span className="text-sm text-muted-foreground">
-              {selectedCount} selected
-            </span>
-            <Button size="sm" variant="outline" onClick={onBulkDelete}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Selected
-            </Button>
-          </>}
+
+      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
+        <div>{stockCounter}</div>
+        <div className="flex items-center gap-2 sm:gap-4 sm:ml-4 flex-wrap">
+          {columns && onToggleColumn && <ColumnSelector columns={columns} onToggleColumn={onToggleColumn} isLoading={columnsLoading} />}
+          {extraControls}
+          {selectedCount > 0 && onBulkDelete && <>
+              <span className="text-sm text-muted-foreground">
+                {selectedCount} selected
+              </span>
+              <Button size="sm" variant="outline" onClick={onBulkDelete}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected
+              </Button>
+            </>}
+        </div>
       </div>
     </div>
 
