@@ -219,21 +219,21 @@ export const InspectionEditPage = () => {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Back Button - Above Header */}
+        <Button variant="ghost" size="sm" onClick={handleBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Cadets
+        </Button>
+
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Cadets
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Edit Uniform Inspection</h1>
-            <p className="text-muted-foreground">
-              {inspection.profiles.last_name}, {inspection.profiles.first_name}
-              {inspection.profiles.grade && ` • ${inspection.profiles.grade}`}
-              {inspection.profiles.rank && ` • ${inspection.profiles.rank}`}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Edit Uniform Inspection</h1>
+          <p className="text-muted-foreground">
+            {inspection.profiles.last_name}, {inspection.profiles.first_name}
+            {inspection.profiles.grade && ` • ${inspection.profiles.grade}`}
+            {inspection.profiles.rank && ` • ${inspection.profiles.rank}`}
+          </p>
         </div>
 
         <Card>
