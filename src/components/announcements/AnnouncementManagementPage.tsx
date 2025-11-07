@@ -114,7 +114,7 @@ const AnnouncementManagementPage = () => {
               )}
             </div>
             
-            <div className="flex justify-end gap-2 pt-2">
+            <div className={isMobile ? "grid grid-cols-2 gap-2 pt-2" : "flex justify-end gap-2 pt-2"}>
               {canEdit && (
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEdit(announcement)} title="Edit">
                   <Edit className="w-4 h-4" />
