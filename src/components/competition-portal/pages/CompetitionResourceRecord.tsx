@@ -259,9 +259,18 @@ export const CompetitionResourceRecord: React.FC = () => {
   const canEditResource = isCreateMode ? canCreate : canEdit;
   return <>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+        {/* Mobile: Back Button Above Header */}
+        <div className="md:hidden">
+          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 mb-4">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Resources
+          </Button>
+        </div>
+
         {/* Enhanced Header */}
         <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
-          <div className="flex items-center gap-4">
+          {/* Desktop: Back Button in Header */}
+          <div className="hidden md:flex items-center gap-4">
             <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
               <ArrowLeft className="h-4 w-4" />
               Back to Resources
@@ -275,7 +284,19 @@ export const CompetitionResourceRecord: React.FC = () => {
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Mobile: Only Title */}
+          <div className="md:hidden flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {pageTitle}
+            </h1>
+          </div>
+
+          {/* Desktop: Action Buttons */}
+          <div className="hidden md:flex items-center gap-2">
             {!isViewMode && canEditResource && <>
                 {(isEditMode || isViewMode) && canDelete && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
                     <Trash2 className="h-4 w-4" />
@@ -287,6 +308,20 @@ export const CompetitionResourceRecord: React.FC = () => {
                 </Button>
               </>}
           </div>
+        </div>
+
+        {/* Mobile: Action Buttons Below Header in 1x2 Grid */}
+        <div className="md:hidden grid grid-cols-2 gap-2">
+          {!isViewMode && canEditResource && <>
+              {(isEditMode || isViewMode) && canDelete && <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>}
+              <Button type="submit" form="resource-form" disabled={isSubmitting} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save'}
+              </Button>
+            </>}
         </div>
 
         <div className="max-w-4xl mx-auto">
