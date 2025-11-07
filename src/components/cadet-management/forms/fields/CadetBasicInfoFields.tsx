@@ -30,8 +30,8 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
           control={form.control}
           name="first_name"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">
                 First Name <span className="text-destructive">*</span>
               </FormLabel>
               <div className="flex-1">
@@ -52,8 +52,8 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
           control={form.control}
           name="last_name"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">
                 Last Name <span className="text-destructive">*</span>
               </FormLabel>
               <div className="flex-1">
@@ -76,8 +76,8 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
         control={form.control}
         name="email"
         render={({ field }) => (
-          <FormItem className="flex items-center gap-4">
-            <FormLabel className="w-24 text-right flex-shrink-0">
+          <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+            <FormLabel className="md:w-24 md:text-right flex-shrink-0">
               Email <span className="text-destructive">*</span>
             </FormLabel>
             <div className="flex-1">

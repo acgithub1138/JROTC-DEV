@@ -31,8 +31,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
           control={form.control}
           name="role_id"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">Role</FormLabel>
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">Role</FormLabel>
               <div className="flex-1">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
@@ -59,8 +59,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
           control={form.control}
           name="rank"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">Rank</FormLabel>
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">Rank</FormLabel>
               <div className="flex-1">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
@@ -93,8 +93,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
           control={form.control}
           name="flight"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">Flight</FormLabel>
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">Flight</FormLabel>
               <div className="flex-1">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
@@ -121,8 +121,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
           control={form.control}
           name="start_year"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">Freshman Year</FormLabel>
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">Freshman Year</FormLabel>
               <div className="flex-1">
                 <Select 
                   onValueChange={(value) => {
@@ -168,8 +168,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
             const isAutoCalculated = shouldAutoCalculateGrade(freshmanYear);
             
             return (
-              <FormItem className="flex items-center gap-4">
-                <FormLabel className="w-24 text-right flex-shrink-0">
+              <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <FormLabel className="md:w-24 md:text-right flex-shrink-0">
                   Grade{isAutoCalculated}
                 </FormLabel>
                 <div className="flex-1">
@@ -203,8 +203,8 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
           control={form.control}
           name="cadet_year"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right flex-shrink-0">Cadet Year</FormLabel>
+            <FormItem className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <FormLabel className="md:w-24 md:text-right flex-shrink-0">Cadet Year</FormLabel>
               <div className="flex-1">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
