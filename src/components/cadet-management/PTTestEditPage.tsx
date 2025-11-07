@@ -285,10 +285,10 @@ export const PTTestEditPage = () => {
       {/* Action Buttons */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex justify-between">
+          <div className="flex flex-col md:flex-row md:justify-between gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" disabled={isDeleting || isUpdating}>
+                <Button variant="outline" size="sm" disabled={isDeleting || isUpdating} className="w-full md:w-auto">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
@@ -310,18 +310,17 @@ export const PTTestEditPage = () => {
               </AlertDialogContent>
             </AlertDialog>
 
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleBack} disabled={isUpdating || isDeleting}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={!hasUnsavedChanges || isUpdating || isDeleting}
-              >
-                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
-            </div>
+            <Button variant="outline" onClick={handleBack} disabled={isUpdating || isDeleting} className="w-full md:w-auto">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={!hasUnsavedChanges || isUpdating || isDeleting}
+              className="w-full md:w-auto"
+            >
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
           </div>
         </CardContent>
       </Card>
