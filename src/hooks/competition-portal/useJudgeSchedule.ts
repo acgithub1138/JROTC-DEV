@@ -15,7 +15,7 @@ export interface JudgeAssignment {
 
 export interface JudgeTimeline {
   timeSlots: Date[];
-  events: Array<{ id: string; name: string }>;
+  events: Array<{ id: string; name: string; initials: string }>;
   getJudgesForSlot: (eventId: string, timeSlot: Date) => Array<{ name: string; location?: string }>;
   isEventActive: (eventId: string, timeSlot: Date) => boolean;
 }
@@ -45,7 +45,7 @@ export const useJudgeSchedule = (competitionId?: string) => {
           cp_comp_events!inner(
             id,
             event,
-            competition_event_types!inner(name)
+            competition_event_types!inner(name, initials)
           )
         `)
         .eq('competition_id', competitionId);
@@ -84,7 +84,11 @@ export const useJudgeSchedule = (competitionId?: string) => {
 
         // Get unique events
         const uniqueEvents = Array.from(
-          new Map(assignments.map(a => [a.event_id, { id: a.event_id, name: a.event_name }])).values()
+          new Map(assignments.map(a => {
+            const eventData = judgeData?.find(j => j.event === a.event_id);
+            const initials = (eventData?.cp_comp_events as any)?.competition_event_types?.initials || '';
+            return [a.event_id, { id: a.event_id, name: a.event_name, initials }];
+          })).values()
         );
 
         const judgeTimeline: JudgeTimeline = {

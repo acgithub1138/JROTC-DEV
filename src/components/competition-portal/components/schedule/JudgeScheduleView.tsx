@@ -117,8 +117,11 @@ export const JudgeScheduleView = ({
                   // Get location from the first judge assignment for this event
                   const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
                   return <th key={event.id} className="text-center p-4 min-w-[150px] py-[8px]">
-                        <div className="font-medium text-sm truncate" title={event.name}>
+                        <div className="font-medium text-sm truncate no-print" title={event.name}>
                           {event.name}
+                        </div>
+                        <div className="font-medium text-sm truncate print-only" title={event.name}>
+                          {event.initials}
                         </div>
                         {eventLocation && <div className="text-[10px] text-muted-foreground font-normal mt-1">
                             {eventLocation}
