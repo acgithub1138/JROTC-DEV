@@ -314,9 +314,7 @@ const CompetitionsPage = () => {
                     <CardHeader className="pb-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          {canManage ? <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-bold text-xl text-primary hover:text-primary-glow hover:underline cursor-pointer text-left w-full truncate transition-colors">
-                              {competition.name}
-                            </button> : <h3 className="font-bold text-xl truncate text-foreground">{competition.name}</h3>}
+                          <h3 className="font-bold text-xl truncate text-foreground">{competition.name}</h3>
                         </div>
                         {canManage ? <Select value={competition.status} onValueChange={value => handleStatusChange(competition.id, value)} disabled={updatingStatus === competition.id}>
                             <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
