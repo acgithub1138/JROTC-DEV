@@ -13,10 +13,13 @@ import { cn } from '@/lib/utils';
 import { useCommunityService } from './hooks/useCommunityService';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-
 export const CommunityServiceEditPage: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const [date, setDate] = useState<Date | undefined>();
   const [event, setEvent] = useState('');
   const [hours, setHours] = useState('');
@@ -26,8 +29,12 @@ export const CommunityServiceEditPage: React.FC = () => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<any>(null);
-
-  const { records, updateRecord, isUpdating, isLoading } = useCommunityService();
+  const {
+    records,
+    updateRecord,
+    isUpdating,
+    isLoading
+  } = useCommunityService();
 
   // Find the record to edit
   const record = records.find(r => r.id === id);
@@ -41,7 +48,7 @@ export const CommunityServiceEditPage: React.FC = () => {
       setHours(record.hours.toString());
       setNotes(record.notes || '');
       setCadetName(`${record.cadet.last_name}, ${record.cadet.first_name}${record.cadet.grade ? ` (${record.cadet.grade})` : ''}`);
-      
+
       // Store initial data for comparison
       setInitialData({
         date: recordDate,
@@ -55,21 +62,15 @@ export const CommunityServiceEditPage: React.FC = () => {
   // Track changes for unsaved dialog
   useEffect(() => {
     if (initialData) {
-      const hasChanges = 
-        date?.toISOString().split('T')[0] !== initialData.date?.toISOString().split('T')[0] ||
-        event !== initialData.event ||
-        hours !== initialData.hours ||
-        notes !== initialData.notes;
+      const hasChanges = date?.toISOString().split('T')[0] !== initialData.date?.toISOString().split('T')[0] || event !== initialData.event || hours !== initialData.hours || notes !== initialData.notes;
       setHasUnsavedChanges(hasChanges);
     }
   }, [date, event, hours, notes, initialData]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !event || !hours || !record) {
       return;
     }
-    
     const updateData = {
       id: record.id,
       cadet_id: record.cadet_id,
@@ -78,12 +79,10 @@ export const CommunityServiceEditPage: React.FC = () => {
       hours: parseFloat(hours),
       notes: notes.trim() || undefined
     };
-
     updateRecord(updateData);
     setHasUnsavedChanges(false);
     navigate(-1);
   };
-
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges) {
       setPendingNavigation(path);
@@ -92,7 +91,6 @@ export const CommunityServiceEditPage: React.FC = () => {
       navigate(path);
     }
   };
-
   const handleDiscardChanges = () => {
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
@@ -103,15 +101,12 @@ export const CommunityServiceEditPage: React.FC = () => {
     }
     setPendingNavigation(null);
   };
-
   const handleCancelNavigation = () => {
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
   };
-
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-6 max-w-2xl">
+    return <div className="container mx-auto p-6 max-w-2xl">
         <div className="mb-6">
           <Skeleton className="h-8 w-32 mb-4" />
           <Skeleton className="h-6 w-64 mb-1" />
@@ -136,13 +131,10 @@ export const CommunityServiceEditPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   if (!record) {
-    return (
-      <div className="container mx-auto p-6 max-w-2xl">
+    return <div className="container mx-auto p-6 max-w-2xl">
         <div className="text-center py-8">
           <h1 className="text-2xl font-bold mb-2">Record Not Found</h1>
           <p className="text-muted-foreground mb-4">The community service record you're looking for doesn't exist.</p>
@@ -150,27 +142,19 @@ export const CommunityServiceEditPage: React.FC = () => {
             Back to Cadets
           </Button>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container mx-auto p-6 max-w-2xl">
+  return <div className="container mx-auto p-6 max-w-2xl">
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                setPendingNavigation('back');
-                setShowUnsavedDialog(true);
-              } else {
-                navigate(-1);
-              }
-            }}
-            className="flex items-center gap-2"
-          >
+          <Button variant="ghost" size="sm" onClick={() => {
+          if (hasUnsavedChanges) {
+            setPendingNavigation('back');
+            setShowUnsavedDialog(true);
+          } else {
+            navigate(-1);
+          }
+        }} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Cadets
           </Button>
@@ -182,10 +166,8 @@ export const CommunityServiceEditPage: React.FC = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Community Service Details</CardTitle>
-        </CardHeader>
-        <CardContent>
+        
+        <CardContent className="py-[8px]">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
@@ -201,24 +183,13 @@ export const CommunityServiceEditPage: React.FC = () => {
                   <Label>Date *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {date ? format(date, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar 
-                        mode="single" 
-                        selected={date} 
-                        onSelect={setDate} 
-                        initialFocus 
-                      />
+                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -228,28 +199,12 @@ export const CommunityServiceEditPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="event">Activity/Event *</Label>
-                  <Input
-                    id="event"
-                    value={event}
-                    onChange={(e) => setEvent(e.target.value)}
-                    placeholder="e.g., Food bank volunteer, Park cleanup"
-                    required
-                  />
+                  <Input id="event" value={event} onChange={e => setEvent(e.target.value)} placeholder="e.g., Food bank volunteer, Park cleanup" required />
                 </div>
 
                 <div>
                   <Label htmlFor="hours">Hours *</Label>
-                  <Input
-                    id="hours"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    max="24"
-                    value={hours}
-                    onChange={(e) => setHours(e.target.value)}
-                    placeholder="0.0"
-                    required
-                  />
+                  <Input id="hours" type="number" step="0.5" min="0" max="24" value={hours} onChange={e => setHours(e.target.value)} placeholder="0.0" required />
                 </div>
               </div>
             </div>
@@ -257,37 +212,22 @@ export const CommunityServiceEditPage: React.FC = () => {
             {/* Notes */}
             <div>
               <Label htmlFor="notes">Event Description</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add details about the event..."
-                rows={3}
-              />
+              <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add details about the event..." rows={3} />
             </div>
 
             {/* Actions */}
             <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end sm:space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  if (hasUnsavedChanges) {
-                    setPendingNavigation('back');
-                    setShowUnsavedDialog(true);
-                  } else {
-                    navigate(-1);
-                  }
-                }}
-                className="w-full sm:w-auto"
-              >
+              <Button type="button" variant="outline" onClick={() => {
+              if (hasUnsavedChanges) {
+                setPendingNavigation('back');
+                setShowUnsavedDialog(true);
+              } else {
+                navigate(-1);
+              }
+            }} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isUpdating}
-                className="w-full sm:w-auto"
-              >
+              <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
                 {isUpdating ? 'Updating...' : 'Update Record'}
               </Button>
             </div>
@@ -295,12 +235,6 @@ export const CommunityServiceEditPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleCancelNavigation}
-      />
-    </div>
-  );
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleCancelNavigation} />
+    </div>;
 };
