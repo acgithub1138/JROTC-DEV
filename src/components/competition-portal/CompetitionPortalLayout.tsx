@@ -74,45 +74,33 @@ const CompetitionPortalLayout = () => {
     loadMappings();
   }, [userProfile?.role, hasPermission, permissionsLoading, hasCompetitionModule, hasCompetitionPortal]);
 
-  // Initialize with default module when school flags are available
-  useEffect(() => {
-    if (!mappingsLoaded) return;
-    
-    const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
-    setActiveModule(defaultModule);
-  }, [hasCompetitionModule, hasCompetitionPortal, mappingsLoaded]);
-
   // Sync active module with current path
   useEffect(() => {
     if (!mappingsLoaded) return;
 
     const currentPath = location.pathname.replace('/app/competition-portal', '') || '/';
+    console.log('🔍 Path detection:', { 
+      fullPath: location.pathname, 
+      cleanPath: currentPath,
+      availablePaths: Array.from(moduleMappings.pathToModuleMap.keys())
+    });
+    
     const detectedModule = findModuleForPath(currentPath, moduleMappings.pathToModuleMap);
     
+    console.log('🎯 Module detection result:', {
+      detectedModule,
+      currentActiveModule: activeModule
+    });
+    
     if (detectedModule) {
-      // Check if user can access the detected module
-      const canAccessModule = canAccessCompetitionModule(detectedModule, hasCompetitionModule, hasCompetitionPortal);
-      
-      if (!canAccessModule) {
-        // Redirect to default accessible module
-        const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
-        const defaultRoute = moduleMappings.moduleToPathMap.get(defaultModule);
-        const fullDefaultRoute = defaultRoute ? `/app/competition-portal${defaultRoute}` : '/app/competition-portal';
-        
-        if (location.pathname !== fullDefaultRoute) {
-          navigate(fullDefaultRoute);
-          return;
-        }
-        setActiveModule(defaultModule);
-      } else {
-        setActiveModule(detectedModule);
-      }
+      setActiveModule(detectedModule);
     } else {
       // Fallback to default if path not found
       const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+      console.log('⚠️ No module found for path, using default:', defaultModule);
       setActiveModule(defaultModule);
     }
-  }, [location.pathname, moduleMappings, mappingsLoaded, hasCompetitionModule, hasCompetitionPortal, navigate]);
+  }, [location.pathname, mappingsLoaded]);
 
   const handleModuleChange = (module: string) => {
     setActiveModule(module);

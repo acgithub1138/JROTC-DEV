@@ -111,9 +111,16 @@ export const findModuleForPath = (
   currentPath: string,
   pathToModuleMap: Map<string, string>
 ): string | null => {
+  console.log('🔎 findModuleForPath:', {
+    currentPath,
+    availablePaths: Array.from(pathToModuleMap.entries())
+  });
+
   // Try exact match first
   if (pathToModuleMap.has(currentPath)) {
-    return pathToModuleMap.get(currentPath) || null;
+    const module = pathToModuleMap.get(currentPath) || null;
+    console.log('✅ Exact match found:', { currentPath, module });
+    return module;
   }
 
   // Try startsWith match (for sub-routes)
@@ -124,9 +131,12 @@ export const findModuleForPath = (
 
   for (const path of sortedPaths) {
     if (currentPath.startsWith(path + '/') || currentPath === path) {
-      return pathToModuleMap.get(path) || null;
+      const module = pathToModuleMap.get(path) || null;
+      console.log('✅ StartsWith match found:', { currentPath, matchedPath: path, module });
+      return module;
     }
   }
 
+  console.log('❌ No match found for path:', currentPath);
   return null;
 };
