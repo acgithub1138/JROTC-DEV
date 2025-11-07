@@ -343,13 +343,23 @@ export const CPCompetitionRecordPage = () => {
             </div>
           </div>
         </div>
-        {!isViewMode && <Button type="submit" form="competition-form" disabled={isSubmitting} className="flex items-center gap-2 hover:scale-105 transition-transform">
+        {!isViewMode && <Button type="submit" form="competition-form" disabled={isSubmitting} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
             <Save className="h-4 w-4" />
             {isSubmitting ? isEditMode ? 'Updating...' : 'Creating...' : isEditMode ? 'Update' : 'Create'}
           </Button>}
       </div>
 
       <div className="max-w-4xl mx-auto">
+        {/* Mobile action button - shown above the card */}
+        {!isViewMode && (
+          <div className="md:hidden mb-4">
+            <Button type="submit" form="competition-form" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2">
+              <Save className="h-4 w-4" />
+              {isSubmitting ? isEditMode ? 'Updating...' : 'Creating...' : isEditMode ? 'Update' : 'Create'}
+            </Button>
+          </div>
+        )}
+
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
           <CardHeader className="border-b border-primary/10">
             <CardTitle className="text-xl font-semibold text-foreground/90">Competition Details</CardTitle>
