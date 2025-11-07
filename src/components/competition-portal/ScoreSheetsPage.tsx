@@ -122,8 +122,8 @@ export const ScoreSheetsPage = () => {
             </div>
             {canCreate && (
               <Button onClick={handleAddTemplate}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Template
+                <Plus className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Add Template</span>
               </Button>
             )}
           </div>
