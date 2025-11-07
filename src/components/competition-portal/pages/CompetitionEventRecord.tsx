@@ -572,9 +572,7 @@ export const CompetitionEventRecord: React.FC = () => {
         </div>
 
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
-          <CardHeader className="border-b border-primary/10">
-            <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
-          </CardHeader>
+          
         <CardContent className="pt-6">
           <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
@@ -887,17 +885,10 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Attachments */}
-            {eventId && (isEditMode || isViewMode) && (
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
+            {eventId && (isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
                 <Label className="mt-2 text-left md:text-right font-semibold">Attachments</Label>
-                <AttachmentSection
-                  recordType="cp_comp_event"
-                  recordId={eventId}
-                  canEdit={!isViewMode}
-                  showContentOnly={true}
-                />
-              </div>
-            )}
+                <AttachmentSection recordType="cp_comp_event" recordId={eventId} canEdit={!isViewMode} showContentOnly={true} />
+              </div>}
 
 
           </form>
