@@ -100,23 +100,16 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
           <div key={i} className="border rounded-lg bg-card animate-pulse">
             <div className="p-4 border-b bg-muted/30">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="h-6 bg-muted rounded w-1/3 mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/4"></div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 bg-muted rounded w-16"></div>
-                  <div className="h-8 bg-muted rounded w-32"></div>
-                </div>
-              </div>
-            </div>
-            <div className="p-4">
+              <div className="h-6 bg-muted rounded w-2/3 mb-2"></div>
               <div className="h-4 bg-muted rounded w-1/2"></div>
+            </div>
+            <div className="p-4 space-y-2">
+              <div className="h-4 bg-muted rounded w-full"></div>
+              <div className="h-4 bg-muted rounded w-3/4"></div>
             </div>
           </div>
         ))}
@@ -171,7 +164,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
   };
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {competitions.map((competition) => {
         const competitionPlacements = getPlacementsForCompetition(
           competition.source_competition_id,
@@ -179,54 +172,45 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
         );
 
         return (
-          <div key={competition.id} className="border rounded-lg bg-card transition-shadow hover:shadow-md animate-fade-in">
-            {/* Header Row */}
+          <div key={competition.id} className="border rounded-lg bg-card transition-shadow hover:shadow-md animate-fade-in flex flex-col h-full">
+            {/* Header */}
             <div className="p-4 border-b bg-muted/30">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h3 
-                        className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => onView?.(competition)}
-                      >
-                        {competition.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(competition.competition_date).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
+                  {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
+                </Badge>
+                <div className="flex items-center gap-1">
+                  {onView && canViewDetails && (
+                    <Button variant="ghost" size="sm" onClick={() => onView(competition)} title="View Score Cards">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {onEdit && competition.source_type === 'internal' && canUpdate && (
+                    <Button variant="ghost" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {onAddEvent && canCreate && (
+                    <Button variant="ghost" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {onDelete && competition.source_type === 'internal' && canDeletePermission && (
+                    <Button variant="ghost" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
-                 <div className="flex items-center gap-3">
-                   <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
-                     {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
-                   </Badge>
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-2">
-                      {onView && canViewDetails && (
-                        <Button variant="outline" size="sm" onClick={() => onView(competition)} title="View Score Cards">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {onEdit && competition.source_type === 'internal' && canUpdate && (
-                        <Button variant="outline" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {onAddEvent && canCreate && (
-                        <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {onDelete && competition.source_type === 'internal' && canDeletePermission && (
-                        <Button variant="destructive" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                 </div>
+              </div>
+              <h3 
+                className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors mb-2"
+                onClick={() => onView?.(competition)}
+              >
+                {competition.name}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="w-4 h-4" />
+                {new Date(competition.competition_date).toLocaleDateString()}
               </div>
             </div>
             
