@@ -365,7 +365,7 @@ const CompetitionsPage = () => {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-border/50">
+                      <div className="grid grid-cols-2 gap-2 pt-4 border-t border-border/50">
                         {/* View Competition */}
                         {canViewDetails && <Tooltip>
                             <TooltipTrigger asChild>
