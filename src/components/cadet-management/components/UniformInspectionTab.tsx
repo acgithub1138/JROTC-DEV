@@ -160,7 +160,7 @@ export const UniformInspectionTab = ({
             {sortedData.map(inspection => (
               <Card key={inspection.id}>
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="mb-3">
                     <div>
                       <h4 className="font-medium">{inspection.profiles.last_name}, {inspection.profiles.first_name}</h4>
                       <div className="flex items-center gap-2 mt-1">
@@ -174,14 +174,6 @@ export const UniformInspectionTab = ({
                         </span>
                       </div>
                     </div>
-                    {(canUpdate || canDelete) && (
-                      <TableActionButtons 
-                        canEdit={canUpdate} 
-                        canDelete={canDelete} 
-                        onEdit={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
-                        onDelete={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
-                      />
-                    )}
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -195,6 +187,32 @@ export const UniformInspectionTab = ({
                       </div>
                     )}
                   </div>
+
+                  {/* Action Buttons - Mobile Grid */}
+                  {(canUpdate || canDelete) && (
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {canUpdate && (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
+                          className="w-full"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
+                          className="w-full text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
