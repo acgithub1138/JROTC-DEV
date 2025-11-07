@@ -29,100 +29,99 @@ import { JudgesBulkUploadPage } from './pages/JudgesBulkUploadPage';
 import { ScoreSheetRecordPage } from './pages/ScoreSheetRecordPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getDefaultCompetitionModule, canAccessCompetitionModule } from '@/utils/competitionPermissions';
+import { fetchCompetitionModuleMappings, findModuleForPath, type ModuleMappings } from '@/utils/competitionModuleMappings';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
   const { hasCompetitionModule, hasCompetitionPortal } = usePortal();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [activeModule, setActiveModule] = useState('open_competitions');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [moduleMappings, setModuleMappings] = useState<ModuleMappings>({
+    pathToModuleMap: new Map(),
+    moduleToPathMap: new Map(),
+    modules: []
+  });
+  const [mappingsLoaded, setMappingsLoaded] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Map routes to modules - keeping for backward compatibility with header
-  const routeToModuleMap: { [key: string]: string } = {
-    '/app/competition-portal': 'cp_dashboard',
-    '/app/competition-portal/': 'cp_dashboard',
-    '/app/competition-portal/dashboard': 'cp_dashboard',
-    '/app/competition-portal/competitions': 'cp_competitions',
-    '/app/competition-portal/my-competitions': 'competitions',
-    '/app/competition-portal/my-competitions-analytics': 'my_competitions_analytics',
-    '/app/competition-portal/score-sheets': 'cp_score_sheets',
-    '/app/competition-portal/judges': 'cp_judges',
-    '/app/competition-portal/analytics': 'analytics',
-    '/app/competition-portal/settings': 'competition_settings',
-    '/app/competition-portal/open-competitions': 'open_competitions',
-  };
-
-  // Map modules to routes - keeping for backward compatibility with header
-  const moduleToRouteMap: { [key: string]: string } = {
-    'cp_dashboard': '/app/competition-portal/dashboard',
-    'cp_competitions': '/app/competition-portal/competitions',
-    'competitions': '/app/competition-portal/my-competitions',
-    'my_competitions_analytics': '/app/competition-portal/my-competitions-analytics',
-    'cp_score_sheets': '/app/competition-portal/score-sheets',
-    'cp_judges': '/app/competition-portal/judges',
-    'analytics': '/app/competition-portal/analytics',
-    'competition_settings': '/app/competition-portal/settings',
-    'open_competitions': '/app/competition-portal/open-competitions',
-  };
-
+  // Load module mappings from database
   useEffect(() => {
-    // Initialize with default module when school flags are available
-    const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
-    setActiveModule(defaultModule);
-  }, [hasCompetitionModule, hasCompetitionPortal]);
-
-  useEffect(() => {
-    // Map current path to module - ORDER MATTERS: Check more specific paths first!
-    const pathToModuleMap: { [key: string]: string } = {
-      '/dashboard': 'cp_dashboard',
-      '/competitions': 'cp_competitions',
-      '/competition-details': 'cp_competitions',
-      '/my-competitions-analytics': 'my_competitions_analytics', // Check this BEFORE /my-competitions
-      '/my-competitions': 'competitions',
-      '/score-sheets': 'cp_score_sheets',
-      '/judges': 'cp_judges',
-      '/open-competitions': 'open_competitions',
-      '/analytics': 'analytics',
-      '/settings': 'competition_settings'
-    };
-    
-    const currentPath = location.pathname.replace('/app/competition-portal', '') || '/';
-    let detectedModule = 'open_competitions'; // Safe fallback
-    
-    // Find the matching module for current path
-    for (const [path, module] of Object.entries(pathToModuleMap)) {
-      if (currentPath.includes(path)) {
-        detectedModule = module;
-        break;
-      }
-    }
-    
-    // Check if user can access the detected module
-    const canAccessModule = canAccessCompetitionModule(detectedModule, hasCompetitionModule, hasCompetitionPortal);
-    
-    if (!canAccessModule) {
-      // Redirect to default accessible module
-      const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
-      const defaultRoute = moduleToRouteMap[defaultModule];
-      if (defaultRoute && location.pathname !== defaultRoute) {
-        navigate(defaultRoute);
+    const loadMappings = async () => {
+      if (!userProfile?.role || permissionsLoading) {
         return;
       }
-      setActiveModule(defaultModule);
+
+      try {
+        const mappings = await fetchCompetitionModuleMappings(
+          hasPermission,
+          hasCompetitionModule,
+          hasCompetitionPortal
+        );
+        setModuleMappings(mappings);
+        setMappingsLoaded(true);
+      } catch (error) {
+        console.error('Error loading competition module mappings:', error);
+        setMappingsLoaded(true);
+      }
+    };
+
+    loadMappings();
+  }, [userProfile?.role, hasPermission, permissionsLoading, hasCompetitionModule, hasCompetitionPortal]);
+
+  // Initialize with default module when school flags are available
+  useEffect(() => {
+    if (!mappingsLoaded) return;
+    
+    const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+    setActiveModule(defaultModule);
+  }, [hasCompetitionModule, hasCompetitionPortal, mappingsLoaded]);
+
+  // Sync active module with current path
+  useEffect(() => {
+    if (!mappingsLoaded) return;
+
+    const currentPath = location.pathname.replace('/app/competition-portal', '') || '/';
+    const detectedModule = findModuleForPath(currentPath, moduleMappings.pathToModuleMap);
+    
+    if (detectedModule) {
+      // Check if user can access the detected module
+      const canAccessModule = canAccessCompetitionModule(detectedModule, hasCompetitionModule, hasCompetitionPortal);
+      
+      if (!canAccessModule) {
+        // Redirect to default accessible module
+        const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+        const defaultRoute = moduleMappings.moduleToPathMap.get(defaultModule);
+        const fullDefaultRoute = defaultRoute ? `/app/competition-portal${defaultRoute}` : '/app/competition-portal';
+        
+        if (location.pathname !== fullDefaultRoute) {
+          navigate(fullDefaultRoute);
+          return;
+        }
+        setActiveModule(defaultModule);
+      } else {
+        setActiveModule(detectedModule);
+      }
     } else {
-      setActiveModule(detectedModule);
+      // Fallback to default if path not found
+      const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+      setActiveModule(defaultModule);
     }
-  }, [location.pathname, hasCompetitionModule, hasCompetitionPortal, navigate, moduleToRouteMap]);
+  }, [location.pathname, moduleMappings, mappingsLoaded, hasCompetitionModule, hasCompetitionPortal, navigate]);
 
   const handleModuleChange = (module: string) => {
     setActiveModule(module);
-    const route = moduleToRouteMap[module];
+    const route = moduleMappings.moduleToPathMap.get(module);
     if (route) {
-      navigate(route);
+      navigate(`/app/competition-portal${route}`);
+    } else {
+      // Fallback
+      navigate('/app/competition-portal');
     }
   };
 

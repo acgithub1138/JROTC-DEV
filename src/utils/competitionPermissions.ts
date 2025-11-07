@@ -14,6 +14,7 @@ export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
   { moduleId: 'my_competitions', requiresCompetitionModule: true },
   { moduleId: 'competitions', requiresCompetitionModule: true },
   { moduleId: 'my_competitions_reports', requiresCompetitionModule: true },
+  { moduleId: 'my_competitions_analytics', requiresCompetitionModule: true }, // Alias for my_competitions_reports
   
   // Competition Portal sections (competition_portal = true)  
   { moduleId: 'cp_dashboard', requiresCompetitionPortal: true },
