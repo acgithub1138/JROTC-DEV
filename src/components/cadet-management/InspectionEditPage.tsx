@@ -279,7 +279,7 @@ export const InspectionEditPage = () => {
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:justify-between pt-4 border-t">
+            <div className="flex justify-between pt-4 border-t">
               <Button 
                 variant="destructive" 
                 onClick={handleDelete}
@@ -290,13 +290,15 @@ export const InspectionEditPage = () => {
                 Delete
               </Button>
               
-              <Button variant="outline" onClick={handleBack}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={updateMutation.isPending || !formData.date}>
-                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={handleBack}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSave} disabled={updateMutation.isPending || !formData.date}>
+                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
