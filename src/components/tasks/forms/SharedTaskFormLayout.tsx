@@ -76,17 +76,19 @@ export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
             {attachmentSection}
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting || isSubmitDisabled}
+              className="w-full sm:w-auto"
             >
               {isSubmitting ? 'Saving...' : submitButtonText}
             </Button>

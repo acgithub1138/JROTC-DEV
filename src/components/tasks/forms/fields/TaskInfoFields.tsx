@@ -34,18 +34,18 @@ export const TaskInfoFields: React.FC<TaskInfoFieldsProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Number</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label className="sm:w-24 sm:text-right text-left">Number</Label>
         <Input value={displayTaskNumber} disabled className="bg-muted flex-1" />
       </div>
       
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Created by</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label className="sm:w-24 sm:text-right text-left">Created by</Label>
         <Input value={displayCreatedBy} disabled className="bg-muted flex-1" />
       </div>
       
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Created</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label className="sm:w-24 sm:text-right text-left">Created</Label>
         <Input value={displayCreatedAt} disabled className="bg-muted flex-1" />
       </div>
     </div>

@@ -12,8 +12,8 @@ interface TaskTitleFieldProps {
 export const TaskTitleField: React.FC<TaskTitleFieldProps> = ({ form }) => {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-4">
-        <Label htmlFor="title" className="w-32 text-right">Short Description *</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label htmlFor="title" className="sm:w-32 sm:text-right text-left">Short Description *</Label>
         <div className="flex-1">
           <Input
             id="title"

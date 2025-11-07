@@ -12,8 +12,8 @@ interface TaskDescriptionFieldProps {
 export const TaskDescriptionField: React.FC<TaskDescriptionFieldProps> = ({ form }) => {
   return (
     <div className="space-y-2">
-      <div className="flex items-start gap-4">
-        <Label htmlFor="description" className="w-32 text-right pt-2">Task Details *</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-start sm:gap-4">
+        <Label htmlFor="description" className="sm:w-32 sm:text-right text-left sm:pt-2">Task Details *</Label>
         <div className="flex-1">
           <Textarea
             id="description"

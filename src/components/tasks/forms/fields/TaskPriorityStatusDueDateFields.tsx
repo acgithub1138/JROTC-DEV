@@ -29,8 +29,8 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
   const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers(true);
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Label htmlFor="priority" className="w-24 text-right">Priority</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label htmlFor="priority" className="sm:w-24 sm:text-right text-left">Priority</Label>
         <Select value={form.watch('priority')} onValueChange={(value) => form.setValue('priority', value)}>
           <SelectTrigger className="flex-1">
             <SelectValue />
@@ -48,8 +48,8 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
         </Select>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Label htmlFor="status" className="w-24 text-right">Status</Label>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label htmlFor="status" className="sm:w-24 sm:text-right text-left">Status</Label>
         <Select 
           value={form.watch('status')} 
           onValueChange={(value) => form.setValue('status', value)}
@@ -72,8 +72,8 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
       </div>
 
       {(canEditThisTask && canAssignTasks) && (
-        <div className="flex items-center gap-4">
-          <Label htmlFor="assigned_to" className="w-24 text-right">Assigned To *</Label>
+        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+          <Label htmlFor="assigned_to" className="sm:w-24 sm:text-right text-left">Assigned To *</Label>
           <div className="flex-1">
             {isLoadingUsers ? (
               <div className="text-sm text-muted-foreground">Loading users...</div>
@@ -114,8 +114,8 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
         name="due_date"
         render={({ field }) => (
           <FormItem>
-            <div className="flex items-center gap-4">
-              <FormLabel className="w-24 text-right">Due Date</FormLabel>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+              <FormLabel className="sm:w-24 sm:text-right text-left">Due Date</FormLabel>
               <FormControl>
                 <Input
                   type="date"
