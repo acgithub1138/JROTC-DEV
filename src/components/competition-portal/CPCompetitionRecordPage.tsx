@@ -439,8 +439,6 @@ export const CPCompetitionRecordPage = () => {
                 </div>
               </div>
             </div>
-              </div>
-            </div>
 
             {/* End Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-[1fr_7fr] gap-2 md:gap-4 md:items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
@@ -479,8 +477,6 @@ export const CPCompetitionRecordPage = () => {
                     </Select>
                   </div>
                 </div>
-              </div>
-            </div>
               </div>
             </div>
 
