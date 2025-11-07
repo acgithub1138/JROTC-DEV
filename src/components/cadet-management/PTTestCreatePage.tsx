@@ -143,31 +143,35 @@ export const PTTestCreatePage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Back Button */}
+      <Button variant="outline" onClick={handleBack} size="sm">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Add PT Test Records</h1>
-            <p className="text-muted-foreground">
-              Create PT test records for cadets
-            </p>
-          </div>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Add PT Test Records</h1>
+          <p className="text-muted-foreground">
+            Create PT test records for cadets
+          </p>
         </div>
-        <div className="flex gap-2">
+
+        {/* Mode Selection Buttons */}
+        <div className="grid grid-cols-2 gap-2">
           <Button 
             variant={mode === 'single' ? 'default' : 'outline'}
             onClick={() => setMode('single')}
+            className="w-full"
           >
             Single Cadet
           </Button>
           <Button 
             variant={mode === 'bulk' ? 'default' : 'outline'}
             onClick={() => setMode('bulk')}
+            className="w-full"
           >
             Bulk Entry
           </Button>
@@ -183,9 +187,9 @@ export const PTTestCreatePage = () => {
           <CardContent>
             <form onSubmit={handleSingleSubmit} className="space-y-6">
               {/* Row 1: Cadet and Date */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="cadet" className="w-20 text-right shrink-0">Cadet *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <Label htmlFor="cadet" className="md:w-20 md:text-right flex-shrink-0">Cadet *</Label>
                   <div className="flex-1">
                     <Select
                       value={singleData.cadetId}
@@ -205,8 +209,8 @@ export const PTTestCreatePage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <Label className="w-16 text-right shrink-0">Date *</Label>
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <Label className="md:w-16 md:text-right flex-shrink-0">Date *</Label>
                   <div className="flex-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -236,9 +240,9 @@ export const PTTestCreatePage = () => {
               </div>
 
               {/* Row 2: Push-ups and Sit-ups */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="pushUps" className="w-20 text-right shrink-0">Push-ups</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <Label htmlFor="pushUps" className="md:w-20 md:text-right flex-shrink-0">Push-ups</Label>
                   <div className="flex-1">
                     <Input
                       id="pushUps"
@@ -251,8 +255,8 @@ export const PTTestCreatePage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="sitUps" className="w-16 text-right shrink-0">Sit-ups</Label>
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <Label htmlFor="sitUps" className="md:w-16 md:text-right flex-shrink-0">Sit-ups</Label>
                   <div className="flex-1">
                     <Input
                       id="sitUps"
@@ -267,9 +271,9 @@ export const PTTestCreatePage = () => {
               </div>
 
               {/* Row 3: Plank Time and Mile Time */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <Label htmlFor="plankTime" className="w-20 text-right shrink-0 pt-2">Plank Time</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-4">
+                  <Label htmlFor="plankTime" className="md:w-20 md:text-right flex-shrink-0 md:pt-2">Plank Time</Label>
                   <div className="flex-1 space-y-1">
                     <Input
                       id="plankTime"
@@ -283,8 +287,8 @@ export const PTTestCreatePage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <Label htmlFor="mileTime" className="w-16 text-right shrink-0 pt-2">Mile Time</Label>
+                <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-4">
+                  <Label htmlFor="mileTime" className="md:w-16 md:text-right flex-shrink-0 md:pt-2">Mile Time</Label>
                   <div className="flex-1 space-y-1">
                     <Input
                       id="mileTime"
@@ -301,7 +305,7 @@ export const PTTestCreatePage = () => {
 
               {/* Submit Button */}
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={singleLoading}>
+                <Button type="submit" disabled={singleLoading} className="w-full md:w-auto">
                   {singleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save PT Test
                 </Button>
@@ -319,9 +323,9 @@ export const PTTestCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="flex items-center gap-4">
-                <Label htmlFor="test-date" className="w-20 text-right shrink-0">Test Date</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <Label htmlFor="test-date" className="md:w-20 md:text-right flex-shrink-0">Test Date</Label>
                 <div className="flex-1">
                   <Input 
                     id="test-date" 
@@ -340,8 +344,8 @@ export const PTTestCreatePage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Label htmlFor="flight" className="w-16 text-right shrink-0">Flight</Label>
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <Label htmlFor="flight" className="md:w-16 md:text-right flex-shrink-0">Flight</Label>
                 <div className="flex-1">
                   <Select value={selectedFlight} onValueChange={setSelectedFlight}>
                     <SelectTrigger>
@@ -463,6 +467,7 @@ export const PTTestCreatePage = () => {
               <Button 
                 onClick={handleBulkSave} 
                 disabled={!bulkDate || !selectedFlight || bulkSaving}
+                className="w-full md:w-auto"
               >
                 {bulkSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save PT Tests
