@@ -127,12 +127,39 @@ export const Header: React.FC<HeaderProps> = ({
                   </SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-2">
-                  {menuItems.map(item => <Button key={item.id} variant={activeModule === item.id ? 'secondary' : 'ghost'} className="w-full justify-start" onClick={() => {
-                onModuleChange(item.id);
-                setMobileMenuOpen(false);
-              }}>
-                      {item.label}
-                    </Button>)}
+                  {menuItems.map(item => (
+                    <div key={item.id}>
+                      <Button 
+                        variant={activeModule === item.id ? 'secondary' : 'ghost'} 
+                        className="w-full justify-start" 
+                        onClick={() => {
+                          onModuleChange(item.id);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                      
+                      {/* Render sub-items if they exist */}
+                      {item.children && item.children.length > 0 && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.children.map(subItem => (
+                            <Button
+                              key={subItem.id}
+                              variant={activeModule === subItem.id ? 'secondary' : 'ghost'}
+                              className="w-full justify-start text-sm"
+                              onClick={() => {
+                                onModuleChange(subItem.id);
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              {subItem.label}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                   
                   {canAccessCompetitionPortal && (
                     <Button 
