@@ -98,7 +98,7 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
           </CardHeader>
           
           <CardContent className="space-y-3">
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               {task.description && (
                 <p className="text-sm text-gray-600 line-clamp-2">
                   {task.description}
@@ -122,27 +122,33 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
               </div>
             </div>
             
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onView(task)}
+                className="w-full"
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">View</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(task)}
+                className="w-full"
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Edit</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onDelete(task)}
+                className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Delete</span>
               </Button>
             </div>
           </CardContent>
