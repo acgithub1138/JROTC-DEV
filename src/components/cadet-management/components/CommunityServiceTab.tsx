@@ -158,7 +158,8 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
                       canEdit={canEdit} 
                       canDelete={canDelete} 
                       onEdit={() => handleEditRecord(record)} 
-                      onDelete={() => handleDeleteRecord(record)} 
+                      onDelete={() => handleDeleteRecord(record)}
+                      mobileFullButtons={true}
                     />
                   </div>
                 )}

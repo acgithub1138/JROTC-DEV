@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Eye, Plus, X, CheckCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TableActionButtonsProps {
   canView?: boolean;
@@ -27,6 +28,8 @@ interface TableActionButtonsProps {
   readOnly?: boolean;
   // For competition portal - only show edit/delete for internal competitions
   isInternal?: boolean;
+  // Show full buttons with text on mobile instead of icon-only
+  mobileFullButtons?: boolean;
 }
 
 export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
@@ -42,8 +45,12 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   onCancel,
   customActions = [],
   readOnly = false,
-  isInternal = true
+  isInternal = true,
+  mobileFullButtons = false
 }) => {
+  const isMobile = useIsMobile();
+  const showFullButtons = isMobile && mobileFullButtons;
+
   // If readOnly is true, don't show any actions
   if (readOnly) {
     return null;
@@ -56,7 +63,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   }
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="contents">
       {/* Create Action */}
       {onCreate && canCreate && (
         <TooltipProvider>
@@ -91,34 +98,48 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
       {/* Edit Action */}
       {onEdit && canEdit && isInternal && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onEdit}>
-                <Edit className="w-3 h-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        showFullButtons ? (
+          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </Button>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" className="h-6 w-6" onClick={onEdit}>
+                  <Edit className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
       )}
 
       {/* Delete Action */}
       {onDelete && canDelete && isInternal && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={onDelete}>
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        showFullButtons ? (
+          <Button variant="outline" size="sm" className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={onDelete}>
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={onDelete}>
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
       )}
 
       {/* Cancel Action */}
