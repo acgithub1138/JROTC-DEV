@@ -137,7 +137,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                         }
                       </p>
                     </div>
-                    <div className="flex flex-wrap gap-2 pt-2">
+                    <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 pt-2">
                       {canViewDetails && (
                         <Tooltip>
                           <TooltipTrigger asChild>
