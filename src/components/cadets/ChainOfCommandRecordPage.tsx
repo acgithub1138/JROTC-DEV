@@ -254,7 +254,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           Back to Chain of Command
         </Button>
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold">
             {mode === 'create' ? 'Add New Role' : 'Edit Role'}
           </h1>
@@ -262,7 +262,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           <Button 
             onClick={handleSubmit} 
             disabled={isLoading || !hasUnsavedChanges || !formData.role || !formData.reports_to || !formData.assistant}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <Save className="w-4 h-4" />
             {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
@@ -281,8 +281,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
             <div className="space-y-6">
               {/* First row: Cadet and Role */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="cadet" className="w-32 text-right shrink-0">Cadet</Label>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                  <Label htmlFor="cadet" className="sm:w-32 sm:text-right text-left sm:shrink-0">Cadet</Label>
                   <div className="flex-1">
                     <Select 
                       value={formData.cadet_id} 
@@ -303,8 +303,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="role" className="w-32 text-right shrink-0">Role *</Label>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                  <Label htmlFor="role" className="sm:w-32 sm:text-right text-left sm:shrink-0">Role *</Label>
                   <div className="flex-1">
                     <Input 
                       id="role" 
@@ -331,8 +331,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
 
               {/* Second row: Reports To and Assistant */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="reports_to" className="w-32 text-right shrink-0">Reports To *</Label>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                  <Label htmlFor="reports_to" className="sm:w-32 sm:text-right text-left sm:shrink-0">Reports To *</Label>
                   <div className="flex-1">
                     <Select 
                       value={formData.reports_to} 
@@ -353,8 +353,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <Label htmlFor="assistant" className="w-32 text-right shrink-0">Assistant *</Label>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                  <Label htmlFor="assistant" className="sm:w-32 sm:text-right text-left sm:shrink-0">Assistant *</Label>
                   <div className="flex-1">
                     <Select 
                       value={formData.assistant} 
@@ -377,8 +377,8 @@ export const ChainOfCommandRecordPage: React.FC = () => {
               </div>
 
               {/* Third row: Email Address */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="email_address" className="w-32 text-right shrink-0">Email Address</Label>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                <Label htmlFor="email_address" className="sm:w-32 sm:text-right text-left sm:shrink-0">Email Address</Label>
                 <div className="flex-1">
                   <Input 
                     id="email_address" 
