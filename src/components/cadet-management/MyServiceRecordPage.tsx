@@ -144,8 +144,8 @@ export const MyServiceRecordPage: React.FC = () => {
             </div>
 
             {/* Date Field */}
-            <div className="space-y-2">
-              <Label htmlFor="date">Date *</Label>
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="date" className="text-left">Date *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -168,8 +168,8 @@ export const MyServiceRecordPage: React.FC = () => {
             </div>
 
             {/* Event Field */}
-            <div className="space-y-2">
-              <Label htmlFor="event">Event/Activity *</Label>
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="event" className="text-left">Event/Activity *</Label>
               <Input
                 id="event"
                 value={formData.event}
@@ -180,8 +180,8 @@ export const MyServiceRecordPage: React.FC = () => {
             </div>
 
             {/* Hours Field */}
-            <div className="space-y-2">
-              <Label htmlFor="hours">Hours *</Label>
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="hours" className="text-left">Hours *</Label>
               <Input
                 id="hours"
                 type="number"
@@ -195,8 +195,8 @@ export const MyServiceRecordPage: React.FC = () => {
             </div>
 
             {/* Notes Field */}
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="notes" className="text-left">Notes (Optional)</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
@@ -207,19 +207,20 @@ export const MyServiceRecordPage: React.FC = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleBack}
                 disabled={isCreating}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isCreating}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <Save className="w-4 h-4" />
                 {isCreating ? 'Recording...' : 'Record Service Hours'}
