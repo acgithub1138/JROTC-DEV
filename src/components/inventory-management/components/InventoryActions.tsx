@@ -30,32 +30,66 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
 
   return (
     <>
-      {(canCreate || isLoading) && (
-        <Button onClick={onAddItem} disabled={isLoading}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
-      )}
-      {/* Actions Dropdown */}
-      {!isMobile && (canBulkImport || isLoading) && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center">
-              <MoreHorizontal className="w-4 h-4 mr-2" />
-              Actions
+      {/* Desktop View */}
+      {!isMobile && (
+        <>
+          {(canCreate || isLoading) && (
+            <Button onClick={onAddItem} disabled={isLoading}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
-            <DropdownMenuItem onClick={onExport} className="flex items-center cursor-pointer">
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleBulkOperations} disabled={isLoading} className="flex items-center cursor-pointer">
-              <Upload className="w-4 h-4 mr-2" />
-              Bulk Import
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+          {(canBulkImport || isLoading) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center">
+                  <MoreHorizontal className="w-4 h-4 mr-2" />
+                  Actions
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
+                <DropdownMenuItem onClick={onExport} className="flex items-center cursor-pointer">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBulkOperations} disabled={isLoading} className="flex items-center cursor-pointer">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </>
+      )}
+
+      {/* Mobile View - 2 column grid with icon buttons */}
+      {isMobile && (
+        <div className="grid grid-cols-2 gap-2">
+          {(canCreate || isLoading) && (
+            <Button onClick={onAddItem} disabled={isLoading} className="w-full" size="lg">
+              <Plus className="w-5 h-5" />
+            </Button>
+          )}
+          {(canBulkImport || isLoading) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full" size="lg">
+                  <MoreHorizontal className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
+                <DropdownMenuItem onClick={onExport} className="flex items-center cursor-pointer">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBulkOperations} disabled={isLoading} className="flex items-center cursor-pointer">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       )}
     </>
   );

@@ -135,12 +135,23 @@ const InventoryManagementPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-muted-foreground">Manage school inventory items and assignments</p>
+      <div className="space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">Inventory Management</h1>
+            <p className="text-muted-foreground">Manage school inventory items and assignments</p>
+          </div>
+          {/* Desktop actions */}
+          <div className="hidden sm:flex gap-2">
+            <InventoryActions
+              onAddItem={handleCreateNew}
+              onExport={handleExport}
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
+
+        {/* Mobile actions - Below header */}
+        <div className="sm:hidden">
           <InventoryActions
             onAddItem={handleCreateNew}
             onExport={handleExport}
