@@ -82,17 +82,17 @@ export const InspectionCreatePage = () => {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Back Button */}
+        <Button variant="outline" size="sm" onClick={handleBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Cadets
+        </Button>
+
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Cadets
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Uniform Inspection Entry</h1>
-            <p className="text-muted-foreground">Record uniform inspection results for cadets</p>
-          </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Uniform Inspection Entry</h1>
+          <p className="text-muted-foreground">Record uniform inspection results for cadets</p>
         </div>
 
         <Card>
@@ -101,9 +101,9 @@ export const InspectionCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="flex items-center gap-4">
-                <Label htmlFor="inspection-date" className="w-32 text-right shrink-0">Inspection Date</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <Label htmlFor="inspection-date" className="md:w-32 md:text-right flex-shrink-0">Inspection Date</Label>
                 <div className="flex-1">
                   <Input
                     id="inspection-date"
@@ -122,8 +122,8 @@ export const InspectionCreatePage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Label htmlFor="flight" className="w-16 text-right shrink-0">Flight</Label>
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <Label htmlFor="flight" className="md:w-16 md:text-right flex-shrink-0">Flight</Label>
                 <div className="flex-1">
                   <Select value={selectedFlight} onValueChange={setSelectedFlight}>
                     <SelectTrigger>
@@ -152,57 +152,106 @@ export const InspectionCreatePage = () => {
                 </div>
 
                 {cadets.length > 0 && (
-                  <div className="border rounded-lg overflow-hidden">
-                    {/* Header */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 p-3 bg-muted font-medium text-sm">
-                      <div className="md:col-span-2">Cadet</div>
-                      <div>Grade</div>
-                      <div>Notes</div>
+                  <>
+                    {/* Desktop Grid View */}
+                    <div className="hidden md:block border rounded-lg overflow-hidden">
+                      {/* Header */}
+                      <div className="grid grid-cols-4 gap-2 p-3 bg-muted font-medium text-sm">
+                        <div className="col-span-2">Cadet</div>
+                        <div>Grade</div>
+                        <div>Notes</div>
+                      </div>
+
+                      {/* Cadet Rows */}
+                      <div className="divide-y">
+                        {cadets.map((cadet) => {
+                          const scores = getCadetScores(cadet.id);
+                          return (
+                            <div key={cadet.id} className="grid grid-cols-4 gap-2 p-3 items-start">
+                              <div className="col-span-2">
+                                <div className="font-medium">
+                                  {cadet.last_name}, {cadet.first_name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+                                </div>
+                              </div>
+
+                              <div>
+                                <Input
+                                  type="number"
+                                  placeholder="0-100"
+                                  min="0"
+                                  max="100"
+                                  value={scores.grade}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'grade', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div>
+                                <Textarea
+                                  placeholder="Optional notes"
+                                  value={scores.notes}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'notes', e.target.value)}
+                                  className="w-full min-h-[40px] resize-none"
+                                  rows={2}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {/* Cadet Rows */}
-                    <div className="divide-y">
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {cadets.map((cadet) => {
                         const scores = getCadetScores(cadet.id);
                         return (
-                          <div key={cadet.id} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-3 items-start">
-                            <div className="md:col-span-2">
-                              <div className="font-medium">
-                                {cadet.last_name}, {cadet.first_name}
+                          <Card key={cadet.id}>
+                            <CardContent className="p-4 space-y-4">
+                              {/* Cadet Name */}
+                              <div>
+                                <h4 className="font-medium">
+                                  {cadet.last_name}, {cadet.first_name}
+                                </h4>
+                                {/* Cadet Details */}
+                                <p className="text-sm text-muted-foreground">
+                                  {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+                                </p>
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {cadet.grade && `${cadet.grade} • `}{cadet.rank}
+
+                              {/* Grade */}
+                              <div className="space-y-2">
+                                <Label className="text-sm">Grade</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="0-100"
+                                  min="0"
+                                  max="100"
+                                  value={scores.grade}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'grade', e.target.value)}
+                                />
                               </div>
-                            </div>
 
-                            <div className="space-y-2 md:space-y-0">
-                              <Label className="md:hidden">Grade</Label>
-                              <Input
-                                type="number"
-                                placeholder="0-100"
-                                min="0"
-                                max="100"
-                                value={scores.grade}
-                                onChange={(e) => updateCadetScore(cadet.id, 'grade', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-
-                            <div className="space-y-2 md:space-y-0">
-                              <Label className="md:hidden">Notes</Label>
-                              <Textarea
-                                placeholder="Optional notes"
-                                value={scores.notes}
-                                onChange={(e) => updateCadetScore(cadet.id, 'notes', e.target.value)}
-                                className="w-full min-h-[40px] resize-none"
-                                rows={2}
-                              />
-                            </div>
-                          </div>
+                              {/* Notes */}
+                              <div className="space-y-2">
+                                <Label className="text-sm">Notes</Label>
+                                <Textarea
+                                  placeholder="Optional notes"
+                                  value={scores.notes}
+                                  onChange={(e) => updateCadetScore(cadet.id, 'notes', e.target.value)}
+                                  className="min-h-[60px] resize-none"
+                                  rows={3}
+                                />
+                              </div>
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>
-                  </div>
+                  </>
                 )}
 
                 {selectedFlight && !cadetsLoading && cadets.length === 0 && (
@@ -223,11 +272,11 @@ export const InspectionCreatePage = () => {
             )}
 
             {/* Actions */}
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={handleBack} disabled={saving}>
+            <div className="flex flex-col md:flex-row justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={handleBack} disabled={saving} className="w-full md:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={!isFormValid || saving}>
+              <Button onClick={handleSave} disabled={!isFormValid || saving} className="w-full md:w-auto">
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Inspections
               </Button>
