@@ -223,12 +223,15 @@
   }
   
   /* Show only the print container and its contents */
+  .schedule-print-wrapper,
+  .schedule-print-wrapper *,
   .schedule-print-container,
   .schedule-print-container * {
     visibility: visible !important;
   }
   
-  /* Position print content at top-left of page */
+  /* Position print wrapper and container */
+  .schedule-print-wrapper,
   .schedule-print-container {
     position: absolute !important;
     top: 0 !important;
