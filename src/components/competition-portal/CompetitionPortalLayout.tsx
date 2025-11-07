@@ -78,10 +78,9 @@ const CompetitionPortalLayout = () => {
   useEffect(() => {
     if (!mappingsLoaded) return;
 
-    const currentPath = location.pathname.replace('/app/competition-portal', '') || '/';
+    const currentPath = location.pathname;
     console.log('🔍 Path detection:', { 
       fullPath: location.pathname, 
-      cleanPath: currentPath,
       availablePaths: Array.from(moduleMappings.pathToModuleMap.keys())
     });
     
@@ -106,7 +105,7 @@ const CompetitionPortalLayout = () => {
     setActiveModule(module);
     const route = moduleMappings.moduleToPathMap.get(module);
     if (route) {
-      navigate(`/app/competition-portal${route}`);
+      navigate(route);
     } else {
       // Fallback
       navigate('/app/competition-portal');

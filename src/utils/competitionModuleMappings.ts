@@ -72,9 +72,16 @@ export const fetchCompetitionModuleMappings = async (
     );
 
     sortedByPathLength.forEach((module) => {
-      const cleanPath = module.path.startsWith('/') ? module.path : `/${module.path}`;
-      pathToModuleMap.set(cleanPath, module.moduleName);
-      moduleToPathMap.set(module.moduleName, cleanPath);
+      // Ensure all paths are absolute (start with /app/competition-portal)
+      const rawPath = module.path || '';
+      const absolutePath = rawPath.startsWith('/app/competition-portal')
+        ? rawPath
+        : rawPath.startsWith('/') 
+          ? `/app/competition-portal${rawPath}` 
+          : `/app/competition-portal/${rawPath}`;
+      
+      pathToModuleMap.set(absolutePath, module.moduleName);
+      moduleToPathMap.set(module.moduleName, absolutePath);
     });
 
     console.log('Loaded competition module mappings:', {

@@ -184,7 +184,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   
   const handleMenuItemClick = (item: any) => {
     console.log('Menu item clicked:', item, 'Current activeModule:', activeModule);
-    navigate(item.path);
+    onModuleChange(item.id);
     if (isMobile && setSidebarOpen) {
       setSidebarOpen(false);
     }
