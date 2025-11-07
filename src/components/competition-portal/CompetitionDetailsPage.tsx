@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Menu } from 'lucide-react';
 import { useCompetitionEventsPermissions, useCompetitionResourcesPermissions, useCompetitionSchoolsPermissions, useCompetitionSchedulePermissions, useCompetitionResultsPermissions, useCompetitionJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CompetitionDetailsSidebar } from './CompetitionDetailsSidebar';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
@@ -11,7 +11,11 @@ import { CompetitionResultsTab } from './tabs/CompetitionResultsTab';
 import { JudgesAssignedView } from './views/JudgesAssignedView';
 import { ApplicationStatusView } from './views/ApplicationStatusView';
 import { ScheduleView } from './views/ScheduleView';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 export const CompetitionDetailsPage = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
@@ -148,21 +152,54 @@ export const CompetitionDetailsPage = () => {
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      {/* Sidebar */}
-      <CompetitionDetailsSidebar 
-        competitionId={competitionId} 
-        permissions={{
-          events: eventsPermissions,
-          judges: judgesPermissions,
-          resources: resourcesPermissions,
-          schools: schoolsPermissions,
-          schedule: schedulePermissions,
-          results: resultsPermissions
-        }}
-      />
+      {/* Sidebar - Hidden on mobile */}
+      {!isMobile && (
+        <CompetitionDetailsSidebar 
+          competitionId={competitionId} 
+          permissions={{
+            events: eventsPermissions,
+            judges: judgesPermissions,
+            resources: resourcesPermissions,
+            schools: schoolsPermissions,
+            schedule: schedulePermissions,
+            results: resultsPermissions
+          }}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      {isMobile && (
+        <CompetitionDetailsSidebar 
+          competitionId={competitionId} 
+          permissions={{
+            events: eventsPermissions,
+            judges: judgesPermissions,
+            resources: resourcesPermissions,
+            schools: schoolsPermissions,
+            schedule: schedulePermissions,
+            results: resultsPermissions
+          }}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+      )}
       
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <div className="sticky top-0 z-10 bg-background border-b p-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-4 w-4 mr-2" />
+              Menu
+            </Button>
+          </div>
+        )}
+        
         <div className="p-6 space-y-6">
           {/* Dynamic content based on route */}
           <div className="mt-6">

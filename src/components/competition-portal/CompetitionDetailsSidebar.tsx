@@ -2,9 +2,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { ChevronDown, ChevronRight, Trophy, Users, FileText, School, Calendar, Award, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CompetitionDetailsSidebarProps {
   competitionId: string;
@@ -16,12 +18,15 @@ interface CompetitionDetailsSidebarProps {
     schedule: { canAccess: boolean };
     results: { canAccess: boolean };
   };
+  sidebarOpen?: boolean;
+  setSidebarOpen?: (open: boolean) => void;
 }
 
-export const CompetitionDetailsSidebar = ({ competitionId, permissions }: CompetitionDetailsSidebarProps) => {
+export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarOpen, setSidebarOpen }: CompetitionDetailsSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  const isMobile = useIsMobile();
 
   const [judgesOpen, setJudgesOpen] = useState(currentPath.includes('/judges'));
   const [applicationsOpen, setApplicationsOpen] = useState(currentPath.includes('/applications'));
@@ -29,6 +34,9 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions }: Compet
 
   const navigateTo = (path: string) => {
     navigate(`/app/competition-portal/competition-details/${competitionId}${path}`);
+    if (isMobile && setSidebarOpen) {
+      setSidebarOpen(false);
+    }
   };
 
   const isActive = (path: string) => currentPath === `/app/competition-portal/competition-details/${competitionId}${path}`;
@@ -94,11 +102,138 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions }: Compet
     },
   ];
 
+  const renderMenuContent = () => (
+    <>
+      {menuItems.map((item) => {
+        if (!item.canAccess) return null;
+
+        // Item with children (collapsible)
+        if (item.children) {
+          const isJudges = item.id === 'judges';
+          const isSchedules = item.id === 'schedules';
+          const isOpen = isJudges ? judgesOpen : isSchedules ? schedulesOpen : false;
+          const setOpen = isJudges ? setJudgesOpen : isSchedules ? setSchedulesOpen : () => {};
+
+          return (
+            <Collapsible key={item.id} open={isOpen} onOpenChange={setOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between font-normal hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-2">
+                    {item.icon && <item.icon className="h-4 w-4" />}
+                    <span>{item.label}</span>
+                  </div>
+                  {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="ml-4 space-y-1 mt-1">
+                {item.children.map((child) => {
+                  // Nested children (applications)
+                  if (child.children) {
+                    return (
+                      <Collapsible key={child.id} open={applicationsOpen} onOpenChange={setApplicationsOpen}>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-between font-normal text-sm hover:bg-muted/50"
+                          >
+                            <span>{child.label}</span>
+                            {applicationsOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="ml-4 space-y-1 mt-1">
+                          {child.children.map((subChild) => (
+                            <Button
+                              key={subChild.id}
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start font-normal text-sm hover:bg-muted/50",
+                                isActive(subChild.path) && "bg-muted text-primary font-medium"
+                              )}
+                              onClick={() => navigateTo(subChild.path)}
+                            >
+                              {subChild.label}
+                            </Button>
+                          ))}
+                        </CollapsibleContent>
+                      </Collapsible>
+                    );
+                  }
+
+                  // Regular child item
+                  return (
+                    <Button
+                      key={child.id}
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start font-normal text-sm hover:bg-muted/50",
+                        isActive(child.path) && "bg-muted text-primary font-medium"
+                      )}
+                      onClick={() => navigateTo(child.path)}
+                    >
+                      {child.label}
+                    </Button>
+                  );
+                })}
+              </CollapsibleContent>
+            </Collapsible>
+          );
+        }
+
+        // Simple menu item
+        return (
+          <Button
+            key={item.id}
+            variant="ghost"
+            className={cn(
+              "w-full justify-start font-normal hover:bg-muted/50",
+              isActive(item.path) && "bg-muted text-primary font-medium"
+            )}
+            onClick={() => navigateTo(item.path)}
+          >
+            {item.icon && <item.icon className="h-4 w-4 mr-2" />}
+            {item.label}
+          </Button>
+        );
+      })}
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5" />
+              Competition Details
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="p-4 space-y-1 max-h-[70vh] overflow-y-auto">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                navigate('/app/competition-portal/competitions');
+                if (setSidebarOpen) setSidebarOpen(false);
+              }}
+              className="w-full justify-start font-normal hover:bg-muted/50 mb-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Competitions
+            </Button>
+            {renderMenuContent()}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <div className="w-64 border-r bg-background h-full">
       <ScrollArea className="h-full">
         <div className="p-4 space-y-1">
-          {/* Back to Competitions button */}
           <Button 
             variant="outline" 
             onClick={() => navigate('/app/competition-portal/competitions')} 
@@ -107,101 +242,7 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions }: Compet
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Competitions
           </Button>
-          
-          {menuItems.map((item) => {
-            if (!item.canAccess) return null;
-
-            // Item with children (collapsible)
-            if (item.children) {
-              const isJudges = item.id === 'judges';
-              const isSchedules = item.id === 'schedules';
-              const isOpen = isJudges ? judgesOpen : isSchedules ? schedulesOpen : false;
-              const setOpen = isJudges ? setJudgesOpen : isSchedules ? setSchedulesOpen : () => {};
-
-              return (
-                <Collapsible key={item.id} open={isOpen} onOpenChange={setOpen}>
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-between font-normal hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-2">
-                        {item.icon && <item.icon className="h-4 w-4" />}
-                        <span>{item.label}</span>
-                      </div>
-                      {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="ml-4 space-y-1 mt-1">
-                    {item.children.map((child) => {
-                      // Nested children (applications)
-                      if (child.children) {
-                        return (
-                          <Collapsible key={child.id} open={applicationsOpen} onOpenChange={setApplicationsOpen}>
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-between font-normal text-sm hover:bg-muted/50"
-                              >
-                                <span>{child.label}</span>
-                                {applicationsOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                              </Button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="ml-4 space-y-1 mt-1">
-                              {child.children.map((subChild) => (
-                                <Button
-                                  key={subChild.id}
-                                  variant="ghost"
-                                  className={cn(
-                                    "w-full justify-start font-normal text-sm hover:bg-muted/50",
-                                    isActive(subChild.path) && "bg-muted text-primary font-medium"
-                                  )}
-                                  onClick={() => navigateTo(subChild.path)}
-                                >
-                                  {subChild.label}
-                                </Button>
-                              ))}
-                            </CollapsibleContent>
-                          </Collapsible>
-                        );
-                      }
-
-                      // Regular child item
-                      return (
-                        <Button
-                          key={child.id}
-                          variant="ghost"
-                          className={cn(
-                            "w-full justify-start font-normal text-sm hover:bg-muted/50",
-                            isActive(child.path) && "bg-muted text-primary font-medium"
-                          )}
-                          onClick={() => navigateTo(child.path)}
-                        >
-                          {child.label}
-                        </Button>
-                      );
-                    })}
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            }
-
-            // Simple menu item
-            return (
-              <Button
-                key={item.id}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start font-normal hover:bg-muted/50",
-                  isActive(item.path) && "bg-muted text-primary font-medium"
-                )}
-                onClick={() => navigateTo(item.path)}
-              >
-                {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-                {item.label}
-              </Button>
-            );
-          })}
+          {renderMenuContent()}
         </div>
       </ScrollArea>
     </div>
