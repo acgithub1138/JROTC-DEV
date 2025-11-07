@@ -9,10 +9,13 @@ import { Plus, Search } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { TablePagination } from '@/components/ui/table-pagination';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { EmailTemplatesCards } from '../cards/EmailTemplatesCards';
 
 export const EmailTemplatesTab: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const { 
     templates, 
     isLoading, 
@@ -70,10 +73,10 @@ export const EmailTemplatesTab: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-center'}`}>
         <h2 className="text-2xl font-semibold">Email Templates</h2>
         {canCreate && (
-          <Button onClick={handleCreate} className="flex items-center gap-2">
+          <Button onClick={handleCreate} className={`flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
             <Plus className="w-4 h-4" />
             Create Template
           </Button>
@@ -100,17 +103,31 @@ export const EmailTemplatesTab: React.FC = () => {
         </div>
       </div>
 
-      <EmailTemplatesTable
-        templates={paginatedTemplates}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onView={handleView}
-        onCopy={handleCopy}
-        canEditTemplate={canEditTemplate}
-        canCopyTemplate={canCopyTemplate}
-        canDeleteTemplate={canDeleteTemplate}
-        canViewTemplate={canViewTemplate}
-      />
+      {isMobile ? (
+        <EmailTemplatesCards
+          templates={paginatedTemplates}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onView={handleView}
+          onCopy={handleCopy}
+          canEditTemplate={canEditTemplate}
+          canCopyTemplate={canCopyTemplate}
+          canDeleteTemplate={canDeleteTemplate}
+          canViewTemplate={canViewTemplate}
+        />
+      ) : (
+        <EmailTemplatesTable
+          templates={paginatedTemplates}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onView={handleView}
+          onCopy={handleCopy}
+          canEditTemplate={canEditTemplate}
+          canCopyTemplate={canCopyTemplate}
+          canDeleteTemplate={canDeleteTemplate}
+          canViewTemplate={canViewTemplate}
+        />
+      )}
 
       {templates.length > ITEMS_PER_PAGE && (
         <TablePagination
