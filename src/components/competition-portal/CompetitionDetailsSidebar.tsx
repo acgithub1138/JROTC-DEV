@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight, Trophy, Users, FileText, School, Calendar, Award, UserCheck, FileCheck } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trophy, Users, FileText, School, Calendar, Award, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -98,6 +98,16 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions }: Compet
     <div className="w-64 border-r bg-background h-full">
       <ScrollArea className="h-full">
         <div className="p-4 space-y-1">
+          {/* Back to Competitions button */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/app/competition-portal/competitions')} 
+            className="w-full justify-start font-normal hover:bg-muted/50 mb-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Competitions
+          </Button>
+          
           {menuItems.map((item) => {
             if (!item.canAccess) return null;
 

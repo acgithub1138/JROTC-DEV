@@ -164,18 +164,6 @@ export const CompetitionDetailsPage = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Competition Details</h1>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/app/competition-portal/competitions')} 
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Competitions
-            </Button>
-          </div>
-
           {/* Dynamic content based on route */}
           <div className="mt-6">
             {renderContent()}
