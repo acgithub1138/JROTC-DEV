@@ -259,8 +259,32 @@ export const CompetitionResourceRecord: React.FC = () => {
   const canEditResource = isCreateMode ? canCreate : canEdit;
   return <>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
+        {/* Back Button - Mobile Above Header */}
+        <div className="md:hidden">
+          <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Resources
+          </Button>
+        </div>
+
+        {/* Action Buttons - Mobile Only (Above Card) */}
+        {!isViewMode && canEditResource && (
+          <div className="md:hidden grid grid-cols-2 gap-2">
+            {(isEditMode || isViewMode) && canDelete && (
+              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center justify-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            )}
+            <Button type="submit" form="resource-form" disabled={isSubmitting} className="flex items-center justify-center gap-2">
+              <Save className="h-4 w-4" />
+              {isSubmitting ? 'Saving...' : isCreateMode ? 'Add' : 'Save'}
+            </Button>
+          </div>
+        )}
+
+        {/* Enhanced Header - Desktop Only */}
+        <div className="hidden md:flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
           <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
               <ArrowLeft className="h-4 w-4" />
