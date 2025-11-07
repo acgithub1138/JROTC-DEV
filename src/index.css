@@ -173,6 +173,8 @@
     color-adjust: exact !important;
     font-size: 12px !important;
     background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Hide everything except print content */
@@ -191,14 +193,26 @@
   /* Layout print wrapper and container full-width */
   .schedule-print-wrapper,
   .schedule-print-container {
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    max-width: none !important;
     transform: none !important;
     background: white !important;
+  }
+
+  /* Break out of any parent constraints (cards, containers, max-w, center) */
+  .schedule-print-wrapper,
+  .schedule-print-wrapper * {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    transform: none !important;
+    zoom: 1 !important; /* normalize Chromium scaling */
   }
 
   /* Neutralize card visuals in print */
