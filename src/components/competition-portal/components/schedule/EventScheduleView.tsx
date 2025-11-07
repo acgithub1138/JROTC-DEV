@@ -170,7 +170,11 @@ export const EventScheduleView = ({
                                 <p>Click to edit schedule</p>
                               </TooltipContent>
                             </Tooltip>
-                          ) : null}
+                          ) : (
+                            <div className="font-medium text-sm whitespace-normal break-words w-full no-print">
+                              {event.event_initials || event.event_name}
+                            </div>
+                          )}
                           {/* Print version */}
                           <div className="hidden print:block font-medium text-sm whitespace-normal break-words w-full">
                             {event.event_initials || event.event_name}
