@@ -140,7 +140,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                   backgroundColor: school.color || '#3B82F6'
                 }} />
                       </div>
-                      <div className="flex flex-wrap gap-2 pt-2">
+                      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 pt-2">
                         {canViewDetails && <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEvents(school.id)}>
