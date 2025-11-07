@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type AnnouncementRecordMode = 'create' | 'edit' | 'view';
 
@@ -28,6 +29,7 @@ export const AnnouncementRecordPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
   
   const mode = searchParams.get('mode') as AnnouncementRecordMode || 'view';
   const recordId = searchParams.get('id');
@@ -269,14 +271,23 @@ export const AnnouncementRecordPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-h-screen overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={handleBack}>
+      <div className={`flex ${isMobile ? 'flex-col gap-4' : 'items-center justify-between'}`}>
+        {isMobile && (
+          <Button variant="ghost" onClick={handleBack} className="w-fit">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
+        )}
+        
+        <div className={`flex items-center ${isMobile ? 'flex-col items-start gap-2' : 'space-x-4'}`}>
+          {!isMobile && (
+            <Button variant="ghost" onClick={handleBack}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          )}
           <div>
             <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
             {currentAnnouncement && (
@@ -288,14 +299,14 @@ export const AnnouncementRecordPage = () => {
         </div>
         
         {mode !== 'view' && (
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
+          <div className={`flex items-center ${isMobile ? 'w-full grid grid-cols-2 gap-2' : 'space-x-2'}`}>
+            <Button variant="outline" onClick={handleBack} disabled={isSubmitting} className={isMobile ? 'w-full' : ''}>
               <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isSubmitting}>
+            <Button onClick={handleSave} disabled={isSubmitting} className={isMobile ? 'w-full' : ''}>
               <Save className="w-4 h-4 mr-2" />
-              {mode === 'create' ? 'Create Announcement' : 'Update Announcement'}
+              {mode === 'create' ? 'Create' : 'Update'}
             </Button>
           </div>
         )}
@@ -311,8 +322,8 @@ export const AnnouncementRecordPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Label className="w-24 text-right">Title *</Label>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                <Label className={isMobile ? '' : 'w-24 text-right'}>Title *</Label>
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">{title}</div>
@@ -327,8 +338,8 @@ export const AnnouncementRecordPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Label className="w-24 text-right">Priority</Label>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                <Label className={isMobile ? '' : 'w-24 text-right'}>Priority</Label>
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">{getPriorityLabel(priority[0])}</div>
@@ -357,8 +368,8 @@ export const AnnouncementRecordPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Label className="w-24 text-right">Active</Label>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                <Label className={isMobile ? '' : 'w-24 text-right'}>Active</Label>
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">{isActive ? 'Yes' : 'No'}</div>
@@ -371,8 +382,8 @@ export const AnnouncementRecordPage = () => {
 
             {/* Right Column */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Label className="w-32 text-right">Publish Date *</Label>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                <Label className={isMobile ? '' : 'w-32 text-right'}>Publish Date *</Label>
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">
@@ -389,8 +400,8 @@ export const AnnouncementRecordPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Label className="w-32 text-right">Set Expiration</Label>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                <Label className={isMobile ? '' : 'w-32 text-right'}>Set Expiration</Label>
                 <div className="flex-1">
                   {mode === 'view' ? (
                     <div className="px-3 py-2 text-sm">{hasExpiration ? 'Yes' : 'No'}</div>
@@ -401,8 +412,8 @@ export const AnnouncementRecordPage = () => {
               </div>
 
               {hasExpiration && (
-                <div className="flex items-center space-x-4">
-                  <Label className="w-32 text-right">Expire Date</Label>
+                <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center space-x-4'}`}>
+                  <Label className={isMobile ? '' : 'w-32 text-right'}>Expire Date</Label>
                   <div className="flex-1">
                     {mode === 'view' ? (
                       <div className="px-3 py-2 text-sm">
@@ -423,8 +434,8 @@ export const AnnouncementRecordPage = () => {
 
           {/* Content */}
           <div className="space-y-4">
-            <div className="flex items-start space-x-4">
-              <Label className="w-24 text-right mt-2">Content *</Label>
+            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-start space-x-4'}`}>
+              <Label className={isMobile ? '' : 'w-24 text-right mt-2'}>Content *</Label>
               <div className="flex-1">
                 {mode === 'view' ? (
                   <div className="border rounded-md p-4 min-h-[200px]">
@@ -443,8 +454,8 @@ export const AnnouncementRecordPage = () => {
 
           {/* Attachments */}
           <div className="space-y-2">
-            <div className="flex items-center gap-4">
-              <Label className="w-32 text-right text-sm font-medium">Attachments</Label>
+            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center gap-4'}`}>
+              <Label className={isMobile ? '' : 'w-32 text-right text-sm font-medium'}>Attachments</Label>
               <div className="flex-1">
                 {mode === 'create' ? (
                   <>
