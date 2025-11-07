@@ -268,8 +268,8 @@ const CompetitionsPage = () => {
               onClick={() => navigate("/app/competition-portal/competitions/competition_record")}
               className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Competition
+              <Plus className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Create Competition</span>
             </Button>
           )}
         </div>
