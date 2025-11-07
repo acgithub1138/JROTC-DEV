@@ -549,6 +549,20 @@ export const CompetitionEventRecord: React.FC = () => {
       </div>
 
       <div className="max-w-4xl mx-auto">
+        {/* Mobile action buttons - shown above the card */}
+        <div className="md:hidden grid grid-cols-2 gap-2 mb-4">
+          {canEditForm && <>
+              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center justify-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>}
+              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center justify-center gap-2">
+                <Save className="h-4 w-4" />
+                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
+              </Button>
+            </>}
+        </div>
+
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
           <CardHeader className="border-b border-primary/10">
             <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
@@ -873,20 +887,6 @@ export const CompetitionEventRecord: React.FC = () => {
           </form>
         </CardContent>
         </Card>
-
-        {/* Mobile action buttons - shown below the card */}
-        <div className="md:hidden flex flex-col gap-2 mt-4">
-          {canEditForm && <>
-              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="w-full flex items-center justify-center gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>}
-              <Button type="submit" form="event-form" disabled={isSaving} className="w-full flex items-center justify-center gap-2">
-                <Save className="h-4 w-4" />
-                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
-              </Button>
-            </>}
-        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
