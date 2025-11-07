@@ -62,14 +62,17 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
         </>
       )}
 
-      {/* Mobile View - 2 column grid with icon buttons */}
+      {/* Mobile View - 3 column grid with icon-only buttons */}
       {isMobile && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {(canCreate || isLoading) && (
             <Button onClick={onAddItem} disabled={isLoading} className="w-full" size="lg">
               <Plus className="w-5 h-5" />
             </Button>
           )}
+          <Button onClick={onExport} variant="outline" className="w-full" size="lg">
+            <Download className="w-5 h-5" />
+          </Button>
           {(canBulkImport || isLoading) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -78,10 +81,6 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
-                <DropdownMenuItem onClick={onExport} className="flex items-center cursor-pointer">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleBulkOperations} disabled={isLoading} className="flex items-center cursor-pointer">
                   <Upload className="w-4 h-4 mr-2" />
                   Bulk Import

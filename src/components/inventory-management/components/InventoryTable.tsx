@@ -245,25 +245,27 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center pt-2 gap-2">
+                <div className="flex items-center gap-2 pt-2">
                   <div className="flex items-center gap-2 min-w-0">
                     {item.issued_to && item.issued_to.length > 0 && canViewDetails && (
                       <IssuedUsersPopover issuedTo={item.issued_to} />
                     )}
                   </div>
-                  <TableActionButtons 
-                    canView={false} 
-                    canEdit={canUpdate} 
-                    canDelete={canDelete} 
-                    onEdit={() => handleEdit(item)} 
-                    onDelete={() => onDelete(item)} 
-                    customActions={[{
-                      icon: <History className="w-3 h-3" />,
-                      label: "View history",
-                      onClick: () => setHistoryItem(item),
-                      show: canViewDetails
-                    }]} 
-                  />
+                  <div className="ml-auto flex items-center gap-2 flex-wrap shrink-0">
+                    <TableActionButtons 
+                      canView={false} 
+                      canEdit={canUpdate} 
+                      canDelete={canDelete} 
+                      onEdit={() => handleEdit(item)} 
+                      onDelete={() => onDelete(item)} 
+                      customActions={[{
+                        icon: <History className="w-3 h-3" />,
+                        label: "View history",
+                        onClick: () => setHistoryItem(item),
+                        show: canViewDetails
+                      }]} 
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>

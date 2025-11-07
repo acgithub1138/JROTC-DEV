@@ -63,13 +63,13 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between px-2 py-4">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-2 py-4">
+      <div className="text-sm text-muted-foreground text-center sm:text-left">
         Showing {startItem} to {endItem} of {totalItems} items
       </div>
       
       <Pagination>
-        <PaginationContent>
+        <PaginationContent className="flex-wrap justify-center">
           <PaginationItem>
             <PaginationPrevious
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}

@@ -134,15 +134,15 @@ const InventoryManagementPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 overflow-x-hidden">
-      <div className="space-y-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold">Inventory Management</h1>
-            <p className="text-muted-foreground">Manage school inventory items and assignments</p>
+    <div className="px-4 sm:px-6 py-6 space-y-6 overflow-x-hidden min-w-0">
+      <div className="space-y-3">
+        <div className="flex justify-between items-start gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">Inventory Management</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage school inventory items and assignments</p>
           </div>
           {/* Desktop actions */}
-          <div className="hidden sm:flex gap-2">
+          <div className="hidden sm:flex gap-2 flex-shrink-0">
             <InventoryActions
               onAddItem={handleCreateNew}
               onExport={handleExport}
