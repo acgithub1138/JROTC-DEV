@@ -82,12 +82,12 @@ const JobBoardPage = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-2">
+              <div className="relative flex-1 sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input placeholder="Search by cadet name or role..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
-              <div className="flex text-right">If the Chart disappears, click the Chain of Command tab then Chain of Command Chart tab again.</div>
+              <div className="flex text-left sm:text-right text-sm text-muted-foreground">If the Chart disappears, click the Chain of Command tab then Chain of Command Chart tab again.</div>
             </div>
           </CardHeader>
           <CardContent>
