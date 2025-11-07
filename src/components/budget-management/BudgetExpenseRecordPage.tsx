@@ -313,23 +313,60 @@ export const BudgetExpenseRecordPage: React.FC = () => {
   return (
     <>
       <div className="p-6 space-y-6">
+        {/* Back Button - Above header on mobile */}
+        <Button variant="ghost" size="sm" onClick={handleBack} className="sm:hidden">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Budget
+        </Button>
+
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Budget
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
-              <p className="text-muted-foreground">
-                Budget → {getPageTitle()}
-              </p>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={handleBack} className="hidden sm:flex">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Budget
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
+                <p className="text-muted-foreground">
+                  Budget → {getPageTitle()}
+                </p>
+              </div>
             </div>
+            
+            {currentMode === 'view' && canEdit && (
+              <Button onClick={handleEdit} className="hidden sm:flex">
+                Edit Expense
+              </Button>
+            )}
           </div>
-          
+
+          {/* Action Buttons - Mobile: Below header in 2-column grid */}
+          {isFormMode && (
+            <div className="grid grid-cols-2 gap-2 sm:hidden">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => form.handleSubmit(handleSubmit)()} 
+                disabled={isSubmitting || isCreating || isUploadingFiles}
+                className="w-full"
+              >
+                {(isSubmitting || isCreating || isUploadingFiles) ? 'Saving...' : 
+                 currentMode === 'create' ? 'Add' : 'Update'}
+              </Button>
+            </div>
+          )}
+
           {currentMode === 'view' && canEdit && (
-            <Button onClick={handleEdit}>
+            <Button onClick={handleEdit} className="sm:hidden w-full">
               Edit Expense
             </Button>
           )}
@@ -356,8 +393,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="item"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Item *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Item *</FormLabel>
                           <div className="flex-1">
                             <FormControl>
                               <Input placeholder="Enter item name" {...field} />
@@ -372,8 +409,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="type"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Type *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Type *</FormLabel>
                           <div className="flex-1">
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -399,8 +436,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="date"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Date *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Date *</FormLabel>
                           <div className="flex-1">
                             <FormControl>
                                   <Input
@@ -422,8 +459,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Amount *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Amount *</FormLabel>
                           <div className="flex-1">
                             <FormControl>
                               <Input
@@ -444,8 +481,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="payment_method"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Payment Method *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Payment Method *</FormLabel>
                           <div className="flex-1">
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -471,8 +508,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Status *</FormLabel>
+                        <FormItem className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right text-left shrink-0">Status *</FormLabel>
                           <div className="flex-1">
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -497,8 +534,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem className="flex gap-4">
-                        <FormLabel className="w-32 text-right shrink-0 mt-2">Description</FormLabel>
+                      <FormItem className="flex flex-col space-y-2 sm:flex-row sm:gap-4">
+                        <FormLabel className="sm:w-32 sm:text-right text-left shrink-0 sm:mt-2">Description</FormLabel>
                         <div className="flex-1">
                           <FormControl>
                             <Textarea
@@ -515,8 +552,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
 
                   {/* Attachments Section */}
                   <div className="lg:col-span-2">
-                    <div className="flex gap-4">
-                      <label className="w-32 text-right text-sm font-medium mt-2 shrink-0">Attachments</label>
+                    <div className="flex flex-col space-y-2 sm:flex-row sm:gap-4">
+                      <label className="sm:w-32 sm:text-right text-left text-sm font-medium sm:mt-2 shrink-0">Attachments</label>
                       <div className="flex-1">
                         {currentMode === 'create' ? (
                           <>
@@ -564,7 +601,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-6 lg:col-span-2">
+                  {/* Action Buttons - Desktop only */}
+                  <div className="hidden sm:flex justify-end gap-2 pt-6 lg:col-span-2">
                     <Button
                       type="button"
                       variant="outline"
