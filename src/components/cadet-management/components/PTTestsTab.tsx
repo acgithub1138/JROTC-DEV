@@ -183,7 +183,7 @@ export const PTTestsTab = ({
             {sortedData.map(test => (
               <Card key={test.id}>
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="mb-3">
                     <div>
                       <h4 className="font-medium">{test.profiles.last_name}, {test.profiles.first_name}</h4>
                       <div className="flex items-center gap-2 mt-1">
@@ -197,39 +197,6 @@ export const PTTestsTab = ({
                         </span>
                       </div>
                     </div>
-                    {(canUpdate || canDelete) && (
-                      <div className="flex gap-2">
-                        {canUpdate && (
-                          <Button variant="outline" size="icon" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)} className="h-8 w-8">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {canDelete && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700" disabled={isDeleting}>
-                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this PT test for {test.profiles.first_name} {test.profiles.last_name}? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(test)} disabled={isDeleting}>
-                                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
-                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
@@ -249,6 +216,43 @@ export const PTTestsTab = ({
                       <span className="ml-2 font-medium">{formatTime(test.mile_time)}</span>
                     </div>
                   </div>
+                  
+                  {/* Action Buttons - Mobile Grid */}
+                  {(canUpdate || canDelete) && (
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {canUpdate && (
+                        <Button variant="outline" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)} className="w-full">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" className="w-full text-red-600 hover:text-red-700" disabled={isDeleting}>
+                              {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this PT test for {test.profiles.first_name} {test.profiles.last_name}? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(test)} disabled={isDeleting}>
+                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
