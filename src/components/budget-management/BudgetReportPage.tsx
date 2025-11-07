@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { BudgetFilters } from './BudgetManagementPage';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Color palette for pie charts
 const INCOME_COLORS = ['#10B981', '#059669', '#047857', '#065F46', '#064E3B', '#022C22'];
 const EXPENSE_COLORS = ['#EF4444', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#450A0A'];
 const BudgetReportPage = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Fetch only active, non-archived transactions
   const filters: BudgetFilters = {
@@ -98,12 +100,23 @@ const BudgetReportPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
+      {/* Mobile Back Button - Above Header */}
+      {isMobile && (
         <Button variant="ghost" size="sm" onClick={() => navigate('/app/budget')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Budget
         </Button>
+      )}
+
+      {/* Header */}
+      <div className={isMobile ? "" : "flex items-center gap-4"}>
+        {/* Desktop Back Button - Inline with Header */}
+        {!isMobile && (
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app/budget')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Budget
+          </Button>
+        )}
         <div>
           <h1 className="text-3xl font-bold">Budget Report</h1>
           <p className="text-muted-foreground">Visual breakdown of income and expenses by type</p>
