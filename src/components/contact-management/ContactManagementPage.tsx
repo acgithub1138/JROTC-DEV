@@ -187,36 +187,66 @@ const ContactManagementPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Contact Management</h2>
-          <p className="text-muted-foreground">
-            Manage school contacts including parents, relatives, and friends
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {selectedContacts.length > 0 && canDeletePermission && (
-            <Button 
-              variant="destructive" 
-              onClick={handleBulkDelete}
-            >
-              Delete Selected ({selectedContacts.length})
-            </Button>
-          )}
-          {canCreate && (
-            <>
-              <Button variant="outline" onClick={() => navigate('/app/contacts/bulk-import')}>
-                <Upload className="w-4 h-4 mr-2" />
-                Bulk Import
+    <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden min-w-0">
+      <div className="space-y-3">
+        <div className="flex justify-between items-start gap-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Contact Management</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage school contacts including parents, relatives, and friends
+            </p>
+          </div>
+          {/* Desktop buttons */}
+          <div className="hidden sm:flex gap-2 flex-shrink-0">
+            {selectedContacts.length > 0 && canDeletePermission && (
+              <Button 
+                variant="destructive" 
+                onClick={handleBulkDelete}
+              >
+                Delete Selected ({selectedContacts.length})
               </Button>
-              <Button onClick={handleAddContact}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Contact
-              </Button>
-            </>
-          )}
+            )}
+            {canCreate && (
+              <>
+                <Button variant="outline" onClick={() => navigate('/app/contacts/bulk-import')}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </Button>
+                <Button onClick={handleAddContact}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Contact
+                </Button>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Mobile buttons - Below header */}
+        {isMobile && (
+          <div className="space-y-2">
+            {selectedContacts.length > 0 && canDeletePermission && (
+              <Button 
+                variant="destructive" 
+                onClick={handleBulkDelete}
+                className="w-full"
+              >
+                Delete Selected ({selectedContacts.length})
+              </Button>
+            )}
+            {canCreate && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => navigate('/app/contacts/bulk-import')} className="w-full">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </Button>
+                <Button onClick={handleAddContact} className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Contact
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <StandardTableWrapper
