@@ -10,6 +10,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { EmailQueueCards } from '@/components/email-management/cards/EmailQueueCards';
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending':
@@ -25,6 +27,7 @@ const getStatusColor = (status: string) => {
   }
 };
 export const EmailQueueTab: React.FC = () => {
+  const isMobile = useIsMobile();
   const {
     queueItems,
     isLoading,
@@ -268,7 +271,15 @@ export const EmailQueueTab: React.FC = () => {
               <p className="text-muted-foreground">
                 Email queue is empty. Manually sent emails will appear here.
               </p>
-            </div> : <div className="overflow-x-auto">
+            </div> : (
+              <>
+                {isMobile ? (
+                  <EmailQueueCards 
+                    items={paginatedItems} 
+                    onViewEmail={(item) => setViewingEmail(item)} 
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -335,11 +346,13 @@ export const EmailQueueTab: React.FC = () => {
                        </TableCell>
                      </TableRow>;
               })}
-                 </TableBody>
-               </Table>
-               
-               {/* Pagination Controls */}
-               {totalPages > 1 && <div className="flex items-center justify-between px-2 py-4">
+                  </TableBody>
+                </Table>
+              </div>
+                )}
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && <div className="flex items-center justify-between px-2 py-4">
                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                      Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} emails
                    </div>
@@ -369,9 +382,10 @@ export const EmailQueueTab: React.FC = () => {
                      <Button variant="outline" size="sm" onClick={handleNext} disabled={currentPage === totalPages} className="h-8 w-8 p-0">
                        <ChevronRight className="w-4 h-4" />
                      </Button>
-                   </div>
-                 </div>}
-            </div>}
+                    </div>
+                  </div>}
+              </>
+            )}
         </CardContent>
       </Card>
       
