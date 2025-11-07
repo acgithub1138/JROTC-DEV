@@ -468,8 +468,10 @@ export const CompetitionSchoolRecord = () => {
               </>}
           </div>
         </div>
-        
-        {/* Mobile Action Buttons - Below Header */}
+      </div>
+
+      <div className="max-w-4xl mx-auto space-y-4">
+        {/* Mobile Action Buttons - Above Card */}
         {canEdit && !isViewMode && (
           <div className="md:hidden grid grid-cols-2 gap-2">
             {canDelete && !isCreateMode && (
@@ -484,9 +486,7 @@ export const CompetitionSchoolRecord = () => {
             </Button>
           </div>
         )}
-      </div>
 
-      <div className="max-w-4xl mx-auto">
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
           <CardHeader className="border-b border-primary/10">
             <CardTitle className="text-xl font-semibold text-foreground/90">{pageTitle}</CardTitle>
