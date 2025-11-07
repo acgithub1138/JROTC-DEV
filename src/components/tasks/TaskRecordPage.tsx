@@ -630,35 +630,38 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     };
     return (
       <>
-        <div className="container mx-auto py-6 px-4">
+        <div className="container mx-auto py-4 md:py-6 px-4">
           {/* Header */}
-          <div className="mb-6">
-            {recordType === 'subtask' && parentTask ? <div className="flex items-center gap-2 mb-4">
-                <Button variant="outline" onClick={() => navigate('/app/tasks')}>
+          <div className="mb-4 md:mb-6">
+            {recordType === 'subtask' && parentTask ? <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+                <Button variant="outline" size="sm" onClick={() => navigate('/app/tasks')}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Tasks
                 </Button>
-                <span className="text-muted-foreground">/</span>
-                <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?id=${parentTask.id}`)}>
+                <span className="hidden sm:inline text-muted-foreground">/</span>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/app/tasks/task_record?id=${parentTask.id}`)}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to {parentTask.task_number}
                 </Button>
-              </div> : <Button variant="outline" onClick={handleBack} className="mb-4">
+              </div> : <Button variant="outline" size="sm" onClick={handleBack} className="mb-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Tasks
               </Button>}
             
-            <div className="flex items-center justify-between">
-              <div>
-                 <h1 className="text-3xl font-bold">
+            <div className="space-y-4">
+              {/* Header with title */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl md:text-3xl font-bold break-words">
                     {record.task_number && <span className="text-blue-600 font-mono mr-2">
                         {record.task_number} -
                       </span>}
                     {record.title}
                   </h1>
-              </div>
-              
-               <div className="flex items-center gap-2">
+                </div>
+                
+                {/* Desktop action buttons */}
+                <div className="hidden md:flex items-center gap-2 flex-shrink-0">
                   {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} className="flex items-center gap-2">
                       <Check className="w-4 h-4" />
                       Mark Complete
@@ -669,23 +672,47 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                       Create Subtask
                     </Button>}
                  
-                 {canCreate && recordType === 'task' && <Button variant="outline" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
-                     <Copy className="w-4 h-4" />
-                     {isDuplicating ? 'Duplicating...' : 'Duplicate'}
-                   </Button>}
+                  {canCreate && recordType === 'task' && <Button variant="outline" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
+                      <Copy className="w-4 h-4" />
+                      {isDuplicating ? 'Duplicating...' : 'Duplicate'}
+                    </Button>}
                  
-                 {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
-                     <Save className="w-4 h-4" />
-                     {isLoading ? 'Saving...' : 'Save Changes'}
-                   </Button>}
+                  {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+                      <Save className="w-4 h-4" />
+                      {isLoading ? 'Saving...' : 'Save Changes'}
+                    </Button>}
+                </div>
+              </div>
+
+              {/* Mobile action buttons */}
+              <div className="flex md:hidden items-center gap-2 flex-wrap">
+                {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} size="sm" className="flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    <span className="hidden sm:inline">Mark Complete</span>
+                  </Button>}
+                
+                {canCreate && recordType === 'task' && <Button variant="outline" size="sm" onClick={() => navigate(`/app/tasks/task_record?mode=create_subtask&parent_task_id=${record.id}`)} className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Create Subtask</span>
+                  </Button>}
+               
+                {canCreate && recordType === 'task' && <Button variant="outline" size="sm" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
+                    <Copy className="w-4 h-4" />
+                    <span className="hidden sm:inline">{isDuplicating ? 'Duplicating...' : 'Duplicate'}</span>
+                  </Button>}
+               
+                {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} size="sm" className="flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    <span className="hidden sm:inline">{isLoading ? 'Saving...' : 'Save Changes'}</span>
+                  </Button>}
               </div>
             </div>
           </div>
 
           {/* Main Content - Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             {/* Left Column */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* Summary */}
               <Card>
                  <CardHeader className="py-[8px]">
@@ -846,7 +873,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           </div>
 
           {/* Right Column - Comments & History */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <Card className="h-full">
               <CardHeader className="py-[12px]">
                 <CardTitle className="flex items-center gap-2">
