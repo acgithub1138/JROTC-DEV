@@ -84,57 +84,67 @@ export const CadetCards = ({
               </div>
             </div>
             
-            <div className="flex justify-between items-center pt-2">
-              {profile.grade && (
+            {profile.grade && (
+              <div className="flex items-center pb-3">
                 <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
                   {profile.grade}
                 </Badge>
-              )}
-               <div className="flex space-x-2">
-                {activeTab === 'active' ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onViewProfile(profile)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEditProfile(profile)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onToggleStatus(profile)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onViewProfile(profile)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onToggleStatus(profile)}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Activate
-                    </Button>
-                  </>
-                )}
               </div>
+            )}
+            
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t">
+              {activeTab === 'active' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewProfile(profile)}
+                    className="w-full"
+                  >
+                    <Eye className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">View</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEditProfile(profile)}
+                    className="w-full"
+                  >
+                    <Edit className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onToggleStatus(profile)}
+                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewProfile(profile)}
+                    className="w-full col-span-1"
+                  >
+                    <Eye className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">View</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onToggleStatus(profile)}
+                    className="w-full col-span-2"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Activate
+                  </Button>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
