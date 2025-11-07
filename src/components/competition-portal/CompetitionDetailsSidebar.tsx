@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ChevronDown, ChevronRight, Trophy, Users, FileText, School, Calendar, Award, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -203,15 +203,15 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarO
 
   if (isMobile) {
     return (
-      <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="flex items-center gap-2">
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="top" className="h-[80vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5" />
               Competition Details
-            </DrawerTitle>
-          </DrawerHeader>
-          <div className="p-4 space-y-1 max-h-[70vh] overflow-y-auto">
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-1">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -225,8 +225,8 @@ export const CompetitionDetailsSidebar = ({ competitionId, permissions, sidebarO
             </Button>
             {renderMenuContent()}
           </div>
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
     );
   }
 
