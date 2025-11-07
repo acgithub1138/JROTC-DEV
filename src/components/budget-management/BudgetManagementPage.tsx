@@ -121,31 +121,85 @@ const BudgetManagementPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">Budget Management</h1>
-          <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
+      <div className="space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">Budget Management</h1>
+            <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
+          </div>
+          
+          {/* Desktop buttons */}
+          <div className="hidden md:flex gap-2">
+            {canCreate && (
+              <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Income
+              </Button>
+            )}
+            {canCreate && (
+              <Button onClick={handleAddExpense} className="bg-red-600 hover:bg-red-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Expense
+              </Button>
+            )}
+            
+            {/* Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center">
+                  <MoreHorizontal className="w-4 h-4 mr-2" />
+                  Actions
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
+                {canView && (
+                  <DropdownMenuItem onClick={handleBudgetReport} className="flex items-center cursor-pointer">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Budget Report
+                  </DropdownMenuItem>
+                )}
+                {!isMobile && canView && (
+                  <DropdownMenuItem 
+                    onClick={exportToExcel} 
+                    disabled={isExporting}
+                    className="flex items-center cursor-pointer"
+                  >
+                    <FileDown className="w-4 h-4 mr-2" />
+                    {isExporting ? 'Exporting...' : 'Export to Excel'}
+                  </DropdownMenuItem>
+                )}
+                {canUpdate && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleArchiveAll} className="flex items-center cursor-pointer">
+                      <Archive className="w-4 h-4 mr-2" />
+                      Archive Expenses
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex gap-2 flex-col md:flex-row">
+
+        {/* Mobile buttons - 3 column grid below header */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
           {canCreate && (
-            <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Income
+            <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white w-full" size="lg">
+              <Plus className="w-5 h-5" />
             </Button>
           )}
           {canCreate && (
-            <Button onClick={handleAddExpense} className="bg-red-600 hover:bg-red-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Expense
+            <Button onClick={handleAddExpense} className="bg-red-600 hover:bg-red-700 text-white w-full" size="lg">
+              <Plus className="w-5 h-5" />
             </Button>
           )}
           
-          {/* Actions Dropdown */}
+          {/* Actions Dropdown - Mobile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center">
-                <MoreHorizontal className="w-4 h-4 mr-2" />
-                Actions
+              <Button variant="outline" className="w-full" size="lg">
+                <MoreHorizontal className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48 bg-background border shadow-md z-50" align="end">
