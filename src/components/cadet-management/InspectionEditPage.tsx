@@ -279,7 +279,7 @@ export const InspectionEditPage = () => {
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:justify-between pt-4 border-t">
+            <div className="grid grid-cols-1 gap-2 sm:flex sm:justify-between pt-4 border-t">
               <Button 
                 variant="destructive" 
                 onClick={handleDelete}
