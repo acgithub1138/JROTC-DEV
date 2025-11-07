@@ -387,19 +387,6 @@ const CompetitionsPage = () => {
                             </TooltipContent>
                           </Tooltip>}
 
-                        {/* Copy Competition */}
-                        {canCreate && <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => handleCopyCompetition(competition)}>
-                                <Copy className="w-4 h-4 mr-1" />
-                                Copy
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Copy Competition</p>
-                            </TooltipContent>
-                          </Tooltip>}
-
                         {/* Manage Competition */}
                         {canManage && <Tooltip>
                             <TooltipTrigger asChild>
@@ -410,6 +397,19 @@ const CompetitionsPage = () => {
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Manage Competition</p>
+                            </TooltipContent>
+                          </Tooltip>}
+
+                        {/* Copy Competition */}
+                        {canCreate && <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => handleCopyCompetition(competition)}>
+                                <Copy className="w-4 h-4 mr-1" />
+                                Copy
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Copy Competition</p>
                             </TooltipContent>
                           </Tooltip>}
 
