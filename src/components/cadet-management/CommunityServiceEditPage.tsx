@@ -267,7 +267,7 @@ export const CommunityServiceEditPage: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end sm:space-x-2">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -279,12 +279,14 @@ export const CommunityServiceEditPage: React.FC = () => {
                     navigate(-1);
                   }
                 }}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={isUpdating}
+                className="w-full sm:w-auto"
               >
                 {isUpdating ? 'Updating...' : 'Update Record'}
               </Button>
