@@ -232,32 +232,67 @@ const TeamRecordPage = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Back Button - Above header on mobile */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleBack}
+        className="sm:hidden"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Teams
+      </Button>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Teams
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold">
-              {isEdit ? 'Edit Team' : 'Add New Team'}
-            </h1>
-            <p className="text-muted-foreground">
-              {isEdit ? 'Update team information and members' : 'Create a new team with members'}
-            </p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="hidden sm:flex"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Teams
+            </Button>
+            <div>
+              <h1 className="text-2xl font-semibold">
+                {isEdit ? 'Edit Team' : 'Add New Team'}
+              </h1>
+              <p className="text-muted-foreground">
+                {isEdit ? 'Update team information and members' : 'Create a new team with members'}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons - Desktop only */}
+          <div className="hidden sm:flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={loading}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={loading || !formData.name.trim()}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Saving...' : (isEdit ? 'Update Team' : 'Create Team')}
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons - Mobile: Below header in 2-column grid */}
+        <div className="grid grid-cols-2 gap-2 sm:hidden">
           <Button
             variant="outline"
             onClick={handleBack}
             disabled={loading}
+            className="w-full"
           >
             <X className="h-4 w-4 mr-2" />
             Cancel
@@ -265,9 +300,10 @@ const TeamRecordPage = () => {
           <Button
             onClick={handleSave}
             disabled={loading || !formData.name.trim()}
+            className="w-full"
           >
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Saving...' : (isEdit ? 'Update Team' : 'Create Team')}
+            {loading ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
           </Button>
         </div>
       </div>
@@ -284,8 +320,8 @@ const TeamRecordPage = () => {
         <CardContent className="space-y-6">
           {/* Basic Info */}
           <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Label htmlFor="name" className="w-32 text-right shrink-0">Team Name *</Label>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+              <Label htmlFor="name" className="sm:w-32 sm:text-right text-left shrink-0">Team Name *</Label>
               <div className="flex-1">
                 <Input
                   id="name"
@@ -296,8 +332,8 @@ const TeamRecordPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Label htmlFor="team_lead" className="w-32 text-right shrink-0">Team Lead *</Label>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
+              <Label htmlFor="team_lead" className="sm:w-32 sm:text-right text-left shrink-0">Team Lead *</Label>
               <div className="flex-1">
                 <Select
                   value={formData.team_lead_id}
@@ -323,8 +359,8 @@ const TeamRecordPage = () => {
 
           {/* Team Members - Only show when Team Lead is selected */}
           {formData.team_lead_id && (
-            <div className="flex items-start gap-4">
-              <Label className="w-32 text-right shrink-0 pt-2">Team Members *</Label>
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-start sm:gap-4">
+              <Label className="sm:w-32 sm:text-right text-left shrink-0 sm:pt-2">Team Members *</Label>
               <div className="flex-1 space-y-3">
                 <Input
                   placeholder="Search cadets..."
@@ -377,8 +413,8 @@ const TeamRecordPage = () => {
             </div>
           )}
 
-          <div className="flex items-start gap-4">
-            <Label htmlFor="description" className="w-32 text-right shrink-0 pt-2">Description</Label>
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-start sm:gap-4">
+            <Label htmlFor="description" className="sm:w-32 sm:text-right text-left shrink-0 sm:pt-2">Description</Label>
             <div className="flex-1">
               <Textarea
                 id="description"
