@@ -76,13 +76,13 @@ const CompetitionPortalLayout = () => {
   }, [hasCompetitionModule, hasCompetitionPortal]);
 
   useEffect(() => {
-    // Map current path to module
+    // Map current path to module - ORDER MATTERS: Check more specific paths first!
     const pathToModuleMap: { [key: string]: string } = {
       '/dashboard': 'cp_dashboard',
       '/competitions': 'cp_competitions',
       '/competition-details': 'cp_competitions',
+      '/my-competitions-analytics': 'my_competitions_analytics', // Check this BEFORE /my-competitions
       '/my-competitions': 'competitions',
-      '/my-competitions-analytics': 'my_competitions_analytics',
       '/score-sheets': 'cp_score_sheets',
       '/judges': 'cp_judges',
       '/open-competitions': 'open_competitions',
