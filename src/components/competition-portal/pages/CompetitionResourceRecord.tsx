@@ -365,8 +365,8 @@ export const CompetitionResourceRecord: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <Label className="text-left md:text-right pt-2 font-semibold">Start Date & Time</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="col-span-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="start_date" render={({
                         field
                       }) => <FormItem>
@@ -382,7 +382,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                             <FormMessage />
                           </FormItem>} />
                     </div>
-                    <div>
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="start_time_hour" render={({
                         field
                       }) => <FormItem>
@@ -403,7 +403,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                             <FormMessage />
                           </FormItem>} />
                     </div>
-                    <div>
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="start_time_minute" render={({
                         field
                       }) => <FormItem>
@@ -427,8 +427,8 @@ export const CompetitionResourceRecord: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <Label className="text-left md:text-right pt-2 font-semibold">End Date & Time</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="col-span-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="end_date" render={({
                         field
                       }) => <FormItem>
@@ -438,7 +438,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                             <FormMessage />
                           </FormItem>} />
                     </div>
-                    <div>
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="end_time_hour" render={({
                         field
                       }) => <FormItem>
@@ -459,7 +459,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                             <FormMessage />
                           </FormItem>} />
                     </div>
-                    <div>
+                    <div className="col-span-1 md:col-span-1">
                       <FormField control={form.control} name="end_time_minute" render={({
                         field
                       }) => <FormItem>
