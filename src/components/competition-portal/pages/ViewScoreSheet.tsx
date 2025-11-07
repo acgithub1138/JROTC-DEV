@@ -112,6 +112,12 @@ export const ViewScoreSheet: React.FC = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
+      {/* Mobile: Back button above header */}
+      <Button variant="outline" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/results`)} className="flex items-center gap-2 md:hidden mb-4">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Results
+      </Button>
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Score Sheet Details</h1>
@@ -119,7 +125,8 @@ export const ViewScoreSheet: React.FC = () => {
             {eventName ? `${eventName} - ${schoolName}` : `Event ${eventId} - ${schoolName}`}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/results`)} className="flex items-center gap-2">
+        {/* Desktop: Back button next to header */}
+        <Button variant="outline" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/results`)} className="hidden md:flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Results
         </Button>
