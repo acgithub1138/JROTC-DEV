@@ -136,10 +136,17 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
                   </div>
 
                   <div className="space-y-2 text-sm">
-                    {judge.judge_profile?.phone && (
+                    {judge.event_name && (
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4 flex-shrink-0" />
-                        <span>{formatPhoneNumber(judge.judge_profile.phone)}</span>
+                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                        <span>{judge.event_name}</span>
+                      </div>
+                    )}
+
+                    {judge.location && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span>{judge.location}</span>
                       </div>
                     )}
 
@@ -157,17 +164,10 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
                       </div>
                     )}
 
-                    {judge.event_name && (
+                    {judge.judge_profile?.phone && (
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4 flex-shrink-0" />
-                        <span>{judge.event_name}</span>
-                      </div>
-                    )}
-
-                    {judge.location && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 flex-shrink-0" />
-                        <span>{judge.location}</span>
+                        <Phone className="h-4 w-4 flex-shrink-0" />
+                        <span>{formatPhoneNumber(judge.judge_profile.phone)}</span>
                       </div>
                     )}
                   </div>
