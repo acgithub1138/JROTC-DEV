@@ -7,12 +7,16 @@ import { TableCell, TableHead, TableRow } from '@/components/ui/table';
 import { SortableTableHead } from '@/components/ui/sortable-table';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { format as formatDate } from 'date-fns';
 import { formatCurrency as formatCurrencyUtil } from '@/utils/timeDisplayUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
+
+// Budget-specific pagination constant
+const BUDGET_ITEMS_PER_PAGE = 25;
 
 interface BudgetTableProps {
   transactions: BudgetTransaction[];
@@ -30,12 +34,29 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   onDelete,
 }) => {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const { getPaddingClass } = useTableSettings();
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedTransactions.length / BUDGET_ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * BUDGET_ITEMS_PER_PAGE;
+  const endIndex = startIndex + BUDGET_ITEMS_PER_PAGE;
+  const paginatedTransactions = sortedTransactions.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [transactions.length]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   // Format date from YYYY-MM-DD to MM/DD/YYYY (no timezone conversion needed for date-only fields)
   const formatDateDisplay = (dateString: string) => {
@@ -70,7 +91,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedTransactions(sortedTransactions.map(t => t.id));
+      setSelectedTransactions(paginatedTransactions.map(t => t.id));
     } else {
       setSelectedTransactions([]);
     }
@@ -90,7 +111,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     const confirmMessage = `Are you sure you want to delete ${selectedTransactions.length} transaction${selectedTransactions.length > 1 ? 's' : ''}?`;
     if (confirm(confirmMessage)) {
       selectedTransactions.forEach(transactionId => {
-        const transaction = sortedTransactions.find(t => t.id === transactionId);
+        const transaction = paginatedTransactions.find(t => t.id === transactionId);
         if (transaction) {
           onDelete(transaction);
         }
@@ -109,15 +130,16 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 
   return (
     <TooltipProvider>
-      <StandardTable>
-      <StandardTableHeader>
-        <TableRow>
-          <TableHead className="w-12">
-            <Checkbox
-              checked={selectedTransactions.length === sortedTransactions.length && sortedTransactions.length > 0}
-              onCheckedChange={handleSelectAll}
-            />
-          </TableHead>
+      <div className="space-y-4">
+        <StandardTable>
+        <StandardTableHeader>
+          <TableRow>
+            <TableHead className="w-12">
+              <Checkbox
+                checked={selectedTransactions.length === paginatedTransactions.length && paginatedTransactions.length > 0}
+                onCheckedChange={handleSelectAll}
+              />
+            </TableHead>
           <SortableTableHead sortKey="item" currentSort={sortConfig} onSort={handleSort}>
             Item
           </SortableTableHead>
@@ -148,7 +170,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
         emptyIcon={<DollarSign className="w-12 h-12" />}
         colSpan={10}
       >
-        {sortedTransactions.map((transaction) => (
+        {paginatedTransactions.map((transaction) => (
           <TableRow key={transaction.id} className="hover:bg-muted/50">
             <TableCell className={getPaddingClass()}>
               <Checkbox
@@ -195,6 +217,14 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
         ))}
       </StandardTableBody>
     </StandardTable>
+
+    <TablePagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      totalItems={sortedTransactions.length}
+      onPageChange={handlePageChange}
+    />
+    </div>
     </TooltipProvider>
   );
 };

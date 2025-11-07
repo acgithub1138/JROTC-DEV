@@ -3,11 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
+import React from 'react';
+
+// Budget-specific pagination constant
+const BUDGET_ITEMS_PER_PAGE = 25;
 
 interface BudgetCardsProps {
   transactions: BudgetTransaction[];
@@ -24,6 +29,23 @@ export const BudgetCards = ({
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
   const { timezone } = useSchoolTimezone();
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(transactions.length / BUDGET_ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * BUDGET_ITEMS_PER_PAGE;
+  const endIndex = startIndex + BUDGET_ITEMS_PER_PAGE;
+  const paginatedTransactions = transactions.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [transactions.length]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';
@@ -60,8 +82,9 @@ export const BudgetCards = ({
 
   return (
     <TooltipProvider>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {transactions.map((transaction) => (
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {paginatedTransactions.map((transaction) => (
         <Card key={transaction.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
@@ -162,7 +185,15 @@ export const BudgetCards = ({
             </div>
           </CardContent>
         </Card>
-        ))}
+          ))}
+        </div>
+
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={transactions.length}
+          onPageChange={handlePageChange}
+        />
       </div>
     </TooltipProvider>
   );
