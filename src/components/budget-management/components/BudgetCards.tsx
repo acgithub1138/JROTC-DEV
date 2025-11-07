@@ -125,7 +125,7 @@ export const BudgetCards = ({
               )}
             </div>
             
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="grid grid-cols-2 gap-2 pt-2 sm:flex sm:justify-end sm:space-x-2 sm:gap-0">
               {canUpdate && (
                 <Tooltip>
                   <TooltipTrigger asChild>
