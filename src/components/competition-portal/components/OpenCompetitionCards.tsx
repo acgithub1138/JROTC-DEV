@@ -83,9 +83,9 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
     );
   }
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {competitions.map((competition) => (
-        <Card key={competition.id} className="hover:shadow-lg transition-shadow relative">
+        <Card key={competition.id} className="hover:shadow-lg transition-shadow relative flex flex-col h-full">
           {isRegistered(competition.id) && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
               <Badge variant="default" className="bg-green-500 text-white">
