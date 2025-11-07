@@ -44,15 +44,15 @@ export const EmailQueueCards: React.FC<EmailQueueCardsProps> = ({ items, onViewE
 
         return (
           <Card key={item.id} className="w-full">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg truncate">{item.subject}</CardTitle>
+            <CardHeader className="pb-3 px-4 pt-4">
+              <div className="flex justify-between items-start gap-2">
+                <CardTitle className="text-base truncate flex-1">{item.subject}</CardTitle>
                 <Badge className={getStatusColor(item.status)}>
                   {item.status}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 px-4 pb-4">
               <div className="grid grid-cols-1 gap-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Recipient:</span>
