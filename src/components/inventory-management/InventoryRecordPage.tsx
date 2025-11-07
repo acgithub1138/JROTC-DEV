@@ -19,6 +19,7 @@ import { MultiSelectProfiles } from './components/MultiSelectProfiles';
 import { CategorySelect } from './components/CategorySelect';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface InventoryFormData {
@@ -50,6 +51,7 @@ export const InventoryRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Extract mode and record ID from URL parameters
   const mode = (searchParams.get('mode') as InventoryRecordMode) || 'view';
@@ -315,28 +317,71 @@ export const InventoryRecordPage: React.FC = () => {
 
   return (
     <>
-      <div className="p-6 space-y-6">
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden min-w-0">
+        {/* Mobile: Back button above header */}
+        {isMobile && (
+          <Button variant="ghost" size="sm" onClick={handleBack} className="w-fit -ml-2">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Inventory
+          </Button>
+        )}
+
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Desktop: Back button + Title side by side */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Inventory
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
-              <p className="text-muted-foreground">
+            {!isMobile && (
+              <Button variant="ghost" size="sm" onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Inventory
+              </Button>
+            )}
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold truncate">{getPageTitle()}</h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">
                 Inventory → {getPageTitle()}
               </p>
             </div>
           </div>
           
-          {currentMode === 'view' && canEdit && (
+          {/* Desktop: Action buttons on the right */}
+          {!isMobile && currentMode === 'view' && canEdit && (
             <Button onClick={handleEdit}>
               Edit Item
             </Button>
           )}
         </div>
+
+        {/* Mobile: Action buttons below header */}
+        {isMobile && (
+          <>
+            {currentMode === 'view' && canEdit && (
+              <Button onClick={handleEdit} className="w-full">
+                Edit Item
+              </Button>
+            )}
+            {isFormMode && (
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={form.handleSubmit(handleSubmit)} 
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? 'Saving...' : 
+                   currentMode === 'create' ? 'Add Item' : 'Update Item'}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Form/View Content */}
         <div className="max-w-4xl mx-auto">
@@ -351,14 +396,14 @@ export const InventoryRecordPage: React.FC = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                   {/* Basic Information */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="item_id"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Item ID</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Item ID</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input placeholder="Enter item ID" {...field} />
                             </FormControl>
@@ -372,9 +417,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="item"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Item *</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Item *</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input placeholder="Enter item name" {...field} />
                             </FormControl>
@@ -388,9 +433,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="category"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Category</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Category</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <CategorySelect
                               value={field.value}
                               onValueChange={handleCategoryChange}
@@ -408,9 +453,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="sub_category"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Sub Category</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Sub Category</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <CategorySelect
                               value={field.value}
                               onValueChange={field.onChange}
@@ -428,9 +473,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="size"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Size</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Size</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input placeholder="Enter size" {...field} />
                             </FormControl>
@@ -444,9 +489,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="gender"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Gender</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Gender</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <Select value={field.value || undefined} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
@@ -466,14 +511,14 @@ export const InventoryRecordPage: React.FC = () => {
                   </div>
 
                   {/* Quantities and Stock */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="qty_total"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Total Qty</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Total Qty</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input
                                 type="number"
@@ -492,9 +537,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="qty_issued"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Issued Qty</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Issued Qty</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input
                                 type="number"
@@ -513,9 +558,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="stock_number"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Stock Number</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Stock Number</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input placeholder="Enter stock number" {...field} />
                             </FormControl>
@@ -529,9 +574,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="unit_of_measure"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Unit</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Unit</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <Select value={field.value || undefined} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
@@ -553,9 +598,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="location"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Location</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Location</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input placeholder="Enter location" {...field} />
                             </FormControl>
@@ -567,14 +612,14 @@ export const InventoryRecordPage: React.FC = () => {
                   </div>
 
                   {/* Checkboxes */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="has_serial_number"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Serial Number</FormLabel>
-                          <div className="flex-1 flex items-center space-x-2">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Serial Number</FormLabel>
+                          <div className="flex-1 flex items-center space-x-2 min-w-0">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
@@ -592,9 +637,9 @@ export const InventoryRecordPage: React.FC = () => {
                         control={form.control}
                         name="model_number"
                         render={({ field }) => (
-                          <FormItem className="flex items-center gap-4">
-                            <FormLabel className="w-32 text-right shrink-0">Model Number</FormLabel>
-                            <div className="flex-1">
+                          <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Model Number</FormLabel>
+                            <div className="flex-1 min-w-0">
                               <FormControl>
                                 <Input placeholder="Enter model number" {...field} />
                               </FormControl>
@@ -609,9 +654,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="returnable"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Returnable</FormLabel>
-                          <div className="flex-1 flex items-center space-x-2">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Returnable</FormLabel>
+                          <div className="flex-1 flex items-center space-x-2 min-w-0">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
@@ -628,9 +673,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="accountable"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Accountable</FormLabel>
-                          <div className="flex-1 flex items-center space-x-2">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Accountable</FormLabel>
+                          <div className="flex-1 flex items-center space-x-2 min-w-0">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
@@ -677,14 +722,14 @@ export const InventoryRecordPage: React.FC = () => {
                   />
 
                   {/* Pending Fields */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="pending_updates"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Pending Updates</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Pending Updates</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input
                                 type="number"
@@ -703,9 +748,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="pending_issue_changes"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Pending Issues</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Pending Issues</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input
                                 type="number"
@@ -724,9 +769,9 @@ export const InventoryRecordPage: React.FC = () => {
                       control={form.control}
                       name="pending_write_offs"
                       render={({ field }) => (
-                        <FormItem className="flex items-center gap-4">
-                          <FormLabel className="w-32 text-right shrink-0">Pending Write-offs</FormLabel>
-                          <div className="flex-1">
+                        <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                          <FormLabel className="sm:w-32 sm:text-right sm:shrink-0">Pending Write-offs</FormLabel>
+                          <div className="flex-1 min-w-0">
                             <FormControl>
                               <Input
                                 type="number"
@@ -747,9 +792,9 @@ export const InventoryRecordPage: React.FC = () => {
                     control={form.control}
                     name="notes"
                     render={({ field }) => (
-                      <FormItem className="flex gap-4">
-                        <FormLabel className="w-32 text-right shrink-0 mt-2">Notes</FormLabel>
-                        <div className="flex-1">
+                      <FormItem className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <FormLabel className="sm:w-32 sm:text-right sm:shrink-0 sm:mt-2">Notes</FormLabel>
+                        <div className="flex-1 min-w-0">
                           <FormControl>
                             <Textarea
                               placeholder="Enter notes"
@@ -763,19 +808,22 @@ export const InventoryRecordPage: React.FC = () => {
                     )}
                   />
 
-                  <div className="flex justify-end gap-2 pt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleBack}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Saving...' : 
-                       currentMode === 'create' ? 'Add Item' : 'Update Item'}
-                    </Button>
-                  </div>
+                  {/* Desktop: Action buttons at bottom */}
+                  {!isMobile && (
+                    <div className="flex justify-end gap-2 pt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleBack}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 
+                         currentMode === 'create' ? 'Add Item' : 'Update Item'}
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Form>
             ) : (
