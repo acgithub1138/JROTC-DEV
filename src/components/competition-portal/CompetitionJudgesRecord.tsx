@@ -277,27 +277,23 @@ export const CompetitionJudgesRecord = () => {
         </div>
 
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
-        <CardHeader className="border-b border-primary/10">
-          <CardTitle className="text-xl font-semibold text-foreground/90">Judge Assignment Details</CardTitle>
-        </CardHeader>
+        
         <CardContent className="pt-6 py-[8px]">
           <Form {...form}>
             <form id="judge-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 <FormField control={form.control} name="judges" rules={{
-                required: 'At least one judge is required',
-                validate: value => value && value.length > 0 || 'At least one judge is required'
-              }} render={({
-                field
-              }) => <FormItem>
+                  required: 'At least one judge is required',
+                  validate: value => value && value.length > 0 || 'At least one judge is required'
+                }} render={({
+                  field
+                }) => <FormItem>
                       <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
                     <FormControl>
-                      <MultiSelectJudges 
-                        judges={availableJudges.map(j => ({ id: j.id, name: j.name }))}
-                        selectedJudgeIds={field.value || []}
-                        onChange={field.onChange}
-                        disabled={isEditMode}
-                      />
+                      <MultiSelectJudges judges={availableJudges.map(j => ({
+                      id: j.id,
+                      name: j.name
+                    }))} selectedJudgeIds={field.value || []} onChange={field.onChange} disabled={isEditMode} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
@@ -306,10 +302,10 @@ export const CompetitionJudgesRecord = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <FormField control={form.control} name="event" rules={{
-                  required: 'Event is required'
-                }} render={({
-                  field
-                }) => <FormItem>
+                    required: 'Event is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                         <FormLabel className="font-semibold">Event *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -329,10 +325,10 @@ export const CompetitionJudgesRecord = () => {
 
                 <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
                   <FormField control={form.control} name="location" rules={{
-                  required: 'Location is required'
-                }} render={({
-                  field
-                }) => <FormItem>
+                    required: 'Location is required'
+                  }} render={({
+                    field
+                  }) => <FormItem>
                         <FormLabel className="font-semibold">Location *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Enter location" readOnly className="bg-muted/50" />
@@ -348,10 +344,10 @@ export const CompetitionJudgesRecord = () => {
                   <FormLabel className="w-24 text-left shrink-0 font-semibold">Start Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField control={form.control} name="start_time_hour" rules={{
-                    required: 'Start hour is required'
-                  }} render={({
-                    field
-                  }) => <FormItem>
+                      required: 'Start hour is required'
+                    }} render={({
+                      field
+                    }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -360,8 +356,8 @@ export const CompetitionJudgesRecord = () => {
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
                               {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                   {i.toString().padStart(2, '0')}
                                 </SelectItem>)}
                             </SelectContent>
@@ -369,10 +365,10 @@ export const CompetitionJudgesRecord = () => {
                           <FormMessage />
                         </FormItem>} />
                     <FormField control={form.control} name="start_time_minute" rules={{
-                    required: 'Start minute is required'
-                  }} render={({
-                    field
-                  }) => <FormItem>
+                      required: 'Start minute is required'
+                    }} render={({
+                      field
+                    }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -395,10 +391,10 @@ export const CompetitionJudgesRecord = () => {
                   <FormLabel className="w-24 text-left shrink-0 font-semibold">End Time *</FormLabel>
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <FormField control={form.control} name="end_time_hour" rules={{
-                    required: 'End hour is required'
-                  }} render={({
-                    field
-                  }) => <FormItem>
+                      required: 'End hour is required'
+                    }} render={({
+                      field
+                    }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -407,8 +403,8 @@ export const CompetitionJudgesRecord = () => {
                             </FormControl>
                             <SelectContent className="bg-background border shadow-lg z-50 max-h-60 overflow-y-auto">
                               {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                                   {i.toString().padStart(2, '0')}
                                 </SelectItem>)}
                             </SelectContent>
@@ -416,10 +412,10 @@ export const CompetitionJudgesRecord = () => {
                           <FormMessage />
                         </FormItem>} />
                     <FormField control={form.control} name="end_time_minute" rules={{
-                    required: 'End minute is required'
-                  }} render={({
-                    field
-                  }) => <FormItem>
+                      required: 'End minute is required'
+                    }} render={({
+                      field
+                    }) => <FormItem>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -440,8 +436,8 @@ export const CompetitionJudgesRecord = () => {
 
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                 <FormField control={form.control} name="assignment_details" render={({
-                field
-              }) => <FormItem>
+                  field
+                }) => <FormItem>
                       <FormLabel className="font-semibold">Assignment Details</FormLabel>
                       <FormControl>
                         <Textarea {...field} placeholder="Enter any additional details about this assignment" rows={4} className="resize-none" />
