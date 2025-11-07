@@ -141,7 +141,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       <p className="text-sm">{resource.end_time ? convertToUI(resource.end_time, timezone, 'datetime') : '-'}</p>
                     </div>
                      {(canViewDetails || canEdit || canDelete) && (
-                       <div className="flex flex-wrap gap-2 pt-2">
+                       <div className="grid grid-cols-2 gap-2 pt-2">
                          {canViewDetails && (
                           <Tooltip>
                             <TooltipTrigger asChild>
