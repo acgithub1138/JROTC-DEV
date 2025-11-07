@@ -17,6 +17,9 @@ interface TaskFormContentProps {
   onCancel?: () => void;
   showAttachments?: boolean;
   onTaskCreated?: (task: Task) => void;
+  hideActionButtons?: boolean;
+  renderSubmitButton?: (props: { isSubmitting: boolean; isDisabled: boolean; text: string; onClick: () => void }) => React.ReactNode;
+  renderCancelButton?: (props: { onClick: () => void }) => React.ReactNode;
 }
 
 export const TaskFormContent: React.FC<TaskFormContentProps> = ({
@@ -25,7 +28,10 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
   onSuccess,
   onCancel,
   showAttachments = true,
-  onTaskCreated
+  onTaskCreated,
+  hideActionButtons = false,
+  renderSubmitButton,
+  renderCancelButton,
 }) => {
   const { userProfile } = useAuth();
   const { canAssign, canUpdate, canUpdateAssigned } = useTaskPermissions();
@@ -219,6 +225,7 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
         submitButtonText={mode === 'create' ? 'Create Task' : 'Update Task'}
         isSubmitting={isSubmitting}
         isSubmitDisabled={isUploadingFiles}
+        hideActionButtons={hideActionButtons}
       />
 
       <UnsavedChangesDialog

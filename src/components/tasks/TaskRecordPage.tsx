@@ -572,17 +572,47 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
   // Render create/edit form for tasks
   if (currentMode === 'create' || currentMode === 'create_task' || currentMode === 'edit' && recordType === 'task') {
+    const formId = 'task-form';
+    
     return <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
           <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {recordType === 'subtask' && parentTask ? `Back to ${parentTask.task_number}` : 'Back to Tasks'}
           </Button>
-          <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
+          
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+            <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
+            
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleFormClose}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                form={formId}
+                className="w-full sm:w-auto"
+              >
+                {currentMode === 'create' || currentMode === 'create_task' ? 'Create Task' : 'Update Task'}
+              </Button>
+            </div>
+          </div>
         </div>
         
         <div className="max-w-4xl mx-auto">
-          <TaskFormContent mode={currentMode === 'create_task' ? 'create' : currentMode} task={record} onSuccess={handleTaskSaved} onCancel={handleFormClose} onTaskCreated={() => navigate('/app/tasks')} showAttachments={true} />
+          <TaskFormContent 
+            mode={currentMode === 'create_task' ? 'create' : currentMode} 
+            task={record} 
+            onSuccess={handleTaskSaved} 
+            onCancel={handleFormClose} 
+            onTaskCreated={() => navigate('/app/tasks')} 
+            showAttachments={true}
+            hideActionButtons={true}
+          />
         </div>
       </div>;
   }

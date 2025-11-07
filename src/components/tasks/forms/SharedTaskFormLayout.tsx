@@ -24,6 +24,7 @@ interface SharedTaskFormLayoutProps {
   submitButtonText: string;
   isSubmitting: boolean;
   isSubmitDisabled?: boolean;
+  hideActionButtons?: boolean;
 }
 
 export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
@@ -45,11 +46,12 @@ export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
   submitButtonText,
   isSubmitting,
   isSubmitDisabled = false,
+  hideActionButtons = false,
 }) => {
   return (
     <div className="bg-background p-6 rounded-lg border">
       <Form {...form}>
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-6" id="task-form">
           {/* Top Section - Two Columns */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
             <TaskInfoFields
@@ -73,26 +75,28 @@ export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
           <div className="space-y-6 p-6 border rounded-lg bg-card">
             {titleField}
             {descriptionField}
-            {attachmentSection}
+          {attachmentSection}
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || isSubmitDisabled}
-              className="w-full sm:w-auto"
-            >
-              {isSubmitting ? 'Saving...' : submitButtonText}
-            </Button>
-          </div>
+          {!hideActionButtons && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || isSubmitDisabled}
+                className="w-full sm:w-auto"
+              >
+                {isSubmitting ? 'Saving...' : submitButtonText}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
     </div>
