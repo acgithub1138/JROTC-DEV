@@ -24,9 +24,16 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     isLoading,
     deleteResource
   } = useCompetitionResources(competitionId);
-  const { canCreate, canEdit, canDelete, canView, canViewDetails } = useTablePermissions('cp_comp_resources');
-  const { timezone } = useSchoolTimezone();
-  
+  const {
+    canCreate,
+    canEdit,
+    canDelete,
+    canView,
+    canViewDetails
+  } = useTablePermissions('cp_comp_resources');
+  const {
+    timezone
+  } = useSchoolTimezone();
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -38,18 +45,14 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
       setSortDirection('asc');
     }
   };
-
   const getSortIcon = (field: string) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
     return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
-
   const sortedResources = resources.sort((a, b) => {
     if (!sortField) return 0;
-    
     let aValue: any = '';
     let bValue: any = '';
-    
     switch (sortField) {
       case 'cadet':
         aValue = a.cadet_profile ? `${a.cadet_profile.last_name}, ${a.cadet_profile.first_name}`.toLowerCase() : 'unknown cadet';
@@ -70,30 +73,24 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
       default:
         return 0;
     }
-    
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
-
   const handleView = (resourceId: string) => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=view&id=${resourceId}`);
   };
-
   const handleEdit = (resourceId: string) => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=edit&id=${resourceId}`);
   };
-
   const handleCreate = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=create`);
   };
-
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     setDeletingResourceId(id);
     await deleteResource(id);
     setDeletingResourceId(null);
   };
-
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
@@ -109,18 +106,12 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           </Button>}
       </div>
 
-      {!canView ? (
-        <div className="text-center py-8 text-muted-foreground">
+      {!canView ? <div className="text-center py-8 text-muted-foreground">
           <p>You don't have permission to view resources</p>
-        </div>
-      ) : resources.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        </div> : resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div>
-        ) : isMobile ? (
-          <div className="space-y-4">
-            {sortedResources.map(resource => (
-              <Card key={resource.id}>
+        </div> : isMobile ? <div className="space-y-4">
+            {sortedResources.map(resource => <Card key={resource.id}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">
                     {resource.cadet_profile ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}` : 'Unknown Cadet'}
@@ -140,10 +131,8 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
                       <p className="text-sm">{resource.end_time ? convertToUI(resource.end_time, timezone, 'datetime') : '-'}</p>
                     </div>
-                     {(canEdit || canDelete) && (
-                       <div className="grid grid-cols-2 gap-2 pt-2">
-                         {canEdit && (
-                          <Tooltip>
+                     {(canEdit || canDelete) && <div className="grid grid-cols-2 gap-2 pt-2">
+                         {canEdit && <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="sm" onClick={() => handleEdit(resource.id)}>
                                 <Edit className="w-4 h-4 mr-1" />
@@ -153,22 +142,11 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                             <TooltipContent>
                               <p>Edit Resource</p>
                             </TooltipContent>
-                          </Tooltip>
-                        )}
-                        {canDelete && (
-                          <AlertDialog>
+                          </Tooltip>}
+                        {canDelete && <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-red-600 hover:text-red-700 hover:border-red-300"
-                                disabled={deletingResourceId === resource.id}
-                              >
-                                {deletingResourceId === resource.id ? (
-                                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4 mr-1" />
-                                )}
+                              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-300" disabled={deletingResourceId === resource.id}>
+                                {deletingResourceId === resource.id ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />}
                                 Delete
                               </Button>
                             </AlertDialogTrigger>
@@ -181,57 +159,38 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => handleDelete(resource.id)}
-                                  disabled={deletingResourceId === resource.id}
-                                >
+                                <AlertDialogAction onClick={() => handleDelete(resource.id)} disabled={deletingResourceId === resource.id}>
                                   {deletingResourceId === resource.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Delete
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
-                    )}
+                          </AlertDialog>}
+                      </div>}
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : <div className="border rounded-lg">
+              </Card>)}
+          </div> : <div className="border rounded-lg">
           <Table>
           <TableHeader>
             <TableRow>
               <TableHead>
-                <button 
-                  onClick={() => handleSort('cadet')}
-                  className="flex items-center gap-2 hover:text-foreground font-medium"
-                >
+                <button onClick={() => handleSort('cadet')} className="flex items-center gap-2 hover:text-foreground font-medium">
                   Cadet {getSortIcon('cadet')}
                 </button>
               </TableHead>
               <TableHead>
-                <button 
-                  onClick={() => handleSort('location')}
-                  className="flex items-center gap-2 hover:text-foreground font-medium"
-                >
+                <button onClick={() => handleSort('location')} className="flex items-center gap-2 hover:text-foreground font-medium">
                   Location {getSortIcon('location')}
                 </button>
               </TableHead>
               <TableHead>
-                <button 
-                  onClick={() => handleSort('start_time')}
-                  className="flex items-center gap-2 hover:text-foreground font-medium"
-                >
+                <button onClick={() => handleSort('start_time')} className="flex items-center gap-2 hover:text-foreground font-medium">
                   Start {getSortIcon('start_time')}
                 </button>
               </TableHead>
               <TableHead>
-                <button 
-                  onClick={() => handleSort('end_time')}
-                  className="flex items-center gap-2 hover:text-foreground font-medium"
-                >
+                <button onClick={() => handleSort('end_time')} className="flex items-center gap-2 hover:text-foreground font-medium">
                   End {getSortIcon('end_time')}
                 </button>
               </TableHead>
@@ -252,20 +211,15 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                 </TableCell>
                  {(canViewDetails || canEdit || canDelete) && <TableCell>
                      <div className="flex items-center justify-center gap-2">
-                       {canViewDetails && (
-                        <Tooltip>
+                       {canViewDetails && <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleView(resource.id)}>
-                              <Eye className="w-3 h-3" />
-                            </Button>
+                            
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>View Resource</p>
                           </TooltipContent>
-                        </Tooltip>
-                      )}
-                       {canEdit && (
-                        <Tooltip>
+                        </Tooltip>}
+                       {canEdit && <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource.id)}>
                               <Edit className="w-3 h-3" />
@@ -274,22 +228,11 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                           <TooltipContent>
                             <p>Edit Resource</p>
                           </TooltipContent>
-                        </Tooltip>
-                      )}
-                       {canDelete && (
-                         <AlertDialog>
+                        </Tooltip>}
+                       {canDelete && <AlertDialog>
                            <AlertDialogTrigger asChild>
-                             <Button 
-                               variant="outline" 
-                               size="icon" 
-                               className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                               disabled={deletingResourceId === resource.id}
-                             >
-                               {deletingResourceId === resource.id ? (
-                                 <Loader2 className="w-3 h-3 animate-spin" />
-                               ) : (
-                                 <Trash2 className="w-3 h-3" />
-                               )}
+                             <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" disabled={deletingResourceId === resource.id}>
+                               {deletingResourceId === resource.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                              </Button>
                            </AlertDialogTrigger>
                            <AlertDialogContent>
@@ -301,17 +244,13 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                              </AlertDialogHeader>
                              <AlertDialogFooter>
                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                               <AlertDialogAction 
-                                 onClick={() => handleDelete(resource.id)}
-                                 disabled={deletingResourceId === resource.id}
-                               >
+                               <AlertDialogAction onClick={() => handleDelete(resource.id)} disabled={deletingResourceId === resource.id}>
                                  {deletingResourceId === resource.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                  Delete
                                </AlertDialogAction>
                              </AlertDialogFooter>
                            </AlertDialogContent>
-                         </AlertDialog>
-                       )}
+                         </AlertDialog>}
                     </div>
                   </TableCell>}
               </TableRow>)}
