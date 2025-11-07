@@ -128,31 +128,20 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
           <div className="space-y-4">
             {sortedData.map(record => (
               <Card key={record.id} className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 className="font-medium">{record.cadet.last_name}, {record.cadet.first_name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      {record.cadet.grade && (
-                        <Badge variant="outline" className="text-xs">
-                          {record.cadet.grade}
-                        </Badge>
-                      )}
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(record.date), 'MMM d, yyyy')}
-                      </span>
-                    </div>
+                <div className="mb-3">
+                  <h4 className="font-medium">{record.cadet.last_name}, {record.cadet.first_name}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    {record.cadet.grade && (
+                      <Badge variant="outline" className="text-xs">
+                        {record.cadet.grade}
+                      </Badge>
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      {format(new Date(record.date), 'MMM d, yyyy')}
+                    </span>
                   </div>
-                  {(canEdit || canDelete) && (
-                    <TableActionButtons 
-                      canView={false} 
-                      canEdit={canEdit} 
-                      canDelete={canDelete} 
-                      onEdit={() => handleEditRecord(record)} 
-                      onDelete={() => handleDeleteRecord(record)} 
-                    />
-                  )}
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-sm mb-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Hours:</span>
                     <span className="font-medium">{record.hours}</span>
@@ -162,6 +151,17 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
                     <p className="text-sm mt-1">{record.event}</p>
                   </div>
                 </div>
+                {(canEdit || canDelete) && (
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+                    <TableActionButtons 
+                      canView={false} 
+                      canEdit={canEdit} 
+                      canDelete={canDelete} 
+                      onEdit={() => handleEditRecord(record)} 
+                      onDelete={() => handleDeleteRecord(record)} 
+                    />
+                  </div>
+                )}
               </Card>
             ))}
           </div>
