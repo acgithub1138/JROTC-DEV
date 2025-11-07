@@ -286,7 +286,7 @@ export const CompetitionJudgesRecord = () => {
                   </FormItem>} />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <FormField control={form.control} name="event" rules={{
                   required: 'Event is required'
