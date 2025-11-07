@@ -251,14 +251,19 @@ const CompetitionsPage = () => {
       </div>;
   }
   return <TooltipProvider>
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Competitions</h1>
-          <p className="text-muted-foreground">Manage drill competitions and events</p>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+            Competitions
+          </h1>
+          <p className="text-muted-foreground text-lg">Manage drill competitions and events</p>
         </div>
-        {canCreateCompetition && <Button onClick={() => navigate('/app/competition-portal/competitions/competition_record')}>
+        {canCreateCompetition && <Button 
+            onClick={() => navigate('/app/competition-portal/competitions/competition_record')}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Create Competition
           </Button>}
@@ -274,18 +279,23 @@ const CompetitionsPage = () => {
         <TabsContent value={activeTab} className="space-y-6">
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg">
+        <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search competitions..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+                <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                <Input 
+                  placeholder="Search competitions..." 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)} 
+                  className="pl-11 h-11 border-border/50 focus:border-primary focus:ring-primary/20"
+                />
               </div>
             </div>
             <div className="min-w-[200px]">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 border-border/50">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -305,20 +315,26 @@ const CompetitionsPage = () => {
       </Card>
 
       {/* Competitions Grid */}
-      {filteredAndSortedCompetitions.length === 0 ? <Card>
+      {filteredAndSortedCompetitions.length === 0 ? <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
-            <div className="text-muted-foreground">
+            <div className="text-muted-foreground text-lg">
               {competitions.length === 0 ? 'No competitions found.' : 'No competitions match your search criteria.'}
             </div>
           </CardContent>
         </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedCompetitions.map(competition => <Card key={competition.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+          {filteredAndSortedCompetitions.map(competition => <Card 
+              key={competition.id} 
+              className="group border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-2xl hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]"
+            >
+              <CardHeader className="pb-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    {canManage ? <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-semibold text-lg text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left w-full truncate">
+                    {canManage ? <button 
+                        onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} 
+                        className="font-bold text-xl text-primary hover:text-primary-glow hover:underline cursor-pointer text-left w-full truncate transition-colors"
+                      >
                         {competition.name}
-                      </button> : <h3 className="font-semibold text-lg truncate">{competition.name}</h3>}
+                      </button> : <h3 className="font-bold text-xl truncate text-foreground">{competition.name}</h3>}
                   </div>
                   {canManage ? <Select value={competition.status} onValueChange={value => handleStatusChange(competition.id, value)} disabled={updatingStatus === competition.id}>
                       <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
@@ -339,37 +355,37 @@ const CompetitionsPage = () => {
                     {competition.description}
                   </CardDescription>}
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 {/* Date Information */}
-                <div className="space-y-1">
-                  <div className="flex items-center text-sm">
-                    <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span className="font-medium">
+                <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-border/30">
+                  <div className="flex items-center text-sm font-medium">
+                    <CalendarDays className="w-5 h-5 mr-3 text-primary" />
+                    <span className="text-foreground">
                       {format(new Date(competition.start_date), 'MMM d, yyyy')}
                     </span>
                   </div>
-                  {competition.start_date !== competition.end_date && <div className="text-xs text-muted-foreground ml-6">
+                  {competition.start_date !== competition.end_date && <div className="text-sm text-muted-foreground ml-8">
                       to {format(new Date(competition.end_date), 'MMM d, yyyy')}
                     </div>}
                 </div>
 
                 {/* Location */}
-                <div className="flex items-center text-sm">
-                  <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="truncate">{competition.location}</span>
+                <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30">
+                  <MapPin className="w-5 h-5 mr-3 text-primary flex-shrink-0" />
+                  <span className="truncate font-medium text-foreground">{competition.location}</span>
                 </div>
 
                 {/* Registered Schools */}
-                <div className="flex items-center text-sm">
-                  <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span>
+                <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30">
+                  <Users className="w-5 h-5 mr-3 text-primary" />
+                  <span className="font-medium text-foreground">
                     {registrationCounts[competition.id] || 0}
                     {competition.max_participants && ` / ${competition.max_participants}`} Schools
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+                <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-border/50">
                   {/* View Competition */}
                   {canViewDetails && <Tooltip>
                       <TooltipTrigger asChild>
