@@ -37,16 +37,16 @@ export const EmailQueueCards: React.FC<EmailQueueCardsProps> = ({ items, onViewE
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       {items.map((item) => {
         const recipients = item.recipient_email.split(',').map(email => email.trim());
         const hasMultiple = recipients.length > 1;
 
         return (
-          <Card key={item.id} className="w-full">
+          <Card key={item.id} className="w-full max-w-full">
             <CardHeader className="pb-3 px-4 pt-4">
               <div className="flex justify-between items-start gap-2">
-                <CardTitle className="text-base truncate flex-1">{item.subject}</CardTitle>
+                <CardTitle className="text-base flex-1 break-words whitespace-normal">{item.subject}</CardTitle>
                 <Badge className={getStatusColor(item.status)}>
                   {item.status}
                 </Badge>
@@ -65,7 +65,7 @@ export const EmailQueueCards: React.FC<EmailQueueCardsProps> = ({ items, onViewE
                             Multiple ({recipients.length})
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80">
+                        <PopoverContent className="w-[min(20rem,90vw)]">
                           <div className="space-y-2">
                             <h4 className="font-medium text-sm">Recipients ({recipients.length})</h4>
                             <div className="max-h-48 overflow-y-auto space-y-1">
@@ -104,7 +104,7 @@ export const EmailQueueCards: React.FC<EmailQueueCardsProps> = ({ items, onViewE
                 {item.error_message && (
                   <div>
                     <span className="text-muted-foreground">Error:</span>
-                    <p className="text-red-600 text-xs mt-1">{item.error_message}</p>
+                    <p className="text-red-600 text-xs mt-1 break-words">{item.error_message}</p>
                   </div>
                 )}
               </div>
