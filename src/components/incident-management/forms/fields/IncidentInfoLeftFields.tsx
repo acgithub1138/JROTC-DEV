@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Incident } from '@/hooks/incidents/types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface IncidentInfoLeftFieldsProps {
   form: UseFormReturn<any>;
@@ -22,18 +23,19 @@ export const IncidentInfoLeftFields: React.FC<IncidentInfoLeftFieldsProps> = ({
   categoryOptions
 }) => {
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
 
   return (
     <>
       {/* Incident Number - Read only field */}
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Number</Label>
+      <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+        <Label className={isMobile ? '' : 'w-24 text-right'}>Number</Label>
         <Input value={mode === 'create' ? 'Next #' : incident?.incident_number || ''} disabled className="bg-muted flex-1" />
       </div>
 
       {/* Created By - Read only field */}
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Created by</Label>
+      <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+        <Label className={isMobile ? '' : 'w-24 text-right'}>Created by</Label>
         <Input 
           value={mode === 'create' 
             ? (userProfile ? `${userProfile.last_name}, ${userProfile.first_name}` : 'Current User')
@@ -47,8 +49,8 @@ export const IncidentInfoLeftFields: React.FC<IncidentInfoLeftFieldsProps> = ({
       </div>
 
       {/* Created Date - Read only field */}
-      <div className="flex items-center gap-4">
-        <Label className="w-24 text-right">Created</Label>
+      <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+        <Label className={isMobile ? '' : 'w-24 text-right'}>Created</Label>
         <Input 
           value={mode === 'create' 
             ? format(new Date(), "MM/dd/yyyy HH:mm")
@@ -64,8 +66,8 @@ export const IncidentInfoLeftFields: React.FC<IncidentInfoLeftFieldsProps> = ({
         control={form.control}
         name="category"
         render={({ field }) => (
-          <FormItem className="flex items-start gap-4">
-            <FormLabel className="w-24 text-right flex-shrink-0 pt-2">
+          <FormItem className={`flex ${isMobile ? 'flex-col' : 'items-start'} gap-${isMobile ? '2' : '4'}`}>
+            <FormLabel className={isMobile ? '' : 'w-24 text-right flex-shrink-0 pt-2'}>
               Category <span className="text-destructive">*</span>
             </FormLabel>
             <div className="flex-1">

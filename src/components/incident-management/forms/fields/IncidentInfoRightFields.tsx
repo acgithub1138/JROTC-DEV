@@ -9,6 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface IncidentInfoRightFieldsProps {
   form: UseFormReturn<any>;
@@ -24,6 +25,7 @@ export const IncidentInfoRightFields: React.FC<IncidentInfoRightFieldsProps> = (
   priorityOptions
 }) => {
   const { users } = useSchoolUsers();
+  const isMobile = useIsMobile();
   
   // Filter users for assignment (admins only for incidents)
   const adminOptions = [
@@ -41,8 +43,8 @@ export const IncidentInfoRightFields: React.FC<IncidentInfoRightFieldsProps> = (
         control={form.control}
         name="priority"
         render={({ field }) => (
-          <FormItem className="flex items-center gap-4">
-            <FormLabel className="w-32 text-right flex-shrink-0">
+          <FormItem className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+            <FormLabel className={isMobile ? '' : 'w-32 text-right flex-shrink-0'}>
               Priority <span className="text-destructive">*</span>
             </FormLabel>
             <div className="flex-1">
@@ -71,8 +73,8 @@ export const IncidentInfoRightFields: React.FC<IncidentInfoRightFieldsProps> = (
         control={form.control}
         name="status"
         render={({ field }) => (
-          <FormItem className="flex items-center gap-4">
-            <FormLabel className="w-32 text-right flex-shrink-0">Status</FormLabel>
+          <FormItem className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+            <FormLabel className={isMobile ? '' : 'w-32 text-right flex-shrink-0'}>Status</FormLabel>
             <div className="flex-1">
               <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                 <FormControl>
@@ -99,8 +101,8 @@ export const IncidentInfoRightFields: React.FC<IncidentInfoRightFieldsProps> = (
           control={form.control}
           name="assigned_to_admin"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-4">
-              <FormLabel className="w-32 text-right flex-shrink-0">Assigned To</FormLabel>
+            <FormItem className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+              <FormLabel className={isMobile ? '' : 'w-32 text-right flex-shrink-0'}>Assigned To</FormLabel>
               <div className="flex-1">
                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                   <FormControl>
@@ -128,8 +130,8 @@ export const IncidentInfoRightFields: React.FC<IncidentInfoRightFieldsProps> = (
         control={form.control}
         name="due_date"
         render={({ field }) => (
-          <FormItem className="flex items-center gap-4">
-            <FormLabel className="w-32 text-right flex-shrink-0">Due Date</FormLabel>
+          <FormItem className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-${isMobile ? '2' : '4'}`}>
+            <FormLabel className={isMobile ? '' : 'w-32 text-right flex-shrink-0'}>Due Date</FormLabel>
             <div className="flex-1">
               <Popover>
                 <PopoverTrigger asChild>

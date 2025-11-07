@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { IncidentInfoLeftFields } from './fields/IncidentInfoLeftFields';
 import { IncidentInfoRightFields } from './fields/IncidentInfoRightFields';
 import type { Incident } from '@/hooks/incidents/types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SharedIncidentFormLayoutProps {
   form: UseFormReturn<any>;
@@ -37,10 +38,24 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
   submitButtonText,
   isSubmitting
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="bg-background p-6 rounded-lg border">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Form Actions - Mobile Only (Top) */}
+          {isMobile && (
+            <div className="grid grid-cols-2 gap-2">
+              <Button type="button" variant="outline" onClick={onCancel} className="w-full">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+              </Button>
+            </div>
+          )}
+
           {/* Top section - Two columns */}
           <div className="grid gap-6 lg:grid-cols-2 p-6 border rounded-lg bg-card">
             {/* Left Column */}
@@ -72,8 +87,8 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
             </div>
 
             {attachmentSection && (
-              <div className="flex items-center gap-4">
-                <label className="w-24 text-right flex-shrink-0 text-sm font-medium">
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+                <label className={`${isMobile ? '' : 'w-24 text-right'} flex-shrink-0 text-sm font-medium`}>
                   Attachments
                 </label>
                 <div className="flex-1">
@@ -83,15 +98,17 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : submitButtonText}
-            </Button>
-          </div>
+          {/* Form Actions - Desktop Only (Bottom) */}
+          {!isMobile && (
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : submitButtonText}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
     </div>

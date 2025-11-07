@@ -26,6 +26,7 @@ import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useIncidentPriorityOptions, useIncidentCategoryOptions, useIncidentStatusOptions } from '@/hooks/incidents/useIncidentsQuery';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import type { Incident } from '@/hooks/incidents/types';
+import { useIsMobile } from '@/hooks/use-mobile';
 type IncidentRecordMode = 'create' | 'edit' | 'view';
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
@@ -72,6 +73,7 @@ const getCategoryBadgeClass = (category: string) => {
 export const IncidentRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const {
     toast
   } = useToast();
@@ -388,20 +390,28 @@ export const IncidentRecordPage: React.FC = () => {
 
   // Create mode
   if (currentMode === 'create') {
-    return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
+    return <div className="p-6 space-y-6 max-h-screen overflow-y-auto">
+        {isMobile && (
+          <Button variant="ghost" size="sm" onClick={handleBack} className="w-fit mb-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Incidents
+            Back
           </Button>
-        </div>
+        )}
 
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Create New Incident
+              <CardTitle className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center gap-2'}`}>
+                {!isMobile && (
+                  <Button variant="ghost" size="sm" onClick={handleBack} className="mr-auto">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                )}
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Create New Incident
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -427,23 +437,33 @@ export const IncidentRecordPage: React.FC = () => {
 
   // Edit mode
   if (currentMode === 'edit') {
-    return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
+    return <div className="p-6 space-y-6 max-h-screen overflow-y-auto">
+        {isMobile && (
+          <Button variant="ghost" size="sm" onClick={handleBack} className="w-fit mb-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Incidents
+            Back
           </Button>
-          <div className="text-sm text-muted-foreground">
-            {incident.incident_number} / Edit
-          </div>
-        </div>
+        )}
 
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Edit Incident - {incident.incident_number}
+              <CardTitle className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center gap-2'}`}>
+                {!isMobile && (
+                  <Button variant="ghost" size="sm" onClick={handleBack} className="mr-auto">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                )}
+                <div className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Edit Incident - {incident.incident_number}
+                </div>
+                {!isMobile && (
+                  <div className="text-sm text-muted-foreground ml-2">
+                    {incident.incident_number} / Edit
+                  </div>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
