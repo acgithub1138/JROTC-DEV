@@ -17,14 +17,14 @@ const CommunityServicePage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Community Service</h1>
           <p className="text-muted-foreground">
             View and manage community service records
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/app/cadets/service_record')}>
+        <Button variant="outline" onClick={() => navigate('/app/cadets/service_record')} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Add Community Service
         </Button>
