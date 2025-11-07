@@ -101,7 +101,8 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      {/* Desktop Table View */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -200,6 +201,83 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {filteredApplications.map((application) => (
+          <Card key={application.id} className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <h3 className="font-semibold text-lg">
+                  {application.cp_judges?.name || 'Unknown Judge'}
+                </h3>
+                {getStatusBadge(application.status)}
+              </div>
+
+              <div className="space-y-2">
+                {application.cp_judges?.email && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <a href={`mailto:${application.cp_judges.email}`} className="text-primary hover:underline break-all">
+                      {application.cp_judges.email}
+                    </a>
+                  </div>
+                )}
+                {application.cp_judges?.phone && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <a href={`tel:${application.cp_judges.phone}`} className="text-primary hover:underline">
+                      {formatPhoneNumber(application.cp_judges.phone)}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <div className="text-sm text-muted-foreground">
+                Applied: {format(new Date(application.created_at), 'MMM d, yyyy')}
+              </div>
+
+              {application.availability_notes && (
+                <div className="border-t pt-3">
+                  <p className="text-sm font-medium mb-1">Availability Notes</p>
+                  <p className="text-sm text-muted-foreground">
+                    {application.availability_notes}
+                  </p>
+                </div>
+              )}
+
+              {application.decline_reason && (
+                <div className="bg-destructive/10 p-3 rounded">
+                  <p className="text-sm font-medium mb-1">Decline Reason</p>
+                  <p className="text-sm text-muted-foreground">{application.decline_reason}</p>
+                </div>
+              )}
+
+              {application.status === 'pending' && (
+                <div className="flex gap-2 pt-2 border-t">
+                  <Button 
+                    className="flex-1"
+                    onClick={() => handleApproveClick(application)} 
+                    disabled={isApproving}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    variant="destructive" 
+                    onClick={() => handleDeclineClick(application)} 
+                    disabled={isDeclining}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Decline
+                  </Button>
+                </div>
+              )}
+            </div>
+          </Card>
+        ))}
       </div>
 
       {/* Approve Dialog */}
