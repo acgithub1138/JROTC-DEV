@@ -5,48 +5,6 @@
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 /* Print styles - Optimized for "Fit to printable area" */
-@media print {
-  @page {
-    size: landscape;
-    margin: 0.5in;
-  }
-  
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-  }
-  
-  .schedule-print-container {
-    width: 100%;
-    max-width: 100%;
-    overflow: visible;
-  }
-  
-  table {
-    page-break-inside: auto;
-    width: 100%;
-  }
-  
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-  
-  thead {
-    display: table-header-group;
-  }
-  
-  /* Hide scrollbars in print */
-  .overflow-x-auto {
-    overflow: visible !important;
-  }
-}
 
 @layer base {
   :root {
@@ -230,25 +188,38 @@
     visibility: visible !important;
   }
   
-  /* Position print wrapper and container */
+  /* Layout print wrapper and container full-width */
   .schedule-print-wrapper,
   .schedule-print-container {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
     margin: 0 !important;
-    padding: 20px !important;
-    width: calc(100% - 40px) !important;
+    padding: 0 !important;
+    width: 100% !important;
     transform: none !important;
     background: white !important;
+  }
+
+  /* Neutralize card visuals in print */
+  .schedule-print-container,
+  .schedule-print-container * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+
+  /* Ensure scroll containers don't clip content in print */
+  .overflow-x-auto {
+    overflow: visible !important;
   }
   
   .schedule-print-container table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 7px !important;
+    font-size: 10px !important;
     margin: 0 !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
     page-break-inside: auto !important;
   }
   
@@ -277,7 +248,6 @@
     text-align: center !important;
     line-height: 1.1 !important;
     vertical-align: middle !important;
-    max-width: 80px !important;
   }
   
   .schedule-print-container th {
