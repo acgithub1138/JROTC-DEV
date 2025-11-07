@@ -103,17 +103,29 @@ export const CompetitionDetailsPage = () => {
     
     // Schedules - Schools
     if (currentPath === `${basePath}/schedules/schools`) {
-      return <ScheduleView competitionId={competitionId} type="schools" />;
+      return (
+        <div className="schedule-print-wrapper">
+          <ScheduleView competitionId={competitionId} type="schools" />
+        </div>
+      );
     }
     
     // Schedules - Judges
     if (currentPath === `${basePath}/schedules/judges`) {
-      return <ScheduleView competitionId={competitionId} type="judges" />;
+      return (
+        <div className="schedule-print-wrapper">
+          <ScheduleView competitionId={competitionId} type="judges" />
+        </div>
+      );
     }
     
     // Schedules - Resources
     if (currentPath === `${basePath}/schedules/resources`) {
-      return <ScheduleView competitionId={competitionId} type="resources" />;
+      return (
+        <div className="schedule-print-wrapper">
+          <ScheduleView competitionId={competitionId} type="resources" />
+        </div>
+      );
     }
     
     // Results
