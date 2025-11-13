@@ -132,8 +132,8 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2 text-sm text-muted-foreground">
+          <CardContent className="flex flex-col h-full space-y-4">
+            <div className="flex-1 space-y-2 text-sm text-muted-foreground">
               {competition.fee && (
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
@@ -207,7 +207,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               )}
             </div>
 
-            <div className="flex gap-1">
+            <div className="flex gap-1 pt-2 border-t">
               {canViewDetails && (
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => onViewDetails(competition.id)}>
                   <Eye className="w-3 h-3 mr-1" />
