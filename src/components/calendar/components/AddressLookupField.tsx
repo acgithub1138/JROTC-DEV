@@ -15,11 +15,28 @@ interface AddressSuggestion {
   display_name: string;
   name?: string;
   type?: string;
+  parsed_address?: string;
+  parsed_city?: string;
+  parsed_state?: string;
+  parsed_zip?: string;
+  parsed_latitude?: string;
+  parsed_longitude?: string;
+}
+
+interface ParsedAddressData {
+  location: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  latitude: string;
+  longitude: string;
 }
 
 interface AddressLookupFieldProps {
   value?: string;
   onValueChange: (value: string) => void;
+  onAddressParsed?: (data: ParsedAddressData) => void;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -27,6 +44,7 @@ interface AddressLookupFieldProps {
 export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   value,
   onValueChange,
+  onAddressParsed,
   placeholder = "Enter location...",
   disabled = false,
 }) => {
@@ -101,10 +119,23 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
     onValueChange(newValue);
   };
 
-  const handleSelect = (selectedValue: string) => {
-    onValueChange(selectedValue);
-    setInputValue(selectedValue);
+  const handleSelect = (suggestion: AddressSuggestion) => {
+    onValueChange(suggestion.display_name);
+    setInputValue(suggestion.display_name);
     setShowSuggestions(false);
+    
+    // If callback provided and we have parsed data, send it
+    if (onAddressParsed && suggestion.parsed_address) {
+      onAddressParsed({
+        location: suggestion.display_name,
+        address: suggestion.parsed_address || '',
+        city: suggestion.parsed_city || '',
+        state: suggestion.parsed_state || '',
+        zip: suggestion.parsed_zip || '',
+        latitude: suggestion.parsed_latitude || '',
+        longitude: suggestion.parsed_longitude || '',
+      });
+    }
   };
 
   const handleInputFocus = () => {
@@ -147,7 +178,7 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
                         <CommandItem
                           key={`${suggestion.display_name}-${index}`}
                           value={suggestion.display_name}
-                          onSelect={() => handleSelect(suggestion.display_name)}
+                          onSelect={() => handleSelect(suggestion)}
                           className="flex items-start cursor-pointer"
                         >
                           <MapPin className="mr-2 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />

@@ -90,19 +90,33 @@ serve(async (req) => {
       )
     }
 
-    // Transform Google Maps response to Nominatim-like format
+    // Transform Google Maps response with parsed address components
     const data = googleData.results.map((result: any) => {
       const addressComponents = result.address_components
       const getComponent = (type: string) => 
         addressComponents.find((c: any) => c.types.includes(type))?.long_name || ''
+      const getShortComponent = (type: string) => 
+        addressComponents.find((c: any) => c.types.includes(type))?.short_name || ''
+      
+      const streetNumber = getComponent('street_number')
+      const route = getComponent('route')
+      const streetAddress = [streetNumber, route].filter(Boolean).join(' ')
       
       return {
         lat: result.geometry.location.lat.toString(),
         lon: result.geometry.location.lng.toString(),
         display_name: result.formatted_address,
+        // Parsed components for easy access
+        parsed_address: streetAddress,
+        parsed_city: getComponent('locality') || getComponent('sublocality'),
+        parsed_state: getShortComponent('administrative_area_level_1'),
+        parsed_zip: getComponent('postal_code'),
+        parsed_latitude: result.geometry.location.lat.toString(),
+        parsed_longitude: result.geometry.location.lng.toString(),
+        // Keep original format for compatibility
         address: {
-          road: getComponent('route'),
-          house_number: getComponent('street_number'),
+          road: route,
+          house_number: streetNumber,
           city: getComponent('locality') || getComponent('sublocality'),
           state: getComponent('administrative_area_level_1'),
           postcode: getComponent('postal_code'),
