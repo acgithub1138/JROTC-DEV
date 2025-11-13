@@ -5,10 +5,11 @@ import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { User, LogOut, Settings, Menu, Shield, Trophy, Building2, UserCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { User, LogOut, Settings, Menu, Shield, Trophy, Building2, UserCircle, ChevronDown, ChevronRight, UserCog, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { SchoolProfileModal } from '@/components/school/SchoolProfileModal';
+import { ImpersonateUserModal } from '@/components/admin/ImpersonateUserModal';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
@@ -29,16 +30,23 @@ export const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const {
     signOut,
-    userProfile
+    userProfile,
+    isImpersonating,
+    impersonatedProfile,
+    stopImpersonation
   } = useAuth();
   const { canAccessCompetitionPortal, setPortal } = usePortal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [schoolProfileOpen, setSchoolProfileOpen] = useState(false);
+  const [impersonateModalOpen, setImpersonateModalOpen] = useState(false);
   const [linkedCadetId, setLinkedCadetId] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const {
     menuItems
   } = useSidebarPreferences();
+
+  // Get the original admin profile from sessionStorage for display purposes
+  const originalAdminId = sessionStorage.getItem('original_admin_id');
 
   // Fetch linked cadet ID for parent users
   useEffect(() => {
@@ -115,6 +123,21 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return <div className="bg-white border-b border-gray-200 px-6 py-4">
+      {/* Impersonation Banner */}
+      {isImpersonating && impersonatedProfile && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 mb-4">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <Shield className="w-4 h-4 text-yellow-700" />
+            <span className="font-medium text-yellow-900">
+              Impersonating: {impersonatedProfile.last_name}, {impersonatedProfile.first_name}
+            </span>
+            <Badge variant="secondary" className={`text-xs ${getRoleColor(impersonatedProfile.role)}`}>
+              {impersonatedProfile.role.replace('_', ' ').toUpperCase()}
+            </Badge>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center">
         {/* Left side - Mobile Menu Button */}
         <div className="flex items-center space-x-4 flex-shrink-0">
@@ -237,40 +260,66 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              {userProfile?.role === 'instructor' && (
+              {isImpersonating ? (
+                // Impersonating - only show stop option
                 <>
-                  <DropdownMenuItem onClick={() => setSchoolProfileOpen(true)}>
-                    <Building2 className="w-4 h-4 mr-2" />
-                    School Profile
+                  <DropdownMenuItem 
+                    onClick={stopImpersonation}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Stop Impersonation
                   </DropdownMenuItem>
+                </>
+              ) : (
+                // Normal view
+                <>
+                  {userProfile?.role === 'instructor' && (
+                    <>
+                      <DropdownMenuItem onClick={() => setSchoolProfileOpen(true)}>
+                        <Building2 className="w-4 h-4 mr-2" />
+                        School Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  
+                  <DropdownMenuItem onClick={() => {
+                    if (userProfile?.role === 'parent') {
+                      navigate('/app/parent-profile');
+                    } else {
+                      navigate(`/app/cadets/cadet_record?mode=view&id=${userProfile?.id}`);
+                    }
+                  }}>
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
+                  
+                  {userProfile?.role === 'parent' && linkedCadetId && (
+                    <DropdownMenuItem onClick={() => navigate(`/app/cadets/cadet_record?mode=view&id=${linkedCadetId}`)}>
+                      <UserCircle className="w-4 h-4 mr-2" />
+                      My Cadet's Profile
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {userProfile?.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setImpersonateModalOpen(true)}>
+                        <UserCog className="w-4 h-4 mr-2" />
+                        Impersonate User
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
                   <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
                 </>
               )}
-              
-              <DropdownMenuItem onClick={() => {
-                if (userProfile?.role === 'parent') {
-                  navigate('/app/parent-profile');
-                } else {
-                  navigate(`/app/cadets/cadet_record?mode=view&id=${userProfile?.id}`);
-                }
-              }}>
-                <User className="w-4 h-4 mr-2" />
-                My Profile
-              </DropdownMenuItem>
-              
-              {userProfile?.role === 'parent' && linkedCadetId && (
-                <DropdownMenuItem onClick={() => navigate(`/app/cadets/cadet_record?mode=view&id=${linkedCadetId}`)}>
-                  <UserCircle className="w-4 h-4 mr-2" />
-                  My Cadet's Profile
-                </DropdownMenuItem>
-              )}
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem onClick={signOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -279,6 +328,11 @@ export const Header: React.FC<HeaderProps> = ({
       <SchoolProfileModal
         open={schoolProfileOpen}
         onOpenChange={setSchoolProfileOpen}
+      />
+      
+      <ImpersonateUserModal
+        open={impersonateModalOpen}
+        onOpenChange={setImpersonateModalOpen}
       />
     </div>;
 };
