@@ -34,6 +34,8 @@ interface FormData {
   city: string;
   state: string;
   zip: string;
+  latitude: string;
+  longitude: string;
   max_participants: string;
   registration_deadline_date: string;
   registration_deadline_hour: string;
@@ -77,6 +79,8 @@ export const CPCompetitionRecordPage = () => {
     city: existingCompetition?.city || '',
     state: existingCompetition?.state || '',
     zip: existingCompetition?.zip || '',
+    latitude: (existingCompetition as any)?.latitude || '',
+    longitude: (existingCompetition as any)?.longitude || '',
     max_participants: existingCompetition?.max_participants?.toString() || '',
     registration_deadline_date: existingCompetition?.registration_deadline ? new Date(existingCompetition.registration_deadline).toISOString().split('T')[0] : '',
     registration_deadline_hour: existingCompetition?.registration_deadline ? new Date(existingCompetition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
@@ -112,6 +116,8 @@ export const CPCompetitionRecordPage = () => {
         city: existingCompetition.city || '',
         state: existingCompetition.state || '',
         zip: existingCompetition.zip || '',
+        latitude: (existingCompetition as any).latitude || '',
+        longitude: (existingCompetition as any).longitude || '',
         max_participants: existingCompetition.max_participants?.toString() || '',
         registration_deadline_date: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).toISOString().split('T')[0] : '',
         registration_deadline_hour: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
@@ -157,6 +163,27 @@ export const CPCompetitionRecordPage = () => {
       return newData;
     });
   };
+  const handleAddressParsed = (data: {
+    location: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    latitude: string;
+    longitude: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      location: data.location,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zip: data.zip,
+      latitude: data.latitude,
+      longitude: data.longitude
+    }));
+  };
+
   const handleBackClick = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -178,7 +205,9 @@ export const CPCompetitionRecordPage = () => {
         address: formData.address,
         city: formData.city,
         state: formData.state,
-        zip: formData.zip
+        zip: formData.zip,
+        latitude: formData.latitude,
+        longitude: formData.longitude
       };
 
       // If address fields are empty but location is provided, try to parse location
@@ -269,6 +298,8 @@ export const CPCompetitionRecordPage = () => {
         city: addressData.city,
         state: addressData.state,
         zip: addressData.zip,
+        latitude: addressData.latitude,
+        longitude: addressData.longitude,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         registration_deadline: registrationDeadlineUTC,
         hosting_school: formData.hosting_school,
@@ -530,7 +561,13 @@ export const CPCompetitionRecordPage = () => {
               </div>
               <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-[1fr_3fr] md:items-center gap-2 md:gap-4">
                 <Label className="font-semibold md:text-right">Location *</Label>
-                <AddressLookupField value={formData.location} onValueChange={value => updateFormData('location', value)} placeholder="Enter competition location or search address" disabled={isViewMode} />
+                <AddressLookupField 
+                  value={formData.location} 
+                  onValueChange={value => updateFormData('location', value)} 
+                  onAddressParsed={handleAddressParsed}
+                  placeholder="Enter competition location or search address" 
+                  disabled={isViewMode} 
+                />
               </div>
             </div>
 
