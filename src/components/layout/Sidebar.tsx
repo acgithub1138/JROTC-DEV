@@ -255,41 +255,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <ScrollArea className="flex-1 px-3">
           <div className="space-y-1">
             {menuItems.map((item) => renderMenuItem(item, 1))}
-
-            {/* Competition Portal Access Button */}
-            {canAccessCompetitionPortal && (
-              <div className="pt-4 border-t border-gray-700">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-left font-normal"
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: currentTheme.link_text,
-                    border: `1px solid ${currentTheme.link_text}`,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
-                    e.currentTarget.style.color = '#ffffff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = currentTheme.link_text;
-                  }}
-                  onClick={() => {
-                    console.log('Competition Portal button clicked - navigating to portal');
-                    setPortal('competition');
-                    navigate('/app/competition-portal/dashboard');
-                  }}
-                >
-                  <Trophy className="w-4 h-4 mr-3" />
-                  Competition Portal
-                </Button>
-              </div>
-            )}
-
-            
           </div>
         </ScrollArea>
+
+        {/* Competition Portal Button */}
+        {canAccessCompetitionPortal && (
+          <div className="p-3 border-t border-gray-700">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-left font-normal"
+              style={{
+                backgroundColor: 'transparent',
+                color: currentTheme.link_text,
+                border: `1px solid ${currentTheme.link_text}`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = currentTheme.link_text;
+              }}
+              onClick={() => {
+                console.log('Competition Portal button clicked - navigating to portal');
+                setPortal('competition');
+                navigate('/app/competition-portal/dashboard');
+              }}
+            >
+              <Trophy className="w-4 h-4 mr-3" />
+              Competition Portal
+            </Button>
+          </div>
+        )}
 
         {/* Training Videos Button - Fixed at bottom */}
         <div className="p-3 border-t border-gray-700">
