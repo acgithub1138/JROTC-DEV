@@ -49,6 +49,11 @@ interface AuthContextType {
   createUser: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
   loading: boolean;
+  // Impersonation
+  impersonatedProfile: Profile | null;
+  isImpersonating: boolean;
+  startImpersonation: (userId: string) => Promise<void>;
+  stopImpersonation: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [impersonatedProfile, setImpersonatedProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Use refs to prevent unnecessary profile fetches
@@ -284,10 +290,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = useCallback(async () => {
     try {
+      // Clear impersonation state
+      sessionStorage.removeItem('impersonation_active');
+      sessionStorage.removeItem('impersonated_user_id');
+      sessionStorage.removeItem('original_admin_id');
+      
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setUserProfile(null);
+      setImpersonatedProfile(null);
       lastFetchedUserIdRef.current = null;
       profileFetchingRef.current = false;
       window.location.href = '/app/user-type';
@@ -346,17 +358,101 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user?.id, fetchUserProfile]);
 
+  // Impersonation functions
+  const startImpersonation = useCallback(async (userId: string) => {
+    if (!userProfile || userProfile.role !== 'admin') {
+      toast('Unauthorized', { description: 'Only admins can impersonate users' });
+      return;
+    }
+
+    try {
+      console.log('Starting impersonation for user:', userId);
+      const profile = await fetchUserProfile(userId);
+      
+      if (!profile) {
+        toast('Error', { description: 'Failed to load user profile' });
+        return;
+      }
+
+      // Store impersonation state in sessionStorage
+      sessionStorage.setItem('impersonation_active', 'true');
+      sessionStorage.setItem('impersonated_user_id', userId);
+      sessionStorage.setItem('original_admin_id', userProfile.id);
+      
+      setImpersonatedProfile(profile);
+      toast('Impersonation Active', { 
+        description: `Now viewing as ${profile.first_name} ${profile.last_name}` 
+      });
+      
+      // Refresh to apply all permissions
+      window.location.reload();
+    } catch (error) {
+      console.error('Impersonation error:', error);
+      toast('Error', { description: 'Failed to impersonate user' });
+    }
+  }, [userProfile, fetchUserProfile]);
+
+  const stopImpersonation = useCallback(() => {
+    console.log('Stopping impersonation');
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('impersonation_active');
+    sessionStorage.removeItem('impersonated_user_id');
+    sessionStorage.removeItem('original_admin_id');
+    
+    setImpersonatedProfile(null);
+    toast('Impersonation Ended', { 
+      description: 'Returned to admin view' 
+    });
+    
+    // Refresh to restore admin permissions
+    window.location.reload();
+  }, []);
+
+  // Check for existing impersonation on mount
+  useEffect(() => {
+    const checkImpersonation = async () => {
+      const isImpersonating = sessionStorage.getItem('impersonation_active') === 'true';
+      const impersonatedUserId = sessionStorage.getItem('impersonated_user_id');
+      const originalAdminId = sessionStorage.getItem('original_admin_id');
+
+      if (isImpersonating && impersonatedUserId && originalAdminId && userProfile) {
+        // Verify current user is still the admin
+        if (userProfile.id === originalAdminId && userProfile.role === 'admin') {
+          console.log('Restoring impersonation state for:', impersonatedUserId);
+          const profile = await fetchUserProfile(impersonatedUserId);
+          if (profile) {
+            setImpersonatedProfile(profile);
+          }
+        } else {
+          // Clear invalid impersonation state
+          sessionStorage.removeItem('impersonation_active');
+          sessionStorage.removeItem('impersonated_user_id');
+          sessionStorage.removeItem('original_admin_id');
+        }
+      }
+    };
+
+    if (userProfile && !loading) {
+      checkImpersonation();
+    }
+  }, [userProfile, loading, fetchUserProfile]);
+
   const value = useMemo(() => ({
     user,
     session,
-    userProfile,
+    userProfile: impersonatedProfile || userProfile, // Return impersonated profile if active
     loading,
     signUp,
     signIn,
     signOut,
     createUser,
     refreshProfile,
-  }), [user, session, userProfile, loading, signUp, signIn, signOut, createUser, refreshProfile]);
+    impersonatedProfile,
+    isImpersonating: !!impersonatedProfile,
+    startImpersonation,
+    stopImpersonation,
+  }), [user, session, userProfile, impersonatedProfile, loading, signUp, signIn, signOut, createUser, refreshProfile, startImpersonation, stopImpersonation]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
