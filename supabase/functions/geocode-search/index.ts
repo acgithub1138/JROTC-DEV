@@ -49,17 +49,26 @@ serve(async (req) => {
 
     console.log('Geocoding search for query:', query)
 
-    // Call Nominatim API
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`
+    // Get Google Maps API key
+    const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY')
+    if (!apiKey) {
+      console.error('GOOGLE_MAPS_API_KEY not configured')
+      return new Response(
+        JSON.stringify({ error: 'Geocoding service not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Call Google Maps Geocoding API
+    const googleMapsUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&components=country:US&key=${apiKey}`
     
-    const response = await fetch(nominatimUrl, {
-      headers: {
-        'User-Agent': 'JROTC-Management-App/1.0'
-      }
-    })
+    const response = await fetch(googleMapsUrl)
 
     if (!response.ok) {
-      console.error('Nominatim API error:', response.status, response.statusText)
+      console.error('Google Maps API error:', response.status, response.statusText)
       return new Response(
         JSON.stringify({ error: 'Geocoding service error' }),
         { 
@@ -69,8 +78,41 @@ serve(async (req) => {
       )
     }
 
-    const data = await response.json()
-    console.log('Nominatim response:', data.length, 'results')
+    const googleData = await response.json()
+    
+    if (googleData.status !== 'OK') {
+      console.error('Google Maps API status:', googleData.status)
+      return new Response(
+        JSON.stringify([]),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Transform Google Maps response to Nominatim-like format
+    const data = googleData.results.map((result: any) => {
+      const addressComponents = result.address_components
+      const getComponent = (type: string) => 
+        addressComponents.find((c: any) => c.types.includes(type))?.long_name || ''
+      
+      return {
+        lat: result.geometry.location.lat.toString(),
+        lon: result.geometry.location.lng.toString(),
+        display_name: result.formatted_address,
+        address: {
+          road: getComponent('route'),
+          house_number: getComponent('street_number'),
+          city: getComponent('locality') || getComponent('sublocality'),
+          state: getComponent('administrative_area_level_1'),
+          postcode: getComponent('postal_code'),
+          country: getComponent('country'),
+          country_code: addressComponents.find((c: any) => c.types.includes('country'))?.short_name.toLowerCase() || 'us'
+        }
+      }
+    })
+    
+    console.log('Google Maps response:', data.length, 'results')
 
     const httpResponse = new Response(
       JSON.stringify(data),
