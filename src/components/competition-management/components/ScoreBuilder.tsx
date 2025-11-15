@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Sparkles } from 'lucide-react';
 import { JsonFieldBuilder } from './JsonFieldBuilder';
+import { AiTemplateGeneratorModal } from './AiTemplateGeneratorModal';
+import { toast } from 'sonner';
 
 interface ScoreBuilderProps {
   useBuilder: boolean;
@@ -21,6 +26,14 @@ export const ScoreBuilder: React.FC<ScoreBuilderProps> = ({
   jsonError,
   handleJsonTextChange
 }) => {
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+
+  const handleTemplateGenerated = (template: Record<string, any>) => {
+    updateFormData('scores', template);
+    setAiModalOpen(false);
+    toast.success('Template generated successfully!');
+  };
+
   return (
     <div className="space-y-2">        
       {useBuilder ? (
@@ -29,7 +42,19 @@ export const ScoreBuilder: React.FC<ScoreBuilderProps> = ({
           onChange={scores => updateFormData('scores', scores)} 
         />
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Score Sheet Structure</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAiModalOpen(true)}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Generate with AI
+            </Button>
+          </div>
           <Textarea 
             value={jsonText} 
             onChange={e => handleJsonTextChange(e.target.value)} 
@@ -52,6 +77,12 @@ export const ScoreBuilder: React.FC<ScoreBuilderProps> = ({
           </p>
         </div>
       )}
+
+      <AiTemplateGeneratorModal
+        open={aiModalOpen}
+        onOpenChange={setAiModalOpen}
+        onTemplateGenerated={handleTemplateGenerated}
+      />
     </div>
   );
 };
