@@ -77,7 +77,7 @@ export const GenerateWithAIModal: React.FC<GenerateWithAIModalProps> = ({
       toast.info('Extracting text from PDF...');
       const pdfText = await parsePDF(selectedFile);
 
-      if (pdfText.length > 100000) {
+      if (pdfText.length > 500000) {
         toast.error('PDF text is too long. Please use a shorter form.');
         setIsGenerating(false);
         return;
