@@ -20,7 +20,6 @@ export const ScoreSheetRecordPage = () => {
   const [template, setTemplate] = useState<CompetitionTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [useBuilder, setUseBuilder] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
@@ -329,11 +328,7 @@ export const ScoreSheetRecordPage = () => {
 
         {/* Action Buttons - Desktop */}
         <div className="hidden md:flex items-center gap-2">
-          {(mode === 'create' || mode === 'edit') && (
-            <Button onClick={() => setUseBuilder(!useBuilder)} variant="outline" size="sm">
-              {useBuilder ? 'Manual JSON' : 'Field Builder'}
-            </Button>
-          )}
+          {/* Manual JSON button removed */}
         </div>
       </div>
 
@@ -428,7 +423,7 @@ export const ScoreSheetRecordPage = () => {
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 onFormChange={setHasUnsavedChanges}
-                useBuilder={useBuilder}
+                useBuilder={true}
               />
             </CardContent>
           </Card>

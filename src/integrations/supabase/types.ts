@@ -1223,7 +1223,9 @@ export type Database = {
           hosting_school: string | null
           id: string
           is_public: boolean
+          latitude: string | null
           location: string
+          longitude: string | null
           max_participants: number | null
           name: string
           program: Database["public"]["Enums"]["jrotc_program"] | null
@@ -1249,7 +1251,9 @@ export type Database = {
           hosting_school?: string | null
           id?: string
           is_public?: boolean
+          latitude?: string | null
           location: string
+          longitude?: string | null
           max_participants?: number | null
           name: string
           program?: Database["public"]["Enums"]["jrotc_program"] | null
@@ -1275,7 +1279,9 @@ export type Database = {
           hosting_school?: string | null
           id?: string
           is_public?: boolean
+          latitude?: string | null
           location?: string
+          longitude?: string | null
           max_participants?: number | null
           name?: string
           program?: Database["public"]["Enums"]["jrotc_program"] | null
