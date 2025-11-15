@@ -121,12 +121,12 @@ export const ScoreSheetRecordPage = () => {
       // Update existing template with generated fields
       setTemplate({
         ...template,
-        scores: criteriaArray
+        scores: { criteria: criteriaArray }
       });
     } else {
       // For create mode, initialize template with generated fields
       setTemplate({
-        scores: criteriaArray
+        scores: { criteria: criteriaArray }
       } as any);
     }
     setHasUnsavedChanges(true);
