@@ -114,12 +114,20 @@ export const ScoreSheetRecordPage = () => {
     handleNavigation('/app/competition-portal/score-sheets');
   };
   const handleFieldsGenerated = (generatedFields: any) => {
+    // Extract criteria array from the response
+    const criteriaArray = generatedFields.criteria || generatedFields;
+    
     if (template) {
       // Update existing template with generated fields
       setTemplate({
         ...template,
-        scores: generatedFields
+        scores: criteriaArray
       });
+    } else {
+      // For create mode, initialize template with generated fields
+      setTemplate({
+        scores: criteriaArray
+      } as any);
     }
     setHasUnsavedChanges(true);
     toast.success('Fields generated and applied to the template');
