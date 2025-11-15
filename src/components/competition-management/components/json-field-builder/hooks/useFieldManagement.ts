@@ -25,7 +25,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         fieldInfo: criterion.fieldInfo,
         textType: criterion.maxLength > 75 ? 'notes' : 'short',
         values: criterion.options,
-        maxValue: criterion.maxValue ?? criterion.maxPoints,
+        maxValue: criterion.maxValue,
         scaleRanges: criterion.scaleRanges,
         penalty: criterion.penalty || false,
         pauseField: criterion.pauseField || false,

@@ -76,25 +76,6 @@ export const useTemplateForm = ({ template, onFormChange, useBuilder }: UseTempl
     }
   }, [eventTypes, template]);
 
-  // Sync scores when template prop updates (e.g., after AI generation)
-  useEffect(() => {
-    if (!template) return;
-
-    const incomingScores = (typeof (template as any).scores === 'object' && (template as any).scores !== null)
-      ? (template as any).scores as Record<string, any>
-      : {} as Record<string, any>;
-
-    const hasIncomingCriteria = Array.isArray((incomingScores as any).criteria) && (incomingScores as any).criteria.length > 0;
-    const hasCurrentCriteria = Array.isArray((formData.scores as any)?.criteria) && (formData.scores as any).criteria.length > 0;
-
-    if (hasIncomingCriteria && (!hasCurrentCriteria || JSON.stringify(formData.scores) !== JSON.stringify(incomingScores))) {
-      setFormData(prev => ({
-        ...prev,
-        scores: incomingScores
-      }));
-    }
-  }, [template]);
-
   // Update jsonText when scores change from field builder
   useEffect(() => {
     if (useBuilder) {
