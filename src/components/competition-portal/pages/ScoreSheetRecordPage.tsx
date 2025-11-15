@@ -10,14 +10,14 @@ import { TemplateForm } from '@/components/competition-management/components/Tem
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { GenerateWithAIModal } from '../my-competitions/components/GenerateWithAIModal';
 import { toast } from 'sonner';
-
 export const ScoreSheetRecordPage = () => {
   const navigate = useNavigate();
-  const { '*': splat } = useParams();
+  const {
+    '*': splat
+  } = useParams();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') || 'view';
   const templateId = searchParams.get('id');
-
   const [template, setTemplate] = useState<CompetitionTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +25,17 @@ export const ScoreSheetRecordPage = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [showAIModal, setShowAIModal] = useState(false);
-
-  const { canCreate, canUpdate, canViewDetails } = useCPScoreSheetsPermissions();
-  const { createTemplate, updateTemplate, templates, isLoading: templatesLoading } = useCompetitionTemplates();
+  const {
+    canCreate,
+    canUpdate,
+    canViewDetails
+  } = useCPScoreSheetsPermissions();
+  const {
+    createTemplate,
+    updateTemplate,
+    templates,
+    isLoading: templatesLoading
+  } = useCompetitionTemplates();
 
   // Load template data if editing/viewing
   useEffect(() => {
@@ -37,7 +45,6 @@ export const ScoreSheetRecordPage = () => {
         setIsLoading(false);
         return;
       }
-
       if (!templateId) {
         setError('Template ID is required for view/edit mode');
         setIsLoading(false);
@@ -49,7 +56,6 @@ export const ScoreSheetRecordPage = () => {
         setIsLoading(true);
         return;
       }
-
       try {
         setIsLoading(true);
         const foundTemplate = templates.find(t => t.id === templateId);
@@ -65,7 +71,6 @@ export const ScoreSheetRecordPage = () => {
         setIsLoading(false);
       }
     };
-
     loadTemplate();
   }, [templateId, mode, templates, templatesLoading]);
 
@@ -79,7 +84,6 @@ export const ScoreSheetRecordPage = () => {
       setError('You do not have permission to view template details');
     }
   }, [mode, canCreate, canUpdate, canViewDetails]);
-
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges) {
       setPendingNavigation(path);
@@ -88,11 +92,9 @@ export const ScoreSheetRecordPage = () => {
       navigate(path);
     }
   };
-
   const handleBack = () => {
     handleNavigation('/app/competition-portal/score-sheets');
   };
-
   const handleSubmit = async (data: any) => {
     try {
       if (mode === 'create') {
@@ -108,11 +110,9 @@ export const ScoreSheetRecordPage = () => {
       console.error('Error submitting template:', error);
     }
   };
-
   const handleCancel = () => {
     handleNavigation('/app/competition-portal/score-sheets');
   };
-
   const handleFieldsGenerated = (generatedFields: any) => {
     if (template) {
       // Update existing template with generated fields
@@ -124,7 +124,6 @@ export const ScoreSheetRecordPage = () => {
     setHasUnsavedChanges(true);
     toast.success('Fields generated and applied to the template');
   };
-
   const handleConfirmNavigation = () => {
     setShowConfirmDialog(false);
     if (pendingNavigation) {
@@ -132,12 +131,10 @@ export const ScoreSheetRecordPage = () => {
       setPendingNavigation(null);
     }
   };
-
   const handleCancelNavigation = () => {
     setShowConfirmDialog(false);
     setPendingNavigation(null);
   };
-
   const getPageTitle = () => {
     switch (mode) {
       case 'create':
@@ -150,68 +147,40 @@ export const ScoreSheetRecordPage = () => {
         return 'Score Sheet Template';
     }
   };
-
   const renderScoreField = (field: any, index: number) => {
     const fieldType = field.type || 'text';
     const fieldName = field.name || `Field ${index + 1}`;
     const isBoldGray = field.pauseField || field.type === 'bold_gray' || field.type === 'pause';
-
     if (fieldType === 'section_header') {
-      return (
-        <div key={index} className="border-b-2 border-primary pb-2">
+      return <div key={index} className="border-b-2 border-primary pb-2">
           <h3 className="text-lg font-bold text-primary">{fieldName}</h3>
-        </div>
-      );
+        </div>;
     }
-
     if (fieldType === 'label' || fieldType === 'bold_gray' || fieldType === 'pause') {
-      return (
-        <div key={index} className="py-2">
-          {isBoldGray ? (
-            <div className="bg-muted px-3 py-2 rounded">
+      return <div key={index} className="py-2">
+          {isBoldGray ? <div className="bg-muted px-3 py-2 rounded">
               <span className="font-bold">{fieldName}</span>
-            </div>
-          ) : (
-            <span className="font-medium">{fieldName}</span>
-          )}
-          {field.fieldInfo && (
-            <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
-          )}
-        </div>
-      );
+            </div> : <span className="font-medium">{fieldName}</span>}
+          {field.fieldInfo && <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>}
+        </div>;
     }
-
     if (fieldType === 'penalty') {
-      return (
-        <div key={index} className="py-2 border-b space-y-2">
+      return <div key={index} className="py-2 border-b space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-medium text-destructive">{fieldName}</span>
             <div className="flex items-center gap-2">
-              {field.penaltyType === 'points' ? (
-                <input className="border rounded px-2 py-1 w-32" disabled placeholder="Number of violations" />
-              ) : field.penaltyType === 'minor_major' ? (
-                <select className="border rounded px-2 py-1 w-32" disabled>
+              {field.penaltyType === 'points' ? <input className="border rounded px-2 py-1 w-32" disabled placeholder="Number of violations" /> : field.penaltyType === 'minor_major' ? <select className="border rounded px-2 py-1 w-32" disabled>
                   <option>Select type</option>
                   <option>Minor (-20)</option>
                   <option>Major (-50)</option>
-                </select>
-              ) : (
-                <input className="border rounded px-2 py-1 w-32" disabled />
-              )}
+                </select> : <input className="border rounded px-2 py-1 w-32" disabled />}
             </div>
           </div>
-          {field.fieldInfo && (
-            <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
-          )}
-          {field.penaltyType === 'points' && field.pointValue && (
-            <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>
-          )}
-        </div>
-      );
+          {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+          {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+        </div>;
     }
-
-    return (
-      <div key={index} className="border-b space-y-2 py-[2px]">
+    return <div key={index} className="border-b space-y-2 py-[2px]">
         <div className="flex items-center justify-between">
           <span className={isBoldGray ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
             {fieldName}
@@ -220,53 +189,36 @@ export const ScoreSheetRecordPage = () => {
             <input className="border rounded px-2 py-1 w-32" disabled />
           </div>
         </div>
-        {field.fieldInfo && (
-          <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
-        )}
-      </div>
-    );
+        {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+      </div>;
   };
-
   const renderScoreSection = (section: any, sectionIndex: number) => {
     if (!section.fields || !Array.isArray(section.fields)) {
       return null;
     }
-
-    return (
-      <Card key={sectionIndex} className="mb-4">
+    return <Card key={sectionIndex} className="mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{section.name || `Section ${sectionIndex + 1}`}</CardTitle>
-          {section.description && (
-            <p className="text-sm text-muted-foreground">{section.description}</p>
-          )}
+          {section.description && <p className="text-sm text-muted-foreground">{section.description}</p>}
         </CardHeader>
         <CardContent className="space-y-4">
           {section.fields.map((field: any, fieldIndex: number) => renderScoreField(field, fieldIndex))}
         </CardContent>
-      </Card>
-    );
+      </Card>;
   };
-
   const renderScoreStructure = () => {
     if (!template?.scores || typeof template.scores !== 'object') {
-      return (
-        <div className="text-center py-8 text-muted-foreground">
+      return <div className="text-center py-8 text-muted-foreground">
           <p>No score structure defined for this template</p>
-        </div>
-      );
+        </div>;
     }
-
     const scores = template.scores as any;
-
     if (scores.sections && Array.isArray(scores.sections)) {
-      return (
-        <div className="space-y-4">
+      return <div className="space-y-4">
           {scores.sections.map((section: any, index: number) => renderScoreSection(section, index))}
-        </div>
-      );
+        </div>;
     } else if (scores.criteria && Array.isArray(scores.criteria)) {
-      return (
-        <Card>
+      return <Card>
           <CardHeader>
             <CardTitle>Score Sheet Preview</CardTitle>
           </CardHeader>
@@ -277,11 +229,9 @@ export const ScoreSheetRecordPage = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
-      );
+        </Card>;
     } else {
-      return (
-        <Card>
+      return <Card>
           <CardHeader>
             <CardTitle>Score Structure</CardTitle>
           </CardHeader>
@@ -290,14 +240,11 @@ export const ScoreSheetRecordPage = () => {
               {JSON.stringify(template.scores, null, 2)}
             </pre>
           </CardContent>
-        </Card>
-      );
+        </Card>;
     }
   };
-
   if (error) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg mb-4">{error}</div>
@@ -307,22 +254,16 @@ export const ScoreSheetRecordPage = () => {
             </Button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (isLoading) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Loading...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+  return <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Back Button */}
       <Button onClick={handleBack} variant="outline" size="sm">
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -333,45 +274,38 @@ export const ScoreSheetRecordPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{getPageTitle()}</h1>
-          {template && (
-            <p className="text-muted-foreground">
+          {template && <p className="text-muted-foreground">
               Template: {template.template_name}
-            </p>
-          )}
+            </p>}
         </div>
 
         {/* Action Buttons - Desktop */}
         <div className="hidden md:flex items-center gap-2">
-          {(mode === 'create' || mode === 'edit') && (
-            <Button onClick={() => setShowAIModal(true)} variant="outline" size="sm">
+          {(mode === 'create' || mode === 'edit') && <Button onClick={() => setShowAIModal(true)} variant="outline" size="sm" className="w-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-white hover:from-cyan-500 hover:via-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed border-0">
               <Sparkles className="h-4 w-4 mr-2" />
               Generate with AI
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
 
       {/* Mobile Action Buttons */}
-      {(mode === 'create' || mode === 'edit') && (
-        <div className="md:hidden grid grid-cols-2 gap-2">
+      {(mode === 'create' || mode === 'edit') && <div className="md:hidden grid grid-cols-2 gap-2">
           <Button onClick={handleCancel} variant="outline" className="w-full">
             Cancel
           </Button>
           <Button onClick={() => {
-            const form = document.querySelector('form');
-            if (form) {
-              form.requestSubmit();
-            }
-          }} className="w-full">
+        const form = document.querySelector('form');
+        if (form) {
+          form.requestSubmit();
+        }
+      }} className="w-full">
             {mode === 'create' ? 'Create' : 'Save'}
           </Button>
-        </div>
-      )}
+        </div>}
 
       {/* Content */}
       <div className="space-y-6">
-        {mode === 'view' ? (
-          <div className="space-y-6">
+        {mode === 'view' ? <div className="space-y-6">
             {/* Template Info */}
             <Card>
               <CardHeader>
@@ -398,23 +332,17 @@ export const ScoreSheetRecordPage = () => {
                   </div>
                 </div>
                 
-                {(template as any)?.description && (
-                  <div>
+                {(template as any)?.description && <div>
                     <div className="text-sm font-medium">Description</div>
                     <p className="mt-1 text-sm text-muted-foreground">{(template as any).description}</p>
-                  </div>
-                )}
+                  </div>}
                 
                 <div>
                   <div className="text-sm font-medium">Template Source</div>
                   <div className="mt-1">
-                    {(template as any)?.is_global ? (
-                      <Badge variant="default" className="bg-blue-100 text-blue-800">
+                    {(template as any)?.is_global ? <Badge variant="default" className="bg-blue-100 text-blue-800">
                         Global Template
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">School Template</Badge>
-                    )}
+                      </Badge> : <Badge variant="outline">School Template</Badge>}
                   </div>
                 </div>
               </CardContent>
@@ -428,43 +356,22 @@ export const ScoreSheetRecordPage = () => {
               </p>
               {renderScoreStructure()}
             </div>
-          </div>
-        ) : (
-          <Card>
+          </div> : <Card>
             <CardHeader>
               <CardTitle>
                 {mode === 'create' ? 'Create New Template' : 'Edit Template'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <TemplateForm
-                template={template}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                onFormChange={setHasUnsavedChanges}
-                useBuilder={true}
-              />
+              <TemplateForm template={template} onSubmit={handleSubmit} onCancel={handleCancel} onFormChange={setHasUnsavedChanges} useBuilder={true} />
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
 
       {/* Unsaved Changes Dialog */}
-      <UnsavedChangesDialog 
-        open={showConfirmDialog} 
-        onOpenChange={setShowConfirmDialog}
-        onDiscard={handleConfirmNavigation}
-        onCancel={handleCancelNavigation}
-        title="Unsaved Changes"
-        description="You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?"
-      />
+      <UnsavedChangesDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog} onDiscard={handleConfirmNavigation} onCancel={handleCancelNavigation} title="Unsaved Changes" description="You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?" />
 
       {/* Generate with AI Modal */}
-      <GenerateWithAIModal
-        open={showAIModal}
-        onOpenChange={setShowAIModal}
-        onFieldsGenerated={handleFieldsGenerated}
-      />
-    </div>
-  );
+      <GenerateWithAIModal open={showAIModal} onOpenChange={setShowAIModal} onFieldsGenerated={handleFieldsGenerated} />
+    </div>;
 };
