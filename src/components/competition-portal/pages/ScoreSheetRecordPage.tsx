@@ -3,11 +3,12 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft, Eye, Sparkles } from 'lucide-react';
 import { useCPScoreSheetsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useCompetitionTemplates, type CompetitionTemplate } from '../my-competitions/hooks/useCompetitionTemplates';
 import { TemplateForm } from '@/components/competition-management/components/TemplateForm';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { GenerateWithAIModal } from '../my-competitions/components/GenerateWithAIModal';
 import { toast } from 'sonner';
 
 export const ScoreSheetRecordPage = () => {
@@ -23,6 +24,7 @@ export const ScoreSheetRecordPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [showAIModal, setShowAIModal] = useState(false);
 
   const { canCreate, canUpdate, canViewDetails } = useCPScoreSheetsPermissions();
   const { createTemplate, updateTemplate, templates, isLoading: templatesLoading } = useCompetitionTemplates();
@@ -109,6 +111,18 @@ export const ScoreSheetRecordPage = () => {
 
   const handleCancel = () => {
     handleNavigation('/app/competition-portal/score-sheets');
+  };
+
+  const handleFieldsGenerated = (generatedFields: any) => {
+    if (template) {
+      // Update existing template with generated fields
+      setTemplate({
+        ...template,
+        scores: generatedFields
+      });
+    }
+    setHasUnsavedChanges(true);
+    toast.success('Fields generated and applied to the template');
   };
 
   const handleConfirmNavigation = () => {
@@ -328,7 +342,12 @@ export const ScoreSheetRecordPage = () => {
 
         {/* Action Buttons - Desktop */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Manual JSON button removed */}
+          {(mode === 'create' || mode === 'edit') && (
+            <Button onClick={() => setShowAIModal(true)} variant="outline" size="sm">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Generate with AI
+            </Button>
+          )}
         </div>
       </div>
 
@@ -438,6 +457,13 @@ export const ScoreSheetRecordPage = () => {
         onCancel={handleCancelNavigation}
         title="Unsaved Changes"
         description="You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?"
+      />
+
+      {/* Generate with AI Modal */}
+      <GenerateWithAIModal
+        open={showAIModal}
+        onOpenChange={setShowAIModal}
+        onFieldsGenerated={handleFieldsGenerated}
       />
     </div>
   );
