@@ -152,6 +152,7 @@ export const useDashboardPermissions = () => {
     canViewQuickActions: hasPermission('dashboard', 'view_quick_actions'),
     canViewAnnouncements: hasPermission('dashboard', 'view_announcements_widget'),
     canViewMobileFeatures: hasPermission('dashboard', 'view_mobile_features'),
+    canViewSharedPictures: hasPermission('dashboard', 'view_shared_pictures'),
   };
 };
 
