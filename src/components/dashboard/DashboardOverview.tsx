@@ -350,6 +350,8 @@ const DashboardOverview = () => {
         <div className="space-y-6">
           {/* My Cadets Widget for parents, My Tasks for others */}
           {canViewMyCadets && userProfile?.role === 'parent' ? <MyCadetsWidget /> : canViewMyTasks && userProfile?.role !== 'admin' ? <MyTasksWidget /> : null}
+          {/* Shared Pictures Widget - below My Cadets */}
+          {canViewSharedPictures && <SharedPicturesWidget />}
           {/* Quick Actions Widget - moved back below My Tasks */}
           {canViewQuickActions && renderQuickActionsWidget()}
         </div>
@@ -392,8 +394,6 @@ const DashboardOverview = () => {
               </div>
             </CardContent>
           </Card>}
-
-          {canViewSharedPictures && <SharedPicturesWidget />}
         </div>
       </div>
 
