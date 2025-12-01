@@ -3292,6 +3292,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           referred_by: string | null
+          shared_pictures_url: string | null
           state: string | null
           subscription_end: string | null
           subscription_start: string | null
@@ -3318,6 +3319,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           referred_by?: string | null
+          shared_pictures_url?: string | null
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
@@ -3344,6 +3346,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           referred_by?: string | null
+          shared_pictures_url?: string | null
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null

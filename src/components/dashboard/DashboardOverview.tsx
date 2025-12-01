@@ -15,6 +15,7 @@ import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyCadetsWidget } from './widgets/MyCadetsWidget';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
+import { SharedPicturesWidget } from './widgets/SharedPicturesWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions, useAnnouncementPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
@@ -47,7 +48,8 @@ const DashboardOverview = () => {
     canViewMyCadets,
     canViewUpcomingEvents,
     canViewQuickActions,
-    canViewAnnouncements
+    canViewAnnouncements,
+    canViewSharedPictures
   } = useDashboardPermissions();
   const {
     canCreate: canCreateUsers
@@ -390,6 +392,8 @@ const DashboardOverview = () => {
               </div>
             </CardContent>
           </Card>}
+
+          {canViewSharedPictures && <SharedPicturesWidget />}
         </div>
       </div>
 
