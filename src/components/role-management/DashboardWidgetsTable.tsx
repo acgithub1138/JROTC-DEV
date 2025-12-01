@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Users, CheckSquare, DollarSign, Package, AlertTriangle, Building, Calendar, Zap, Megaphone, Smartphone, Heart } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Package, AlertTriangle, Building, Calendar, Zap, Megaphone, Smartphone, Heart, Image } from 'lucide-react';
 interface DashboardWidget {
   name: string;
   label: string;
@@ -88,6 +88,12 @@ const dashboardWidgets: DashboardWidget[] = [{
   description: 'Display mobile-specific features and notifications',
   icon: Smartphone,
   category: 'Features'
+}, {
+  name: 'view_shared_pictures',
+  label: 'Shared Pictures',
+  description: 'Display link to shared pictures folder',
+  icon: Image,
+  category: 'Widgets'
 }];
 interface DashboardWidgetsTableProps {
   modules: any[];
