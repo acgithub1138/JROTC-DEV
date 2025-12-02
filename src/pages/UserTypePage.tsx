@@ -32,7 +32,7 @@ export default function UserTypePage() {
             Select your account type to continue
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+        <CardContent className="flex flex-col gap-4 p-6">
           {userTypes.map((type) => {
             const Icon = type.icon;
             return (
