@@ -11,7 +11,12 @@ const PricingPage = () => {
       price: "Free",
       period: "",
       description: "Best For JROTC Programs that want to register for competitions",
-      features: ["Register for Competitions", "Competition Schedule", "Instant Access to Event Scores"],
+      features: [
+        "Register for Competitions",
+        "Competition Schedule",
+        "Instant Access to Event Scores",
+        "Limited Email Support",
+      ],
       notIncluded: [],
       popular: false,
       cta: "Get Started",
@@ -28,6 +33,7 @@ const PricingPage = () => {
         "Competition Registration",
         "Event Time Selection",
         "Competition Analytics",
+        "Email Support",
       ],
       notIncluded: [],
       popular: true,
@@ -36,9 +42,8 @@ const PricingPage = () => {
     {
       name: "Competitions - Hosting (per meet)",
       price: "$199",
-      period: "per-meet",
-      description:
-        "Best for JORTC programs that host 1-3 competitions. (Need more ask about our unlimited hosting package)",
+      period: "per competition",
+      description: "Best for JORTC programs that host competitions.",
       features: [
         "All Analytics features +",
         "Competition Dashboard",
@@ -49,6 +54,7 @@ const PricingPage = () => {
         "Schedule Management",
         "Real-Time Score Tracking",
         "Real-Time Ranks",
+        "Email Support",
       ],
       notIncluded: [],
       popular: false,
@@ -90,7 +96,7 @@ const PricingPage = () => {
               Simple, Transparent <span className="text-primary">Pricing</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Choose the plan that fits your JROTC program size and needs. All plans include full support and training.
+              Choose the plan that fits your JROTC program size and needs. All plans include email support and training.
             </p>
           </div>
 
@@ -207,7 +213,8 @@ const PricingPage = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Start your JROTC Pro subscription today and see how our platform can transform your program management.
+            Start your JROTC Competition subscription today and see how our platform can transform your competition
+            management.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
