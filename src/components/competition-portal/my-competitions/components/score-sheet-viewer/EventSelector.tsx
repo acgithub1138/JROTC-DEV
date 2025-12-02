@@ -22,7 +22,10 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
         <SelectTrigger className="w-64">
           <SelectValue placeholder="Choose an event type..." />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-background z-50">
+          <SelectItem value="all">
+            All Events ({events.length} total score sheets)
+          </SelectItem>
           {uniqueEventTypes.map((eventType) => (
             <SelectItem key={eventType} value={eventType}>
               {eventType} ({events.filter(e => e.competition_event_types?.name === eventType).length} score sheets)
