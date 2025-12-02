@@ -73,7 +73,7 @@ const PricingPage = () => {
     },
     {
       question: "What kind of support do you provide?",
-      answer: "We offer email support for non hosting plans, and email and phone support for hosting plans.",
+      answer: "We offer limite email support for the basic plan, and email support for hosting plans.",
     },
     {
       question: "Is my data secure?",
