@@ -25,7 +25,7 @@ export default function UserTypePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <Card className="w-full max-w-4xl">
+      <Card className="w-full max-w-sm">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-bold">Welcome to JROTC Command Center</CardTitle>
           <CardDescription className="text-base">Select your account type to continue</CardDescription>
