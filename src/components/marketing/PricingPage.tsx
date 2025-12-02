@@ -118,7 +118,7 @@ const PricingPage = () => {
             {plans.map((plan, index) => (
               <Card
                 key={index}
-                className={`relative ${plan.popular ? "border-primary shadow-lg scale-105" : "border-border"}`}
+                className={`relative flex flex-col ${plan.popular ? "border-primary shadow-lg scale-105" : "border-border"}`}
               >
                 {plan.popular && (
                   <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
@@ -133,7 +133,7 @@ const PricingPage = () => {
                     <span className="text-muted-foreground">/{plan.period}</span>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="flex-1 flex flex-col justify-between space-y-4">
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-2">
