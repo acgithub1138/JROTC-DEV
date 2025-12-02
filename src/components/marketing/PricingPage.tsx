@@ -53,7 +53,7 @@ const PricingPage = () => {
         "Judges Portal",
         "Schedule Management",
         "Real-Time Score Tracking",
-        "Real-Time Ranks",
+        "Real-Time Ranking",
         "Email Support",
       ],
       notIncluded: [],
