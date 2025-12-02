@@ -78,8 +78,15 @@ const LandingPage = () => {
     //  },
     {
       icon: Trophy,
+      title: "Competition - Basic",
+      description: "Register for competitions.",
+      href: "/products/competition-management",
+      features: ["Register for Competitions", "Competition Scoring"],
+    },
+    {
+      icon: Trophy,
       title: "Competition - Analytics",
-      description: "A place to track all your competitions and review your performance over time.",
+      description: "Track your competitions and review your performance over time.",
       href: "/products/competition-management",
       features: [
         "Register for Competitions",
@@ -96,6 +103,7 @@ const LandingPage = () => {
       href: "/products/competition-management",
       features: [
         "Competition Planning",
+        "Casdet Management",
         "Resource Management",
         "Participant Management",
         "Judges Portal",
