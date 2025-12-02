@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { useCompetitionEventsPermissions, useCompetitionResourcesPermissions, useCompetitionSchoolsPermissions, useCompetitionSchedulePermissions, useCompetitionResultsPermissions, useCompetitionJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CompetitionDetailsSidebar } from './CompetitionDetailsSidebar';
+import { CompetitionDetailsTabs } from './CompetitionDetailsTabs';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
@@ -17,6 +19,7 @@ export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
+  const isMobile = useIsMobile();
   
   // Extract competition ID from URL path
   const getCompetitionIdFromPath = () => {
@@ -148,35 +151,52 @@ export const CompetitionDetailsPage = () => {
     );
   }
 
+  const competitionPermissions = {
+    events: eventsPermissions,
+    judges: judgesPermissions,
+    resources: resourcesPermissions,
+    schools: schoolsPermissions,
+    schedule: schedulePermissions,
+    results: resultsPermissions
+  };
+
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full">
-      <CompetitionDetailsSidebar 
-        competitionId={competitionId} 
-        permissions={{
-          events: eventsPermissions,
-          judges: judgesPermissions,
-          resources: resourcesPermissions,
-          schools: schoolsPermissions,
-          schedule: schedulePermissions,
-          results: resultsPermissions
-        }}
-        open={sidebarOpen}
-        onOpenChange={setSidebarOpen}
-      />
+    <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
+      {/* Mobile Sidebar */}
+      {isMobile && (
+        <CompetitionDetailsSidebar 
+          competitionId={competitionId} 
+          permissions={competitionPermissions}
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+        />
+      )}
       
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Mobile Menu Button */}
-        <div className="sticky top-0 z-10 bg-background border-b p-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-4 w-4 mr-2" />
-            Menu
-          </Button>
-        </div>
+        {isMobile && (
+          <div className="sticky top-0 z-10 bg-background border-b p-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-4 w-4 mr-2" />
+              Menu
+            </Button>
+          </div>
+        )}
+        
+        {/* Desktop/Tablet Tabs */}
+        {!isMobile && (
+          <div className="sticky top-0 z-10 bg-background border-b">
+            <CompetitionDetailsTabs 
+              competitionId={competitionId} 
+              permissions={competitionPermissions}
+            />
+          </div>
+        )}
         
         <div className="p-6 space-y-6">
           {/* Dynamic content based on route */}
