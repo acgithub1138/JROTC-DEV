@@ -179,27 +179,30 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                 <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
                   {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
                 </Badge>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {onView && canViewDetails && (
-                    <Button variant="ghost" size="sm" onClick={() => onView(competition)} title="View Score Cards">
-                      <Eye className="w-4 h-4" />
+                    <Button variant="default" size="sm" onClick={() => onView(competition)}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Scores
                     </Button>
                   )}
-                  {onEdit && competition.source_type === 'internal' && canUpdate && (
-                    <Button variant="ghost" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  )}
-                  {onAddEvent && canCreate && (
-                    <Button variant="ghost" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  )}
-                  {onDelete && competition.source_type === 'internal' && canDeletePermission && (
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {onEdit && competition.source_type === 'internal' && canUpdate && (
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {onAddEvent && canCreate && (
+                      <Button variant="ghost" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {onDelete && competition.source_type === 'internal' && canDeletePermission && (
+                      <Button variant="ghost" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               <h3 
