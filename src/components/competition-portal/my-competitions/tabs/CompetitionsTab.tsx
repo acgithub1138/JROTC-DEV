@@ -53,7 +53,6 @@ const formatCompetitionDateFull = (date: string) => {
 export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
   const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
-  const { canViewDetails } = useTablePermissions('competitions');
   const [viewingCompetition, setViewingCompetition] = useState<ExtendedCompetition | null>(null);
   const [deletingCompetition, setDeletingCompetition] = useState<ExtendedCompetition | null>(null);
   
@@ -166,7 +165,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           handleDeleteCompetition(competition);
         }}
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onView={canViewDetails ? handleViewScoreSheets : undefined}
+        onView={handleViewScoreSheets}
         canEdit={canUpdate && !readOnly}
         canDelete={canDelete && !readOnly}
         canAddEvent={canCreate && !readOnly}
