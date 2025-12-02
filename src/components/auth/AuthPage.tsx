@@ -184,6 +184,9 @@ const AuthPage = () => {
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                 {loading ? "Signing In..." : "Sign In"}
               </Button>
+              <Button type="button" variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50">
+                New Parent Sign Up
+              </Button>
             </form>
 
             <div className="mt-4 text-center space-y-2">
