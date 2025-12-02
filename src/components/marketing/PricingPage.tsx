@@ -37,31 +37,12 @@ const PricingPage = () => {
       name: "Competitions - Hosting (per meet)",
       price: "$199",
       period: "per-meet",
-      description: "Best for JORTC programs that host 1-3 competitions",
+      description:
+        "Best for JORTC programs that host 1-3 competitions. (Need more ask about our unlimited hosting package)",
       features: [
         "All Analytics features +",
         "Competition Dashboard",
-        "One Host Competition",
-        "Event Management",
-        "Resource Management",
-        "Judges Portal",
-        "Schedule Management",
-        "Real-Time Score Tracking",
-        "Real-Time Ranks",
-      ],
-      notIncluded: [],
-      popular: false,
-      cta: "Get Started",
-    },
-    {
-      name: "Competitions - Hosting (Unlimited)",
-      price: "$799",
-      period: "per year",
-      description: "Best for JORTC programs that host 4+ competitions",
-      features: [
-        "All Analytics features +",
-        "Competition Dashboard",
-        "Unlimited Host Competitions",
+        "Host One Competition",
         "Event Management",
         "Resource Management",
         "Judges Portal",
@@ -114,7 +95,7 @@ const PricingPage = () => {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {plans.map((plan, index) => (
               <Card
                 key={index}
@@ -185,7 +166,6 @@ const PricingPage = () => {
               "Mobile browser support",
               "Data backup & security",
               "Regular updates",
-              "Email notifications",
               "User training materials",
             ].map((feature, index) => (
               <div key={index} className="flex items-center gap-2">
