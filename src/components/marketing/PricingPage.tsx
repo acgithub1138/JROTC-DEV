@@ -39,9 +39,9 @@ const PricingPage = () => {
       period: "per-meet",
       description: "Best for JORTC programs that host 1-3 competitions",
       features: [
-        "All Competition - Analytics features +",
+        "All Analytics features +",
         "Competition Dashboard",
-        "Host Competitions",
+        "One Host Competition",
         "Event Management",
         "Resource Management",
         "Judges Portal",
@@ -59,9 +59,9 @@ const PricingPage = () => {
       period: "per year",
       description: "Best for JORTC programs that host 4+ competitions",
       features: [
-        "All Competition - Analytics features +",
+        "All Analytics features +",
         "Competition Dashboard",
-        "Host Competitions",
+        "Unlimited Host Competitions",
         "Event Management",
         "Resource Management",
         "Judges Portal",
