@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useAuth } from '@/contexts/AuthContext';
-import { usePortal } from '@/contexts/PortalContext';
-import { usePermissionContext } from '@/contexts/PermissionContext';
-import { filterCompetitionModulesBySchoolFlags } from '@/utils/competitionPermissions';
-import { useThemes } from '@/hooks/useThemes';
-import { useNavigate } from 'react-router-dom';
-import { Trophy, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import * as LucideIcons from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePortal } from "@/contexts/PortalContext";
+import { usePermissionContext } from "@/contexts/PermissionContext";
+import { filterCompetitionModulesBySchoolFlags } from "@/utils/competitionPermissions";
+import { useThemes } from "@/hooks/useThemes";
+import { useNavigate } from "react-router-dom";
+import { Trophy, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import * as LucideIcons from "lucide-react";
 
 interface CompetitionSidebarProps {
   className?: string;
@@ -24,32 +24,32 @@ interface CompetitionSidebarProps {
 
 // Default theme configuration
 const DEFAULT_THEME = {
-  primary_color: '#111827',
+  primary_color: "#111827",
   // Sidebar background (gray-900)
-  secondary_color: '#2563eb',
+  secondary_color: "#2563eb",
   // Selected link background (blue-600)
-  link_text: '#d1d5db',
+  link_text: "#d1d5db",
   // Link text (gray-300)
-  link_selected_text: '#ffffff',
+  link_selected_text: "#ffffff",
   // Selected link text (white)
-  link_hover: '#1f2937' // Hover background (gray-800)
+  link_hover: "#1f2937", // Hover background (gray-800)
 };
 
 // Fetch competition portal menu items from database
 const fetchCompetitionMenuItemsFromDatabase = async (
   hasPermission: (module: string, action: string) => boolean,
   hasCompetitionModule: boolean,
-  hasCompetitionPortal: boolean
+  hasCompetitionPortal: boolean,
 ) => {
   try {
-    const { data: modules, error } = await supabase.rpc('get_permission_modules_simple', {
+    const { data: modules, error } = await supabase.rpc("get_permission_modules_simple", {
       is_tab_param: false,
       parent_module_param: null,
-      is_active_param: true
+      is_active_param: true,
     });
 
     if (error) {
-      console.error('Error fetching competition portal modules:', error);
+      console.error("Error fetching competition portal modules:", error);
       return [];
     }
 
@@ -62,26 +62,26 @@ const fetchCompetitionMenuItemsFromDatabase = async (
         label: module.label,
         icon: module.icon,
         path: module.path,
-        sort_order: module.sort_order || 0
+        sort_order: module.sort_order || 0,
       }));
 
-    console.log('All competition modules from DB:', allCompetitionModules);
+    console.log("All competition modules from DB:", allCompetitionModules);
 
     // First filter by school-level flags, then by role permissions
     const schoolFilteredModules = filterCompetitionModulesBySchoolFlags(
       allCompetitionModules,
       hasCompetitionModule,
-      hasCompetitionPortal
+      hasCompetitionPortal,
     );
 
     const competitionModules = schoolFilteredModules
-      .filter((module: any) => hasPermission(module.name, 'sidebar'))
+      .filter((module: any) => hasPermission(module.name, "sidebar"))
       .sort((a: any, b: any) => a.sort_order - b.sort_order);
 
-    console.log('Loaded competition portal modules:', competitionModules);
+    console.log("Loaded competition portal modules:", competitionModules);
     return competitionModules;
   } catch (error) {
-    console.error('Error in fetchCompetitionMenuItemsFromDatabase:', error);
+    console.error("Error in fetchCompetitionMenuItemsFromDatabase:", error);
     return [];
   }
 };
@@ -90,17 +90,17 @@ const fetchCompetitionMenuItemsFromDatabase = async (
 const DynamicIcon: React.FC<{ iconName: string; className?: string }> = ({ iconName, className = "" }) => {
   const iconKey = iconName as keyof typeof LucideIcons;
   const IconComponent = LucideIcons[iconKey];
-  
+
   // Type guard to check if it's a valid React component
   const isValidComponent = (component: any): component is React.ComponentType<any> => {
-    return typeof component === 'function' || (typeof component === 'object' && component.$$typeof);
+    return typeof component === "function" || (typeof component === "object" && component.$$typeof);
   };
-  
+
   if (!IconComponent || !isValidComponent(IconComponent)) {
     console.warn(`Icon "${iconName}" not found in Lucide icons, using fallback`);
     return <Trophy className={className} />;
   }
-  
+
   const ValidIcon = IconComponent as React.ComponentType<{ className?: string }>;
   return <ValidIcon className={className} />;
 };
@@ -111,7 +111,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   onModuleChange,
   isMobile = false,
   sidebarOpen = false,
-  setSidebarOpen
+  setSidebarOpen,
 }) => {
   const { userProfile } = useAuth();
   const { setPortal, hasCompetitionModule, hasCompetitionPortal } = usePortal();
@@ -130,10 +130,14 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 
       setIsLoading(true);
       try {
-        const items = await fetchCompetitionMenuItemsFromDatabase(hasPermission, hasCompetitionModule, hasCompetitionPortal);
+        const items = await fetchCompetitionMenuItemsFromDatabase(
+          hasPermission,
+          hasCompetitionModule,
+          hasCompetitionPortal,
+        );
         setMenuItems(items);
       } catch (error) {
-        console.error('Error loading competition menu items:', error);
+        console.error("Error loading competition menu items:", error);
         setMenuItems([]);
       } finally {
         setIsLoading(false);
@@ -144,7 +148,9 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   }, [userProfile?.role, hasPermission, permissionsLoading, hasCompetitionModule, hasCompetitionPortal]);
 
   // Get the active theme that matches the user's JROTC program or use default
-  const activeTheme = themes.find(theme => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program);
+  const activeTheme = themes.find(
+    (theme) => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program,
+  );
 
   // Use active theme or fallback to default theme
   const currentTheme = {
@@ -152,14 +158,16 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     secondary_color: activeTheme?.secondary_color || DEFAULT_THEME.secondary_color,
     link_text: (activeTheme as any)?.link_text || DEFAULT_THEME.link_text,
     link_selected_text: (activeTheme as any)?.link_selected_text || DEFAULT_THEME.link_selected_text,
-    link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover
+    link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover,
   };
 
   // Show loading state while menu items are being fetched
   if (isLoading) {
     return (
-      <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} 
-           style={{ backgroundColor: DEFAULT_THEME.primary_color }}>
+      <div
+        className={cn("fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40", className)}
+        style={{ backgroundColor: DEFAULT_THEME.primary_color }}
+      >
         <div className="p-6">
           <div className="flex items-center space-x-2">
             <Trophy className="w-8 h-8 text-blue-400" />
@@ -168,7 +176,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
         </div>
         <ScrollArea className="flex-1 px-3">
           <div className="space-y-1">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="h-10 bg-gray-700 rounded animate-pulse" />
             ))}
           </div>
@@ -178,12 +186,12 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   }
 
   const handleReturnToCCC = () => {
-    setPortal('ccc');
-    navigate('/app');
+    setPortal("ccc");
+    navigate("/app");
   };
-  
+
   const handleMenuItemClick = (item: any) => {
-    console.log('Menu item clicked:', item, 'Current activeModule:', activeModule);
+    console.log("Menu item clicked:", item, "Current activeModule:", activeModule);
     onModuleChange(item.id);
     if (isMobile && setSidebarOpen) {
       setSidebarOpen(false);
@@ -205,12 +213,12 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-2">
-            {menuItems.map(item => {
+            {menuItems.map((item) => {
               const isActive = activeModule === item.id;
               return (
                 <Button
                   key={item.id}
-                  variant={isActive ? 'secondary' : 'ghost'}
+                  variant={isActive ? "secondary" : "ghost"}
                   className="w-full justify-start text-gray-900 hover:bg-gray-100"
                   onClick={() => handleMenuItemClick(item)}
                 >
@@ -219,8 +227,8 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
                 </Button>
               );
             })}
-            
-            {userProfile?.role !== 'external' && (
+
+            {userProfile?.role !== "external" && (
               <Button
                 variant="outline"
                 className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100"
@@ -240,8 +248,10 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   }
 
   return (
-    <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} 
-         style={{ backgroundColor: currentTheme.primary_color }}>
+    <div
+      className={cn("fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40", className)}
+      style={{ backgroundColor: currentTheme.primary_color }}
+    >
       <div className="p-6">
         <div className="flex items-center space-x-2">
           {activeTheme?.theme_image_url ? (
@@ -257,29 +267,29 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-1">
-          {menuItems.map(item => {
+          {menuItems.map((item) => {
             const isActive = activeModule === item.id;
             return (
-              <Button 
-                key={item.id} 
-                variant="ghost" 
-                className="w-full justify-start text-left font-normal" 
+              <Button
+                key={item.id}
+                variant="ghost"
+                className="w-full justify-start text-left font-normal"
                 style={{
-                  backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
-                  color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
-                }} 
-                onMouseEnter={e => {
+                  backgroundColor: isActive ? currentTheme.secondary_color : "transparent",
+                  color: isActive ? currentTheme.link_selected_text : currentTheme.link_text,
+                }}
+                onMouseEnter={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.color = "#ffffff";
                   }
-                }} 
-                onMouseLeave={e => {
+                }}
+                onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.backgroundColor = "transparent";
                     e.currentTarget.style.color = currentTheme.link_text;
                   }
-                }} 
+                }}
                 onClick={() => handleMenuItemClick(item)}
               >
                 <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3" />
@@ -291,28 +301,28 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
       </ScrollArea>
 
       {/* Return to CCC Button - Hidden for external users */}
-      {userProfile?.role !== 'external' && (
+      {userProfile?.role !== "external" && (
         <div className="p-3 border-t border-gray-700">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start text-left font-normal" 
+          <Button
+            variant="outline"
+            className="w-full justify-start text-left font-normal"
             style={{
               borderColor: currentTheme.link_text,
               color: currentTheme.link_text,
-              backgroundColor: 'transparent'
-            }} 
-            onMouseEnter={e => {
+              backgroundColor: "transparent",
+            }}
+            onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-              e.currentTarget.style.color = '#ffffff';
-            }} 
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
               e.currentTarget.style.color = currentTheme.link_text;
-            }} 
+            }}
             onClick={handleReturnToCCC}
           >
             <ArrowLeft className="w-4 h-4 mr-3" />
-            Return to CCC
+            Command & Control Center
           </Button>
         </div>
       )}
