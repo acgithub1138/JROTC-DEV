@@ -9,14 +9,14 @@ export default function UserTypePage() {
   const userTypes = [
     {
       title: "JROTC Command Center",
-      description: "Access the full JROTC Command Center for instructors, cadets, and parents",
+      description: "",
       icon: Users,
       path: "/app/auth",
       variant: "default" as const,
     },
     {
       title: "Judges Portal",
-      description: "Access the judges portal for scoring competitions",
+      description: "",
       icon: Gavel,
       path: "/app/judges/auth",
       variant: "default" as const,
@@ -28,9 +28,7 @@ export default function UserTypePage() {
       <Card className="w-full max-w-4xl">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-bold">Welcome to JROTC Command Center</CardTitle>
-          <CardDescription className="text-base">
-            Select your account type to continue
-          </CardDescription>
+          <CardDescription className="text-base">Select your account type to continue</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 p-6">
           {userTypes.map((type) => {
