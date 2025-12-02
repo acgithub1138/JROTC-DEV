@@ -5,51 +5,87 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, X } from "lucide-react";
 const PricingPage = () => {
-  const plans = [{
-    name: "Competitions - Basic",
-    price: "Free",
-    period: "",
-    description: "Best For JROTC Programs that want to register for competitions",
-    features: ["Register for Competitions", "Competition Schedule", "Instant Access to Event Scores", "Limited Email Support"],
-    notIncluded: [],
-    popular: false,
-    cta: "Get Started"
-  }, {
-    name: "Competitions - Analytics",
-    price: "$199",
-    period: "per year",
-    description: "Best for JROTC programs that participate in competitions",
-    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration", "Event Time Selection", "Competition Analytics", "Email Support"],
-    notIncluded: [],
-    popular: true,
-    cta: "Get Started"
-  }, {
-    name: "Competitions - Hosting (per meet)",
-    price: "$199",
-    period: "per competition",
-    description: "Best for JORTC programs that host competitions.",
-    features: ["All Analytics features +", "Competition Dashboard", "Host One Competition", "Event Management", "Resource Management", "Judges Portal", "Schedule Management", "Real-Time Score Tracking", "Real-Time Ranks", "Email Support"],
-    notIncluded: [],
-    popular: false,
-    cta: "Get Started"
-  }];
-  const faqs = [{
-    question: "What's your pricing model?",
-    answer: "We offer transparent annual or per meet pricing with no extra hidden fees."
-  }, {
-    question: "Can I change plans later?",
-    answer: "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle."
-  }, {
-    question: "What kind of support do you provide?",
-    answer: "We offer limite email support for the basic plan, and email support for hosting plans."
-  }, {
-    question: "Is my data secure?",
-    answer: "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud."
-  }];
+  const plans = [
+    {
+      name: "Competitions - Basic",
+      price: "Free",
+      period: "",
+      description: "Best For JROTC Programs that want to register for competitions",
+      features: [
+        "Register for Competitions",
+        "Competition Schedule",
+        "Instant Access to Event Scores",
+        "Limited Email Support",
+      ],
+      notIncluded: [],
+      popular: false,
+      cta: "Get Started",
+    },
+    {
+      name: "Competitions - Analytics",
+      price: "$199",
+      period: "per year",
+      description: "Best for JROTC programs that participate in competitions",
+      features: [
+        "All Basic features +",
+        "My Competition Tracking",
+        "Score Sheet Templates",
+        "Competition Registration",
+        "Event Time Selection",
+        "Competition Analytics",
+        "Email Support",
+      ],
+      notIncluded: [],
+      popular: true,
+      cta: "Get Started",
+    },
+    {
+      name: "Competitions - Hosting",
+      price: "$199",
+      period: "per competition",
+      description: "Best for JORTC programs that host competitions.",
+      features: [
+        "All Analytics features +",
+        "Competition Dashboard",
+        "Host One Competition",
+        "Event Management",
+        "Resource Management",
+        "Judges Portal",
+        "Schedule Management",
+        "Real-Time Score Tracking",
+        "Real-Time Ranks",
+        "Email Support",
+      ],
+      notIncluded: [],
+      popular: false,
+      cta: "Get Started",
+    },
+  ];
+  const faqs = [
+    {
+      question: "What's your pricing model?",
+      answer: "We offer transparent annual or per meet pricing with no extra hidden fees.",
+    },
+    {
+      question: "Can I change plans later?",
+      answer:
+        "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle.",
+    },
+    {
+      question: "What kind of support do you provide?",
+      answer: "We offer limite email support for the basic plan, and email support for hosting plans.",
+    },
+    {
+      question: "Is my data secure?",
+      answer:
+        "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud.",
+    },
+  ];
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  return <div className="min-h-screen">
+  return (
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-10 lg:py-16">
         <div className="container mx-auto px-4">
@@ -64,7 +100,11 @@ const PricingPage = () => {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => <Card key={index} className={`relative flex flex-col ${plan.popular ? "border-primary shadow-lg scale-105" : "border-border"}`}>
+            {plans.map((plan, index) => (
+              <Card
+                key={index}
+                className={`relative flex flex-col ${plan.popular ? "border-primary shadow-lg scale-105" : "border-border"}`}
+              >
                 {plan.popular}
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
@@ -76,20 +116,30 @@ const PricingPage = () => {
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col justify-between space-y-4">
                   <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5 text-primary" />
                         <span className="text-sm">{feature}</span>
-                      </li>)}
-                    {plan.notIncluded.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2">
+                      </li>
+                    ))}
+                    {plan.notIncluded.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-2">
                         <X className="h-5 w-5 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>)}
+                      </li>
+                    ))}
                   </ul>
-                  <Button className={`w-full ${plan.popular ? "" : "variant-outline"}`} variant={plan.popular ? "default" : "outline"} size="lg" asChild>
+                  <Button
+                    className={`w-full ${plan.popular ? "" : "variant-outline"}`}
+                    variant={plan.popular ? "default" : "outline"}
+                    size="lg"
+                    asChild
+                  >
                     <Link to="/contact">{plan.cta}</Link>
                   </Button>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
 
           {/* Money Back Guarantee */}
@@ -111,10 +161,18 @@ const PricingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {["Cloud-based access", "Mobile browser support", "Data backup & security", "Regular updates", "User training materials"].map((feature, index) => <div key={index} className="flex items-center gap-2">
+            {[
+              "Cloud-based access",
+              "Mobile browser support",
+              "Data backup & security",
+              "Regular updates",
+              "User training materials",
+            ].map((feature, index) => (
+              <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
                 <span className="text-sm">{feature}</span>
-              </div>)}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -130,14 +188,16 @@ const PricingPage = () => {
           </div>
 
           <div className="max-w-4xl mx-auto space-y-6">
-            {faqs.map((faq, index) => <Card key={index}>
+            {faqs.map((faq, index) => (
+              <Card key={index}>
                 <CardHeader>
                   <CardTitle className="text-lg">{faq.question}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{faq.answer}</p>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -154,10 +214,16 @@ const PricingPage = () => {
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link to="/contact">Get Started</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild></Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              asChild
+            ></Button>
           </div>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 };
 export default PricingPage;
