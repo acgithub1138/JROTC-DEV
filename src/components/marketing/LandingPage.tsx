@@ -45,7 +45,7 @@ const LandingPage = () => {
     description: "Keep parents, relatives, vendors, and supporters organized and accessible.",
     href: "/products/contacts-management",
     features: ["Contact management"]
-  },{
+  }, {
     icon: Mail,
     title: "Email Management",
     description: "Set up email notifications for the cadet tasks to keep them informed on what needs to be done.",
@@ -97,12 +97,9 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Streamline Your <span className="text-primary">JROTC Program</span> Management
+              Streamline Your <span className="text-primary">JROTC Competition</span> Management
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              This comprehensive platform is designed specifically for JROTC instructors to manage cadets, 
-              competitions, tasks, and communications in one powerful system.
-            </p>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">This comprehensive platform is designed specifically for JROTC Competition instructors to manage every aspect of your competitions in one powerful system.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button size="lg" className="text-lg px-8" asChild>
                 <Link to="/contact">Get Started</Link>
@@ -166,7 +163,9 @@ const LandingPage = () => {
       </section>
 
       {/* Features Grid - Deferred rendering */}
-      <section className="py-20" style={{ contentVisibility: 'auto' }}>
+      <section className="py-20" style={{
+      contentVisibility: 'auto'
+    }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">
