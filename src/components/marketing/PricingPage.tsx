@@ -46,6 +46,7 @@ const PricingPage = () => {
       description: "Best for JORTC programs that host competitions.",
       features: [
         "All Analytics features +",
+        "Cadet Management",
         "Competition Dashboard",
         "Host One Competition",
         "Event Management",
