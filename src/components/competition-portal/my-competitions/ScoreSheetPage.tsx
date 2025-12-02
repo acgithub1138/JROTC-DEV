@@ -65,7 +65,22 @@ export const ScoreSheetPage = () => {
   }, [selectedSchoolId]);
 
   useEffect(() => {
-    if (showAllSchools && selectedEvent && selectedSchoolIds.length > 0) {
+    if (selectedEvent === 'all') {
+      // Show all events for selected school(s)
+      if (showAllSchools && selectedSchoolIds.length > 0) {
+        const filtered = (events as any[]).filter(event => 
+          selectedSchoolIds.includes(event.school_id)
+        );
+        setFilteredEvents(filtered);
+      } else if (!showAllSchools && selectedSchoolId) {
+        const filtered = (events as any[]).filter(event => 
+          event.school_id === selectedSchoolId
+        );
+        setFilteredEvents(filtered);
+      } else {
+        setFilteredEvents([]);
+      }
+    } else if (showAllSchools && selectedEvent && selectedSchoolIds.length > 0) {
       const filtered = (events as any[]).filter(event => 
         selectedSchoolIds.includes(event.school_id) && 
         event.competition_event_types?.name === selectedEvent
@@ -117,6 +132,16 @@ export const ScoreSheetPage = () => {
     }
     return acc;
   }, {} as Record<string, { name: string; events: any[] }>);
+
+  // Group events by event type when "All" is selected
+  const groupedByEventType = selectedEvent === 'all' ? filteredEvents.reduce((acc, event) => {
+    const eventType = event.competition_event_types?.name || 'Unknown Event';
+    if (!acc[eventType]) {
+      acc[eventType] = [];
+    }
+    acc[eventType].push(event);
+    return acc;
+  }, {} as Record<string, any[]>) : {};
 
   if (compsLoading) {
     return (
@@ -242,11 +267,57 @@ export const ScoreSheetPage = () => {
                     <div className="border-b pb-2">
                       <h3 className="text-lg font-semibold">{schoolData.name}</h3>
                       <div className="text-sm text-muted-foreground">
-                        {schoolData.events.length} score sheet{schoolData.events.length !== 1 ? 's' : ''} for {selectedEvent}
+                        {schoolData.events.length} score sheet{schoolData.events.length !== 1 ? 's' : ''} {selectedEvent !== 'all' ? `for ${selectedEvent}` : ''}
+                      </div>
+                    </div>
+                    {selectedEvent === 'all' ? (
+                      <div className="space-y-8">
+                        {Object.entries(
+                          schoolData.events.reduce((acc, event) => {
+                            const eventType = event.competition_event_types?.name || 'Unknown Event';
+                            if (!acc[eventType]) acc[eventType] = [];
+                            acc[eventType].push(event);
+                            return acc;
+                          }, {} as Record<string, any[]>)
+                        ).map(([eventType, eventsList]) => (
+                          <div key={eventType} className="space-y-2">
+                            <h4 className="text-md font-medium text-primary">{eventType}</h4>
+                            <ScoreSheetTable 
+                              events={eventsList as any[]} 
+                              onEventsRefresh={refetch}
+                              isInternal={!isPortalCompetition}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <ScoreSheetTable 
+                        events={schoolData.events} 
+                        onEventsRefresh={refetch}
+                        isInternal={!isPortalCompetition}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Select schools to view their score sheets {selectedEvent !== 'all' ? `for ${selectedEvent}` : ''}
+              </div>
+            )
+          ) : !showAllSchools && selectedEvent && filteredEvents.length > 0 ? (
+            selectedEvent === 'all' ? (
+              <div className="space-y-8">
+                {Object.entries(groupedByEventType).map(([eventType, eventsList]) => (
+                  <div key={eventType} className="space-y-4">
+                    <div className="border-b pb-2">
+                      <h3 className="text-lg font-semibold">{eventType}</h3>
+                      <div className="text-sm text-muted-foreground">
+                        {(eventsList as any[]).length} score sheet{(eventsList as any[]).length !== 1 ? 's' : ''}
                       </div>
                     </div>
                     <ScoreSheetTable 
-                      events={schoolData.events} 
+                      events={eventsList as any[]} 
                       onEventsRefresh={refetch}
                       isInternal={!isPortalCompetition}
                     />
@@ -254,25 +325,21 @@ export const ScoreSheetPage = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                Select schools to view their score sheets for {selectedEvent}
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredEvents.length} score sheets for {selectedEvent}
+                </div>
+                
+                <ScoreSheetTable 
+                  events={filteredEvents} 
+                  onEventsRefresh={refetch}
+                  isInternal={!isPortalCompetition}
+                />
               </div>
             )
-          ) : !showAllSchools && selectedEvent && filteredEvents.length > 0 ? (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredEvents.length} score sheets for {selectedEvent}
-              </div>
-              
-              <ScoreSheetTable 
-                events={filteredEvents} 
-                onEventsRefresh={refetch}
-                isInternal={!isPortalCompetition}
-              />
-            </div>
           ) : !showAllSchools && selectedEvent && filteredEvents.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No score sheets found for {selectedEvent}
+              No score sheets found {selectedEvent !== 'all' ? `for ${selectedEvent}` : ''}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
