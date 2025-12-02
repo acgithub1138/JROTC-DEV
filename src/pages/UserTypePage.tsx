@@ -1,39 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserCircle, School, Gavel } from "lucide-react";
+import { Users, Gavel } from "lucide-react";
 
 export default function UserTypePage() {
   const navigate = useNavigate();
 
   const userTypes = [
     {
-      title: "Instructor / Cadet",
-      description: "Access the full JROTC Command Center",
+      title: "JROTC Command Center",
+      description: "Access the full JROTC Command Center for instructors, cadets, and parents",
       icon: Users,
       path: "/app/auth",
       variant: "default" as const,
     },
     {
-      title: "Parent",
-      description: "View your cadet's progress and information",
-      icon: UserCircle,
-      path: "/app/auth",
-      variant: "default" as const,
-    },
-    {
-      title: "Free Account",
-      description: "Register for competitions as an external school",
-      icon: School,
-      path: "/external/auth",
-      variant: "secondary" as const,
-    },
-    {
-      title: "Judge",
-      description: "Access the judges portal for scoring",
+      title: "Judges Portal",
+      description: "Access the judges portal for scoring competitions",
       icon: Gavel,
       path: "/app/judges/auth",
-      variant: "outline" as const,
+      variant: "default" as const,
     },
   ];
 
