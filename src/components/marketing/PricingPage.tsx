@@ -23,7 +23,7 @@ const PricingPage = () => {
     },
     {
       name: "Competitions - Analytics",
-      price: "$199",
+      price: "$299",
       period: "per year",
       description: "Best for JROTC programs that participate in competitions",
       features: [
@@ -41,7 +41,7 @@ const PricingPage = () => {
     },
     {
       name: "Competitions - Hosting",
-      price: "$199",
+      price: "$249",
       period: "per competition",
       description: "Best for JORTC programs that host competitions.",
       features: [
