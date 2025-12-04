@@ -33,6 +33,23 @@ const formSchema = z.object({
   end_time_hour: z.string().optional(),
   end_time_minute: z.string().optional(),
   assignment_details: z.string().optional()
+}).refine((data) => {
+  // Only validate if both start and end times are provided
+  if (!data.start_date || !data.end_date || !data.start_time_hour || !data.end_time_hour) {
+    return true;
+  }
+  
+  const startDateTime = new Date(
+    `${data.start_date}T${data.start_time_hour}:${data.start_time_minute || '00'}`
+  );
+  const endDateTime = new Date(
+    `${data.end_date}T${data.end_time_hour}:${data.end_time_minute || '00'}`
+  );
+  
+  return endDateTime > startDateTime;
+}, {
+  message: 'End time must be after start time',
+  path: ['end_time_hour']
 });
 type FormData = z.infer<typeof formSchema>;
 export const CompetitionResourceRecord: React.FC = () => {
