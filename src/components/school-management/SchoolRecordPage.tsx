@@ -30,8 +30,8 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
-  competition_module?: boolean;
-  competition_portal?: boolean;
+  comp_analytics?: boolean;
+  comp_hosting?: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -66,8 +66,8 @@ const SchoolRecordPage = () => {
     zip_code: "",
     phone: "",
     email: "",
-    competition_module: false,
-    competition_portal: false,
+    comp_analytics: false,
+    comp_hosting: false,
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: "",
@@ -111,8 +111,8 @@ const SchoolRecordPage = () => {
         zip_code: data.zip_code || "",
         phone: data.phone || "",
         email: data.email || "",
-        competition_module: data.competition_module || false,
-        competition_portal: data.competition_portal || false,
+        comp_analytics: data.comp_analytics || false,
+        comp_hosting: data.comp_hosting || false,
         subscription_start: data.subscription_start || undefined,
         subscription_end: data.subscription_end || undefined,
         referred_by: data.referred_by || "",
@@ -543,29 +543,29 @@ const SchoolRecordPage = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="competition_module"
-                    checked={schoolData.competition_module || false}
+                    id="comp_analytics"
+                    checked={schoolData.comp_analytics || false}
                     onCheckedChange={(checked) =>
                       setSchoolData({
                         ...schoolData,
-                        competition_module: checked as boolean,
+                        comp_analytics: checked as boolean,
                       })
                     }
                   />
-                  <Label htmlFor="competition_module">Competition Tracking</Label>
+                  <Label htmlFor="comp_analytics">Competition Tracking</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="competition_portal"
-                    checked={schoolData.competition_portal || false}
+                    id="comp_hosting"
+                    checked={schoolData.comp_hosting || false}
                     onCheckedChange={(checked) =>
                       setSchoolData({
                         ...schoolData,
-                        competition_portal: checked as boolean,
+                        comp_hosting: checked as boolean,
                       })
                     }
                   />
-                  <Label htmlFor="competition_portal">Competition Hosting</Label>
+                  <Label htmlFor="comp_hosting">Competition Hosting</Label>
                 </div>
               </div>
 

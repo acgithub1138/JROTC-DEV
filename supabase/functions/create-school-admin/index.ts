@@ -107,9 +107,9 @@ serve(async (req) => {
         jrotc_program,
         timezone,
         referred_by,
-        comp_register_only: true,
-        competition_module: true,
-        competition_portal: false
+        comp_basic: true,
+        comp_analytics: true,
+        comp_hosting: false
       })
       .select()
       .single()

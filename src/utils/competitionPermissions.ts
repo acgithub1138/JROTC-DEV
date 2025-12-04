@@ -3,39 +3,39 @@
 
 export interface CompetitionModuleRequirement {
   moduleId: string;
-  requiresCompetitionModule?: boolean;
-  requiresCompetitionPortal?: boolean;
+  requiresCompAnalytics?: boolean;
+  requiresCompHosting?: boolean;
 }
 
 // Define which modules require which school-level flags
 export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
-  // Competition Module sections (competition_module = true)
-  { moduleId: 'open_competitions', requiresCompetitionModule: true },
-  { moduleId: 'my_competitions', requiresCompetitionModule: true },
-  { moduleId: 'competitions', requiresCompetitionModule: true },
-  { moduleId: 'my_competitions_reports', requiresCompetitionModule: true },
-  { moduleId: 'my_competitions_analytics', requiresCompetitionModule: true }, // Alias for my_competitions_reports
+  // Competition Analytics sections (comp_analytics = true)
+  { moduleId: 'open_competitions', requiresCompAnalytics: true },
+  { moduleId: 'my_competitions', requiresCompAnalytics: true },
+  { moduleId: 'competitions', requiresCompAnalytics: true },
+  { moduleId: 'my_competitions_reports', requiresCompAnalytics: true },
+  { moduleId: 'my_competitions_analytics', requiresCompAnalytics: true }, // Alias for my_competitions_reports
   
-  // Competition Portal sections (competition_portal = true)  
-  { moduleId: 'cp_dashboard', requiresCompetitionPortal: true },
-  { moduleId: 'hosting_competitions', requiresCompetitionPortal: true },
-  { moduleId: 'cp_competitions', requiresCompetitionPortal: true },
-  { moduleId: 'cp_comp_events', requiresCompetitionPortal: true },
-  { moduleId: 'cp_comp_resources', requiresCompetitionPortal: true },
-  { moduleId: 'cp_comp_schools', requiresCompetitionPortal: true },
-  { moduleId: 'cp_schedules', requiresCompetitionPortal: true },
-  { moduleId: 'cp_comp_results', requiresCompetitionPortal: true },
-  { moduleId: 'cp_judges', requiresCompetitionPortal: true },
-  { moduleId: 'analytics', requiresCompetitionPortal: true },
-  { moduleId: 'competition_settings', requiresCompetitionPortal: true },
+  // Competition Hosting sections (comp_hosting = true)  
+  { moduleId: 'cp_dashboard', requiresCompHosting: true },
+  { moduleId: 'hosting_competitions', requiresCompHosting: true },
+  { moduleId: 'cp_competitions', requiresCompHosting: true },
+  { moduleId: 'cp_comp_events', requiresCompHosting: true },
+  { moduleId: 'cp_comp_resources', requiresCompHosting: true },
+  { moduleId: 'cp_comp_schools', requiresCompHosting: true },
+  { moduleId: 'cp_schedules', requiresCompHosting: true },
+  { moduleId: 'cp_comp_results', requiresCompHosting: true },
+  { moduleId: 'cp_judges', requiresCompHosting: true },
+  { moduleId: 'analytics', requiresCompHosting: true },
+  { moduleId: 'competition_settings', requiresCompHosting: true },
   
   // Both flags allow access to score sheets (can be accessed from either section)
-  { moduleId: 'cp_score_sheets', requiresCompetitionModule: true, requiresCompetitionPortal: true },
+  { moduleId: 'cp_score_sheets', requiresCompAnalytics: true, requiresCompHosting: true },
   
-  // Judges Portal sections (competition_portal = true)
-  { moduleId: 'judges_portal', requiresCompetitionPortal: true },
-  { moduleId: 'cp_judge_applications', requiresCompetitionPortal: true },
-  { moduleId: 'open_comps_open', requiresCompetitionPortal: true },
+  // Judges Portal sections (comp_hosting = true)
+  { moduleId: 'judges_portal', requiresCompHosting: true },
+  { moduleId: 'cp_judge_applications', requiresCompHosting: true },
+  { moduleId: 'open_comps_open', requiresCompHosting: true },
 ];
 
 /**
@@ -43,8 +43,8 @@ export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
  */
 export const canAccessCompetitionModule = (
   moduleId: string,
-  hasCompetitionModule: boolean,
-  hasCompetitionPortal: boolean
+  hasCompAnalytics: boolean,
+  hasCompHosting: boolean
 ): boolean => {
   const requirement = COMPETITION_MODULE_REQUIREMENTS.find(req => req.moduleId === moduleId);
   
@@ -54,12 +54,12 @@ export const canAccessCompetitionModule = (
   }
   
   // Check if either required flag is satisfied
-  const moduleAccess = requirement.requiresCompetitionModule ? hasCompetitionModule : false;
-  const portalAccess = requirement.requiresCompetitionPortal ? hasCompetitionPortal : false;
+  const analyticsAccess = requirement.requiresCompAnalytics ? hasCompAnalytics : false;
+  const hostingAccess = requirement.requiresCompHosting ? hasCompHosting : false;
   
   // For modules that require both, user needs at least one flag
   // For modules that require only one, they need that specific flag
-  return moduleAccess || portalAccess;
+  return analyticsAccess || hostingAccess;
 };
 
 /**
@@ -67,11 +67,11 @@ export const canAccessCompetitionModule = (
  */
 export const filterCompetitionModulesBySchoolFlags = (
   modules: any[],
-  hasCompetitionModule: boolean,
-  hasCompetitionPortal: boolean
+  hasCompAnalytics: boolean,
+  hasCompHosting: boolean
 ): any[] => {
   return modules.filter(module => 
-    canAccessCompetitionModule(module.id || module.name, hasCompetitionModule, hasCompetitionPortal)
+    canAccessCompetitionModule(module.id || module.name, hasCompAnalytics, hasCompHosting)
   );
 };
 
@@ -79,16 +79,16 @@ export const filterCompetitionModulesBySchoolFlags = (
  * Get the default module for a user based on their school-level permissions
  */
 export const getDefaultCompetitionModule = (
-  hasCompetitionModule: boolean,
-  hasCompetitionPortal: boolean
+  hasCompAnalytics: boolean,
+  hasCompHosting: boolean
 ): string => {
-  // If user has competition portal, default to dashboard
-  if (hasCompetitionPortal) {
+  // If user has competition hosting, default to dashboard
+  if (hasCompHosting) {
     return 'cp_dashboard';
   }
   
-  // If user only has competition module, default to open competitions
-  if (hasCompetitionModule) {
+  // If user only has competition analytics, default to open competitions
+  if (hasCompAnalytics) {
     return 'open_competitions';
   }
   

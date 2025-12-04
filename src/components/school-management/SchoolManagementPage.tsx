@@ -50,8 +50,8 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
-  competition_module?: boolean;
-  competition_portal?: boolean;
+  comp_analytics?: boolean;
+  comp_hosting?: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -63,8 +63,8 @@ interface School {
 type SortField =
   | "name"
   | "contact"
-  | "competition_module"
-  | "competition_portal"
+  | "comp_analytics"
+  | "comp_hosting"
   | "subscription_start"
   | "subscription_end";
 type SortDirection = "asc" | "desc";
@@ -156,7 +156,7 @@ const SchoolManagementPage = () => {
       if (bValue === null || bValue === undefined) bValue = "";
 
       // Handle different data types
-      if (sortField === "competition_module" || sortField === "competition_portal") {
+      if (sortField === "comp_analytics" || sortField === "comp_hosting") {
         aValue = aValue ? 1 : 0;
         bValue = bValue ? 1 : 0;
       } else if (sortField === "subscription_start" || sortField === "subscription_end") {
@@ -313,11 +313,11 @@ const SchoolManagementPage = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">My Competitions:</span>
-                        <span>{school.competition_module ? "Yes" : "No"}</span>
+                        <span>{school.comp_analytics ? "Yes" : "No"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Competition Portal:</span>
-                        <span>{school.competition_portal ? "Yes" : "No"}</span>
+                        <span>{school.comp_hosting ? "Yes" : "No"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Subscription Start:</span>
@@ -369,11 +369,11 @@ const SchoolManagementPage = () => {
                     <Button
                       variant="ghost"
                       className="h-auto p-0 font-semibold hover:bg-transparent"
-                      onClick={() => handleSort("competition_module")}
+                      onClick={() => handleSort("comp_analytics")}
                     >
                       <span className="flex items-center gap-2">
                         Competition Tracking
-                        {getSortIcon("competition_module")}
+                        {getSortIcon("comp_analytics")}
                       </span>
                     </Button>
                   </TableHead>
@@ -381,11 +381,11 @@ const SchoolManagementPage = () => {
                     <Button
                       variant="ghost"
                       className="h-auto p-0 font-semibold hover:bg-transparent"
-                      onClick={() => handleSort("competition_portal")}
+                      onClick={() => handleSort("comp_hosting")}
                     >
                       <span className="flex items-center gap-2">
                         Competition Hosting
-                        {getSortIcon("competition_portal")}
+                        {getSortIcon("comp_hosting")}
                       </span>
                     </Button>
                   </TableHead>
@@ -425,8 +425,8 @@ const SchoolManagementPage = () => {
                       {school.name}
                     </TableCell>
                     <TableCell className="py-2">{school.contact || "-"}</TableCell>
-                    <TableCell className="py-2">{school.competition_module ? "Yes" : "No"}</TableCell>
-                    <TableCell className="py-2">{school.competition_portal ? "Yes" : "No"}</TableCell>
+                    <TableCell className="py-2">{school.comp_analytics ? "Yes" : "No"}</TableCell>
+                    <TableCell className="py-2">{school.comp_hosting ? "Yes" : "No"}</TableCell>
                     <TableCell className="py-2">
                       {school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : "-"}
                     </TableCell>

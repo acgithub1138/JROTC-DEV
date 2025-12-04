@@ -3278,9 +3278,9 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
-          comp_register_only: boolean
-          competition_module: boolean | null
-          competition_portal: boolean | null
+          comp_analytics: boolean | null
+          comp_basic: boolean
+          comp_hosting: boolean | null
           contact: string | null
           created_at: string
           email: string | null
@@ -3305,9 +3305,9 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
-          comp_register_only?: boolean
-          competition_module?: boolean | null
-          competition_portal?: boolean | null
+          comp_analytics?: boolean | null
+          comp_basic?: boolean
+          comp_hosting?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
@@ -3332,9 +3332,9 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
-          comp_register_only?: boolean
-          competition_module?: boolean | null
-          competition_portal?: boolean | null
+          comp_analytics?: boolean | null
+          comp_basic?: boolean
+          comp_hosting?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
