@@ -31,8 +31,8 @@ interface NewSchool {
   phone: string;
   email: string;
   jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
-  competition_module: boolean;
-  competition_portal: boolean;
+  comp_analytics: boolean;
+  comp_hosting: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by: string;
@@ -59,8 +59,8 @@ export const CreateSchoolDialog = ({
     phone: '',
     email: '',
     jrotc_program: 'air_force',
-    competition_module: false,
-    competition_portal: false,
+    comp_analytics: false,
+    comp_hosting: false,
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: '',
@@ -335,21 +335,21 @@ export const CreateSchoolDialog = ({
             <div className="space-y-2">
               
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox id="competition_module" checked={newSchool.competition_module} onCheckedChange={checked => setNewSchool({
+                <Checkbox id="comp_analytics" checked={newSchool.comp_analytics} onCheckedChange={checked => setNewSchool({
                   ...newSchool,
-                  competition_module: checked as boolean
+                  comp_analytics: checked as boolean
                 })} />
-                <Label htmlFor="competition_module">Competition Tracking</Label>
+                <Label htmlFor="comp_analytics">Competition Tracking</Label>
               </div>
             </div>
             <div className="space-y-2">
               
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox id="competition_portal" checked={newSchool.competition_portal} onCheckedChange={checked => setNewSchool({
+                <Checkbox id="comp_hosting" checked={newSchool.comp_hosting} onCheckedChange={checked => setNewSchool({
                   ...newSchool,
-                  competition_portal: checked as boolean
+                  comp_hosting: checked as boolean
                 })} />
-                <Label htmlFor="competition_portal">Competition Hosting</Label>
+                <Label htmlFor="comp_hosting">Competition Hosting</Label>
               </div>
             </div>
           </div>

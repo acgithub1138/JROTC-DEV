@@ -27,8 +27,8 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentPortal, setCurrentPortal] = useState<PortalType>('ccc');
 
   // Get school-level flags
-  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-  const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
+  const hasCompetitionModule = userProfile?.schools?.comp_analytics === true;
+  const hasCompetitionPortal = userProfile?.schools?.comp_hosting === true;
   
   // Check if user can access competition portal (either competition module or competition portal enabled)
   // Also exclude parent users from accessing competition portal

@@ -15,9 +15,9 @@ interface School {
   phone?: string;
   email?: string;
   jrotc_program?: string;
-  competition_module?: boolean;
-  competition_portal?: boolean;
-  comp_register_only?: boolean;
+  comp_analytics?: boolean;
+  comp_hosting?: boolean;
+  comp_basic?: boolean;
   logo_url?: string;
   initials?: string;
 }
@@ -104,8 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phone,
             email,
             jrotc_program,
-            competition_module,
-            competition_portal,
+            comp_analytics,
+            comp_hosting,
             logo_url,
             initials
           ),
@@ -147,9 +147,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Also check current location to prevent redirect loops
     const currentPath = window.location.pathname;
     
-    // IMPORTANT: Only redirect external users if school has comp_register_only set to true
+    // IMPORTANT: Only redirect external users if school has comp_basic set to true
     if (userRole === 'external' && 
-        profile.schools?.comp_register_only === true &&
+        profile.schools?.comp_basic === true &&
         redirectedUserRef.current !== profile.id && 
         !currentPath.includes('/app/competition-portal/open-competitions')) {
       redirectedUserRef.current = profile.id;
@@ -160,7 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/app/competition-portal/open-competitions';
       }, 100);
     } else {
-      console.log('No redirect needed for user role:', userRole, 'comp_register_only:', profile.schools?.comp_register_only);
+      console.log('No redirect needed for user role:', userRole, 'comp_basic:', profile.schools?.comp_basic);
     }
   }, []);
 

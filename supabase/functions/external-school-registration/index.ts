@@ -84,8 +84,8 @@ serve(async (req) => {
         jrotc_program: schoolData.jrotc_program,
         timezone: schoolData.timezone || null,
         referred_by: schoolData.referred_by || null,
-        comp_register_only: true,
-        competition_module: true
+        comp_basic: true,
+        comp_analytics: true
       })
       .select()
       .single();
