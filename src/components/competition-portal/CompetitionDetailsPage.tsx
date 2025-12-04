@@ -207,7 +207,7 @@ export const CompetitionDetailsPage = () => {
         
         <div className="p-6 space-y-6">
           {/* Judges Sub-Tabs (desktop only) */}
-          {!isMobile && currentPath.includes('/judges') && (
+          {!isMobile && currentPath.includes('/judges') && !currentPath.includes('/schedules') && (
             <JudgesSubTabs competitionId={competitionId} />
           )}
           
