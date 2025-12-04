@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCPCadets, CPCadet, CPCadetFormData } from '@/hooks/competition-portal/useCPCadets';
-import { useCPCadetsPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCPCadets, CPCadet, CPCadetFormData } from "@/hooks/competition-portal/useCPCadets";
+import { useCPCadetsPermissions } from "@/hooks/useModuleSpecificPermissions";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,37 +17,38 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GRADE_OPTIONS = [
-  'Freshman',
-  '9th Grade',
-  'Sophomore',
-  '10th Grade',
-  'Junior',
-  '11th Grade',
-  'Senior',
-  '12th Grade',
-  'Graduate',
+  "Freshman",
+  "9th Grade",
+  "Sophomore",
+  "10th Grade",
+  "Junior",
+  "11th Grade",
+  "Senior",
+  "12th Grade",
+  "Graduate",
 ];
 
-type Mode = 'create' | 'edit' | 'view';
+type Mode = "create" | "edit" | "view";
 
 export function CPCadetRecordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const mode = (searchParams.get('mode') as Mode) || 'view';
-  const cadetId = searchParams.get('id');
+  const mode = (searchParams.get("mode") as Mode) || "view";
+  const cadetId = searchParams.get("id");
 
-  const { cadets, isLoading, createCadet, updateCadet, deleteCadet, isCreating, isUpdating, isDeleting } = useCPCadets();
+  const { cadets, isLoading, createCadet, updateCadet, deleteCadet, isCreating, isUpdating, isDeleting } =
+    useCPCadets();
   const { canCreate, canEdit, canDelete } = useCPCadetsPermissions();
 
   const [formData, setFormData] = useState<CPCadetFormData>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    grade: '',
+    first_name: "",
+    last_name: "",
+    email: "",
+    grade: "",
   });
   const [originalData, setOriginalData] = useState<CPCadetFormData | null>(null);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -57,12 +58,12 @@ export function CPCadetRecordPage() {
   const cadet = cadets.find((c) => c.id === cadetId);
 
   useEffect(() => {
-    if (cadet && (mode === 'edit' || mode === 'view')) {
+    if (cadet && (mode === "edit" || mode === "view")) {
       const data = {
-        first_name: cadet.first_name || '',
-        last_name: cadet.last_name || '',
-        email: cadet.email || '',
-        grade: cadet.grade || '',
+        first_name: cadet.first_name || "",
+        last_name: cadet.last_name || "",
+        email: cadet.email || "",
+        grade: cadet.grade || "",
       };
       setFormData(data);
       setOriginalData(data);
@@ -71,31 +72,31 @@ export function CPCadetRecordPage() {
 
   const hasChanges = originalData
     ? JSON.stringify(formData) !== JSON.stringify(originalData)
-    : Object.values(formData).some((v) => v !== '');
+    : Object.values(formData).some((v) => v !== "");
 
   const handleBack = () => {
     if (hasChanges) {
-      setPendingNavigation('/app/competition-portal/cadets');
+      setPendingNavigation("/app/competition-portal/cadets");
       setShowUnsavedDialog(true);
     } else {
-      navigate('/app/competition-portal/cadets');
+      navigate("/app/competition-portal/cadets");
     }
   };
 
   const handleSave = async () => {
-    if (mode === 'create') {
+    if (mode === "create") {
       await createCadet(formData);
-      navigate('/app/competition-portal/cadets');
-    } else if (mode === 'edit' && cadetId) {
+      navigate("/app/competition-portal/cadets");
+    } else if (mode === "edit" && cadetId) {
       await updateCadet({ id: cadetId, ...formData });
-      navigate('/app/competition-portal/cadets');
+      navigate("/app/competition-portal/cadets");
     }
   };
 
   const handleDelete = async () => {
     if (cadetId) {
       await deleteCadet(cadetId);
-      navigate('/app/competition-portal/cadets');
+      navigate("/app/competition-portal/cadets");
     }
   };
 
@@ -106,13 +107,13 @@ export function CPCadetRecordPage() {
     setShowUnsavedDialog(false);
   };
 
-  const isViewMode = mode === 'view';
-  const canSave = mode === 'create' ? canCreate : canEdit;
+  const isViewMode = mode === "view";
+  const canSave = mode === "create" ? canCreate : canEdit;
   const isSaving = isCreating || isUpdating;
 
-  const pageTitle = mode === 'create' ? 'Add Cadet' : mode === 'edit' ? 'Edit Cadet' : 'View Cadet';
+  const pageTitle = mode === "create" ? "Add Cadet" : mode === "edit" ? "Edit Cadet" : "View Cadet";
 
-  if (isLoading && mode !== 'create') {
+  if (isLoading && mode !== "create") {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
@@ -125,11 +126,11 @@ export function CPCadetRecordPage() {
     );
   }
 
-  if (mode !== 'create' && !cadet && !isLoading) {
+  if (mode !== "create" && !cadet && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-muted-foreground">Cadet not found.</p>
-        <Button variant="outline" onClick={() => navigate('/app/competition-portal/cadets')}>
+        <Button variant="outline" onClick={() => navigate("/app/competition-portal/cadets")}>
           Back to Cadets
         </Button>
       </div>
@@ -137,7 +138,7 @@ export function CPCadetRecordPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
@@ -204,7 +205,7 @@ export function CPCadetRecordPage() {
 
         <div className="flex justify-between pt-4">
           <div>
-            {mode === 'edit' && canDelete && (
+            {mode === "edit" && canDelete && (
               <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -218,7 +219,7 @@ export function CPCadetRecordPage() {
             {!isViewMode && canSave && (
               <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
                 <Save className="h-4 w-4 mr-2" />
-                {isSaving ? 'Saving...' : 'Save'}
+                {isSaving ? "Saving..." : "Save"}
               </Button>
             )}
           </div>
@@ -237,14 +238,14 @@ export function CPCadetRecordPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Cadet</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {formData.last_name}, {formData.first_name}?
-              This action will deactivate the cadet account.
+              Are you sure you want to delete {formData.last_name}, {formData.first_name}? This action will deactivate
+              the cadet account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
