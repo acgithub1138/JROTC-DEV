@@ -75,7 +75,7 @@ const MarketingFooter = () => {
           <div>
             <h3 className="font-semibold mb-4">Get Started</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Ready to streamline your JROTC program management?
+              Ready to streamline your JROTC Competitions?
             </p>
             <Link to="/contact" className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
               Get Started
