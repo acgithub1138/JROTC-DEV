@@ -552,7 +552,7 @@ const SchoolRecordPage = () => {
                       })
                     }
                   />
-                  <Label htmlFor="comp_analytics">Competition Tracking</Label>
+                  <Label htmlFor="comp_analytics">Comp Analytics</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -565,7 +565,7 @@ const SchoolRecordPage = () => {
                       })
                     }
                   />
-                  <Label htmlFor="comp_hosting">Competition Hosting</Label>
+                  <Label htmlFor="comp_hosting">Comp Hosting</Label>
                 </div>
               </div>
 
