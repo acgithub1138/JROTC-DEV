@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2, Phone, Calendar, MapPin, Clock } from 'lucide-react';
@@ -19,15 +19,10 @@ interface JudgesAssignedViewProps {
 
 export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDelete }: JudgesAssignedViewProps) => {
   const navigate = useNavigate();
-  const { judges, isLoading, deleteJudge, refetch } = useCompetitionJudges(competitionId);
+  const { judges, isLoading, deleteJudge } = useCompetitionJudges(competitionId);
   const { timezone } = useSchoolTimezone();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [judgeToDelete, setJudgeToDelete] = useState<string | null>(null);
-
-  // Refetch data when component mounts to ensure fresh data after navigation
-  useEffect(() => {
-    refetch();
-  }, []);
 
   const handleCreateJudge = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges_record`);
