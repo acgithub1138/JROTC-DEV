@@ -29,21 +29,31 @@ export const useResourceSchedule = (competitionId?: string) => {
     try {
       setIsLoading(true);
 
-      // Fetch resource assignments
-      const { data: resourceData, error: resourceError } = await supabase
-        .from('cp_comp_resources')
-        .select(`
-          id,
-          resource,
-          location,
-          start_time,
-          end_time,
-          assignment_details,
-          profiles!inner(first_name, last_name)
-        `)
-        .eq('competition_id', competitionId);
+      // Fetch resource assignments and competition events in parallel
+      const [resourceResult, eventsResult] = await Promise.all([
+        supabase
+          .from('cp_comp_resources')
+          .select(`
+            id,
+            resource,
+            location,
+            start_time,
+            end_time,
+            assignment_details,
+            profiles!inner(first_name, last_name)
+          `)
+          .eq('competition_id', competitionId),
+        supabase
+          .from('cp_comp_events')
+          .select('start_time, end_time')
+          .eq('competition_id', competitionId)
+      ]);
 
-      if (resourceError) throw resourceError;
+      if (resourceResult.error) throw resourceResult.error;
+      if (eventsResult.error) throw eventsResult.error;
+
+      const resourceData = resourceResult.data;
+      const eventsData = eventsResult.data;
 
       // Process resource assignments
       const assignments: ResourceAssignment[] = resourceData?.map(r => ({
@@ -58,13 +68,31 @@ export const useResourceSchedule = (competitionId?: string) => {
 
       setResourceAssignments(assignments);
 
-      // Generate timeline
+      // Generate timeline based on competition events (full comp time) rather than just assignments
       if (assignments.length > 0) {
-        const startTimes = assignments.map(a => new Date(a.start_time));
-        const endTimes = assignments.map(a => new Date(a.end_time));
+        // Collect all times from both events and assignments
+        const allStartTimes: Date[] = [];
+        const allEndTimes: Date[] = [];
 
-        const timelineStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
-        const timelineEnd = new Date(Math.max(...endTimes.map(t => t.getTime())));
+        // Add event times (for full competition range)
+        eventsData?.forEach(event => {
+          if (event.start_time) allStartTimes.push(new Date(event.start_time));
+          if (event.end_time) allEndTimes.push(new Date(event.end_time));
+        });
+
+        // Also include assignment times as fallback
+        assignments.forEach(a => {
+          if (a.start_time) allStartTimes.push(new Date(a.start_time));
+          if (a.end_time) allEndTimes.push(new Date(a.end_time));
+        });
+
+        if (allStartTimes.length === 0 || allEndTimes.length === 0) {
+          setTimeline(null);
+          return;
+        }
+
+        const timelineStart = new Date(Math.min(...allStartTimes.map(t => t.getTime())));
+        const timelineEnd = new Date(Math.max(...allEndTimes.map(t => t.getTime())));
 
         // Generate 15-minute intervals
         const timeSlots: Date[] = [];
