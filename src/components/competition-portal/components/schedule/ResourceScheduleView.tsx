@@ -143,7 +143,6 @@ export const ResourceScheduleView = ({
                             {resources.length > 0 ? <div className="space-y-1">
                                 {resources.filter(resource => shouldShowResource(resource.name)).map((resource, idx) => <div key={idx} className="px-2 py-1 rounded text-xs font-medium">
                                     {resource.name}
-                                    {resource.details}
                                   </div>)}
                               </div> : <div className="text-muted-foreground text-xs">-</div>}
                           </td>;
