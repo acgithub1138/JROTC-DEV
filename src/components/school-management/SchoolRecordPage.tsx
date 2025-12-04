@@ -115,6 +115,7 @@ const SchoolRecordPage = () => {
         email: data.email || "",
         comp_analytics: data.comp_analytics || false,
         comp_hosting: data.comp_hosting || false,
+        comp_basic: data.comp_basic || false,
         subscription_start: data.subscription_start || undefined,
         subscription_end: data.subscription_end || undefined,
         referred_by: data.referred_by || "",
