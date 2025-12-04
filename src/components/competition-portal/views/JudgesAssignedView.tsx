@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, Phone, Calendar, MapPin, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, Edit, Trash2, Phone, Calendar, MapPin, Clock, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCompetitionJudges } from '@/hooks/competition-portal/useCompetitionJudges';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -17,12 +18,95 @@ interface JudgesAssignedViewProps {
   canDelete: boolean;
 }
 
+type SortField = 'name' | 'phone' | 'start_time' | 'end_time' | 'event' | 'location';
+type SortDirection = 'asc' | 'desc' | null;
+
 export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDelete }: JudgesAssignedViewProps) => {
   const navigate = useNavigate();
   const { judges, isLoading, deleteJudge } = useCompetitionJudges(competitionId);
   const { timezone } = useSchoolTimezone();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [judgeToDelete, setJudgeToDelete] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortField(null);
+        setSortDirection(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    if (sortDirection === 'asc') return <ArrowUp className="h-3 w-3 ml-1" />;
+    if (sortDirection === 'desc') return <ArrowDown className="h-3 w-3 ml-1" />;
+    return <ArrowUpDown className="h-3 w-3 ml-1" />;
+  };
+
+  const filteredAndSortedJudges = useMemo(() => {
+    let result = [...judges];
+
+    // Filter by search term
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      result = result.filter(judge => 
+        (judge.judge_profile?.name || '').toLowerCase().includes(lowerSearch) ||
+        (judge.event_name || '').toLowerCase().includes(lowerSearch) ||
+        (judge.location || '').toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    // Sort
+    if (sortField && sortDirection) {
+      result.sort((a, b) => {
+        let aVal: string | null = null;
+        let bVal: string | null = null;
+
+        switch (sortField) {
+          case 'name':
+            aVal = a.judge_profile?.name || '';
+            bVal = b.judge_profile?.name || '';
+            break;
+          case 'phone':
+            aVal = a.judge_profile?.phone || '';
+            bVal = b.judge_profile?.phone || '';
+            break;
+          case 'start_time':
+            aVal = a.start_time || '';
+            bVal = b.start_time || '';
+            break;
+          case 'end_time':
+            aVal = a.end_time || '';
+            bVal = b.end_time || '';
+            break;
+          case 'event':
+            aVal = a.event_name || '';
+            bVal = b.event_name || '';
+            break;
+          case 'location':
+            aVal = a.location || '';
+            bVal = b.location || '';
+            break;
+        }
+
+        const comparison = (aVal || '').localeCompare(bVal || '');
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [judges, searchTerm, sortField, sortDirection]);
 
   const handleCreateJudge = () => {
     navigate(`/app/competition-portal/competition-details/${competitionId}/judges_record`);
@@ -53,10 +137,16 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-muted-foreground">
-          Manage judge assignments for this competition
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search judge, event, or location..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         {canCreate && (
           <Button onClick={handleCreateJudge} size="icon" className="md:w-auto md:px-4">
             <Plus className="h-4 w-4 md:mr-2" />
@@ -69,6 +159,10 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
         <div className="text-center py-8 text-muted-foreground">
           No judges assigned yet. Click "Assign Judge" to get started.
         </div>
+      ) : filteredAndSortedJudges.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No judges found matching "{searchTerm}"
+        </div>
       ) : (
         <>
           {/* Desktop Table View */}
@@ -76,17 +170,29 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Judge Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Start Time</TableHead>
-                  <TableHead>End Time</TableHead>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('name')}>
+                    <div className="flex items-center">Judge Name {getSortIcon('name')}</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('phone')}>
+                    <div className="flex items-center">Phone {getSortIcon('phone')}</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('start_time')}>
+                    <div className="flex items-center">Start Time {getSortIcon('start_time')}</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('end_time')}>
+                    <div className="flex items-center">End Time {getSortIcon('end_time')}</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('event')}>
+                    <div className="flex items-center">Event {getSortIcon('event')}</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => handleSort('location')}>
+                    <div className="flex items-center">Location {getSortIcon('location')}</div>
+                  </TableHead>
                   {(canUpdate || canDelete) && <TableHead className="text-center">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {judges.map(judge => (
+                {filteredAndSortedJudges.map(judge => (
                   <TableRow key={judge.id}>
                     <TableCell className="font-medium py-[4px]">
                       {judge.judge_profile?.name || 'Unknown'}
@@ -126,7 +232,7 @@ export const JudgesAssignedView = ({ competitionId, canCreate, canUpdate, canDel
 
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
-            {judges.map(judge => (
+            {filteredAndSortedJudges.map(judge => (
               <Card key={judge.id} className="border-primary/20 shadow-sm">
                 <CardContent className="p-4 space-y-3">
                   <div>
