@@ -28,6 +28,7 @@ export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
   { moduleId: 'cp_judges', requiresCompHosting: true },
   { moduleId: 'analytics', requiresCompHosting: true },
   { moduleId: 'competition_settings', requiresCompHosting: true },
+  { moduleId: 'comp_cadets', requiresCompHosting: true },
   
   // Both flags allow access to score sheets (can be accessed from either section)
   { moduleId: 'cp_score_sheets', requiresCompAnalytics: true, requiresCompHosting: true },
