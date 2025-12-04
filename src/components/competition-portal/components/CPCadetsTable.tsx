@@ -87,7 +87,12 @@ export function CPCadetsTable({
                 </Button>
               )}
               {canDelete && (
-                <Button variant="outline" size="sm" onClick={() => onDelete(cadet)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:border-red-300"
+                  onClick={() => onDelete(cadet)}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               )}
