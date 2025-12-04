@@ -133,7 +133,7 @@ export function CPCadetRecordPage() {
 
       const response = await supabase.functions.invoke("reset-user-password", {
         body: {
-          targetUserId: cadetId,
+          userId: cadetId,
           newPassword: newPassword,
         },
       });
