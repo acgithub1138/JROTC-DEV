@@ -25,7 +25,7 @@ const gradeColors: Record<string, string> = {
   "11th Grade": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
   Senior: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   "12th Grade": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  Graduate: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+  Graduate: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
 };
 export function CPCadetsTable({
   cadets,
@@ -34,7 +34,7 @@ export function CPCadetsTable({
   onDelete,
   canEdit,
   canDelete,
-  canViewDetails
+  canViewDetails,
 }: CPCadetsTableProps) {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>("name");
@@ -62,17 +62,15 @@ export function CPCadetsTable({
     }
     return sortDirection === "asc" ? comparison : -comparison;
   });
-  const SortIcon = ({
-    field
-  }: {
-    field: SortField;
-  }) => {
+  const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
     return sortDirection === "asc" ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />;
   };
   if (isMobile) {
-    return <div className="space-y-3">
-        {sortedCadets.map(cadet => <div key={cadet.id} className="bg-card border rounded-lg p-4 space-y-2">
+    return (
+      <div className="space-y-3">
+        {sortedCadets.map((cadet) => (
+          <div key={cadet.id} className="bg-card border rounded-lg p-4 space-y-2">
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium text-foreground">
@@ -83,21 +81,25 @@ export function CPCadetsTable({
               <Badge className={gradeColors[cadet.grade] || "bg-gray-100 text-gray-800"}>{cadet.grade || "N/A"}</Badge>
             </div>
             <div className="flex gap-2 pt-2">
-              {canViewDetails && <Button variant="outline" size="sm" onClick={() => onView(cadet)}>
-                  <Eye className="h-4 w-4" />
-                </Button>}
-              {canEdit && <Button variant="outline" size="sm" onClick={() => onEdit(cadet)}>
+              {canEdit && (
+                <Button variant="outline" size="sm" onClick={() => onEdit(cadet)}>
                   <Pencil className="h-4 w-4" />
-                </Button>}
-              {canDelete && <Button variant="outline" size="sm" onClick={() => onDelete(cadet)}>
+                </Button>
+              )}
+              {canDelete && (
+                <Button variant="outline" size="sm" onClick={() => onDelete(cadet)}>
                   <Trash2 className="h-4 w-4" />
-                </Button>}
+                </Button>
+              )}
             </div>
-          </div>)}
+          </div>
+        ))}
         {sortedCadets.length === 0 && <div className="text-center py-8 text-muted-foreground">No cadets found</div>}
-      </div>;
+      </div>
+    );
   }
-  return <div className="border rounded-lg">
+  return (
+    <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
@@ -120,7 +122,8 @@ export function CPCadetsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedCadets.map(cadet => <TableRow key={cadet.id}>
+          {sortedCadets.map((cadet) => (
+            <TableRow key={cadet.id}>
               <TableCell className="font-medium py-[6px]">
                 {cadet.last_name}, {cadet.first_name}
               </TableCell>
@@ -132,21 +135,34 @@ export function CPCadetsTable({
               <TableCell>{cadet.email}</TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-center gap-2">
-                  {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(cadet)}>
+                  {canEdit && (
+                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(cadet)}>
                       <Pencil className="h-4 w-4" />
-                    </Button>}
-                  {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(cadet)}>
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
+                      onClick={() => onDelete(cadet)}
+                    >
                       <Trash2 className="h-4 w-4" />
-                    </Button>}
+                    </Button>
+                  )}
                 </div>
               </TableCell>
-            </TableRow>)}
-          {sortedCadets.length === 0 && <TableRow>
+            </TableRow>
+          ))}
+          {sortedCadets.length === 0 && (
+            <TableRow>
               <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                 No cadets found
               </TableCell>
-            </TableRow>}
+            </TableRow>
+          )}
         </TableBody>
       </Table>
-    </div>;
+    </div>
+  );
 }
