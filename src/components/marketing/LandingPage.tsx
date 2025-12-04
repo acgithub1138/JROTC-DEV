@@ -201,7 +201,7 @@ const LandingPage = () => {
                   <li>• All information centralized in one platform</li>
                   <li>• Competition tracking and reporting</li>
                   <li>• Streamlined competition management</li>
-                  <li>• Automated communications</li>
+                  <li>• Automated score calculations</li>
                   <li>• More time for what matters: developing leaders!</li>
                 </ul>
               </div>
