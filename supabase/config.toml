@@ -1,4 +1,4 @@
-project_id = "vpiwfabbzaebfkadmmgd"
+project_id = "kdksbhapzsknieizubvu"
 
 [functions.email-queue-webhook]
 verify_jwt = false
