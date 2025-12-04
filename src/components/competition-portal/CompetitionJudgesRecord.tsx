@@ -314,9 +314,14 @@ export const CompetitionJudgesRecord = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-background">
-                          {competitionEvents.length === 0 ? <div className="p-2 text-sm text-muted-foreground">No events available</div> : [...competitionEvents].sort((a, b) => (a.event_name || '').localeCompare(b.event_name || '')).map(event => <SelectItem key={event.id} value={event.id}>
-                              {event.event_name || 'Unnamed Event'}
-                            </SelectItem>)}
+                          {competitionEvents.length === 0 ? <div className="p-2 text-sm text-muted-foreground">No events available</div> : [...competitionEvents].sort((a, b) => (a.event_name || '').localeCompare(b.event_name || '')).map(event => {
+                            const judgeCount = judges.filter(j => (j as any).event === event.id).length;
+                            return (
+                              <SelectItem key={event.id} value={event.id}>
+                                {event.event_name || 'Unnamed Event'} ({judgeCount})
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <FormMessage />
