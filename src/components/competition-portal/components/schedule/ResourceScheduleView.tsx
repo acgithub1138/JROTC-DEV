@@ -72,9 +72,7 @@ export const ResourceScheduleView = ({
         <p className="text-muted-foreground">No resource assignments found for this competition.</p>
       </div>;
   }
-  
-  return (
-      <div className="schedule-print-container space-y-4">
+  return <div className="schedule-print-container space-y-4">
       {/* Print-only title */}
       <div className="print-only text-center mb-4">
         <h1 className="text-2xl font-bold">
@@ -145,9 +143,7 @@ export const ResourceScheduleView = ({
                             {resources.length > 0 ? <div className="space-y-1">
                                 {resources.filter(resource => shouldShowResource(resource.name)).map((resource, idx) => <div key={idx} className="px-2 py-1 rounded text-xs font-medium">
                                     {resource.name}
-                                    {resource.details && <div className="text-[10px] text-muted-foreground mt-0.5">
-                                        {resource.details}
-                                      </div>}
+                                    {resource.details}
                                   </div>)}
                               </div> : <div className="text-muted-foreground text-xs">-</div>}
                           </td>;
@@ -186,6 +182,5 @@ export const ResourceScheduleView = ({
             </tbody>
           </table>
         </div>}
-    </div>
-  );
+    </div>;
 };
