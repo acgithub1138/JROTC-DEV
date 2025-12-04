@@ -69,6 +69,7 @@ export const SelectWithAdd: React.FC<SelectWithAddProps> = ({
         onChange={handleInputChange}
         placeholder="Enter new location..."
         disabled={disabled}
+        autoFocus
       />
     );
   }
