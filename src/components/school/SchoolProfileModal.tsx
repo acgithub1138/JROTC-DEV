@@ -58,8 +58,8 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
-  competition_module?: boolean;
-  competition_portal?: boolean;
+  comp_analytics?: boolean;
+  comp_hosting?: boolean;
   subscription_start?: string;
   subscription_end?: string;
   timezone?: string;
@@ -547,12 +547,12 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
                 </div>
               </div>
 
-              {/* Competition Tracking & Portal */}
+              {/* Competition Analytics & Hosting */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Competition Tracking</Label>
+                  <Label>Competition Analytics</Label>
                   <Input
-                    value={school.competition_module ? 'Enabled' : 'Disabled'}
+                    value={school.comp_analytics ? 'Enabled' : 'Disabled'}
                     disabled
                     className="bg-muted"
                   />
@@ -560,7 +560,7 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
                 <div className="space-y-2">
                   <Label>Competition Hosting</Label>
                   <Input
-                    value={school.competition_portal ? 'Enabled' : 'Disabled'}
+                    value={school.comp_hosting ? 'Enabled' : 'Disabled'}
                     disabled
                     className="bg-muted"
                   />
