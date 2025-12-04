@@ -106,17 +106,17 @@ export const JudgeScheduleView = ({
       {/* Grid view for screen and "All Judges" print */}
       <Card className={selectedJudge !== 'all' ? 'no-print' : ''}>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-auto max-h-[calc(100vh-280px)]">
             <table className="w-full min-w-max">
-              <thead>
+              <thead className="sticky top-0 z-20">
                 <tr className="border-b bg-muted/30">
-                  <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
+                  <th className="text-left p-4 font-medium text-sm sticky left-0 bg-muted/30 border-r z-30 min-w-[120px]">
                     Time Slots
                   </th>
                   {timeline.events.map(event => {
                   // Get location from the first judge assignment for this event
                   const eventLocation = judgeAssignments?.find(a => a.event_id === event.id)?.location;
-                  return <th key={event.id} className="text-center p-4 min-w-[150px] py-[8px]">
+                  return <th key={event.id} className="text-center p-4 min-w-[150px] py-[8px] bg-muted/30">
                         <div className="font-medium text-sm truncate no-print" title={event.name}>
                           {event.name}
                         </div>
@@ -140,7 +140,7 @@ export const JudgeScheduleView = ({
                           {convertToUI(timeSlot, timezone, 'date')}
                         </td>
                       </tr>, <tr key={timeSlot.toISOString()} className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                      <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
+                      <td className="p-2 font-medium text-sm sticky left-0 z-10 border-r bg-background">
                         {convertToUI(timeSlot, timezone, 'time')}
                       </td>
                       {timeline.events.map(event => {
