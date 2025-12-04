@@ -20,17 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const GRADE_OPTIONS = [
-  "Freshman",
-  "9th Grade",
-  "Sophomore",
-  "10th Grade",
-  "Junior",
-  "11th Grade",
-  "Senior",
-  "12th Grade",
-  "Graduate",
-];
+const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior"];
 
 type Mode = "create" | "edit" | "view";
 
