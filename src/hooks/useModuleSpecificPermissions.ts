@@ -400,5 +400,6 @@ export const useCPCadetsPermissions = () => {
     canEdit: hasPermission('comp_cadets', 'update'),
     canDelete: hasPermission('comp_cadets', 'delete'),
     canCreate: hasPermission('comp_cadets', 'create'),
+    canResetPassword: hasPermission('comp_cadets', 'reset_password'),
   };
 };

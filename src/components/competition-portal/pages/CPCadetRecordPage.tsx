@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Key, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior"];
 
@@ -32,7 +40,7 @@ export function CPCadetRecordPage() {
 
   const { cadets, isLoading, createCadet, updateCadet, deleteCadet, isCreating, isUpdating, isDeleting } =
     useCPCadets();
-  const { canCreate, canEdit, canDelete } = useCPCadetsPermissions();
+  const { canCreate, canEdit, canDelete, canResetPassword } = useCPCadetsPermissions();
 
   const [formData, setFormData] = useState<CPCadetFormData>({
     first_name: "",
@@ -44,6 +52,11 @@ export function CPCadetRecordPage() {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  // Password reset state
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
   const cadet = cadets.find((c) => c.id === cadetId);
 
@@ -95,6 +108,48 @@ export function CPCadetRecordPage() {
       navigate(pendingNavigation);
     }
     setShowUnsavedDialog(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!cadetId || !newPassword) {
+      toast.error("Please enter a new password");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setPasswordResetLoading(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      const response = await supabase.functions.invoke("reset-user-password", {
+        body: {
+          targetUserId: cadetId,
+          newPassword: newPassword,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to reset password");
+      }
+
+      toast.success("Password reset successfully");
+      setNewPassword("");
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      toast.error(error.message || "Failed to reset password");
+    } finally {
+      setPasswordResetLoading(false);
+    }
   };
 
   const isViewMode = mode === "view";
@@ -192,6 +247,60 @@ export function CPCadetRecordPage() {
             </Select>
           </div>
         </div>
+
+        {/* Password Reset Section - Only visible in edit mode with permission */}
+        {mode === "edit" && canResetPassword && cadetId && (
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="password-reset" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  <span>Password Reset</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 pb-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-[120px_1fr] items-center gap-4">
+                    <Label htmlFor="new_password">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="new_password"
+                        type={showPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleResetPassword}
+                      disabled={passwordResetLoading || !newPassword}
+                      variant="secondary"
+                    >
+                      <Key className="h-4 w-4 mr-2" />
+                      {passwordResetLoading ? "Resetting..." : "Reset Password"}
+                    </Button>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
 
         <div className="flex justify-between pt-4">
           <div>

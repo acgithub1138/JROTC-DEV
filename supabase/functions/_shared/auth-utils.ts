@@ -151,9 +151,11 @@ export async function requireCanResetPassword(actorProfile: UserProfile, targetP
     throw new AuthorizationError('Cannot reset your own password through this function')
   }
 
-  // Check permission to reset passwords
-  const canResetPassword = await checkUserPermission(actorProfile.id, 'cadets', 'reset_password', supabaseAdmin)
-  if (!canResetPassword) {
+  // Check permission to reset passwords from either cadets or comp_cadets module
+  const canResetFromCadets = await checkUserPermission(actorProfile.id, 'cadets', 'reset_password', supabaseAdmin)
+  const canResetFromCompCadets = await checkUserPermission(actorProfile.id, 'comp_cadets', 'reset_password', supabaseAdmin)
+  
+  if (!canResetFromCadets && !canResetFromCompCadets) {
     throw new AuthorizationError('Access denied. You do not have permission to reset passwords')
   }
 
