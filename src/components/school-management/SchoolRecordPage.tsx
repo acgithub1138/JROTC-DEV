@@ -32,6 +32,7 @@ interface School {
   email?: string;
   comp_analytics?: boolean;
   comp_hosting?: boolean;
+  comp_basic?: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -68,6 +69,7 @@ const SchoolRecordPage = () => {
     email: "",
     comp_analytics: false,
     comp_hosting: false,
+    comp_basic: false,
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: "",
@@ -540,7 +542,7 @@ const SchoolRecordPage = () => {
               </div>
 
               {/* Module Settings */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="comp_analytics"
@@ -566,6 +568,19 @@ const SchoolRecordPage = () => {
                     }
                   />
                   <Label htmlFor="comp_hosting">Comp Hosting</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="comp_basic"
+                    checked={schoolData.comp_basic || false}
+                    onCheckedChange={(checked) =>
+                      setSchoolData({
+                        ...schoolData,
+                        comp_basic: checked as boolean,
+                      })
+                    }
+                  />
+                  <Label htmlFor="comp_basic">Comp Basic</Label>
                 </div>
               </div>
 
