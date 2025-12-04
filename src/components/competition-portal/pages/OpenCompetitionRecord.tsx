@@ -325,6 +325,25 @@ export const OpenCompetitionRecord: React.FC = () => {
     }
   }, [currentRegistrations, currentSchedules]);
 
+  // Detect double-booked time slots (same time selected for multiple events)
+  const doubleBookedEventIds = useMemo(() => {
+    const timeSlotToEvents = new Map<string, string[]>();
+    selectedTimeSlots.forEach((timeSlot, eventId) => {
+      if (!timeSlotToEvents.has(timeSlot)) {
+        timeSlotToEvents.set(timeSlot, []);
+      }
+      timeSlotToEvents.get(timeSlot)!.push(eventId);
+    });
+    
+    const doubleBooked = new Set<string>();
+    timeSlotToEvents.forEach((eventIds) => {
+      if (eventIds.length > 1) {
+        eventIds.forEach(id => doubleBooked.add(id));
+      }
+    });
+    return doubleBooked;
+  }, [selectedTimeSlots]);
+
   const totalCost = useMemo(() => {
     const competitionFee = competition?.fee || 0;
     const eventsFee = Array.from(selectedEvents).reduce((sum, eventId) => {
@@ -846,36 +865,41 @@ export const OpenCompetitionRecord: React.FC = () => {
                               </p>
                             </div>
                           ) : (
-                            <Select
-                              value={selectedTimeSlots.get(event.id) || ''}
-                              onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Choose a time slot" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {timeSlots.map((slot) => {
-                                  const occupiedLabel = occupiedLabels.get(event.id)?.get(slot.time.toISOString());
-                                  
-                                  return (
-                                    <SelectItem 
-                                      key={slot.time.toISOString()} 
-                                      value={slot.time.toISOString()}
-                                      disabled={!slot.available}
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <span>{slot.label}</span>
-                                        {!slot.available && occupiedLabel && (
-                                          <span className="text-xs text-muted-foreground ml-2">
-                                            ({occupiedLabel})
-                                          </span>
-                                        )}
-                                      </div>
-                                    </SelectItem>
-                                  );
-                                })}
-                              </SelectContent>
-                            </Select>
+                            <>
+                              <Select
+                                value={selectedTimeSlots.get(event.id) || ''}
+                                onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Choose a time slot" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {timeSlots.map((slot) => {
+                                    const occupiedLabel = occupiedLabels.get(event.id)?.get(slot.time.toISOString());
+                                    
+                                    return (
+                                      <SelectItem 
+                                        key={slot.time.toISOString()} 
+                                        value={slot.time.toISOString()}
+                                        disabled={!slot.available}
+                                      >
+                                        <div className="flex items-center justify-between w-full">
+                                          <span>{slot.label}</span>
+                                          {!slot.available && occupiedLabel && (
+                                            <span className="text-xs text-muted-foreground ml-2">
+                                              ({occupiedLabel})
+                                            </span>
+                                          )}
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              {doubleBookedEventIds.has(event.id) && (
+                                <p className="text-sm text-destructive mt-1">Double Booked</p>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
