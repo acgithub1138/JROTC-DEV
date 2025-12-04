@@ -8,6 +8,7 @@ import MyCompetitionsPage from './my-competitions/MyCompetitionsPage';
 import MyCompetitionsAnalyticsPage from './my-competitions/MyCompetitionsAnalyticsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
+import { CPCadetsPage } from './CPCadetsPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { CompetitionEventRecord } from './pages/CompetitionEventRecord';
@@ -27,6 +28,8 @@ import { AddCompetitionEventPage } from './my-competitions/AddCompetitionEventPa
 import { JudgeRecordPage } from './pages/JudgeRecordPage';
 import { JudgesBulkUploadPage } from './pages/JudgesBulkUploadPage';
 import { ScoreSheetRecordPage } from './pages/ScoreSheetRecordPage';
+import { CPCadetRecordPage } from './pages/CPCadetRecordPage';
+import { CPCadetsBulkUploadPage } from './pages/CPCadetsBulkUploadPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
@@ -164,6 +167,12 @@ const CompetitionPortalLayout = () => {
       return <JudgeRecordPage />;
     } else if (path === '/app/competition-portal/judges') {
       return <JudgesPage />;
+    } else if (path.startsWith('/app/competition-portal/cadets_bulk_upload')) {
+      return <CPCadetsBulkUploadPage />;
+    } else if (path.startsWith('/app/competition-portal/cadets_record')) {
+      return <CPCadetRecordPage />;
+    } else if (path === '/app/competition-portal/cadets') {
+      return <CPCadetsPage />;
     } else if (path === '/app/competition-portal/analytics') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/settings') {

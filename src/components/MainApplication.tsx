@@ -320,6 +320,9 @@ const MainApplication = () => {
             <Route path="competition-portal/judges" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/judges/judge_record" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/judges/judges_bulk_upload" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/cadets" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/cadets_record" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/cadets_bulk_upload" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/analytics" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/settings" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/open-competitions" element={<CompetitionPortalLayout />} />

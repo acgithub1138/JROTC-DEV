@@ -387,3 +387,18 @@ export const usePTTestPermissions = () => {
     canUpdate: hasPermission('pt_test', 'update'), // alias for consistency
   };
 };
+
+// Competition Portal Cadets specific permissions
+export const useCPCadetsPermissions = () => {
+  const modulePermissions = useModulePermissions('comp_cadets');
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('comp_cadets', 'view'),
+    canEdit: hasPermission('comp_cadets', 'update'),
+    canDelete: hasPermission('comp_cadets', 'delete'),
+    canCreate: hasPermission('comp_cadets', 'create'),
+  };
+};
