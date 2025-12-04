@@ -39,7 +39,7 @@ import { fetchCompetitionModuleMappings, findModuleForPath, type ModuleMappings 
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
-  const { hasCompetitionModule, hasCompetitionPortal } = usePortal();
+  const { competitionTier } = usePortal();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [activeModule, setActiveModule] = useState('open_competitions');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -63,8 +63,7 @@ const CompetitionPortalLayout = () => {
       try {
         const mappings = await fetchCompetitionModuleMappings(
           hasPermission,
-          hasCompetitionModule,
-          hasCompetitionPortal
+          competitionTier
         );
         setModuleMappings(mappings);
         setMappingsLoaded(true);
@@ -75,7 +74,7 @@ const CompetitionPortalLayout = () => {
     };
 
     loadMappings();
-  }, [userProfile?.role, hasPermission, permissionsLoading, hasCompetitionModule, hasCompetitionPortal]);
+  }, [userProfile?.role, hasPermission, permissionsLoading, competitionTier]);
 
   // Sync active module with current path
   useEffect(() => {
@@ -98,7 +97,7 @@ const CompetitionPortalLayout = () => {
       setActiveModule(detectedModule);
     } else {
       // Fallback to default if path not found
-      const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+      const defaultModule = getDefaultCompetitionModule(competitionTier);
       console.log('⚠️ No module found for path, using default:', defaultModule);
       setActiveModule(defaultModule);
     }
