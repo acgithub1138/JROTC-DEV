@@ -14,6 +14,7 @@ import { JudgesAssignedView } from './views/JudgesAssignedView';
 import { ApplicationStatusView } from './views/ApplicationStatusView';
 import { ScheduleView } from './views/ScheduleView';
 import { JudgesSubTabs } from './JudgesSubTabs';
+import { SchedulesSubTabs } from './SchedulesSubTabs';
 
 export const CompetitionDetailsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -210,8 +211,13 @@ export const CompetitionDetailsPage = () => {
             <JudgesSubTabs competitionId={competitionId} />
           )}
           
+          {/* Schedules Sub-Tabs (desktop only) */}
+          {!isMobile && currentPath.includes('/schedules') && (
+            <SchedulesSubTabs competitionId={competitionId} />
+          )}
+          
           {/* Dynamic content based on route */}
-          <div className={currentPath.includes('/judges') && !isMobile ? '' : 'mt-6'}>
+          <div className={(currentPath.includes('/judges') || currentPath.includes('/schedules')) && !isMobile ? '' : 'mt-6'}>
             {renderContent()}
           </div>
         </div>
