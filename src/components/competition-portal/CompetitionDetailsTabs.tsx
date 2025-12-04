@@ -65,10 +65,12 @@ export const CompetitionDetailsTabs = ({ competitionId, permissions }: Competiti
   ].filter(tab => tab.canAccess);
 
   const getActiveTab = () => {
+    // Check /schedules first since paths like /schedules/judges or /schedules/resources
+    // would otherwise match /judges or /resources
+    if (currentPath.includes('/schedules')) return 'schedules';
     if (currentPath.includes('/events')) return 'events';
     if (currentPath.includes('/judges')) return 'judges';
     if (currentPath.includes('/resources')) return 'resources';
-    if (currentPath.includes('/schedules')) return 'schedules';
     if (currentPath.includes('/schools')) return 'schools';
     if (currentPath.includes('/results')) return 'results';
     return tabs[0]?.id || '';
