@@ -30,6 +30,7 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
+  ccc_portal?: boolean;
   comp_analytics?: boolean;
   comp_hosting?: boolean;
   comp_basic?: boolean;
@@ -67,6 +68,7 @@ const SchoolRecordPage = () => {
     zip_code: "",
     phone: "",
     email: "",
+    ccc_portal: false,
     comp_analytics: false,
     comp_hosting: false,
     comp_basic: false,
@@ -543,7 +545,20 @@ const SchoolRecordPage = () => {
               </div>
 
               {/* Module Settings */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="ccc_portal"
+                    checked={schoolData.ccc_portal || false}
+                    onCheckedChange={(checked) =>
+                      setSchoolData({
+                        ...schoolData,
+                        ccc_portal: checked as boolean,
+                      })
+                    }
+                  />
+                  <Label htmlFor="ccc_portal">CCC Portal</Label>
+                </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="comp_basic"
