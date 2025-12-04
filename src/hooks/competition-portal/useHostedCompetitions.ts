@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sessionManager } from '@/utils/sessionManager';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['cp_competitions']['Row'];
@@ -12,6 +13,9 @@ export const useHostedCompetitions = () => {
   const fetchHostedCompetitions = async () => {
     try {
       setIsLoading(true);
+      
+      // Ensure valid session before calling edge function
+      await sessionManager.ensureValidSession();
       
       const { data, error } = await supabase.functions.invoke('get-hosted-competitions');
 
