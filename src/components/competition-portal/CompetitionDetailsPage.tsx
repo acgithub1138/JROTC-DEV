@@ -66,6 +66,11 @@ export const CompetitionDetailsPage = () => {
         navigate(`${basePath}/results`, { replace: true });
       }
     }
+    
+    // Redirect /judges to /judges/assigned
+    if (pathAfterBase === '/judges' && judgesPermissions.canAccess) {
+      navigate(`${basePath}/judges/assigned`, { replace: true });
+    }
   }, [competitionId, currentPath, navigate]);
 
   // Render content based on current route

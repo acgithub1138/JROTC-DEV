@@ -196,7 +196,7 @@ export const CompetitionJudgesRecord = () => {
           await createJudge(judgeData);
         }
       }
-      navigate(`/app/competition-portal/competition-details/${competitionId}/judges`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/judges/assigned`);
     } catch (error) {
       console.error('Error saving judge assignment:', error);
     } finally {
