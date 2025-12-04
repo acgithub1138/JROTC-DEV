@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
+import { AppAccess, parseAppAccess, canAccessCCC, canAccessCompetitionPortal } from '@/types/appAccess';
 
 interface School {
   id: string;
@@ -15,9 +16,7 @@ interface School {
   phone?: string;
   email?: string;
   jrotc_program?: string;
-  comp_analytics?: boolean;
-  comp_hosting?: boolean;
-  comp_basic?: boolean;
+  app_access?: AppAccess;
   logo_url?: string;
   initials?: string;
 }
@@ -104,8 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phone,
             email,
             jrotc_program,
-            comp_analytics,
-            comp_hosting,
+            app_access,
             logo_url,
             initials
           ),
@@ -115,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         `)
         .eq('id', userId)
         .single();
-
+      
       if (error) {
         console.error('Error fetching user profile:', error);
         if (error.code !== 'PGRST116') {
@@ -124,8 +122,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      console.log('User profile fetched successfully:', profile);
-      return profile as Profile;
+      // Create profile with parsed app_access
+      const parsedProfile = {
+        ...profile,
+        schools: profile?.schools ? {
+          ...profile.schools,
+          app_access: parseAppAccess(profile.schools.app_access)
+        } : undefined
+      };
+
+      console.log('User profile fetched successfully:', parsedProfile);
+      return parsedProfile as unknown as Profile;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       return null;
@@ -146,10 +153,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user has external role and hasn't been redirected yet
     // Also check current location to prevent redirect loops
     const currentPath = window.location.pathname;
+    const appAccess = profile.schools?.app_access;
     
-    // IMPORTANT: Only redirect external users if school has comp_basic set to true
+    // IMPORTANT: Only redirect external users if school has competition portal access
     if (userRole === 'external' && 
-        profile.schools?.comp_basic === true &&
+        canAccessCompetitionPortal(appAccess) &&
         redirectedUserRef.current !== profile.id && 
         !currentPath.includes('/app/competition-portal/open-competitions')) {
       redirectedUserRef.current = profile.id;
@@ -160,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/app/competition-portal/open-competitions';
       }, 100);
     } else {
-      console.log('No redirect needed for user role:', userRole, 'comp_basic:', profile.schools?.comp_basic);
+      console.log('No redirect needed for user role:', userRole, 'app_access:', appAccess);
     }
   }, []);
 

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { filterCompetitionModulesBySchoolFlags } from './competitionPermissions';
+import { filterCompetitionModulesByTier } from './competitionPermissions';
+import { CompetitionTier } from '@/types/appAccess';
 
 export interface ModuleMapping {
   moduleName: string;
@@ -21,8 +22,7 @@ export interface ModuleMappings {
  */
 export const fetchCompetitionModuleMappings = async (
   hasPermission: (module: string, action: string) => boolean,
-  hasCompetitionModule: boolean,
-  hasCompetitionPortal: boolean
+  competitionTier: CompetitionTier
 ): Promise<ModuleMappings> => {
   try {
     const { data: modules, error } = await supabase.rpc('get_permission_modules_simple', {
@@ -47,16 +47,15 @@ export const fetchCompetitionModuleMappings = async (
         sortOrder: module.sort_order || 0
       }));
 
-    // Filter by school-level flags, then by role permissions
-    const schoolFilteredModules = filterCompetitionModulesBySchoolFlags(
+    // Filter by tier, then by role permissions
+    const tierFilteredModules = filterCompetitionModulesByTier(
       allCompetitionModules.map(m => ({ name: m.moduleName, id: m.moduleName })),
-      hasCompetitionModule,
-      hasCompetitionPortal
+      competitionTier
     );
 
     const accessibleModules = allCompetitionModules
       .filter((module: ModuleMapping) => 
-        schoolFilteredModules.some(m => m.name === module.moduleName) &&
+        tierFilteredModules.some(m => m.name === module.moduleName) &&
         hasPermission(module.moduleName, 'sidebar')
       )
       .sort((a: ModuleMapping, b: ModuleMapping) => a.sortOrder - b.sortOrder);

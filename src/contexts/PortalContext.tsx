@@ -1,15 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { 
+  CompetitionTier, 
+  canAccessCCC as checkCCCAccess, 
+  canAccessCompetitionPortal as checkCompetitionAccess,
+  getCompetitionTier,
+  hasCompetitionTierAtLeast 
+} from '@/types/appAccess';
 
 type PortalType = 'ccc' | 'competition';
 
 interface PortalContextType {
   currentPortal: PortalType;
   setPortal: (portal: PortalType) => void;
+  canAccessCCC: boolean;
   canAccessCompetitionPortal: boolean;
-  hasCompetitionModule: boolean;
-  hasCompetitionPortal: boolean;
-  canAccessCompetitionSection: (section: 'module' | 'portal') => boolean;
+  competitionTier: CompetitionTier;
+  hasMinimumTier: (required: CompetitionTier) => boolean;
 }
 
 const PortalContext = createContext<PortalContextType | undefined>(undefined);
@@ -26,20 +33,25 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { userProfile } = useAuth();
   const [currentPortal, setCurrentPortal] = useState<PortalType>('ccc');
 
-  // Get school-level flags
-  const hasCompetitionModule = userProfile?.schools?.comp_analytics === true;
-  const hasCompetitionPortal = userProfile?.schools?.comp_hosting === true;
+  // Get app access from school
+  const appAccess = userProfile?.schools?.app_access;
   
-  // Check if user can access competition portal (either competition module or competition portal enabled)
+  // Check CCC access
+  const canAccessCCC = checkCCCAccess(appAccess);
+  
+  // Check competition portal access (any tier except 'none')
   // Also exclude parent users from accessing competition portal
   const canAccessCompetitionPortal = 
-    (hasCompetitionModule || hasCompetitionPortal) &&
+    checkCompetitionAccess(appAccess) &&
     userProfile?.role !== 'parent';
   
-  // Helper function to check access to specific competition sections
-  const canAccessCompetitionSection = (section: 'module' | 'portal') => {
+  // Get the competition tier
+  const competitionTier = getCompetitionTier(appAccess);
+  
+  // Helper to check minimum tier requirement
+  const hasMinimumTier = (required: CompetitionTier) => {
     if (userProfile?.role === 'parent') return false;
-    return section === 'module' ? hasCompetitionModule : hasCompetitionPortal;
+    return hasCompetitionTierAtLeast(competitionTier, required);
   };
   
   // Get stored portal preference
@@ -63,10 +75,10 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const value: PortalContextType = {
     currentPortal,
     setPortal,
+    canAccessCCC,
     canAccessCompetitionPortal,
-    hasCompetitionModule,
-    hasCompetitionPortal,
-    canAccessCompetitionSection,
+    competitionTier,
+    hasMinimumTier,
   };
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>;

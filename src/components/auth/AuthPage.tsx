@@ -34,39 +34,44 @@ const AuthPage = () => {
       // Check if user is on mobile route and redirect accordingly
       const isMobileRoute = location.pathname.startsWith("/mobile");
 
-      // Get user profile to check role - we need to wait for auth state to update
+      // Get user profile with app_access to determine routing
       setTimeout(async () => {
         try {
-          const {
-            data: profile
-          } = await supabase.from("profiles").select("role").eq("id", (await supabase.auth.getUser()).data.user?.id).single();
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role, schools(app_access)")
+            .eq("id", (await supabase.auth.getUser()).data.user?.id)
+            .single();
+          
+          const appAccess = profile?.schools?.app_access as { ccc?: { access?: boolean }, competition?: { tier?: string } } | null;
+          const canAccessCCC = appAccess?.ccc?.access === true;
+          const competitionTier = appAccess?.competition?.tier || 'none';
+          const canAccessCompetition = competitionTier !== 'none';
+          
           if (isMobileRoute) {
             // On mobile, parents go to calendar, others go to dashboard
             if (profile?.role === "parent") {
-              navigate("/mobile/calendar", {
-                replace: true
-              });
+              navigate("/mobile/calendar", { replace: true });
             } else {
-              navigate("/mobile/dashboard", {
-                replace: true
-              });
+              navigate("/mobile/dashboard", { replace: true });
             }
           } else if (profile?.role === "parent") {
-            navigate("/app/calendar", {
-              replace: true
-            });
+            navigate("/app/calendar", { replace: true });
+          } else if (canAccessCCC) {
+            // User has CCC access - go to main app
+            navigate("/app", { replace: true });
+          } else if (canAccessCompetition) {
+            // User only has competition access - go to competition portal
+            navigate("/app/competition-portal/dashboard", { replace: true });
           } else {
-            navigate("/app", {
-              replace: true
-            });
+            // Fallback - go to main app
+            navigate("/app", { replace: true });
           }
         } catch (error) {
           console.error("Error fetching profile for redirect:", error);
           // Fallback redirect
           const redirectPath = isMobileRoute ? "/mobile/dashboard" : "/app";
-          navigate(redirectPath, {
-            replace: true
-          });
+          navigate(redirectPath, { replace: true });
         }
       }, 100); // Small delay to allow auth state to update
     }

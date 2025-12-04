@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, ArrowLeft, Save, X } from "lucide-react";
@@ -17,6 +17,7 @@ import { COMMON_TIMEZONES } from "@/utils/timezoneUtils";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import { FileUpload } from "@/components/ui/file-upload";
+import { AppAccess, CompetitionTier, createDefaultAppAccess, getAllTiers, parseAppAccess } from "@/types/appAccess";
 
 interface School {
   id: string;
@@ -30,10 +31,7 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
-  ccc_portal?: boolean;
-  comp_analytics?: boolean;
-  comp_hosting?: boolean;
-  comp_basic?: boolean;
+  app_access?: AppAccess;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -68,10 +66,7 @@ const SchoolRecordPage = () => {
     zip_code: "",
     phone: "",
     email: "",
-    ccc_portal: false,
-    comp_analytics: false,
-    comp_hosting: false,
-    comp_basic: false,
+    app_access: createDefaultAppAccess(),
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: "",
@@ -115,9 +110,7 @@ const SchoolRecordPage = () => {
         zip_code: data.zip_code || "",
         phone: data.phone || "",
         email: data.email || "",
-        comp_analytics: data.comp_analytics || false,
-        comp_hosting: data.comp_hosting || false,
-        comp_basic: data.comp_basic || false,
+        app_access: parseAppAccess(data.app_access),
         subscription_start: data.subscription_start || undefined,
         subscription_end: data.subscription_end || undefined,
         referred_by: data.referred_by || "",
@@ -176,9 +169,30 @@ const SchoolRecordPage = () => {
     setIsSubmitting(true);
 
     try {
+      // Prepare data for Supabase - convert AppAccess to JSON-compatible format
+      const appAccessJson = JSON.parse(JSON.stringify(schoolData.app_access));
+      const dataToSave = {
+        name: schoolData.name,
+        initials: schoolData.initials,
+        jrotc_program: schoolData.jrotc_program,
+        contact: schoolData.contact,
+        address: schoolData.address,
+        city: schoolData.city,
+        state: schoolData.state,
+        zip_code: schoolData.zip_code,
+        phone: schoolData.phone,
+        email: schoolData.email,
+        app_access: appAccessJson,
+        subscription_start: schoolData.subscription_start,
+        subscription_end: schoolData.subscription_end,
+        referred_by: schoolData.referred_by,
+        notes: schoolData.notes,
+        timezone: schoolData.timezone,
+      };
+      
       if (mode === "create") {
         // Create new school
-        const { data, error } = await supabase.from("schools").insert([schoolData]).select().single();
+        const { data, error } = await supabase.from("schools").insert([dataToSave]).select().single();
 
         if (error) throw error;
 
@@ -208,7 +222,7 @@ const SchoolRecordPage = () => {
         const { error } = await supabase
           .from("schools")
           .update({
-            ...schoolData,
+            ...dataToSave,
             logo_url: logoUrl,
           })
           .eq("id", schoolId);
@@ -545,58 +559,58 @@ const SchoolRecordPage = () => {
               </div>
 
               {/* Module Settings */}
-              <div className="grid grid-cols-4 gap-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ccc_portal"
-                    checked={schoolData.ccc_portal || false}
-                    onCheckedChange={(checked) =>
-                      setSchoolData({
-                        ...schoolData,
-                        ccc_portal: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="ccc_portal">CCC Portal</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="comp_basic"
-                    checked={schoolData.comp_basic || false}
-                    onCheckedChange={(checked) =>
-                      setSchoolData({
-                        ...schoolData,
-                        comp_basic: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="comp_basic">Comp Basic</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="comp_analytics"
-                    checked={schoolData.comp_analytics || false}
-                    onCheckedChange={(checked) =>
-                      setSchoolData({
-                        ...schoolData,
-                        comp_analytics: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="comp_analytics">Comp Analytics</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="comp_hosting"
-                    checked={schoolData.comp_hosting || false}
-                    onCheckedChange={(checked) =>
-                      setSchoolData({
-                        ...schoolData,
-                        comp_hosting: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="comp_hosting">Comp Hosting</Label>
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Portal Access</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  {/* CCC Portal Access */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label htmlFor="ccc_access" className="text-base font-medium">CCC Portal</Label>
+                      <p className="text-sm text-muted-foreground">Access to JROTC Command Center</p>
+                    </div>
+                    <Switch
+                      id="ccc_access"
+                      checked={schoolData.app_access?.ccc?.access || false}
+                      onCheckedChange={(checked) =>
+                        setSchoolData({
+                          ...schoolData,
+                          app_access: {
+                            ...schoolData.app_access!,
+                            ccc: { access: checked },
+                          },
+                        })
+                      }
+                    />
+                  </div>
+
+                  {/* Competition Portal Tier */}
+                  <div className="p-4 border rounded-lg space-y-2">
+                    <Label htmlFor="competition_tier" className="text-base font-medium">Competition Portal Tier</Label>
+                    <p className="text-sm text-muted-foreground">Select competition portal access level</p>
+                    <Select
+                      value={schoolData.app_access?.competition?.tier || 'none'}
+                      onValueChange={(value) =>
+                        setSchoolData({
+                          ...schoolData,
+                          app_access: {
+                            ...schoolData.app_access!,
+                            competition: { tier: value as CompetitionTier },
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select tier" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAllTiers().map((tier) => (
+                          <SelectItem key={tier.value} value={tier.value}>
+                            {tier.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 

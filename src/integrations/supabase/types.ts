@@ -3277,6 +3277,7 @@ export type Database = {
       schools: {
         Row: {
           address: string | null
+          app_access: Json | null
           ccc_portal: boolean | null
           city: string | null
           comp_analytics: boolean | null
@@ -3305,6 +3306,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          app_access?: Json | null
           ccc_portal?: boolean | null
           city?: string | null
           comp_analytics?: boolean | null
@@ -3333,6 +3335,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          app_access?: Json | null
           ccc_portal?: boolean | null
           city?: string | null
           comp_analytics?: boolean | null

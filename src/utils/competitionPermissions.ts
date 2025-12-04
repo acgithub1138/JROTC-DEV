@@ -1,51 +1,50 @@
 // Competition Portal Permission System
-// Maps modules to their school-level permission requirements
+// Maps modules to their tier requirements
+
+import { CompetitionTier, hasCompetitionTierAtLeast } from '@/types/appAccess';
 
 export interface CompetitionModuleRequirement {
   moduleId: string;
-  requiresCompAnalytics?: boolean;
-  requiresCompHosting?: boolean;
+  minimumTier: CompetitionTier;
 }
 
-// Define which modules require which school-level flags
+// Define which modules require which minimum tier
+// Hierarchy: none < basic < analytics < host
 export const COMPETITION_MODULE_REQUIREMENTS: CompetitionModuleRequirement[] = [
-  // Competition Analytics sections (comp_analytics = true)
-  { moduleId: 'open_competitions', requiresCompAnalytics: true },
-  { moduleId: 'my_competitions', requiresCompAnalytics: true },
-  { moduleId: 'competitions', requiresCompAnalytics: true },
-  { moduleId: 'my_competitions_reports', requiresCompAnalytics: true },
-  { moduleId: 'my_competitions_analytics', requiresCompAnalytics: true }, // Alias for my_competitions_reports
+  // Basic tier: Open competitions viewing only
+  { moduleId: 'open_competitions', minimumTier: 'basic' },
+  { moduleId: 'open_comps_open', minimumTier: 'basic' },
   
-  // Competition Hosting sections (comp_hosting = true)  
-  { moduleId: 'cp_dashboard', requiresCompHosting: true },
-  { moduleId: 'hosting_competitions', requiresCompHosting: true },
-  { moduleId: 'cp_competitions', requiresCompHosting: true },
-  { moduleId: 'cp_comp_events', requiresCompHosting: true },
-  { moduleId: 'cp_comp_resources', requiresCompHosting: true },
-  { moduleId: 'cp_comp_schools', requiresCompHosting: true },
-  { moduleId: 'cp_schedules', requiresCompHosting: true },
-  { moduleId: 'cp_comp_results', requiresCompHosting: true },
-  { moduleId: 'cp_judges', requiresCompHosting: true },
-  { moduleId: 'analytics', requiresCompHosting: true },
-  { moduleId: 'competition_settings', requiresCompHosting: true },
-  { moduleId: 'comp_cadets', requiresCompHosting: true },
+  // Analytics tier: My competitions, analytics, reports
+  { moduleId: 'my_competitions', minimumTier: 'analytics' },
+  { moduleId: 'competitions', minimumTier: 'analytics' },
+  { moduleId: 'my_competitions_reports', minimumTier: 'analytics' },
+  { moduleId: 'my_competitions_analytics', minimumTier: 'analytics' },
+  { moduleId: 'cp_score_sheets', minimumTier: 'analytics' },
   
-  // Both flags allow access to score sheets (can be accessed from either section)
-  { moduleId: 'cp_score_sheets', requiresCompAnalytics: true, requiresCompHosting: true },
-  
-  // Judges Portal sections (comp_hosting = true)
-  { moduleId: 'judges_portal', requiresCompHosting: true },
-  { moduleId: 'cp_judge_applications', requiresCompHosting: true },
-  { moduleId: 'open_comps_open', requiresCompHosting: true },
+  // Host tier: Full competition hosting/management
+  { moduleId: 'cp_dashboard', minimumTier: 'host' },
+  { moduleId: 'hosting_competitions', minimumTier: 'host' },
+  { moduleId: 'cp_competitions', minimumTier: 'host' },
+  { moduleId: 'cp_comp_events', minimumTier: 'host' },
+  { moduleId: 'cp_comp_resources', minimumTier: 'host' },
+  { moduleId: 'cp_comp_schools', minimumTier: 'host' },
+  { moduleId: 'cp_schedules', minimumTier: 'host' },
+  { moduleId: 'cp_comp_results', minimumTier: 'host' },
+  { moduleId: 'cp_judges', minimumTier: 'host' },
+  { moduleId: 'analytics', minimumTier: 'host' },
+  { moduleId: 'competition_settings', minimumTier: 'host' },
+  { moduleId: 'comp_cadets', minimumTier: 'host' },
+  { moduleId: 'judges_portal', minimumTier: 'host' },
+  { moduleId: 'cp_judge_applications', minimumTier: 'host' },
 ];
 
 /**
- * Check if a user can access a specific competition module based on school-level flags
+ * Check if a user can access a specific competition module based on their tier
  */
 export const canAccessCompetitionModule = (
   moduleId: string,
-  hasCompAnalytics: boolean,
-  hasCompHosting: boolean
+  currentTier: CompetitionTier
 ): boolean => {
   const requirement = COMPETITION_MODULE_REQUIREMENTS.find(req => req.moduleId === moduleId);
   
@@ -54,45 +53,45 @@ export const canAccessCompetitionModule = (
     return false;
   }
   
-  // Check if either required flag is satisfied
-  const analyticsAccess = requirement.requiresCompAnalytics ? hasCompAnalytics : false;
-  const hostingAccess = requirement.requiresCompHosting ? hasCompHosting : false;
-  
-  // For modules that require both, user needs at least one flag
-  // For modules that require only one, they need that specific flag
-  return analyticsAccess || hostingAccess;
+  return hasCompetitionTierAtLeast(currentTier, requirement.minimumTier);
 };
 
 /**
- * Filter competition modules based on school-level permissions
+ * Filter competition modules based on user's tier
  */
-export const filterCompetitionModulesBySchoolFlags = (
+export const filterCompetitionModulesByTier = (
   modules: any[],
-  hasCompAnalytics: boolean,
-  hasCompHosting: boolean
+  currentTier: CompetitionTier
 ): any[] => {
   return modules.filter(module => 
-    canAccessCompetitionModule(module.id || module.name, hasCompAnalytics, hasCompHosting)
+    canAccessCompetitionModule(module.id || module.name, currentTier)
   );
 };
 
 /**
- * Get the default module for a user based on their school-level permissions
+ * Get the default module for a user based on their tier
  */
 export const getDefaultCompetitionModule = (
-  hasCompAnalytics: boolean,
-  hasCompHosting: boolean
+  currentTier: CompetitionTier
 ): string => {
-  // If user has competition hosting, default to dashboard
-  if (hasCompHosting) {
+  // If user has host tier, default to dashboard
+  if (currentTier === 'host') {
     return 'cp_dashboard';
   }
   
-  // If user only has competition analytics, default to open competitions
-  if (hasCompAnalytics) {
-    return 'open_competitions';
+  // If user has analytics tier, default to my competitions
+  if (currentTier === 'analytics') {
+    return 'my_competitions';
   }
   
-  // Fallback (shouldn't happen if canAccessCompetitionPortal is working correctly)
+  // Basic tier defaults to open competitions
   return 'open_competitions';
+};
+
+/**
+ * Get the minimum tier required for a module
+ */
+export const getModuleMinimumTier = (moduleId: string): CompetitionTier => {
+  const requirement = COMPETITION_MODULE_REQUIREMENTS.find(req => req.moduleId === moduleId);
+  return requirement?.minimumTier || 'host'; // Default to highest tier if not found
 };
