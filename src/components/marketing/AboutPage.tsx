@@ -29,18 +29,16 @@ const AboutPage = () => {
     title: "Retired Master Sergeant",
     bio: "4 years with the Air Force Honor Guard, 16 years as a military recruiter, 12 years as an instructor for the AFJROTC program at Flower Mound High School in Texas."
   }];
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Built for JROTC Instructors
+              Built for JROTC Competitions
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               JROTC CCC was created out of a collaboration between cadets & instructors who experienced the 
