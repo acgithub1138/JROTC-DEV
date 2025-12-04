@@ -542,7 +542,21 @@ const SchoolRecordPage = () => {
               </div>
 
               {/* Module Settings */}
-              <div className="grid grid-cols-3 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="comp_basic"
+                    checked={schoolData.comp_basic || false}
+                    onCheckedChange={(checked) =>
+                      setSchoolData({
+                        ...schoolData,
+                        comp_basic: checked as boolean,
+                      })
+                    }
+                  />
+                  <Label htmlFor="comp_basic">Comp Basic</Label>
+                </div>
+              </div>
+            <div className="grid grid-cols-3 gap-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="comp_analytics"
@@ -569,20 +583,6 @@ const SchoolRecordPage = () => {
                   />
                   <Label htmlFor="comp_hosting">Comp Hosting</Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="comp_basic"
-                    checked={schoolData.comp_basic || false}
-                    onCheckedChange={(checked) =>
-                      setSchoolData({
-                        ...schoolData,
-                        comp_basic: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="comp_basic">Comp Basic</Label>
-                </div>
-              </div>
 
               {/* Notes */}
               <div className="space-y-2">
