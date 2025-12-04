@@ -74,11 +74,11 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
 
   // Filter out widget actions from both portal grids
   const filteredActions = actions.filter(action => !action.is_widget);
-  return <div className="overflow-x-auto">
+  return <div className="overflow-auto max-h-[calc(100vh-300px)]">
       <table className="w-full border-collapse">
-        <thead>
+        <thead className="sticky top-0 bg-background z-10">
           <tr className="border-b">
-            <th className="text-left p-3 font-medium">Module</th>
+            <th className="text-left p-3 font-medium bg-background">Module</th>
             {filteredActions.map(action => <ColumnHeader key={action.id} action={action}>
                 {action.label}
               </ColumnHeader>)}
