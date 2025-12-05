@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Lock } from 'lucide-react';
 import { useCompetitionSchedule } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
@@ -11,6 +11,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { usePortal } from '@/contexts/PortalContext';
 
 interface AvailableSchool {
   id: string;
@@ -22,6 +23,10 @@ export const ScheduleEditRecord = () => {
   const navigate = useNavigate();
   const { timezone } = useSchoolTimezone();
   const { toast } = useToast();
+  const { hasMinimumTier } = usePortal();
+  
+  // Check if user has analytics tier or above (required for time slot selection)
+  const canSelectTimeSlot = hasMinimumTier('analytics');
 
   // Extract competitionId and eventId from the route
   const competitionId = splat?.split('/')[2]; // competition-details/{competitionId}/schedule_record
@@ -350,7 +355,7 @@ export const ScheduleEditRecord = () => {
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
-                        ) : (
+                        ) : canSelectTimeSlot ? (
                           <Select 
                             value={currentAssignment || ""} 
                             onValueChange={schoolId => handleLocalScheduleChange(slot.time, schoolId)}
@@ -375,6 +380,11 @@ export const ScheduleEditRecord = () => {
                               })()}
                             </SelectContent>
                           </Select>
+                        ) : (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                            <span>Subscription required to select time</span>
+                          </div>
                         )}
                       </div>
                     </div>
