@@ -29,7 +29,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport className={isMobile ? "top-0 left-1/2 -translate-x-1/2 flex-col-reverse" : ""} />
+      <ToastViewport className={isMobile ? "top-0 bottom-auto left-1/2 -translate-x-1/2 flex-col" : ""} />
     </ToastProvider>
   )
 }
