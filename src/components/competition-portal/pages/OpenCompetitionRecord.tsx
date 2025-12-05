@@ -8,11 +8,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Clock, ArrowLeft, Calendar, Loader2 } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Clock, ArrowLeft, Calendar, Loader2, Lock } from 'lucide-react';
 import { format, addMinutes } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortal } from '@/contexts/PortalContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
@@ -69,8 +70,12 @@ export const OpenCompetitionRecord: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userProfile } = useAuth();
+  const { hasMinimumTier } = usePortal();
   const { timezone } = useSchoolTimezone();
   const { createEvent } = useEvents({ eventType: '', assignedTo: '' });
+  
+  // Check if user has analytics tier or above (required for time slot selection)
+  const canSelectTimeSlot = hasMinimumTier('analytics');
 
   // Extract competitionId from URL if useParams doesn't work due to nested routing
   const location = useLocation();
@@ -863,6 +868,11 @@ export const OpenCompetitionRecord: React.FC = () => {
                               <p className="text-sm text-muted-foreground">
                                 Only subscribers can select their time slots.
                               </p>
+                            </div>
+                          ) : !canSelectTimeSlot ? (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Lock className="h-4 w-4" />
+                              <span>Subscription required to select time</span>
                             </div>
                           ) : (
                             <>
