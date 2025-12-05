@@ -8,6 +8,7 @@ import { RegisteredSchoolsWidget } from './dashboard/RegisteredSchoolsWidget';
 import { EventsJudgesWidget } from './dashboard/EventsJudgesWidget';
 import { JudgesStatusWidget } from './dashboard/JudgesStatusWidget';
 import { ScoreSheetsWidget } from './dashboard/ScoreSheetsWidget';
+import { MyResourceAssignmentsWidget } from './dashboard/MyResourceAssignmentsWidget';
 const CompetitionDashboard = () => {
   const {
     userProfile
@@ -112,6 +113,9 @@ const CompetitionDashboard = () => {
           </div>
           <div className="transition-all duration-300 hover:scale-[1.02]">
             <ScoreSheetsWidget />
+          </div>
+          <div className="transition-all duration-300 hover:scale-[1.02]">
+            <MyResourceAssignmentsWidget />
           </div>
         </div>
       </div>
