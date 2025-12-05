@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { convertToUI } from "@/utils/timezoneUtils";
+import { useSchoolTimezone } from "@/hooks/useSchoolTimezone";
 import { useOpenCompsOpenPermissions } from "@/hooks/useModuleSpecificPermissions";
 import DOMPurify from "dompurify";
 interface Competition {
@@ -61,6 +63,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   const navigate = useNavigate();
   const defaultPermissions = useOpenCompsOpenPermissions();
   const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = permissions || defaultPermissions;
+  const { timezone } = useSchoolTimezone();
   const [showSopModal, setShowSopModal] = useState(false);
   const [selectedSopText, setSelectedSopText] = useState("");
   const [selectedCompetitionName, setSelectedCompetitionName] = useState("");
@@ -151,11 +154,22 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               <div className="flex items-center gap-2">
                 <CalendarDays className="w-4 h-4" />
                 <span>
-                  {format(new Date(competition.start_date), "MMM d, yyyy")}
-                  {competition.end_date &&
-                    format(new Date(competition.end_date), "MMM d, yyyy") !==
-                      format(new Date(competition.start_date), "MMM d, yyyy") &&
-                    ` - ${format(new Date(competition.end_date), "MMM d, yyyy")}`}
+                  {(() => {
+                    const startDate = new Date(competition.start_date);
+                    const endDate = competition.end_date ? new Date(competition.end_date) : startDate;
+                    const startTime = convertToUI(competition.start_date, timezone, 'time');
+                    const endTime = competition.end_date ? convertToUI(competition.end_date, timezone, 'time') : startTime;
+                    const isSameDay = format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd");
+                    const isSameMonth = format(startDate, "MMM yyyy") === format(endDate, "MMM yyyy");
+                    
+                    if (isSameDay) {
+                      return `${format(startDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                    } else if (isSameMonth) {
+                      return `${format(startDate, "MMM d")}-${format(endDate, "d, yyyy")} - ${startTime} - ${endTime}`;
+                    } else {
+                      return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                    }
+                  })()}
                 </span>
               </div>
               <div className="flex items-center gap-2">
