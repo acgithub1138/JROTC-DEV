@@ -25,18 +25,18 @@ export const MobileNavButtons = ({
   totalSteps,
 }: MobileNavButtonsProps) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 safe-area-bottom z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-50">
       <div className="grid grid-cols-3 gap-4 items-center">
         {/* Left Section - Previous/Exit Button */}
         <div>
           {showExit && onExit && (
-            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-10 text-base">
+            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-10 text-base touch-manipulation">
               <X className="h-5 w-5 mr-2" />
             </Button>
           )}
 
           {showPrevious && onPrevious && (
-            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-10 text-base text-left">
+            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-10 text-base text-left touch-manipulation">
               <ChevronLeft className="h-5 w-5 mr-2" />
             </Button>
           )}
@@ -54,7 +54,7 @@ export const MobileNavButtons = ({
         {/* Right Section - Next Button */}
         <div>
           {onNext && (
-            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-10 text-base text-right">
+            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-10 text-base text-right touch-manipulation">
               <ChevronRight className="h-5 w-5 ml-2" />
             </Button>
           )}
