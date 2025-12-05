@@ -330,24 +330,24 @@ export const CPCompetitionRecordPage = () => {
     }
   };
 
-  // Show loading state while waiting for competition data
-  if ((isEditMode || isViewMode) && competitionId && !existingCompetition) {
-    // Still loading - show loading state
-    if (competitionsLoading) {
-      return <div className="p-6 space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Loading...</h1>
-              <p className="text-muted-foreground">Please wait while we load the competition details.</p>
-            </div>
+  // Show loading state while competitions are being fetched
+  if (competitionsLoading && competitionId) {
+    return <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Loading...</h1>
+            <p className="text-muted-foreground">Please wait while we load the competition details.</p>
           </div>
-        </div>;
-    }
-    // Loading done but competition not found - show error
+        </div>
+      </div>;
+  }
+
+  // Competition not found after loading
+  if (!competitionsLoading && competitionId && !existingCompetition) {
     return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
