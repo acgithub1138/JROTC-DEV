@@ -27,13 +27,18 @@ export const ScoreSheetsWidget = () => {
         return { totalSubmitted: 0, totalNeeded: 0, uniqueEvents: 0, uniqueSchools: 0 };
       }
 
-      // Get events with judges_needed
+      // Get events
       const { data: events, error: eventsError } = await supabase
         .from('cp_comp_events')
-        .select('id, judges_needed')
+        .select('id')
         .in('competition_id', compIds);
 
       if (eventsError) throw eventsError;
+
+      const eventIds = events?.map(e => e.id) || [];
+      if (eventIds.length === 0) {
+        return { totalSubmitted: 0, totalNeeded: 0, uniqueEvents: 0, uniqueSchools: 0 };
+      }
 
       // Get event registrations to count schools per event
       const { data: registrations, error: regsError } = await supabase
@@ -43,11 +48,20 @@ export const ScoreSheetsWidget = () => {
 
       if (regsError) throw regsError;
 
-      // Calculate total score sheets needed
+      // Get actual judge assignments per event
+      const { data: judgeAssignments, error: judgesError } = await supabase
+        .from('cp_comp_judges')
+        .select('event')
+        .in('competition_id', compIds);
+
+      if (judgesError) throw judgesError;
+
+      // Calculate total score sheets needed using actual assigned judges count
       let totalNeeded = 0;
       events?.forEach(event => {
         const schoolCount = registrations?.filter(r => r.event_id === event.id).length || 0;
-        totalNeeded += (event.judges_needed || 0) * schoolCount;
+        const actualJudgesCount = judgeAssignments?.filter(j => j.event === event.id).length || 0;
+        totalNeeded += actualJudgesCount * schoolCount;
       });
 
       // Get submitted score sheets
