@@ -113,7 +113,7 @@ export const OpenCompetitionRecord: React.FC = () => {
   // Data state
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [events, setEvents] = useState<CompetitionEvent[]>([]);
-  const [currentRegistrations, setCurrentRegistrations] = useState<{ event_id: string }[]>([]);
+  const [currentRegistrations, setCurrentRegistrations] = useState<{ event_id: string; preferred_time_request: PreferredTimeRequest | null }[]>([]);
   const [currentSchedules, setCurrentSchedules] = useState<{ event_id: string; scheduled_time: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -210,7 +210,7 @@ export const OpenCompetitionRecord: React.FC = () => {
     try {
       const { data: registrations, error: regError } = await supabase
         .from("cp_event_registrations")
-        .select("event_id")
+        .select("event_id, preferred_time_request")
         .eq("competition_id", urlCompetitionId)
         .eq("school_id", userProfile.school_id);
 
@@ -224,7 +224,12 @@ export const OpenCompetitionRecord: React.FC = () => {
 
       if (schedError) throw schedError;
 
-      setCurrentRegistrations(registrations || []);
+      // Cast the registrations to proper type
+      const typedRegistrations = (registrations || []).map(reg => ({
+        event_id: reg.event_id,
+        preferred_time_request: reg.preferred_time_request as unknown as PreferredTimeRequest | null
+      }));
+      setCurrentRegistrations(typedRegistrations);
       setCurrentSchedules(schedules || []);
     } catch (error) {
       console.error("Error fetching registrations:", error);
@@ -349,11 +354,21 @@ export const OpenCompetitionRecord: React.FC = () => {
         setSelectedTimeSlots(timeSlotMap);
         setInitialSelectedTimeSlots(timeSlotMap);
       }
+
+      // Initialize preferred time requests from existing registrations
+      const prefTimeMap = new Map<string, PreferredTimeRequest>();
+      currentRegistrations.forEach((reg) => {
+        if (reg.preferred_time_request) {
+          prefTimeMap.set(reg.event_id, reg.preferred_time_request);
+        }
+      });
+      setPreferredTimeRequests(prefTimeMap);
     } else {
       setSelectedEvents(new Set());
       setInitialSelectedEvents(new Set());
       setSelectedTimeSlots(new Map());
       setInitialSelectedTimeSlots(new Map());
+      setPreferredTimeRequests(new Map());
     }
   }, [currentRegistrations, currentSchedules]);
 
