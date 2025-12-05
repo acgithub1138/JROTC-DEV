@@ -58,7 +58,8 @@ export const CPCompetitionRecordPage = () => {
   const {
     createCompetition,
     updateCompetition,
-    competitions
+    competitions,
+    isLoading: competitionsLoading
   } = useCompetitions();
 
   // Find competition data if editing or viewing
@@ -331,6 +332,22 @@ export const CPCompetitionRecordPage = () => {
 
   // Show loading state while waiting for competition data
   if ((isEditMode || isViewMode) && competitionId && !existingCompetition) {
+    // Still loading - show loading state
+    if (competitionsLoading) {
+      return <div className="p-6 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Loading...</h1>
+              <p className="text-muted-foreground">Please wait while we load the competition details.</p>
+            </div>
+          </div>
+        </div>;
+    }
+    // Loading done but competition not found - show error
     return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
@@ -338,8 +355,8 @@ export const CPCompetitionRecordPage = () => {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Loading...</h1>
-            <p className="text-muted-foreground">Please wait while we load the competition details.</p>
+            <h1 className="text-3xl font-bold">Competition Not Found</h1>
+            <p className="text-muted-foreground">The competition you're looking for could not be found.</p>
           </div>
         </div>
       </div>;
