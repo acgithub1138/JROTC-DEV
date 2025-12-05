@@ -4183,6 +4183,71 @@ export type Database = {
           },
         ]
       }
+      cp_event_time_requests: {
+        Row: {
+          competition_id: string | null
+          event_id: string | null
+          event_initials: string | null
+          event_name: string | null
+          event_type_id: string | null
+          id: string | null
+          preferred_time_request: Json | null
+          school_id: string | null
+          school_initials: string | null
+          school_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition_registration_email_data"
+            referencedColumns: ["competition_id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events_detailed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_event_registrations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cp_events_with_templates: {
         Row: {
           id: string | null
