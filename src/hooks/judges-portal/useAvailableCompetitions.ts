@@ -27,11 +27,12 @@ export const useAvailableCompetitions = () => {
     queryKey: ['available-competitions'],
     queryFn: async () => {
       // Get public competitions that are published and upcoming
+      // Get public competitions in draft or open status with upcoming start dates
       const { data: comps, error: compsError } = await supabase
         .from('cp_competitions')
         .select('*')
         .eq('is_public', true)
-        .eq('status', 'open')
+        .in('status', ['draft', 'open'])
         .gte('start_date', new Date().toISOString())
         .order('start_date', { ascending: true });
       
