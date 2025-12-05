@@ -172,87 +172,89 @@ export const EventScheduleView = ({
           </h1>
         </div>
         
-        <div className="flex items-center justify-between gap-4 no-print w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
           {/* Left side - filter and print */}
-          <div className="flex items-center gap-2">
-            <Label htmlFor="school-filter" className="text-sm whitespace-nowrap">
-              Filter by school:
-            </Label>
-            <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
-              <SelectTrigger className="w-40 sm:w-48">
-                <SelectValue placeholder="All schools" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All schools</SelectItem>
-                {registeredSchools?.map(school => <SelectItem key={school.id} value={school.id}>
-                    {school.name}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
-              <Printer className="h-4 w-4" />
-              Print Schedule
-            </Button>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="school-filter" className="text-sm whitespace-nowrap">
+                Filter by school:
+              </Label>
+              <Select value={selectedSchoolFilter} onValueChange={setSelectedSchoolFilter}>
+                <SelectTrigger className="w-40 sm:w-48">
+                  <SelectValue placeholder="All schools" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All schools</SelectItem>
+                  {registeredSchools?.map(school => <SelectItem key={school.id} value={school.id}>
+                      {school.name}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2 whitespace-nowrap">
+                <Printer className="h-4 w-4" />
+                Print Schedule
+              </Button>
+            </div>
+
+            {/* Event Time Requests trigger */}
+            {timeRequests && timeRequests.length > 0 && (
+              <Collapsible open={isRequestsOpen} onOpenChange={setIsRequestsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2 w-fit">
+                    {isRequestsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <Clock className="h-4 w-4" />
+                    Event Time Requests
+                    <Badge variant="secondary" className="ml-1">{timeRequests.length}</Badge>
+                  </Button>
+                </CollapsibleTrigger>
+              </Collapsible>
+            )}
           </div>
 
-          {/* Right side - Event Time Requests */}
-          {timeRequests && timeRequests.length > 0 && (
-            <Collapsible open={isRequestsOpen} onOpenChange={setIsRequestsOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  {isRequestsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  <Clock className="h-4 w-4" />
-                  Event Time Requests
-                  <Badge variant="secondary" className="ml-1">{timeRequests.length}</Badge>
-                </Button>
-              </CollapsibleTrigger>
-            </Collapsible>
+          {/* Right side - Event Time Requests Content */}
+          {timeRequests && timeRequests.length > 0 && isRequestsOpen && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {timeRequests.map((request) => (
+                    <div key={request.id} className="flex items-start justify-between p-3 bg-muted/50 rounded-md border">
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          {request.school_name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {request.event_name}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline">
+                          {getWindowLabel(request.preferred_time_request?.window)}
+                        </Badge>
+                        {request.preferred_time_request?.exact_time && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Preferred: {request.preferred_time_request.exact_time}
+                          </div>
+                        )}
+                        {request.preferred_time_request?.notes && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate cursor-help">
+                                {request.preferred_time_request.notes}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[300px]">
+                              <p>{request.preferred_time_request.notes}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
-
-        {/* Event Time Requests Content */}
-        {timeRequests && timeRequests.length > 0 && isRequestsOpen && (
-          <Card className="no-print">
-            <CardContent className="p-4">
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {timeRequests.map((request) => (
-                  <div key={request.id} className="flex items-start justify-between p-3 bg-muted/50 rounded-md border">
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {request.school_name}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {request.event_name}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline">
-                        {getWindowLabel(request.preferred_time_request?.window)}
-                      </Badge>
-                      {request.preferred_time_request?.exact_time && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Preferred: {request.preferred_time_request.exact_time}
-                        </div>
-                      )}
-                      {request.preferred_time_request?.notes && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate cursor-help">
-                              {request.preferred_time_request.notes}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-[300px]">
-                            <p>{request.preferred_time_request.notes}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <Card>
           <CardContent className="p-0">
