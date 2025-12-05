@@ -337,7 +337,7 @@ const MainApplication = () => {
             <Route path="parent-profile" element={<ParentProfilePage />} />
             
             {/* Competition Portal Routes */}
-            <Route path="competition-portal/competitions/competition_record" element={<CPCompetitionRecordPage />} />
+            <Route path="competition-portal/competitions/competition_record" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/dashboard" element={<CompetitionPortalLayout />} />
