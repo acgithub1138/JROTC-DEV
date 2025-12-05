@@ -53,11 +53,12 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
 
         if (!eventData) return;
 
-        // Get all judges assigned to this competition
+        // Get judges assigned to this specific event
         const { data: judgeAssignments } = await supabase
           .from('cp_comp_judges')
           .select('*')
-          .eq('competition_id', eventData.competition_id);
+          .eq('competition_id', eventData.competition_id)
+          .eq('event', eventId);
 
         if (judgeAssignments && judgeAssignments.length > 0) {
           const judgeIds = judgeAssignments.map(j => j.judge);
@@ -98,7 +99,7 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
             </div>
           ) : judges.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
-              No judges assigned to this competition
+              No judges assigned to this event
             </p>
           ) : (
             <div className="overflow-x-auto">
