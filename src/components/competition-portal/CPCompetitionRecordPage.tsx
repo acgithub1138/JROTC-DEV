@@ -59,7 +59,8 @@ export const CPCompetitionRecordPage = () => {
     createCompetition,
     updateCompetition,
     competitions,
-    isLoading: competitionsLoading
+    isLoading: competitionsLoading,
+    hasFetched
   } = useCompetitions();
 
   // Find competition data if editing or viewing
@@ -330,8 +331,8 @@ export const CPCompetitionRecordPage = () => {
     }
   };
 
-  // Show loading state while competitions are being fetched
-  if (competitionsLoading && competitionId) {
+  // Show loading state while we haven't completed a fetch yet
+  if (!hasFetched && competitionId) {
     return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
@@ -346,8 +347,8 @@ export const CPCompetitionRecordPage = () => {
       </div>;
   }
 
-  // Competition not found after loading
-  if (!competitionsLoading && competitionId && !existingCompetition) {
+  // Only show "not found" after we've actually fetched and confirmed it doesn't exist
+  if (hasFetched && competitionId && !existingCompetition) {
     return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
