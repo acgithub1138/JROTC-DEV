@@ -15,7 +15,6 @@ export const useCompetitions = () => {
   const { timezone } = useSchoolTimezone();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasFetched, setHasFetched] = useState(false);
 
   const fetchCompetitions = async () => {
     try {
@@ -39,7 +38,6 @@ export const useCompetitions = () => {
       toast.error('Failed to load competitions');
     } finally {
       setIsLoading(false);
-      setHasFetched(true);
     }
   };
 
@@ -225,7 +223,6 @@ export const useCompetitions = () => {
   return {
     competitions,
     isLoading,
-    hasFetched,
     createCompetition,
     updateCompetition,
     deleteCompetition,

@@ -58,9 +58,7 @@ export const CPCompetitionRecordPage = () => {
   const {
     createCompetition,
     updateCompetition,
-    competitions,
-    isLoading: competitionsLoading,
-    hasFetched
+    competitions
   } = useCompetitions();
 
   // Find competition data if editing or viewing
@@ -331,8 +329,8 @@ export const CPCompetitionRecordPage = () => {
     }
   };
 
-  // Show loading state while we haven't completed a fetch yet
-  if (!hasFetched && competitionId) {
+  // Show loading state while waiting for competition data
+  if ((isEditMode || isViewMode) && competitionId && !existingCompetition) {
     return <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
@@ -342,22 +340,6 @@ export const CPCompetitionRecordPage = () => {
           <div>
             <h1 className="text-3xl font-bold">Loading...</h1>
             <p className="text-muted-foreground">Please wait while we load the competition details.</p>
-          </div>
-        </div>
-      </div>;
-  }
-
-  // Only show "not found" after we've actually fetched and confirmed it doesn't exist
-  if (hasFetched && competitionId && !existingCompetition) {
-    return <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Competition Not Found</h1>
-            <p className="text-muted-foreground">The competition you're looking for could not be found.</p>
           </div>
         </div>
       </div>;
