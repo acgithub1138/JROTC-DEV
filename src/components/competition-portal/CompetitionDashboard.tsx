@@ -54,8 +54,9 @@ const CompetitionDashboard = () => {
         awardsGiven: awards
       };
     },
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000,
+    // Cache for 10 minutes
+    refetchOnWindowFocus: false
   });
   const dashboardStats = [{
     title: 'Active Competitions',
@@ -90,27 +91,7 @@ const CompetitionDashboard = () => {
       </div>
 
       {/* Stats Grid with Enhanced Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {dashboardStats.map((stat, index) => <Card key={index} className="group relative overflow-hidden border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-300">
-                <stat.icon className="h-5 w-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent mb-1">
-                {stat.value}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>)}
-      </div>
+      
 
       {/* Active Competition Widgets Section */}
       <div className="space-y-4">
