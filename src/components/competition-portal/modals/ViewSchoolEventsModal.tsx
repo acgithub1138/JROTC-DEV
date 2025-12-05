@@ -4,8 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI } from '@/utils/timezoneUtils';
+import { Clock } from 'lucide-react';
+
+interface PreferredTimeRequest {
+  window?: 'morning' | 'midday' | 'afternoon' | '';
+  exact_time?: string;
+  notes?: string;
+}
 
 interface ViewSchoolEventsModalProps {
   open: boolean;
@@ -13,6 +21,15 @@ interface ViewSchoolEventsModalProps {
   competitionId: string;
   schoolId: string; // This is the cp_comp_schools.id
 }
+
+const getWindowLabel = (window?: string) => {
+  switch (window) {
+    case 'morning': return 'Morning (8AM-11AM)';
+    case 'midday': return 'Midday (11AM-2PM)';
+    case 'afternoon': return 'Afternoon (2PM-5PM)';
+    default: return null;
+  }
+};
 
 export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
   open,
@@ -67,7 +84,7 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Registered Events</DialogTitle>
           <DialogDescription>
@@ -89,39 +106,72 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
                 <TableHead>Location</TableHead>
                 <TableHead>Time</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Time Preference</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {eventRegistrations.map(registration => (
-                <TableRow key={registration.id}>
-                  <TableCell className="font-medium py-[6px]">
-                    {registration.cp_comp_events?.competition_event_types?.name || 'Unknown Event'}
-                  </TableCell>
-                  <TableCell>
-                    {registration.cp_comp_events?.location || '-'}
-                  </TableCell>
-                  <TableCell>
-                    {convertToUI(
-                      registration.cp_comp_events?.start_time,
-                      timezone,
-                      'datetime'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        registration.status === 'confirmed'
-                          ? 'default'
-                          : registration.status === 'cancelled'
-                          ? 'destructive'
-                          : 'secondary'
-                      }
-                    >
-                      {registration.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {eventRegistrations.map(registration => {
+                const timeRequest = registration.preferred_time_request as PreferredTimeRequest | null;
+                const windowLabel = getWindowLabel(timeRequest?.window);
+                
+                return (
+                  <TableRow key={registration.id}>
+                    <TableCell className="font-medium py-[6px]">
+                      {registration.cp_comp_events?.competition_event_types?.name || 'Unknown Event'}
+                    </TableCell>
+                    <TableCell>
+                      {registration.cp_comp_events?.location || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {convertToUI(
+                        registration.cp_comp_events?.start_time,
+                        timezone,
+                        'datetime'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          registration.status === 'confirmed'
+                            ? 'default'
+                            : registration.status === 'cancelled'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                      >
+                        {registration.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {timeRequest && windowLabel ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1 cursor-help">
+                                <Clock className="h-3 w-3" />
+                                <span className="text-sm">{windowLabel}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="space-y-1">
+                                <p><strong>Window:</strong> {windowLabel}</p>
+                                {timeRequest.exact_time && (
+                                  <p><strong>Exact Time:</strong> {timeRequest.exact_time}</p>
+                                )}
+                                {timeRequest.notes && (
+                                  <p><strong>Notes:</strong> {timeRequest.notes}</p>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
