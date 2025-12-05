@@ -5,27 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: {
-          id: string
-          start_year: number | null
-          cadet_year: string | null
-          grade: string | null
-          active: boolean | null
-        }
-        Update: {
-          grade?: string | null
-          cadet_year?: string | null
-          updated_at?: string
-        }
-      }
-    }
-  }
-}
-
 /**
  * Calculate the current school year
  * School years run August - May
@@ -86,7 +65,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient<Database>(
+    const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
@@ -111,12 +90,12 @@ Deno.serve(async (req) => {
     let graduatedCount = 0;
 
     // Process each cadet
-    for (const cadet of cadets || []) {
+    for (const cadet of (cadets || []) as { id: string; start_year: number | null; cadet_year: string | null }[]) {
       const newGrade = calculateGrade(cadet.start_year!);
       const newCadetYear = incrementCadetYear(cadet.cadet_year);
       
       // Prepare update data
-      const updateData: Database['public']['Tables']['profiles']['Update'] = {
+      const updateData: Record<string, any> = {
         grade: newGrade,
         cadet_year: newCadetYear,
         updated_at: new Date().toISOString()
@@ -169,7 +148,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         processedAt: new Date().toISOString()
       }),
       {
