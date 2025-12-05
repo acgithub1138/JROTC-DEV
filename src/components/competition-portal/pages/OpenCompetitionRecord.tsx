@@ -964,7 +964,9 @@ export const OpenCompetitionRecord: React.FC = () => {
                                 <div className="grid grid-cols-[120px_1fr] items-center gap-2">
                                   <label className="text-sm font-medium">Exact Time</label>
                                   <Input
-                                    type="time"
+                                    type="text"
+                                    placeholder="HH:MM (e.g., 09:30)"
+                                    pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
                                     value={preferredTimeRequests.get(event.id)?.exact_time || ""}
                                     onChange={(e) => handlePreferredTimeChange(event.id, "exact_time", e.target.value)}
                                     className="w-full"
