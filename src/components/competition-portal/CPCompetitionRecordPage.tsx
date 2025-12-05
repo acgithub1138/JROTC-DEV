@@ -15,7 +15,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
-import { convertToUTC } from '@/utils/timezoneUtils';
+import { convertToUTC, convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface FormData {
@@ -97,19 +97,28 @@ export const CPCompetitionRecordPage = () => {
     timezone
   } = useSchoolTimezone();
 
-  // Reinitialize form data when competition data becomes available
+  // Reinitialize form data when competition data becomes available (and timezone is loaded)
   useEffect(() => {
-    if (existingCompetition && (isEditMode || isViewMode)) {
+    if (existingCompetition && (isEditMode || isViewMode) && timezone) {
+      // Use convertToUI to properly convert UTC times back to school timezone
+      const startTime = existingCompetition.start_date ? convertToUI(existingCompetition.start_date, timezone, 'time') : '09:00';
+      const endTime = existingCompetition.end_date ? convertToUI(existingCompetition.end_date, timezone, 'time') : '17:00';
+      const deadlineTime = existingCompetition.registration_deadline ? convertToUI(existingCompetition.registration_deadline, timezone, 'time') : '23:59';
+      
+      const [startHour, startMinute] = startTime.split(':');
+      const [endHour, endMinute] = endTime.split(':');
+      const [deadlineHour, deadlineMinute] = deadlineTime.split(':');
+
       const updatedData: FormData = {
         name: existingCompetition.name || '',
         description: existingCompetition.description || '',
         location: existingCompetition.location || '',
-        start_date: existingCompetition.start_date ? new Date(existingCompetition.start_date).toISOString().split('T')[0] : '',
-        start_time_hour: existingCompetition.start_date ? new Date(existingCompetition.start_date).getHours().toString().padStart(2, '0') : '09',
-        start_time_minute: existingCompetition.start_date ? new Date(existingCompetition.start_date).getMinutes().toString().padStart(2, '0') : '00',
-        end_date: existingCompetition.end_date ? new Date(existingCompetition.end_date).toISOString().split('T')[0] : '',
-        end_time_hour: existingCompetition.end_date ? new Date(existingCompetition.end_date).getHours().toString().padStart(2, '0') : '17',
-        end_time_minute: existingCompetition.end_date ? new Date(existingCompetition.end_date).getMinutes().toString().padStart(2, '0') : '00',
+        start_date: existingCompetition.start_date ? convertToUI(existingCompetition.start_date, timezone, 'dateKey') : '',
+        start_time_hour: startHour || '09',
+        start_time_minute: startMinute || '00',
+        end_date: existingCompetition.end_date ? convertToUI(existingCompetition.end_date, timezone, 'dateKey') : '',
+        end_time_hour: endHour || '17',
+        end_time_minute: endMinute || '00',
         program: existingCompetition.program || 'air_force',
         fee: existingCompetition.fee?.toString() || '',
         address: existingCompetition.address || '',
@@ -119,9 +128,9 @@ export const CPCompetitionRecordPage = () => {
         latitude: (existingCompetition as any).latitude || '',
         longitude: (existingCompetition as any).longitude || '',
         max_participants: existingCompetition.max_participants?.toString() || '',
-        registration_deadline_date: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).toISOString().split('T')[0] : '',
-        registration_deadline_hour: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
-        registration_deadline_minute: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).getMinutes().toString().padStart(2, '0') : '59',
+        registration_deadline_date: existingCompetition.registration_deadline ? convertToUI(existingCompetition.registration_deadline, timezone, 'dateKey') : '',
+        registration_deadline_hour: deadlineHour || '23',
+        registration_deadline_minute: deadlineMinute || '59',
         hosting_school: existingCompetition.hosting_school || userProfile?.schools?.name || '',
         sop: existingCompetition.sop || 'none',
         sop_link: existingCompetition.sop_link || '',
@@ -129,7 +138,7 @@ export const CPCompetitionRecordPage = () => {
       };
       setFormData(updatedData);
     }
-  }, [existingCompetition, isEditMode, isViewMode, userProfile?.schools?.name]);
+  }, [existingCompetition, isEditMode, isViewMode, userProfile?.schools?.name, timezone]);
   const quillRef = React.useRef<ReactQuill>(null);
   const {
     hasUnsavedChanges
