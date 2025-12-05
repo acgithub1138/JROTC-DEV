@@ -212,37 +212,33 @@ export const EventScheduleView = ({
                 <CardContent className="p-4">
                   <div className="space-y-2 max-h-[300px] overflow-y-auto">
                     {timeRequests.map((request) => (
-                      <div key={request.id} className="flex items-start justify-between p-3 bg-muted/50 rounded-md border">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">
-                            {request.school_name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {request.event_name}
-                          </div>
+                      <div key={request.id} className="flex items-center gap-4 p-2 bg-muted/50 rounded-md border">
+                        <div className="font-medium text-sm min-w-[120px]">
+                          {request.school_name}
                         </div>
-                        <div className="text-right">
-                          <Badge variant="outline">
-                            {getWindowLabel(request.preferred_time_request?.window)}
-                          </Badge>
-                          {request.preferred_time_request?.exact_time && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              Preferred: {request.preferred_time_request.exact_time}
-                            </div>
-                          )}
-                          {request.preferred_time_request?.notes && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate cursor-help">
-                                  {request.preferred_time_request.notes}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-[300px]">
-                                <p>{request.preferred_time_request.notes}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
+                        <div className="text-sm text-muted-foreground min-w-[140px]">
+                          {request.event_name}
                         </div>
+                        <Badge variant="outline" className="shrink-0">
+                          {getWindowLabel(request.preferred_time_request?.window)}
+                        </Badge>
+                        {request.preferred_time_request?.exact_time && (
+                          <div className="text-xs text-muted-foreground whitespace-nowrap">
+                            {request.preferred_time_request.exact_time}
+                          </div>
+                        )}
+                        {request.preferred_time_request?.notes && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="text-xs text-muted-foreground truncate max-w-[200px] cursor-help">
+                                {request.preferred_time_request.notes}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[300px]">
+                              <p>{request.preferred_time_request.notes}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </div>
                     ))}
                   </div>
