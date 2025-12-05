@@ -1314,6 +1314,7 @@ export type Database = {
           event_id: string
           id: string
           notes: string | null
+          preferred_time_request: Json | null
           school_id: string
           status: string
           updated_at: string
@@ -1326,6 +1327,7 @@ export type Database = {
           event_id: string
           id?: string
           notes?: string | null
+          preferred_time_request?: Json | null
           school_id: string
           status?: string
           updated_at?: string
@@ -1338,6 +1340,7 @@ export type Database = {
           event_id?: string
           id?: string
           notes?: string | null
+          preferred_time_request?: Json | null
           school_id?: string
           status?: string
           updated_at?: string
