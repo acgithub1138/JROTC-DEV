@@ -4,18 +4,37 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Printer } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Printer, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { convertToUI, getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+
+interface PreferredTimeRequest {
+  window?: string;
+  exact_time?: string;
+  notes?: string;
+}
+
 interface EventScheduleViewProps {
   competitionId: string;
   readOnly?: boolean;
   canUpdate?: boolean;
 }
+
+const getWindowLabel = (window?: string) => {
+  switch (window) {
+    case 'morning': return 'Morning';
+    case 'midday': return 'Midday';
+    case 'afternoon': return 'Afternoon';
+    default: return window || '-';
+  }
+};
+
 export const EventScheduleView = ({
   competitionId,
   readOnly = false,
@@ -31,6 +50,8 @@ export const EventScheduleView = ({
     timezone
   } = useSchoolTimezone();
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
+  const [isRequestsOpen, setIsRequestsOpen] = useState(false);
+
   const {
     data: registeredSchools
   } = useQuery({
@@ -48,6 +69,32 @@ export const EventScheduleView = ({
       }));
     }
   });
+
+  // Fetch time requests from the view
+  const { data: timeRequests } = useQuery({
+    queryKey: ['competition-time-requests', competitionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cp_event_time_requests' as any)
+        .select('*')
+        .eq('competition_id', competitionId);
+      
+      if (error) throw error;
+      return data as unknown as Array<{
+        id: string;
+        competition_id: string;
+        school_id: string;
+        event_id: string;
+        preferred_time_request: PreferredTimeRequest;
+        school_name: string;
+        school_initials: string;
+        event_type_id: string;
+        event_name: string;
+        event_initials: string;
+      }>;
+    }
+  });
+
   const getAllTimeSlots = () => timeline?.timeSlots || [];
   const handleEditEvent = (event: ScheduleEvent) => {
     const currentPath = window.location.pathname;
@@ -94,11 +141,14 @@ export const EventScheduleView = ({
     });
     return scheduleItems.sort((a, b) => a.sortKey - b.sortKey).filter((item, index, self) => index === self.findIndex(t => t.date === item.date && t.time === item.time && t.eventName === item.eventName));
   }, [selectedSchoolFilter, timeline, events, timezone]);
+
   const selectedSchoolName = useMemo(() => {
     if (selectedSchoolFilter === 'all') return '';
     return registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || '';
   }, [selectedSchoolFilter, registeredSchools]);
+
   const handlePrint = () => window.print();
+
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -112,6 +162,7 @@ export const EventScheduleView = ({
         <p className="text-muted-foreground">No events found for this competition.</p>
       </div>;
   }
+
   return <TooltipProvider>
       <div className="schedule-print-container space-y-4">
         {/* Print-only title */}
@@ -144,6 +195,62 @@ export const EventScheduleView = ({
             </Button>
           </div>
         </div>
+
+        {/* Event Time Requests Collapsible Section */}
+        {timeRequests && timeRequests.length > 0 && (
+          <Collapsible open={isRequestsOpen} onOpenChange={setIsRequestsOpen} className="no-print">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                {isRequestsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                <Clock className="h-4 w-4" />
+                Event Time Requests
+                <Badge variant="secondary" className="ml-1">{timeRequests.length}</Badge>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    {timeRequests.map((request) => (
+                      <div key={request.id} className="flex items-start justify-between p-3 bg-muted/50 rounded-md border">
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">
+                            {request.school_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {request.event_name}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline">
+                            {getWindowLabel(request.preferred_time_request?.window)}
+                          </Badge>
+                          {request.preferred_time_request?.exact_time && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Preferred: {request.preferred_time_request.exact_time}
+                            </div>
+                          )}
+                          {request.preferred_time_request?.notes && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate cursor-help">
+                                  {request.preferred_time_request.notes}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[300px]">
+                                <p>{request.preferred_time_request.notes}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         <Card>
           <CardContent className="p-0">
