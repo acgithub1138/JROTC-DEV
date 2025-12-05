@@ -25,7 +25,7 @@ export const MobileNavButtons = ({
   totalSteps,
 }: MobileNavButtonsProps) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 pb-safe z-50">
       <div className="grid grid-cols-3 gap-4 items-center">
         {/* Left Section - Previous/Exit Button */}
         <div>

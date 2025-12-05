@@ -61,10 +61,6 @@ export const SchoolSelectionStep = ({
               <Card 
                 key={school.school_id} 
                 onClick={handleSelect}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleSelect();
-                }}
                 className={cn(
                   "p-4 transition-all touch-manipulation active:scale-[0.98]",
                   isSubmitted 
