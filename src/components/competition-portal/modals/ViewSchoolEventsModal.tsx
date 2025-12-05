@@ -59,6 +59,8 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
     queryKey: ['school-event-registrations', competitionId, schoolRegistration?.school_id],
     queryFn: async () => {
       if (!schoolRegistration?.school_id || !competitionId) return [];
+      
+      // Get event registrations
       const { data, error } = await supabase
         .from('cp_event_registrations')
         .select(`
@@ -77,7 +79,25 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
         .eq('competition_id', competitionId)
         .eq('school_id', schoolRegistration.school_id);
       if (error) throw error;
-      return data;
+      
+      // Get schedule data for this school in this competition
+      const { data: schedules, error: schedulesError } = await supabase
+        .from('cp_event_schedules')
+        .select('event_id, scheduled_time')
+        .eq('competition_id', competitionId)
+        .eq('school_id', schoolRegistration.school_id);
+      if (schedulesError) throw schedulesError;
+      
+      // Create schedule map by event_id
+      const scheduleMap = new Map(
+        schedules?.map(s => [s.event_id, s.scheduled_time]) || []
+      );
+      
+      // Enrich registrations with scheduled time
+      return data?.map(reg => ({
+        ...reg,
+        scheduled_time: scheduleMap.get(reg.event_id) || null
+      })) || [];
     },
     enabled: open && !!schoolRegistration?.school_id && !!competitionId
   });
@@ -104,7 +124,7 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
               <TableRow>
                 <TableHead>Event Name</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Time</TableHead>
+                <TableHead>Time Slot</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Time Preference</TableHead>
               </TableRow>
@@ -123,10 +143,12 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
                       {registration.cp_comp_events?.location || '-'}
                     </TableCell>
                     <TableCell>
-                      {convertToUI(
-                        registration.cp_comp_events?.start_time,
-                        timezone,
-                        'datetime'
+                      {registration.scheduled_time ? (
+                        <span className="text-sm">
+                          {convertToUI(registration.scheduled_time, timezone, 'datetime')}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">Not scheduled</span>
                       )}
                     </TableCell>
                     <TableCell>
