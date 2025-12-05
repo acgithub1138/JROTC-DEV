@@ -30,13 +30,13 @@ export const MobileNavButtons = ({
         {/* Left Section - Previous/Exit Button */}
         <div>
           {showExit && onExit && (
-            <Button variant="outline" size="lg" onPointerDown={onExit} className="w-full h-10 text-base touch-manipulation select-none">
+            <Button variant="outline" size="lg" onClick={onExit} className="w-full h-10 text-base touch-manipulation">
               <X className="h-5 w-5 mr-2" />
             </Button>
           )}
 
           {showPrevious && onPrevious && (
-            <Button variant="outline" size="lg" onPointerDown={onPrevious} className="w-full h-10 text-base text-left touch-manipulation select-none">
+            <Button variant="outline" size="lg" onClick={onPrevious} className="w-full h-10 text-base text-left touch-manipulation">
               <ChevronLeft className="h-5 w-5 mr-2" />
             </Button>
           )}
@@ -54,15 +54,7 @@ export const MobileNavButtons = ({
         {/* Right Section - Next Button */}
         <div>
           {onNext && (
-            <Button 
-              size="lg" 
-              onPointerDown={(e) => {
-                e.preventDefault();
-                if (!nextDisabled) onNext();
-              }} 
-              disabled={nextDisabled} 
-              className="w-full h-10 text-base text-right touch-manipulation select-none"
-            >
+            <Button size="lg" onClick={onNext} disabled={nextDisabled} className="w-full h-10 text-base text-right touch-manipulation">
               <ChevronRight className="h-5 w-5 ml-2" />
             </Button>
           )}
