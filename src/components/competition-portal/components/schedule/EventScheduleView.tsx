@@ -197,7 +197,7 @@ export const EventScheduleView = ({
         </div>
 
         {/* Event Time Requests Collapsible Section */}
-        {timeRequests && timeRequests.length > 0 && (
+        {canUpdate && timeRequests && timeRequests.length > 0 && (
           <Collapsible open={isRequestsOpen} onOpenChange={setIsRequestsOpen} className="no-print">
             <CollapsibleTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
