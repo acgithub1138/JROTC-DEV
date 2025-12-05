@@ -1,5 +1,5 @@
 
-import nodemailer from "npm:nodemailer@6.9.7";
+import nodemailer from "https://esm.sh/nodemailer@6.9.7";
 import { EmailQueueItem, SmtpSettings } from './types.ts';
 
 export async function sendEmailViaSMTP(

@@ -144,7 +144,7 @@ serve(async (req) => {
     
     const result: ProcessingResult = {
       success: false,
-      error: error.message || 'Unknown error occurred',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       processed: 0,
       failed: 0,
       total: 0
