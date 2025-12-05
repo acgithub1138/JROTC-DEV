@@ -212,7 +212,7 @@ export class QueueProcessor {
           failed_at: new Date().toISOString(),
           smtp_type: 'global',
           smtp_host: smtpSettings.smtp_host,
-          original_error: error instanceof Error ? error.message : 'Unknown error occurred'
+          original_error: error.message || 'Unknown error occurred'
         });
 
         failedCount++;

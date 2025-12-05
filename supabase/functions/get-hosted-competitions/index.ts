@@ -68,7 +68,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in get-hosted-competitions function:', error);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'An error occurred fetching hosted competitions' 
+      error: error.message || 'An error occurred fetching hosted competitions' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

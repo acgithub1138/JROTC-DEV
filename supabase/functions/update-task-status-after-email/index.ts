@@ -56,9 +56,9 @@ const handler = async (req: Request): Promise<Response> => {
       // Get the current task/subtask to check its status
       const { data: currentRecord, error: fetchError } = await supabase
         .from(sourceTable)
-        .select('status, assigned_by, created_by')
+        .select('status')
         .eq('id', taskId)
-        .single() as { data: { status: string; assigned_by?: string; created_by?: string } | null; error: any };
+        .single();
 
       if (fetchError) {
         console.error('Error fetching current record:', fetchError);

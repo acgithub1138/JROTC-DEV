@@ -20,6 +20,3 @@ verify_jwt = false
 
 [functions.generate-template-from-pdf]
 verify_jwt = true
-
-[functions.generate-demo-score-sheets]
-verify_jwt = false

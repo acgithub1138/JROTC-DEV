@@ -194,7 +194,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'An error occurred creating the judge account' 
+        error: error.message || 'An error occurred creating the judge account' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

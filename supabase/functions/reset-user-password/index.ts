@@ -116,7 +116,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'An error occurred resetting the password' 
+        error: error.message || 'An error occurred resetting the password' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

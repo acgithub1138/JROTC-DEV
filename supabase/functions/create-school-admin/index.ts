@@ -262,7 +262,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'An error occurred creating the school account' 
+        error: error.message || 'An error occurred creating the school account' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
