@@ -61,12 +61,12 @@ export const ViewScoreSheet: React.FC = () => {
       const sortedEvents = (data || []).sort((a, b) => {
         const scoreSheetA = a.score_sheet as any;
         const scoreSheetB = b.score_sheet as any;
-        const judgeA = scoreSheetA?.judge_number || '';
-        const judgeB = scoreSheetB?.judge_number || '';
+        const judgeA = String(scoreSheetA?.judge_number || '');
+        const judgeB = String(scoreSheetB?.judge_number || '');
 
         // If both have judge numbers, sort by them
         if (judgeA && judgeB) {
-          // Extract number from "Judge X" format
+          // Extract number from "Judge X" format or use numeric value directly
           const numA = parseInt(judgeA.replace(/\D/g, '')) || 0;
           const numB = parseInt(judgeB.replace(/\D/g, '')) || 0;
           if (numA !== numB) return numA - numB;
