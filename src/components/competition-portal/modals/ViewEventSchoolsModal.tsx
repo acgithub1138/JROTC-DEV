@@ -4,7 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { School, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { School, Users, Clock } from 'lucide-react';
+
+interface PreferredTimeRequest {
+  window?: 'morning' | 'midday' | 'afternoon';
+  exact_time?: string;
+  notes?: string;
+}
+
 interface ViewEventSchoolsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,7 +40,7 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
       const {
         data: registrations,
         error
-      } = await supabase.from('cp_event_registrations').select('id, status, notes, created_at, school_id').eq('event_id', event.id).order('created_at', {
+      } = await supabase.from('cp_event_registrations').select('id, status, notes, created_at, school_id, preferred_time_request').eq('event_id', event.id).order('created_at', {
         ascending: true
       });
       if (error) throw error;
@@ -53,13 +61,15 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
         const school = schools?.find(s => s.school_id === registration.school_id);
         return {
           ...registration,
-          school_details: school
+          school_details: school,
+          preferred_time_request: registration.preferred_time_request as PreferredTimeRequest | null
         };
       });
       return enrichedRegistrations;
     },
     enabled: open && !!event?.id
   });
+
   const getStatusBadge = (status: string) => {
     const statusColors = {
       registered: 'bg-blue-100 text-blue-800',
@@ -71,13 +81,24 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>;
   };
+
+  const getWindowLabel = (window?: string) => {
+    const labels: Record<string, string> = {
+      morning: 'Morning',
+      midday: 'Midday',
+      afternoon: 'Afternoon'
+    };
+    return labels[window || ''] || window || '';
+  };
+
   const getPaymentBadge = (paid: boolean) => {
     return <Badge className={paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
         {paid ? 'Paid' : 'Unpaid'}
       </Badge>;
   };
+
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <School className="w-5 h-5" />
@@ -103,6 +124,7 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
                   <TableHead>School Name</TableHead>
                   <TableHead>Registration Status</TableHead>
                   <TableHead>Event Status</TableHead>
+                  <TableHead>Time Preference</TableHead>
                   <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -116,6 +138,40 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(registration.status)}
+                    </TableCell>
+                    <TableCell>
+                      {registration.preferred_time_request?.window ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1.5 cursor-help">
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                <Badge variant="outline" className="text-xs">
+                                  {getWindowLabel(registration.preferred_time_request.window)}
+                                </Badge>
+                                {registration.preferred_time_request.exact_time && (
+                                  <span className="text-xs text-muted-foreground">
+                                    ({registration.preferred_time_request.exact_time})
+                                  </span>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="space-y-1">
+                                <p className="font-medium">Preferred: {getWindowLabel(registration.preferred_time_request.window)}</p>
+                                {registration.preferred_time_request.exact_time && (
+                                  <p className="text-sm">Requested time: {registration.preferred_time_request.exact_time}</p>
+                                )}
+                                {registration.preferred_time_request.notes && (
+                                  <p className="text-sm text-muted-foreground">{registration.preferred_time_request.notes}</p>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="max-w-xs">
                       <div className="truncate" title={registration.notes || ''}>

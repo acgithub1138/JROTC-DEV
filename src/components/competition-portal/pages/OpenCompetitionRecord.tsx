@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Clock, ArrowLeft, Calendar, Loader2, Lock } from 'lucide-react';
@@ -18,12 +20,19 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { convertToUI } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
+import type { Json } from '@/integrations/supabase/types';
 import DOMPurify from 'dompurify';
 
 interface TimeSlot {
   time: Date;
   label: string;
   available: boolean;
+}
+
+interface PreferredTimeRequest {
+  window: 'morning' | 'midday' | 'afternoon' | '';
+  exact_time?: string;
+  notes?: string;
 }
 
 interface CompetitionEvent {
@@ -98,6 +107,7 @@ export const OpenCompetitionRecord: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [occupiedSlots, setOccupiedSlots] = useState<Map<string, Set<string>>>(new Map());
+  const [preferredTimeRequests, setPreferredTimeRequests] = useState<Map<string, PreferredTimeRequest>>(new Map());
   const [occupiedLabels, setOccupiedLabels] = useState<Map<string, Map<string, string>>>(new Map());
   const [conflictEventIds, setConflictEventIds] = useState<Set<string>>(new Set());
   const [showSopText, setShowSopText] = useState(false);
@@ -389,6 +399,15 @@ export const OpenCompetitionRecord: React.FC = () => {
     });
   };
 
+  const handlePreferredTimeChange = (eventId: string, field: keyof PreferredTimeRequest, value: string) => {
+    setPreferredTimeRequests(prev => {
+      const newMap = new Map(prev);
+      const current = newMap.get(eventId) || { window: '' as const };
+      newMap.set(eventId, { ...current, [field]: value });
+      return newMap;
+    });
+  };
+
   const handleRegister = async () => {
     if (!competition || !userProfile?.school_id) {
       toast({
@@ -408,17 +427,26 @@ export const OpenCompetitionRecord: React.FC = () => {
       return;
     }
 
-    // Check that all selected events have time slots selected (except for external users)
+    // Check that all selected events have time slots OR preferred time requests (except for external users)
     if (userProfile?.role !== 'external') {
-      const eventsWithoutTimeSlots = Array.from(selectedEvents).filter(eventId => {
+      const eventsWithoutTimePreferences = Array.from(selectedEvents).filter(eventId => {
         const event = events.find(e => e.id === eventId);
-        return event?.start_time && event?.end_time && !selectedTimeSlots.has(eventId);
+        if (!event?.start_time || !event?.end_time) return false; // No time config = no requirement
+        
+        // Analytics+ tier: must have time slot selected
+        if (canSelectTimeSlot) {
+          return !selectedTimeSlots.has(eventId);
+        }
+        // Basic tier: must have preferred time window selected
+        return !preferredTimeRequests.get(eventId)?.window;
       });
 
-      if (eventsWithoutTimeSlots.length > 0) {
+      if (eventsWithoutTimePreferences.length > 0) {
         toast({
-          title: "Time Slots Required",
-          description: "Please select time slots for all selected events.",
+          title: canSelectTimeSlot ? "Time Slots Required" : "Time Preferences Required",
+          description: canSelectTimeSlot 
+            ? "Please select time slots for all selected events."
+            : "Please select a preferred time window for all selected events.",
           variant: "destructive"
         });
         return;
@@ -479,13 +507,17 @@ export const OpenCompetitionRecord: React.FC = () => {
       }
 
       // Insert new event registrations
-      const registrationInserts = Array.from(selectedEvents).map(eventId => ({
-        competition_id: competition.id,
-        school_id: userProfile.school_id,
-        event_id: eventId,
-        status: 'registered',
-        created_by: userProfile.id
-      }));
+      const registrationInserts = Array.from(selectedEvents).map(eventId => {
+        const preferredRequest = !canSelectTimeSlot ? preferredTimeRequests.get(eventId) : null;
+        return {
+          competition_id: competition.id,
+          school_id: userProfile.school_id,
+          event_id: eventId,
+          status: 'registered',
+          created_by: userProfile.id,
+          preferred_time_request: (preferredRequest?.window ? preferredRequest : null) as unknown as Json
+        };
+      });
 
       const { error: regError } = await supabase
         .from('cp_event_registrations')
@@ -861,7 +893,7 @@ export const OpenCompetitionRecord: React.FC = () => {
                       {isEventSelected && timeSlots.length > 0 && (
                         <div className="mt-4 pt-3 border-t">
                           <label className="text-sm font-medium mb-2 block">
-                            Select Time Slot:
+                            {canSelectTimeSlot ? 'Select Time Slot:' : 'Request Preferred Time:'}
                           </label>
                           {userProfile?.role === 'external' ? (
                             <div className="w-full p-3 bg-muted rounded-md border">
@@ -870,9 +902,52 @@ export const OpenCompetitionRecord: React.FC = () => {
                               </p>
                             </div>
                           ) : !canSelectTimeSlot ? (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Lock className="h-4 w-4" />
-                              <span>Subscription required to select time</span>
+                            <div className="space-y-3 p-3 bg-muted rounded-md border">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                <Lock className="h-4 w-4" />
+                                <span>Request a preferred time (Host will assign your slot)</span>
+                              </div>
+                              
+                              {/* Time Window Selection (Required) */}
+                              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                                <label className="text-sm font-medium">Time Window *</label>
+                                <Select
+                                  value={preferredTimeRequests.get(event.id)?.window || ''}
+                                  onValueChange={(value) => handlePreferredTimeChange(event.id, 'window', value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select preference" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="morning">Morning (Early slots)</SelectItem>
+                                    <SelectItem value="midday">Midday (Middle slots)</SelectItem>
+                                    <SelectItem value="afternoon">Afternoon (Later slots)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              {/* Exact Time (Optional) */}
+                              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                                <label className="text-sm font-medium">Exact Time</label>
+                                <Input
+                                  type="time"
+                                  value={preferredTimeRequests.get(event.id)?.exact_time || ''}
+                                  onChange={(e) => handlePreferredTimeChange(event.id, 'exact_time', e.target.value)}
+                                  className="w-full"
+                                />
+                              </div>
+                              
+                              {/* Notes (Optional) */}
+                              <div className="grid grid-cols-[120px_1fr] items-start gap-2">
+                                <label className="text-sm font-medium pt-2">Notes</label>
+                                <Textarea
+                                  value={preferredTimeRequests.get(event.id)?.notes || ''}
+                                  onChange={(e) => handlePreferredTimeChange(event.id, 'notes', e.target.value)}
+                                  placeholder="e.g., Transportation constraints..."
+                                  rows={2}
+                                  className="resize-none"
+                                />
+                              </div>
                             </div>
                           ) : (
                             <>
