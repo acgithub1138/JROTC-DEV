@@ -316,28 +316,35 @@ export const JudgesMyProfilePage = () => {
                     </div>
                   )}
 
-                  {profile.branch && (
-                    <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
-                        <Shield className="h-5 w-5 text-black" />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                          Military Branch
-                        </label>
-                        <p className="text-base font-medium mt-1">{profile.branch}</p>
-                      </div>
-                    </div>
-                  )}
+                  {(profile.branch || profile.rank) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {profile.branch && (
+                        <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
+                            <Shield className="h-5 w-5 text-black" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                              Military Branch
+                            </label>
+                            <p className="text-base font-medium mt-1">{profile.branch}</p>
+                          </div>
+                        </div>
+                      )}
 
-                  {profile.rank && (
-                    <div className="group">
-                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Rank
-                      </label>
-                      <p className="text-lg font-medium mt-1 group-hover:text-judge transition-colors">
-                        {profile.rank}
-                      </p>
+                      {profile.rank && (
+                        <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-judge/5 to-transparent border border-judge/10 hover:border-judge/20 transition-all">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-judge to-judge/70 flex items-center justify-center shadow-md flex-shrink-0">
+                            <Shield className="h-5 w-5 text-black" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                              Rank
+                            </label>
+                            <p className="text-base font-medium mt-1">{profile.rank}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
