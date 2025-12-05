@@ -113,11 +113,11 @@ export const ResourceScheduleView = ({
           <div className="overflow-auto max-h-[calc(100vh-280px)]">
             <table className="w-full min-w-max">
               <thead className="sticky top-0 z-20">
-                <tr className="border-b bg-muted/30">
-                  <th className="text-left p-4 font-medium text-sm sticky left-0 bg-muted/30 border-r z-30 min-w-[120px]">
+                <tr className="border-b bg-muted">
+                  <th className="text-left p-4 font-medium text-sm sticky left-0 bg-muted border-r z-30 min-w-[120px]">
                     Time Slots
                   </th>
-                  {timeline.locations.map(location => <th key={location} className="text-center p-4 min-w-[150px] bg-muted/30">
+                  {timeline.locations.map(location => <th key={location} className="text-center p-4 min-w-[150px] bg-muted">
                       <div className="font-medium text-sm truncate" title={location}>
                         {location}
                       </div>
