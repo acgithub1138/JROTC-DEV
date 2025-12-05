@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { School, Users, Clock } from 'lucide-react';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { convertToUI } from '@/utils/timezoneUtils';
 
 interface PreferredTimeRequest {
   window?: 'morning' | 'midday' | 'afternoon';
@@ -23,11 +25,14 @@ interface ViewEventSchoolsModalProps {
     } | null;
   } | null;
 }
+
 export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
   open,
   onOpenChange,
   event
 }) => {
+  const { timezone } = useSchoolTimezone();
+
   const {
     data: registeredSchools,
     isLoading
@@ -36,11 +41,11 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
     queryFn: async () => {
       if (!event?.id) return [];
 
-      // First get the event registrations, then fetch school details separately
+      // First get the event registrations
       const {
         data: registrations,
         error
-      } = await supabase.from('cp_event_registrations').select('id, status, notes, created_at, school_id, preferred_time_request').eq('event_id', event.id).order('created_at', {
+      } = await supabase.from('cp_event_registrations').select('id, status, notes, created_at, school_id, competition_id, preferred_time_request').eq('event_id', event.id).order('created_at', {
         ascending: true
       });
       if (error) throw error;
@@ -56,31 +61,32 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
       } = await supabase.from('cp_comp_schools').select('id, school_name, school_id, status').in('school_id', schoolIds);
       if (schoolsError) throw schoolsError;
 
+      // Get schedule data for this event
+      const {
+        data: schedules,
+        error: schedulesError
+      } = await supabase.from('cp_event_schedules').select('school_id, scheduled_time').eq('event_id', event.id);
+      if (schedulesError) throw schedulesError;
+
+      // Create schedule map by school_id
+      const scheduleMap = new Map(
+        schedules?.map(s => [s.school_id, s.scheduled_time]) || []
+      );
+
       // Combine the data
       const enrichedRegistrations = registrations.map(registration => {
         const school = schools?.find(s => s.school_id === registration.school_id);
         return {
           ...registration,
           school_details: school,
-          preferred_time_request: registration.preferred_time_request as PreferredTimeRequest | null
+          preferred_time_request: registration.preferred_time_request as PreferredTimeRequest | null,
+          scheduled_time: scheduleMap.get(registration.school_id) || null
         };
       });
       return enrichedRegistrations;
     },
     enabled: open && !!event?.id
   });
-
-  const getStatusBadge = (status: string) => {
-    const statusColors = {
-      registered: 'bg-blue-100 text-blue-800',
-      confirmed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-      pending: 'bg-yellow-100 text-yellow-800'
-    };
-    return <Badge className={statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>;
-  };
 
   const getWindowLabel = (window?: string) => {
     const labels: Record<string, string> = {
@@ -89,12 +95,6 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
       afternoon: 'Afternoon'
     };
     return labels[window || ''] || window || '';
-  };
-
-  const getPaymentBadge = (paid: boolean) => {
-    return <Badge className={paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-        {paid ? 'Paid' : 'Unpaid'}
-      </Badge>;
   };
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,8 +122,7 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead>School Name</TableHead>
-                  <TableHead>Registration Status</TableHead>
-                  <TableHead>Event Status</TableHead>
+                  <TableHead>Time Slot</TableHead>
                   <TableHead>Time Preference</TableHead>
                   <TableHead>Notes</TableHead>
                 </TableRow>
@@ -134,10 +133,13 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
                       {registration.school_details?.school_name || 'Unknown School'}
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(registration.school_details?.status || 'registered')}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(registration.status)}
+                      {registration.scheduled_time ? (
+                        <span className="text-sm">
+                          {convertToUI(registration.scheduled_time, timezone, 'datetime')}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">Not scheduled</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {registration.preferred_time_request?.window ? (
