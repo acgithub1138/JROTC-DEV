@@ -14,6 +14,8 @@ import { CopyCompetitionModal } from "./components/CopyCompetitionModal";
 import { useHostedCompetitions } from "@/hooks/competition-portal/useHostedCompetitions";
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from "lucide-react";
 import { format } from "date-fns";
+import { convertToUI } from "@/utils/timezoneUtils";
+import { useSchoolTimezone } from "@/hooks/useSchoolTimezone";
 import { toast } from "sonner";
 import { useTablePermissions } from "@/hooks/useTablePermissions";
 import { useCPCompetitionPermissions } from "@/hooks/useModuleSpecificPermissions";
@@ -74,6 +76,7 @@ const CompetitionsPage = () => {
     isLoading: loading,
     refetch: refetchCompetitions
   } = useHostedCompetitions();
+  const { timezone } = useSchoolTimezone();
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -339,11 +342,11 @@ const CompetitionsPage = () => {
                         <div className="flex items-center text-sm font-medium">
                           <CalendarDays className="w-5 h-5 mr-3 text-primary" />
                           <span className="text-foreground">
-                            {format(new Date(competition.start_date), "MMM d, yyyy")}
+                            {format(new Date(competition.start_date), "MMM d, yyyy")} @ {convertToUI(competition.start_date, timezone, 'time')}
                           </span>
                         </div>
                         {competition.start_date !== competition.end_date && <div className="text-sm text-muted-foreground ml-8">
-                            to {format(new Date(competition.end_date), "MMM d, yyyy")}
+                            to {format(new Date(competition.end_date), "MMM d, yyyy")} @ {convertToUI(competition.end_date, timezone, 'time')}
                           </div>}
                       </div>
 
