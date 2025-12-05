@@ -110,7 +110,8 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   } = useAuth();
   const {
     setPortal,
-    competitionTier
+    competitionTier,
+    canAccessCCC
   } = usePortal();
   const {
     hasPermission,
@@ -202,7 +203,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
                 </Button>;
           })}
 
-            {userProfile?.role !== "external" && <Button variant="outline" className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100" onClick={() => {
+            {userProfile?.role !== "external" && canAccessCCC && <Button variant="outline" className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100" onClick={() => {
             handleReturnToCCC();
             setSidebarOpen?.(false);
           }}>
@@ -250,8 +251,8 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
         </div>
       </ScrollArea>
 
-      {/* Return to CCC Button - Hidden for external users */}
-      {userProfile?.role !== "external" && <div className="p-3 border-t border-gray-700">
+      {/* Return to CCC Button - Hidden for external users and users without CCC access */}
+      {userProfile?.role !== "external" && canAccessCCC && <div className="p-3 border-t border-gray-700">
           <Button variant="outline" className="w-full justify-start text-left font-normal" style={{
         borderColor: currentTheme.link_text,
         color: currentTheme.link_text,
