@@ -76,7 +76,9 @@ const CompetitionsPage = () => {
     isLoading: loading,
     refetch: refetchCompetitions
   } = useHostedCompetitions();
-  const { timezone } = useSchoolTimezone();
+  const {
+    timezone
+  } = useSchoolTimezone();
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -338,38 +340,37 @@ const CompetitionsPage = () => {
                     </CardHeader>
                     <CardContent className="space-y-5">
                       {/* Date Information */}
-                      <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                      <div className="p-3 bg-muted/30 rounded-lg border border-border/30 py-[6px] px-[12px]">
                         <div className="flex items-center text-sm font-medium">
                           <CalendarDays className="w-5 h-5 mr-3 text-primary" />
                           <span className="text-foreground">
                             {(() => {
-                              const startDate = new Date(competition.start_date);
-                              const endDate = new Date(competition.end_date);
-                              const startTime = convertToUI(competition.start_date, timezone, 'time');
-                              const endTime = convertToUI(competition.end_date, timezone, 'time');
-                              const isSameDay = format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd");
-                              const isSameMonth = format(startDate, "MMM yyyy") === format(endDate, "MMM yyyy");
-                              
-                              if (isSameDay) {
-                                return `${format(startDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
-                              } else if (isSameMonth) {
-                                return `${format(startDate, "MMM d")}-${format(endDate, "d, yyyy")} - ${startTime} - ${endTime}`;
-                              } else {
-                                return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
-                              }
-                            })()}
+                        const startDate = new Date(competition.start_date);
+                        const endDate = new Date(competition.end_date);
+                        const startTime = convertToUI(competition.start_date, timezone, 'time');
+                        const endTime = convertToUI(competition.end_date, timezone, 'time');
+                        const isSameDay = format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd");
+                        const isSameMonth = format(startDate, "MMM yyyy") === format(endDate, "MMM yyyy");
+                        if (isSameDay) {
+                          return `${format(startDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                        } else if (isSameMonth) {
+                          return `${format(startDate, "MMM d")}-${format(endDate, "d, yyyy")} - ${startTime} - ${endTime}`;
+                        } else {
+                          return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                        }
+                      })()}
                           </span>
                         </div>
                       </div>
 
                       {/* Location */}
-                      <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30">
+                      <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30 py-[6px] px-[12px]">
                         <MapPin className="w-5 h-5 mr-3 text-primary flex-shrink-0" />
                         <span className="truncate font-medium text-foreground">{competition.location}</span>
                       </div>
 
                       {/* Registered Schools */}
-                      <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30">
+                      <div className="flex items-center text-sm p-3 bg-muted/30 rounded-lg border border-border/30 py-[6px]">
                         <Users className="w-5 h-5 mr-3 text-primary" />
                         <span className="font-medium text-foreground">
                           {registrationCounts[competition.id] || 0}
