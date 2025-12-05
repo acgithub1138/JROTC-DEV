@@ -110,7 +110,7 @@ export const ResourceScheduleView = ({
       {/* Grid view for screen and "All Cadets" print */}
       <Card className={selectedResource !== 'all' ? 'no-print' : ''}>
         <CardContent className="p-0">
-          <div className="overflow-auto max-h-[calc(100vh-280px)]">
+          <div className="overflow-auto max-h-[calc(100vh-280px)] print:max-h-none print:overflow-visible">
             <table className="w-full min-w-max">
               <thead className="sticky top-0 z-20">
                 <tr className="border-b bg-muted">
