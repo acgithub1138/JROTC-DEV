@@ -11,7 +11,6 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
 import IncidentForm from '@/components/incident-management/IncidentForm';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
-import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyCadetsWidget } from './widgets/MyCadetsWidget';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
@@ -112,7 +111,6 @@ const DashboardOverview = () => {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
-  const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
   const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
   const handleCreateTransaction = async (data: any) => {
     try {
@@ -425,7 +423,6 @@ const DashboardOverview = () => {
       {/* Admin-only modals */}
       {userProfile?.role === 'admin' && <>
           <CreateUserDialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen} />
-          <CreateSchoolDialog open={isCreateSchoolOpen} onOpenChange={setIsCreateSchoolOpen} />
         </>}
 
       {/* Announcement Dialog */}

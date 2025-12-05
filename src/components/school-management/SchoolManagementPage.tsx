@@ -4,17 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format, addYears } from "date-fns";
-import { COMMON_TIMEZONES } from "@/utils/timezoneUtils";
+import { format } from "date-fns";
 import {
   Pagination,
   PaginationContent,
@@ -31,13 +24,14 @@ import {
   Trash2,
   Search,
   Plus,
-  CalendarIcon,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AppAccess, parseAppAccess, getTierLabel, canAccessCCC, getCompetitionTier } from "@/types/appAccess";
+
 interface School {
   id: string;
   name: string;
@@ -50,8 +44,7 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
-  comp_analytics?: boolean;
-  comp_hosting?: boolean;
+  app_access?: AppAccess;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -63,8 +56,8 @@ interface School {
 type SortField =
   | "name"
   | "contact"
-  | "comp_analytics"
-  | "comp_hosting"
+  | "ccc_access"
+  | "competition_tier"
   | "subscription_start"
   | "subscription_end";
 type SortDirection = "asc" | "desc";
@@ -88,7 +81,7 @@ const SchoolManagementPage = () => {
         ascending: true,
       });
       if (error) throw error;
-      setSchools(data || []);
+      setSchools((data || []).map(s => ({ ...s, app_access: parseAppAccess(s.app_access) })) as School[]);
     } catch (error) {
       console.error("Error fetching schools:", error);
       toast({
@@ -147,22 +140,25 @@ const SchoolManagementPage = () => {
     return sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
   };
   const sortSchools = (schools: School[]) => {
+    const tierOrder = ['none', 'basic', 'analytics', 'host'];
     return [...schools].sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: any;
+      let bValue: any;
 
-      // Handle null/undefined values
-      if (aValue === null || aValue === undefined) aValue = "";
-      if (bValue === null || bValue === undefined) bValue = "";
-
-      // Handle different data types
-      if (sortField === "comp_analytics" || sortField === "comp_hosting") {
-        aValue = aValue ? 1 : 0;
-        bValue = bValue ? 1 : 0;
+      if (sortField === "ccc_access") {
+        aValue = canAccessCCC(a.app_access!) ? 1 : 0;
+        bValue = canAccessCCC(b.app_access!) ? 1 : 0;
+      } else if (sortField === "competition_tier") {
+        aValue = tierOrder.indexOf(getCompetitionTier(a.app_access!));
+        bValue = tierOrder.indexOf(getCompetitionTier(b.app_access!));
       } else if (sortField === "subscription_start" || sortField === "subscription_end") {
-        aValue = aValue ? new Date(aValue).getTime() : 0;
-        bValue = bValue ? new Date(bValue).getTime() : 0;
+        aValue = a[sortField] ? new Date(a[sortField]!).getTime() : 0;
+        bValue = b[sortField] ? new Date(b[sortField]!).getTime() : 0;
       } else {
+        aValue = a[sortField as keyof School];
+        bValue = b[sortField as keyof School];
+        if (aValue === null || aValue === undefined) aValue = "";
+        if (bValue === null || bValue === undefined) bValue = "";
         aValue = String(aValue).toLowerCase();
         bValue = String(bValue).toLowerCase();
       }
@@ -312,12 +308,12 @@ const SchoolManagementPage = () => {
                         <span>{school.contact || "-"}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">My Competitions:</span>
-                        <span>{school.comp_analytics ? "Yes" : "No"}</span>
+                        <span className="text-muted-foreground">CCC Portal:</span>
+                        <span>{canAccessCCC(school.app_access!) ? "Yes" : "No"}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Competition Portal:</span>
-                        <span>{school.comp_hosting ? "Yes" : "No"}</span>
+                        <span className="text-muted-foreground">Competition Tier:</span>
+                        <span>{getTierLabel(getCompetitionTier(school.app_access!))}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Subscription Start:</span>
@@ -369,11 +365,11 @@ const SchoolManagementPage = () => {
                     <Button
                       variant="ghost"
                       className="h-auto p-0 font-semibold hover:bg-transparent"
-                      onClick={() => handleSort("comp_analytics")}
+                      onClick={() => handleSort("ccc_access")}
                     >
                       <span className="flex items-center gap-2">
-                        Competition Tracking
-                        {getSortIcon("comp_analytics")}
+                        CCC Portal
+                        {getSortIcon("ccc_access")}
                       </span>
                     </Button>
                   </TableHead>
@@ -381,11 +377,11 @@ const SchoolManagementPage = () => {
                     <Button
                       variant="ghost"
                       className="h-auto p-0 font-semibold hover:bg-transparent"
-                      onClick={() => handleSort("comp_hosting")}
+                      onClick={() => handleSort("competition_tier")}
                     >
                       <span className="flex items-center gap-2">
-                        Competition Hosting
-                        {getSortIcon("comp_hosting")}
+                        Competition Tier
+                        {getSortIcon("competition_tier")}
                       </span>
                     </Button>
                   </TableHead>
@@ -425,8 +421,8 @@ const SchoolManagementPage = () => {
                       {school.name}
                     </TableCell>
                     <TableCell className="py-2">{school.contact || "-"}</TableCell>
-                    <TableCell className="py-2">{school.comp_analytics ? "Yes" : "No"}</TableCell>
-                    <TableCell className="py-2">{school.comp_hosting ? "Yes" : "No"}</TableCell>
+                    <TableCell className="py-2">{canAccessCCC(school.app_access!) ? "Yes" : "No"}</TableCell>
+                    <TableCell className="py-2">{getTierLabel(getCompetitionTier(school.app_access!))}</TableCell>
                     <TableCell className="py-2">
                       {school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : "-"}
                     </TableCell>
