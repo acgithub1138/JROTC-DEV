@@ -134,13 +134,30 @@ export const CompetitionEventRecord: React.FC = () => {
 
   // Filter out events that are already added to the competition
   const availableEvents = React.useMemo(() => {
+    let events = eventsWithTemplates;
+    
     if (isEditMode && existingEvent) {
-      // In edit mode, include the current event being edited
-      return eventsWithTemplates;
+      // In edit mode, ensure the current event is included even if it doesn't have a template
+      const currentEventId = existingEvent.event;
+      const isCurrentEventInList = eventsWithTemplates.some(e => e.id === currentEventId);
+      
+      if (!isCurrentEventInList && currentEventId) {
+        // Find the event type from eventTypes and add it
+        const currentEventType = eventTypes.find(et => et.id === currentEventId);
+        if (currentEventType) {
+          events = [
+            { id: currentEventType.id, name: currentEventType.name, jrotc_program: competitionProgram || '' },
+            ...eventsWithTemplates
+          ];
+        }
+      }
+    } else {
+      // In create mode, exclude events that are already added
+      events = eventsWithTemplates.filter(event => !existingCompEventIds.includes(event.id));
     }
-    // In create mode, exclude events that are already added
-    return eventsWithTemplates.filter(event => !existingCompEventIds.includes(event.id));
-  }, [eventsWithTemplates, existingCompEventIds, isEditMode, existingEvent]);
+    
+    return events;
+  }, [eventsWithTemplates, existingCompEventIds, isEditMode, existingEvent, eventTypes, competitionProgram]);
 
   // Fetch existing event data for edit/view modes
   useEffect(() => {
@@ -331,6 +348,9 @@ export const CompetitionEventRecord: React.FC = () => {
         error: competitionError
       } = await supabase.from('cp_competitions').select('program').eq('id', competitionId).maybeSingle();
       if (competitionError) throw competitionError;
+      
+      let sheets: Array<{ id: string; template_name: string; jrotc_program: string }> = [];
+      
       if (competitionData?.program) {
         const {
           data,
@@ -339,10 +359,28 @@ export const CompetitionEventRecord: React.FC = () => {
           ascending: true
         });
         if (error) throw error;
-        setScoreSheets(data || []);
-      } else {
-        setScoreSheets([]);
+        sheets = data || [];
       }
+      
+      // In edit mode, ensure the existing score sheet is included even if it doesn't match filters
+      if (isEditMode && existingEvent?.score_sheet) {
+        const existingSheetId = (existingEvent as any).score_sheet;
+        const isExistingInList = sheets.some(s => s.id === existingSheetId);
+        
+        if (!isExistingInList) {
+          const { data: existingSheet } = await supabase
+            .from('competition_templates')
+            .select('id, template_name, jrotc_program')
+            .eq('id', existingSheetId)
+            .single();
+          
+          if (existingSheet) {
+            sheets = [existingSheet, ...sheets];
+          }
+        }
+      }
+      
+      setScoreSheets(sheets);
     } catch (error) {
       console.error('Error fetching filtered score sheets:', error);
       toast.error('Failed to load score sheets');
