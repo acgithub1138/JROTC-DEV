@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCompetitionJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface JudgesSubTabsProps {
   competitionId: string;
@@ -8,6 +9,7 @@ interface JudgesSubTabsProps {
 export const JudgesSubTabs = ({ competitionId }: JudgesSubTabsProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { canUpdate } = useCompetitionJudgesPermissions();
   const currentPath = location.pathname;
   const basePath = `/app/competition-portal/competition-details/${competitionId}`;
 
@@ -39,9 +41,13 @@ export const JudgesSubTabs = ({ competitionId }: JudgesSubTabsProps) => {
     <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-full">
       <TabsList className="w-full justify-start">
         <TabsTrigger value="assigned">Assigned</TabsTrigger>
-        <TabsTrigger value="pending">Pending</TabsTrigger>
-        <TabsTrigger value="approved">Approved</TabsTrigger>
-        <TabsTrigger value="declined">Declined</TabsTrigger>
+        {canUpdate && (
+          <>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="declined">Declined</TabsTrigger>
+          </>
+        )}
       </TabsList>
     </Tabs>
   );
