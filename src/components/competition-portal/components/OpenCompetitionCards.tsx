@@ -34,6 +34,7 @@ interface Competition {
   sop?: string;
   sop_link?: string;
   sop_text?: string;
+  registered_count?: number;
 }
 interface OpenCompetitionCardsProps {
   competitions: Competition[];
@@ -115,21 +116,28 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                   {competition.description || "No description available"}
                 </CardDescription>
               </div>
-              <Badge 
-                variant="secondary" 
-                className="ml-2 text-white"
-                style={{
-                  backgroundColor: 
-                    competition.program === 'air_force' ? '#003f87' :
-                    competition.program === 'army' ? '#454B1B' :
-                    competition.program === 'navy' ? '#000080' :
-                    competition.program === 'marine_corps' ? '#940000' :
-                    undefined
-                }}
-              >
-                <Trophy className="w-3 h-3 mr-1" />
-                {competition.program?.replace("_", " ").toUpperCase() || "N/A"}
-              </Badge>
+              <div className="flex flex-col items-end gap-1 ml-2">
+                <Badge 
+                  variant="secondary" 
+                  className="text-white"
+                  style={{
+                    backgroundColor: 
+                      competition.program === 'air_force' ? '#003f87' :
+                      competition.program === 'army' ? '#454B1B' :
+                      competition.program === 'navy' ? '#000080' :
+                      competition.program === 'marine_corps' ? '#940000' :
+                      undefined
+                  }}
+                >
+                  <Trophy className="w-3 h-3 mr-1" />
+                  {competition.program?.replace("_", " ").toUpperCase() || "N/A"}
+                </Badge>
+                {competition.max_participants && (
+                  <span className="text-xs text-muted-foreground">
+                    {competition.registered_count || 0}/{competition.max_participants} registered
+                  </span>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="flex flex-col h-full space-y-4">
@@ -242,15 +250,21 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               ) : (
                 <>
                   {canCreate && (
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() =>
-                        navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)
-                      }
-                    >
-                      Register
-                    </Button>
+                    competition.max_participants && (competition.registered_count || 0) >= competition.max_participants ? (
+                      <Badge variant="secondary" className="flex-1 justify-center py-2">
+                        Full
+                      </Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() =>
+                          navigate(`/app/competition-portal/open-competitions/${competition.id}/open_comp_record`)
+                        }
+                      >
+                        Register
+                      </Button>
+                    )
                   )}
                 </>
               )}

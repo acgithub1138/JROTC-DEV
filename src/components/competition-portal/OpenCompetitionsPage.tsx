@@ -82,7 +82,24 @@ export const OpenCompetitionsPage = () => {
         ascending: true
       });
       if (error) throw error;
-      return data;
+      
+      // Fetch registration counts for each competition
+      const competitionsWithCounts = await Promise.all(
+        (data || []).map(async (competition) => {
+          const { count } = await supabase
+            .from('cp_comp_schools')
+            .select('*', { count: 'exact', head: true })
+            .eq('competition_id', competition.id)
+            .neq('status', 'canceled');
+          
+          return {
+            ...competition,
+            registered_count: count || 0
+          };
+        })
+      );
+      
+      return competitionsWithCounts;
     }
   });
   const filteredCompetitions = React.useMemo(() => {
