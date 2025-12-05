@@ -338,16 +338,28 @@ const CompetitionsPage = () => {
                     </CardHeader>
                     <CardContent className="space-y-5">
                       {/* Date Information */}
-                      <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-border/30">
+                      <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
                         <div className="flex items-center text-sm font-medium">
                           <CalendarDays className="w-5 h-5 mr-3 text-primary" />
                           <span className="text-foreground">
-                            {format(new Date(competition.start_date), "MMM d, yyyy")} @ {convertToUI(competition.start_date, timezone, 'time')}
+                            {(() => {
+                              const startDate = new Date(competition.start_date);
+                              const endDate = new Date(competition.end_date);
+                              const startTime = convertToUI(competition.start_date, timezone, 'time');
+                              const endTime = convertToUI(competition.end_date, timezone, 'time');
+                              const isSameDay = format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd");
+                              const isSameMonth = format(startDate, "MMM yyyy") === format(endDate, "MMM yyyy");
+                              
+                              if (isSameDay) {
+                                return `${format(startDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                              } else if (isSameMonth) {
+                                return `${format(startDate, "MMM d")}-${format(endDate, "d, yyyy")} - ${startTime} - ${endTime}`;
+                              } else {
+                                return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")} - ${startTime} - ${endTime}`;
+                              }
+                            })()}
                           </span>
                         </div>
-                        {competition.start_date !== competition.end_date && <div className="text-sm text-muted-foreground ml-8">
-                            to {format(new Date(competition.end_date), "MMM d, yyyy")} @ {convertToUI(competition.end_date, timezone, 'time')}
-                          </div>}
                       </div>
 
                       {/* Location */}
