@@ -20,9 +20,7 @@ interface ViewEventSchoolsModalProps {
   onOpenChange: (open: boolean) => void;
   event: {
     id: string;
-    cp_events?: {
-      name: string;
-    } | null;
+    event_name?: string | null;
   } | null;
 }
 
@@ -105,7 +103,7 @@ export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
             <DialogTitle>Registered Schools</DialogTitle>
           </div>
           <DialogDescription>
-            Schools registered for: {event?.cp_events?.name || 'Unknown Event'}
+            Schools registered for: {event?.event_name || 'Unknown Event'}
           </DialogDescription>
         </DialogHeader>
         
