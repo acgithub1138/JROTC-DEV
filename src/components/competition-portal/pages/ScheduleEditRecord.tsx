@@ -217,7 +217,7 @@ export const ScheduleEditRecord = () => {
 
       resetChanges();
       await refetch();
-      navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`); // Go back to schedule tab
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schedules/schools`); // Go back to schedule tab
     } catch (error) {
       console.error("Error updating schedule:", error);
       toast({
@@ -234,7 +234,7 @@ export const ScheduleEditRecord = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schedules/schools`);
     }
   };
 
@@ -242,7 +242,7 @@ export const ScheduleEditRecord = () => {
     setLocalSchedule(initialSchedule);
     resetChanges();
     setShowUnsavedDialog(false);
-    navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/schedules/schools`);
   };
 
   // Get available schools for a specific time slot
