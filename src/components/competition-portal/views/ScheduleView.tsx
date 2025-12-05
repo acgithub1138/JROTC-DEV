@@ -1,6 +1,7 @@
 import { EventScheduleView } from '../components/schedule/EventScheduleView';
 import { JudgeScheduleView } from '../components/schedule/JudgeScheduleView';
 import { ResourceScheduleView } from '../components/schedule/ResourceScheduleView';
+import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface ScheduleViewProps {
   competitionId: string;
@@ -9,8 +10,10 @@ interface ScheduleViewProps {
 }
 
 export const ScheduleView = ({ competitionId, type, readOnly = false }: ScheduleViewProps) => {
+  const { canUpdate } = useCompetitionSchedulePermissions();
+
   if (type === 'schools') {
-    return <EventScheduleView competitionId={competitionId} readOnly={readOnly} />;
+    return <EventScheduleView competitionId={competitionId} readOnly={readOnly} canUpdate={canUpdate} />;
   }
 
   if (type === 'judges') {
