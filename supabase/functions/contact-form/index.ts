@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 import {
   RateLimiter,
   RATE_LIMITS,
@@ -6,7 +7,6 @@ import {
   createRateLimitResponse,
   addRateLimitHeaders,
 } from "../_shared/rate-limiter.ts";
-import nodemailer from "https://esm.sh/nodemailer@6.9.7";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,7 +38,6 @@ serve(async (req) => {
     }
   })();
   console.log(`[contact-form] ${requestId} start ${req.method} ${path}`);
-  // Privacy: do not log headers or body
 
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -73,54 +72,16 @@ serve(async (req) => {
     }
     console.log(`[contact-form] ${requestId} processing`);
 
-    // Parse the request body (do not log sensitive content)
+    // Parse the request body
     const formData: ContactFormData = await req.json();
 
-    // Get SMTP settings from environment
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "587");
-    const smtpUsername = Deno.env.get("SMTP_USERNAME");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
-    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
-    const fromName = Deno.env.get("SMTP_FROM_NAME") || "JROTC CCC Contact Form";
-
-    if (!smtpHost || !smtpUsername || !smtpPassword || !fromEmail) {
-      throw new Error("SMTP configuration is incomplete");
+    // Get Resend API key
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
     }
 
-    // Configure SMTP transporter
-    let transporterConfig: any = {
-      host: smtpHost,
-      port: smtpPort,
-      auth: {
-        user: smtpUsername,
-        pass: smtpPassword,
-      },
-      connectionTimeout: 30000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
-    };
-
-    // Configure TLS/SSL based on port
-    if (smtpPort === 465) {
-      transporterConfig.secure = true;
-      transporterConfig.tls = {
-        minVersion: "TLSv1.2",
-        maxVersion: "TLSv1.3",
-        rejectUnauthorized: true,
-      };
-    } else if (smtpPort === 587 || smtpPort === 25) {
-      transporterConfig.secure = false;
-      transporterConfig.requireTLS = true;
-      transporterConfig.tls = {
-        minVersion: "TLSv1.2",
-        maxVersion: "TLSv1.3",
-        rejectUnauthorized: true,
-        servername: smtpHost,
-      };
-    } else {
-      transporterConfig.secure = false;
-    }
+    const resend = new Resend(resendApiKey);
 
     // Create email content
     const emailSubject = `Contact Form Submission from ${formData.name} - ${formData.school}`;
@@ -138,23 +99,17 @@ serve(async (req) => {
       <p><small>Submitted on: ${new Date().toISOString()}</small></p>
     `;
 
-    // Create transporter and send email
-    const transporter = nodemailer.createTransport(transporterConfig);
-
-    const mailOptions = {
-      from: `${fromName} <${fromEmail}>`,
-      to: "admin@jrotc.us",
-      replyTo: formData.email,
+    // Send email via Resend
+    const emailResponse = await resend.emails.send({
+      from: "JROTC CCC Contact Form <onboarding@resend.dev>",
+      to: ["admin@jrotc.us"],
+      reply_to: formData.email,
       subject: emailSubject,
       html: emailBody,
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    transporter.close();
+    console.log(`[contact-form] ${requestId} email sent successfully`, emailResponse);
 
-    console.log(`[contact-form] ${requestId} email sent successfully`);
-
-    // Simple success response
     const response = {
       success: true,
       message: "Contact form submitted and email sent successfully",
@@ -174,12 +129,12 @@ serve(async (req) => {
 
     return addRateLimitHeaders(httpResponse, functionResult);
   } catch (error) {
-    console.error(`[contact-form] ${requestId} error:`, (error as any)?.message || String(error));
+    console.error(`[contact-form] ${requestId} error:`, error instanceof Error ? error.message : String(error));
 
     return new Response(
       JSON.stringify({
         success: false,
-        error: (error as any)?.message || "Failed to submit contact form",
+        error: error instanceof Error ? error.message : "Failed to submit contact form",
         timestamp: new Date().toISOString(),
         requestId,
       }),
