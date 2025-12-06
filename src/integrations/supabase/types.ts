@@ -412,6 +412,13 @@ export type Database = {
             foreignKeyName: "competition_events_history_competition_event_id_fkey"
             columns: ["competition_event_id"]
             isOneToOne: false
+            referencedRelation: "competition_events_unified"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_history_competition_event_id_fkey"
+            columns: ["competition_event_id"]
+            isOneToOne: false
             referencedRelation: "judge_score_sheets_view"
             referencedColumns: ["id"]
           },
@@ -4023,6 +4030,60 @@ export type Database = {
       }
     }
     Views: {
+      competition_events_unified: {
+        Row: {
+          cadet_ids: string[] | null
+          competition_date: string | null
+          competition_id: string | null
+          competition_location: string | null
+          competition_name: string | null
+          created_at: string | null
+          created_by: string | null
+          event: string | null
+          id: string | null
+          judge_transcript: string | null
+          school_id: string | null
+          score_sheet: Json | null
+          source_competition_id: string | null
+          source_type:
+            | Database["public"]["Enums"]["competition_source_type"]
+            | null
+          team_name: string | null
+          total_points: number | null
+          unified_competition_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events_with_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_events_with_registrations: {
         Row: {
           active: boolean | null
