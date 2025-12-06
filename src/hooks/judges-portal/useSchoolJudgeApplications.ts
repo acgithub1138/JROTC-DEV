@@ -110,6 +110,65 @@ export const useSchoolJudgeApplications = (competitionId?: string) => {
     }
   });
 
+  // Bulk approve applications
+  const bulkApproveMutation = useMutation({
+    mutationFn: async (applicationIds: string[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('cp_judge_competition_registrations')
+        .update({ 
+          status: 'approved',
+          updated_by: user.id
+        })
+        .in('id', applicationIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, applicationIds) => {
+      queryClient.invalidateQueries({ queryKey: ['school-judge-applications'] });
+      toast.success(`${applicationIds.length} judge(s) approved`);
+    },
+    onError: (error: any) => {
+      console.error('Error bulk approving judges:', error);
+      toast.error(error.message || 'Failed to approve judges');
+    }
+  });
+
+  // Bulk decline applications
+  const bulkDeclineMutation = useMutation({
+    mutationFn: async ({
+      applicationIds,
+      declineReason
+    }: {
+      applicationIds: string[];
+      declineReason?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('cp_judge_competition_registrations')
+        .update({ 
+          status: 'declined',
+          decline_reason: declineReason,
+          updated_by: user.id
+        })
+        .in('id', applicationIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, { applicationIds }) => {
+      queryClient.invalidateQueries({ queryKey: ['school-judge-applications'] });
+      toast.success(`${applicationIds.length} judge(s) declined`);
+    },
+    onError: (error: any) => {
+      console.error('Error bulk declining judges:', error);
+      toast.error(error.message || 'Failed to decline judges');
+    }
+  });
+
   return {
     applications,
     isLoading,
@@ -118,5 +177,9 @@ export const useSchoolJudgeApplications = (competitionId?: string) => {
     declineApplication: declineMutation.mutate,
     isApproving: approveMutation.isPending,
     isDeclining: declineMutation.isPending,
+    bulkApproveApplications: bulkApproveMutation.mutate,
+    bulkDeclineApplications: bulkDeclineMutation.mutate,
+    isBulkApproving: bulkApproveMutation.isPending,
+    isBulkDeclining: bulkDeclineMutation.isPending,
   };
 };

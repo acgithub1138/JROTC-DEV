@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useSchoolJudgeApplications } from '@/hooks/judges-portal/useSchoolJudgeApplications';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -25,13 +26,43 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
     approveApplication,
     declineApplication,
     isApproving,
-    isDeclining
+    isDeclining,
+    bulkApproveApplications,
+    bulkDeclineApplications,
+    isBulkApproving,
+    isBulkDeclining
   } = useSchoolJudgeApplications(competitionId);
 
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [declineReason, setDeclineReason] = useState('');
+  
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkApproveDialogOpen, setBulkApproveDialogOpen] = useState(false);
+  const [bulkDeclineDialogOpen, setBulkDeclineDialogOpen] = useState(false);
+  const [bulkDeclineReason, setBulkDeclineReason] = useState('');
+
+  const filteredApplications = applications?.filter(app => app.status === status) || [];
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(filteredApplications.map(app => app.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) {
+      newSelected.add(id);
+    } else {
+      newSelected.delete(id);
+    }
+    setSelectedIds(newSelected);
+  };
 
   const handleApproveClick = (application: any) => {
     setSelectedApplication(application);
@@ -70,6 +101,38 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
     }
   };
 
+  // Bulk action handlers
+  const handleBulkApprove = () => {
+    setBulkApproveDialogOpen(true);
+  };
+
+  const handleConfirmBulkApprove = () => {
+    bulkApproveApplications(Array.from(selectedIds), {
+      onSuccess: () => {
+        setBulkApproveDialogOpen(false);
+        setSelectedIds(new Set());
+      }
+    });
+  };
+
+  const handleBulkDecline = () => {
+    setBulkDeclineReason('');
+    setBulkDeclineDialogOpen(true);
+  };
+
+  const handleConfirmBulkDecline = () => {
+    bulkDeclineApplications({
+      applicationIds: Array.from(selectedIds),
+      declineReason: bulkDeclineReason.trim() || undefined
+    }, {
+      onSuccess: () => {
+        setBulkDeclineDialogOpen(false);
+        setSelectedIds(new Set());
+        setBulkDeclineReason('');
+      }
+    });
+  };
+
   const getStatusBadge = (appStatus: string) => {
     const variants: Record<string, any> = {
       pending: { variant: 'secondary', label: 'Pending' },
@@ -81,7 +144,9 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const filteredApplications = applications?.filter(app => app.status === status) || [];
+  const isAllSelected = filteredApplications.length > 0 && selectedIds.size === filteredApplications.length;
+  const isSomeSelected = selectedIds.size > 0 && selectedIds.size < filteredApplications.length;
+  const isPending = status === 'pending';
 
   if (isLoading) {
     return (
@@ -101,11 +166,51 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
 
   return (
     <div className="space-y-4">
+      {/* Bulk Action Toolbar */}
+      {isPending && selectedIds.size > 0 && (
+        <div className="flex items-center gap-4 p-3 bg-muted rounded-md">
+          <span className="text-sm font-medium">
+            {selectedIds.size} selected
+          </span>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={handleBulkApprove}
+              disabled={isBulkApproving}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Approve Selected
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDecline}
+              disabled={isBulkDeclining}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Decline Selected
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Desktop Table View */}
       <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              {isPending && (
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    ref={(el) => {
+                      if (el) (el as any).indeterminate = isSomeSelected;
+                    }}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
               <TableHead>Judge Name</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead>Applied</TableHead>
@@ -117,6 +222,15 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
           <TableBody>
             {filteredApplications.map((application) => (
               <TableRow key={application.id}>
+                {isPending && (
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(application.id)}
+                      onCheckedChange={(checked) => handleSelectOne(application.id, checked as boolean)}
+                      aria-label={`Select ${application.cp_judges?.name}`}
+                    />
+                  </TableCell>
+                )}
                 <TableCell className="font-medium">
                   {application.cp_judges?.name || 'Unknown Judge'}
                 </TableCell>
@@ -209,9 +323,18 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
           <Card key={application.id} className="p-4">
             <div className="space-y-3">
               <div className="flex items-start justify-between">
-                <h3 className="font-semibold text-lg">
-                  {application.cp_judges?.name || 'Unknown Judge'}
-                </h3>
+                <div className="flex items-center gap-3">
+                  {isPending && (
+                    <Checkbox
+                      checked={selectedIds.has(application.id)}
+                      onCheckedChange={(checked) => handleSelectOne(application.id, checked as boolean)}
+                      aria-label={`Select ${application.cp_judges?.name}`}
+                    />
+                  )}
+                  <h3 className="font-semibold text-lg">
+                    {application.cp_judges?.name || 'Unknown Judge'}
+                  </h3>
+                </div>
                 {getStatusBadge(application.status)}
               </div>
 
@@ -328,6 +451,59 @@ export const ApplicationStatusView = ({ competitionId, status }: ApplicationStat
             </Button>
             <Button variant="destructive" onClick={handleConfirmDecline} disabled={isDeclining}>
               {isDeclining ? 'Declining...' : 'Decline Application'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Approve Dialog */}
+      <AlertDialog open={bulkApproveDialogOpen} onOpenChange={setBulkApproveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve {selectedIds.size} Judge(s)</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to approve {selectedIds.size} selected judge(s) for this competition?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmBulkApprove} disabled={isBulkApproving}>
+              {isBulkApproving ? 'Approving...' : `Approve ${selectedIds.size} Judge(s)`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Decline Dialog */}
+      <Dialog open={bulkDeclineDialogOpen} onOpenChange={setBulkDeclineDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Decline {selectedIds.size} Judge(s)</DialogTitle>
+            <DialogDescription>
+              You are declining {selectedIds.size} selected judge application(s).
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-2">
+            <Label htmlFor="bulk-decline-reason">Reason for Decline (Optional)</Label>
+            <Textarea 
+              id="bulk-decline-reason" 
+              placeholder="e.g., We have enough judges for this competition..." 
+              value={bulkDeclineReason} 
+              onChange={e => setBulkDeclineReason(e.target.value)} 
+              rows={4} 
+            />
+            <p className="text-sm text-muted-foreground">
+              This reason will be visible to all declined judges
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkDeclineDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmBulkDecline} disabled={isBulkDeclining}>
+              {isBulkDeclining ? 'Declining...' : `Decline ${selectedIds.size} Judge(s)`}
             </Button>
           </DialogFooter>
         </DialogContent>
