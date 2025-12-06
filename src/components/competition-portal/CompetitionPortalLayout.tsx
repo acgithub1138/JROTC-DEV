@@ -86,7 +86,19 @@ const CompetitionPortalLayout = () => {
       availablePaths: Array.from(moduleMappings.pathToModuleMap.keys())
     });
     
-    const detectedModule = findModuleForPath(currentPath, moduleMappings.pathToModuleMap);
+    let detectedModule = findModuleForPath(currentPath, moduleMappings.pathToModuleMap);
+    
+    // Handle nested routes that don't have direct module mappings
+    if (!detectedModule) {
+      if (currentPath.includes('/competition-details/')) {
+        // Competition details pages belong to the competitions module
+        detectedModule = 'cp_competitions';
+      } else if (currentPath.includes('/my-competitions/')) {
+        detectedModule = 'cp_my_competitions';
+      } else if (currentPath.includes('/open-competitions/')) {
+        detectedModule = 'cp_open_competitions';
+      }
+    }
     
     console.log('🎯 Module detection result:', {
       detectedModule,
