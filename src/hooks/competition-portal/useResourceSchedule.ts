@@ -45,7 +45,7 @@ export const useResourceSchedule = (competitionId?: string) => {
           .eq('competition_id', competitionId),
         supabase
           .from('cp_comp_events')
-          .select('start_time, end_time')
+          .select('start_time, end_time, interval')
           .eq('competition_id', competitionId)
       ]);
 
@@ -94,12 +94,15 @@ export const useResourceSchedule = (competitionId?: string) => {
         const timelineStart = new Date(Math.min(...allStartTimes.map(t => t.getTime())));
         const timelineEnd = new Date(Math.max(...allEndTimes.map(t => t.getTime())));
 
-        // Generate 15-minute intervals
+        // Get interval from events (use first event's interval, default to 15 min)
+        const intervalMinutes = eventsData?.find(e => e.interval)?.interval || 15;
+
+        // Generate time slots based on event interval
         const timeSlots: Date[] = [];
         const current = new Date(timelineStart);
         while (current < timelineEnd) {
           timeSlots.push(new Date(current));
-          current.setMinutes(current.getMinutes() + 15);
+          current.setMinutes(current.getMinutes() + intervalMinutes);
         }
 
         // Get unique locations
