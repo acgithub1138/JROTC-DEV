@@ -122,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
     });
   };
 
-  return <div className="bg-white border-b border-gray-200 px-6 py-4">
+  return <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-40">
       {/* Impersonation Banner */}
       {isImpersonating && impersonatedProfile && (
         <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 mb-4">
