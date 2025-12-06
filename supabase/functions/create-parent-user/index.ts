@@ -218,7 +218,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred creating the parent account' 
+        error: error instanceof Error ? error.message : 'An error occurred creating the parent account' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

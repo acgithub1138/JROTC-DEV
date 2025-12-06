@@ -92,8 +92,8 @@ serve(async (req) => {
         try {
           await requireCanToggleUserStatus(actorProfile, targetProfile, supabaseAdmin)
         } catch (permissionError) {
-          console.error('Permission denied for user', targetUserId, ':', permissionError.message)
-          errors.push({ userId: targetUserId, error: permissionError.message })
+        console.error('Permission denied for user', targetUserId, ':', permissionError instanceof Error ? permissionError.message : 'Permission denied')
+        errors.push({ userId: targetUserId, error: permissionError instanceof Error ? permissionError.message : 'Permission denied' })
           continue
         }
 
@@ -124,7 +124,7 @@ serve(async (req) => {
         console.log('User status toggled successfully for user:', targetUserId)
       } catch (error) {
         console.error('Error processing user', targetUserId, ':', error)
-        errors.push({ userId: targetUserId, error: error.message })
+        errors.push({ userId: targetUserId, error: error instanceof Error ? error.message : 'Unknown error' })
       }
     }
 
@@ -177,7 +177,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred toggling user status' 
+        error: error instanceof Error ? error.message : 'An error occurred toggling user status' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
