@@ -101,7 +101,7 @@ serve(async (req) => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "JROTC CCC Contact Form <onboarding@resend.dev>",
+      from: "JROTC CCC Contact Form <dev-noreply@jrotc.us>",
       to: ["admin@jrotc.us"],
       reply_to: formData.email,
       subject: emailSubject,
