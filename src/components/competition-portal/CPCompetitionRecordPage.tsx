@@ -318,7 +318,6 @@ export const CPCompetitionRecordPage = () => {
       };
       if (isEditMode && competitionId) {
         await updateCompetition(competitionId, submissionData);
-        toast.success('Competition updated successfully');
       } else {
         // Add school_id and created_by for new competitions
         const newCompetitionData = {
@@ -327,7 +326,6 @@ export const CPCompetitionRecordPage = () => {
           created_by: userProfile?.id
         };
         await createCompetition(newCompetitionData);
-        toast.success('Competition created successfully');
       }
       navigate('/app/competition-portal/competitions');
     } catch (error) {
