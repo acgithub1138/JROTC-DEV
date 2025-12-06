@@ -1,16 +1,12 @@
+import nodemailer from "https://esm.sh/nodemailer@6.9.7";
+import { EmailQueueItem, SmtpSettings } from "./types.ts";
 
-import nodemailer from "npm:nodemailer@6.9.7";
-import { EmailQueueItem, SmtpSettings } from './types.ts';
-
-export async function sendEmailViaSMTP(
-  emailData: EmailQueueItem,
-  smtpSettings: SmtpSettings
-): Promise<boolean> {
+export async function sendEmailViaSMTP(emailData: EmailQueueItem, smtpSettings: SmtpSettings): Promise<boolean> {
   try {
     console.log(`Attempting to send email via SMTP to ${emailData.recipient_email}`);
-    
+
     if (!smtpSettings.is_active) {
-      throw new Error('Global SMTP is not active');
+      throw new Error("Global SMTP is not active");
     }
 
     // Build SMTP configuration
@@ -31,8 +27,8 @@ export async function sendEmailViaSMTP(
       // Implicit SSL for port 465
       transporterConfig.secure = true;
       transporterConfig.tls = {
-        minVersion: 'TLSv1.2',
-        maxVersion: 'TLSv1.3',
+        minVersion: "TLSv1.2",
+        maxVersion: "TLSv1.3",
         rejectUnauthorized: true,
       };
     } else if (smtpSettings.use_tls && (smtpSettings.smtp_port === 587 || smtpSettings.smtp_port === 25)) {
@@ -40,8 +36,8 @@ export async function sendEmailViaSMTP(
       transporterConfig.secure = false;
       transporterConfig.requireTLS = true;
       transporterConfig.tls = {
-        minVersion: 'TLSv1.2',
-        maxVersion: 'TLSv1.3',
+        minVersion: "TLSv1.2",
+        maxVersion: "TLSv1.3",
         rejectUnauthorized: true,
         servername: smtpSettings.smtp_host,
       };
@@ -51,7 +47,7 @@ export async function sendEmailViaSMTP(
     }
 
     console.log(`Creating SMTP transporter for ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
-    
+
     // Create transporter
     const transporter = nodemailer.createTransport(transporterConfig);
 
@@ -68,14 +64,13 @@ export async function sendEmailViaSMTP(
 
     // Send the email
     const result = await transporter.sendMail(mailOptions);
-    
+
     console.log(`Email sent successfully:`, result.messageId);
-    
+
     // Close the transporter
     transporter.close();
-    
+
     return true;
-    
   } catch (error) {
     console.error(`SMTP sending failed:`, error);
     throw error;
