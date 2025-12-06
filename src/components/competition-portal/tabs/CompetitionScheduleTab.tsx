@@ -51,7 +51,7 @@ export const CompetitionScheduleTab = ({
           <EventScheduleView
             competitionId={competitionId}
             readOnly={readOnly}
-            canUpdate={readOnly ? false : canUpdate}
+            canUpdate={canUpdate}
           />
         </TabsContent>
 
