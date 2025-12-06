@@ -45,6 +45,7 @@ export const useJudgeSchedule = (competitionId?: string) => {
           cp_comp_events!inner(
             id,
             event,
+            interval,
             competition_event_types!inner(name, initials)
           )
         `)
@@ -74,12 +75,16 @@ export const useJudgeSchedule = (competitionId?: string) => {
         const timelineStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
         const timelineEnd = new Date(Math.max(...endTimes.map(t => t.getTime())));
 
-        // Generate 15-minute intervals
+        // Get interval from events (use first event's interval, default to 15 min)
+        const eventInterval = judgeData?.find(j => (j.cp_comp_events as any)?.interval)?.cp_comp_events as any;
+        const intervalMinutes = eventInterval?.interval || 15;
+
+        // Generate time slots based on event interval
         const timeSlots: Date[] = [];
         const current = new Date(timelineStart);
         while (current < timelineEnd) {
           timeSlots.push(new Date(current));
-          current.setMinutes(current.getMinutes() + 15);
+          current.setMinutes(current.getMinutes() + intervalMinutes);
         }
 
         // Get unique events
