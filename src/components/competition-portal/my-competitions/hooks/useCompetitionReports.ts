@@ -61,16 +61,14 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     try {
       setIsLoadingCompetitions(true);
       
-      // Get competition events with their related competition details
+      // Get competition events with their related competition details using unified view
       const { data: competitionsData, error } = await supabase
-        .from('competition_events')
+        .from('competition_events_unified')
         .select(`
-          competition_id,
-          competition_event_types!inner(name),
-          competitions!inner(
-            name,
-            competition_date
-          )
+          unified_competition_id,
+          competition_name,
+          competition_date,
+          competition_event_types!inner(name)
         `)
         .eq('school_id', userProfile.school_id)
         .eq('competition_event_types.name', selectedEvent);
@@ -81,11 +79,11 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       const uniqueCompetitions = new Map();
       
       competitionsData?.forEach(comp => {
-        if (!uniqueCompetitions.has(comp.competition_id)) {
-          uniqueCompetitions.set(comp.competition_id, {
-            id: comp.competition_id,
-            name: comp.competitions?.name || 'Unknown',
-            competition_date: comp.competitions?.competition_date || ''
+        if (comp.unified_competition_id && !uniqueCompetitions.has(comp.unified_competition_id)) {
+          uniqueCompetitions.set(comp.unified_competition_id, {
+            id: comp.unified_competition_id,
+            name: comp.competition_name || 'Unknown',
+            competition_date: comp.competition_date || ''
           });
         }
       });
@@ -121,22 +119,19 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     try {
       setIsLoading(true);
       
+      // Use the unified view to get data from both internal and portal competitions
       let query = supabase
-        .from('competition_events')
+        .from('competition_events_unified')
         .select(`
           *,
-          competition_event_types!inner(name),
-          competitions!inner(
-            name,
-            competition_date
-          )
+          competition_event_types!inner(name)
         `)
         .eq('school_id', userProfile.school_id)
         .eq('competition_event_types.name', selectedEvent);
       
-      // Filter by specific competitions if selected
+      // Filter by specific competitions if selected (using unified_competition_id)
       if (selectedCompetitions && selectedCompetitions.length > 0) {
-        query = query.in('competition_id', selectedCompetitions);
+        query = query.in('unified_competition_id', selectedCompetitions);
       }
       
       const { data, error } = await query;
@@ -282,8 +277,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
 
     data.forEach(item => {
-      // Get competition date from the joined competitions table
-      const date = item.competitions?.competition_date || 'Unknown Date';
+      // Get competition date from the unified view
+      const date = item.competition_date || 'Unknown Date';
       
       if (!groupedByDate[date]) {
         groupedByDate[date] = {};
