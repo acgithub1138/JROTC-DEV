@@ -105,13 +105,15 @@ const CompetitionPortalLayout = () => {
       currentActiveModule: activeModule
     });
     
-    if (detectedModule) {
+    if (detectedModule && detectedModule !== activeModule) {
       setActiveModule(detectedModule);
-    } else {
+    } else if (!detectedModule) {
       // Fallback to default if path not found
       const defaultModule = getDefaultCompetitionModule(competitionTier);
-      console.log('⚠️ No module found for path, using default:', defaultModule);
-      setActiveModule(defaultModule);
+      if (defaultModule !== activeModule) {
+        console.log('⚠️ No module found for path, using default:', defaultModule);
+        setActiveModule(defaultModule);
+      }
     }
   }, [location.pathname, mappingsLoaded]);
 
