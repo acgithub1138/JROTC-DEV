@@ -83,11 +83,18 @@ const handler = async (req: Request): Promise<Response> => {
         const commentTable = sourceTable === 'tasks' ? 'task_comments' : 'subtask_comments';
         const commentField = sourceTable === 'tasks' ? 'task_id' : 'subtask_id';
         
+        // Get the full record to get assigned_by or created_by for the comment
+        const { data: fullRecord } = await supabase
+          .from(sourceTable)
+          .select('assigned_by, created_by')
+          .eq('id', taskId)
+          .single();
+        
         await supabase
           .from(commentTable)
           .insert({
             [commentField]: taskId,
-            user_id: currentRecord.assigned_by || currentRecord.created_by,
+            user_id: fullRecord?.assigned_by || fullRecord?.created_by,
             comment_text: 'Status automatically changed to "Pending Response" after information request email was sent.',
             is_system_comment: true
           });
