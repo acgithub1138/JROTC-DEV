@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CopyCompetitionModal } from "./components/CopyCompetitionModal";
 import { useHostedCompetitions } from "@/hooks/competition-portal/useHostedCompetitions";
+import { useCompetitions } from "@/hooks/competition-portal/useCompetitions";
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { convertToUI } from "@/utils/timezoneUtils";
@@ -76,6 +77,7 @@ const CompetitionsPage = () => {
     isLoading: loading,
     refetch: refetchCompetitions
   } = useHostedCompetitions();
+  const { copyCompetition } = useCompetitions();
   const {
     timezone
   } = useSchoolTimezone();
@@ -197,32 +199,13 @@ const CompetitionsPage = () => {
     if (!selectedCompetition) return;
     try {
       setIsCopying(true);
-
-      // Copy competition logic
-      const {
-        data: newCompetition,
-        error: copyError
-      } = await supabase.from("cp_competitions").insert({
-        name,
-        description: selectedCompetition.description,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        location: selectedCompetition.location,
-        max_participants: selectedCompetition.max_participants,
-        registration_deadline: selectedCompetition.registration_deadline,
-        status: "draft",
-        is_public: selectedCompetition.is_public,
-        school_id: selectedCompetition.school_id,
-        created_by: userProfile?.id
-      }).select().single();
-      if (copyError) throw copyError;
-      toast.success("Competition copied successfully");
+      await copyCompetition(selectedCompetition.id, name, startDate, endDate);
       setShowCopyModal(false);
       setSelectedCompetition(null);
       refetchCompetitions();
     } catch (error) {
       console.error("Error copying competition:", error);
-      toast.error("Failed to copy competition");
+      // Toast is already shown by copyCompetition function
     } finally {
       setIsCopying(false);
     }
