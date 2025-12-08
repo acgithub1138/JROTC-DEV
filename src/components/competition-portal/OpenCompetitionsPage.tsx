@@ -270,6 +270,117 @@ export const OpenCompetitionsPage = () => {
       setCompetitionToCancel(null);
     }
   };
+
+  const generatePrintableContent = () => {
+    if (!selectedScoreSheetTemplate?.scores?.criteria) return '';
+
+    return selectedScoreSheetTemplate.scores.criteria.map((field: any, index: number) => {
+      const fieldType = field.type || 'text';
+      const fieldName = field.name || `Field ${index + 1}`;
+      const isBoldGray = field.pauseField || field.type === 'bold_gray' || field.type === 'pause';
+
+      if (fieldType === 'section_header') {
+        return `<div class="section-header">${fieldName}</div>`;
+      }
+
+      if (fieldType === 'label' || fieldType === 'bold_gray' || fieldType === 'pause') {
+        if (isBoldGray) {
+          return `<div class="bold-gray">${fieldName}${field.fieldInfo ? `<div class="field-info">${field.fieldInfo}</div>` : ''}</div>`;
+        }
+        return `<div class="field"><span class="field-name">${fieldName}</span>${field.fieldInfo ? `<div class="field-info">${field.fieldInfo}</div>` : ''}</div>`;
+      }
+
+      if (fieldType === 'penalty') {
+        return `<div class="field penalty"><div><span class="field-name">${fieldName}</span><span class="score-range">Penalty Field</span></div>${field.fieldInfo ? `<div class="field-info">${field.fieldInfo}</div>` : ''}</div>`;
+      }
+
+      return `<div class="field"><div><span class="field-name">${fieldName}</span><span class="score-range">${field.maxValue ? `0-${field.maxValue}` : 'Score'}</span></div>${field.fieldInfo ? `<div class="field-info">${field.fieldInfo}</div>` : ''}</div>`;
+    }).join('');
+  };
+
+  const handlePrintScoreCard = () => {
+    if (!selectedScoreSheetTemplate) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Print Blocked",
+        description: "Please allow pop-ups to print the score card.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const content = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Score Card: ${selectedScoreSheetTemplate.template_name}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              padding: 20px; 
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            h1 { 
+              border-bottom: 2px solid #333; 
+              padding-bottom: 10px; 
+            }
+            .section-header { 
+              font-size: 18px; 
+              font-weight: bold; 
+              margin-top: 20px; 
+              border-bottom: 2px solid #0066cc; 
+              padding-bottom: 5px; 
+              color: #0066cc;
+            }
+            .field { 
+              padding: 8px 0; 
+              border-bottom: 1px solid #ddd; 
+            }
+            .field-name { 
+              font-weight: 500; 
+            }
+            .field-info { 
+              font-size: 14px; 
+              color: #666; 
+              margin-top: 4px; 
+            }
+            .penalty { 
+              color: #cc0000; 
+            }
+            .bold-gray { 
+              background: #f0f0f0; 
+              padding: 8px; 
+              font-weight: bold;
+              margin: 8px 0;
+            }
+            .score-range { 
+              float: right; 
+              color: #666; 
+            }
+            @media print {
+              body { padding: 10px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Score Card: ${selectedScoreSheetTemplate.template_name}</h1>
+          ${selectedScoreSheetTemplate.description ? `<p style="color: #666; margin-bottom: 20px;">${selectedScoreSheetTemplate.description}</p>` : ''}
+          ${generatePrintableContent()}
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(content);
+    printWindow.document.close();
+  };
   if (error) {
     return <div className="p-6">
         <div className="text-center">
@@ -469,7 +580,7 @@ export const OpenCompetitionsPage = () => {
 
       {/* Score Card Modal */}
       <Dialog open={isScoreCardModalOpen} onOpenChange={setIsScoreCardModalOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto print:fixed print:inset-0 print:max-h-none print:max-w-none print:overflow-visible print:shadow-none print:border-none print:rounded-none print:m-0 print:p-8">
+        <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
@@ -549,10 +660,10 @@ export const OpenCompetitionsPage = () => {
             </div>
           )}
 
-          <div className="flex justify-end pt-4 border-t print:hidden">
+          <div className="flex justify-end pt-4 border-t">
             <Button
               variant="outline"
-              onClick={() => window.print()}
+              onClick={handlePrintScoreCard}
             >
               <Printer className="w-4 h-4 mr-2" />
               Print
