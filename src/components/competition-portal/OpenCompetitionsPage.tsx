@@ -469,7 +469,7 @@ export const OpenCompetitionsPage = () => {
 
       {/* Score Card Modal */}
       <Dialog open={isScoreCardModalOpen} onOpenChange={setIsScoreCardModalOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto print:fixed print:inset-0 print:max-h-none print:max-w-none print:overflow-visible print:shadow-none print:border-none print:rounded-none print:m-0 print:p-8">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
