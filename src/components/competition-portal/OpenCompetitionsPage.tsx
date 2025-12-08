@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X, Calendar } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X, Calendar, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +67,8 @@ export const OpenCompetitionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSOPModalOpen, setIsSOPModalOpen] = useState(false);
   const [selectedSOPText, setSelectedSOPText] = useState('');
+  const [isScoreCardModalOpen, setIsScoreCardModalOpen] = useState(false);
+  const [selectedScoreSheetTemplate, setSelectedScoreSheetTemplate] = useState<any>(null);
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
   const {
     data: competitions,
@@ -177,7 +179,8 @@ export const OpenCompetitionsPage = () => {
         error
       } = await supabase.from('cp_comp_events').select(`
           *,
-          competition_event_types!event(name)
+          competition_event_types!event(name),
+          competition_templates!score_sheet(id, template_name, scores, jrotc_program, description)
         `).eq('competition_id', selectedCompetitionId).order('start_time', {
         ascending: true
       });
@@ -187,7 +190,8 @@ export const OpenCompetitionsPage = () => {
         event: {
           name: event.competition_event_types?.name || 'Unknown Event',
           description: '' // Add empty description since it doesn't exist in the table
-        }
+        },
+        scoreSheetTemplate: event.competition_templates || null
       }));
       return transformedData;
     },
@@ -411,6 +415,22 @@ export const OpenCompetitionsPage = () => {
                               <strong>Notes:</strong> {event.notes}
                             </p>
                           </div>}
+
+                        {event.scoreSheetTemplate && (
+                          <div className="pt-3 border-t flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedScoreSheetTemplate(event.scoreSheetTemplate);
+                                setIsScoreCardModalOpen(true);
+                              }}
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              View Score Card
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>)}
@@ -446,5 +466,89 @@ export const OpenCompetitionsPage = () => {
       </AlertDialog>
 
       <SOPTextModal isOpen={isSOPModalOpen} onClose={() => setIsSOPModalOpen(false)} sopText={selectedSOPText} />
+
+      {/* Score Card Modal */}
+      <Dialog open={isScoreCardModalOpen} onOpenChange={setIsScoreCardModalOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Score Card: {selectedScoreSheetTemplate?.template_name || 'Score Sheet'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedScoreSheetTemplate?.scores ? (
+            <div className="space-y-4">
+              {selectedScoreSheetTemplate.scores.criteria && Array.isArray(selectedScoreSheetTemplate.scores.criteria) ? (
+                <div className="space-y-3">
+                  {selectedScoreSheetTemplate.scores.criteria.map((field: any, index: number) => {
+                    const fieldType = field.type || 'text';
+                    const fieldName = field.name || `Field ${index + 1}`;
+                    const isBoldGray = field.pauseField || field.type === 'bold_gray' || field.type === 'pause';
+
+                    if (fieldType === 'section_header') {
+                      return (
+                        <div key={index} className="border-b-2 border-primary pb-2 mt-4">
+                          <h3 className="text-lg font-bold text-primary">{fieldName}</h3>
+                        </div>
+                      );
+                    }
+
+                    if (fieldType === 'label' || fieldType === 'bold_gray' || fieldType === 'pause') {
+                      return (
+                        <div key={index} className="py-2">
+                          {isBoldGray ? (
+                            <div className="bg-muted px-3 py-2 rounded">
+                              <span className="font-bold">{fieldName}</span>
+                            </div>
+                          ) : (
+                            <span className="font-medium">{fieldName}</span>
+                          )}
+                          {field.fieldInfo && <p className="text-sm text-muted-foreground mt-1">{field.fieldInfo}</p>}
+                        </div>
+                      );
+                    }
+
+                    if (fieldType === 'penalty') {
+                      return (
+                        <div key={index} className="py-2 border-b space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-destructive">{fieldName}</span>
+                            <span className="text-sm text-muted-foreground">Penalty Field</span>
+                          </div>
+                          {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={index} className="border-b space-y-1 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className={isBoldGray ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                            {fieldName}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {field.maxValue ? `0-${field.maxValue}` : 'Score'}
+                          </span>
+                        </div>
+                        {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No scoring criteria defined for this event.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No score card available for this event.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>;
 };
