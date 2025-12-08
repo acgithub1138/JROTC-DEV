@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X, Calendar, FileText } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X, Calendar, FileText, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
@@ -548,6 +548,16 @@ export const OpenCompetitionsPage = () => {
               <p>No score card available for this event.</p>
             </div>
           )}
+
+          <div className="flex justify-end pt-4 border-t print:hidden">
+            <Button
+              variant="outline"
+              onClick={() => window.print()}
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Print
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>;
