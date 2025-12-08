@@ -402,30 +402,3 @@
 .rich-text-content s {
   text-decoration: line-through;
 }
-
-/* Print styles for dialogs */
-@media print {
-  body > *:not([data-radix-portal]) {
-    display: none !important;
-  }
-  
-  [data-radix-portal] {
-    position: static !important;
-  }
-  
-  [data-radix-portal] > [role="dialog"] {
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    border: none !important;
-    box-shadow: none !important;
-    background: white !important;
-    color: black !important;
-  }
-  
-  [data-radix-portal] [data-state="open"][data-radix-dialog-overlay] {
-    display: none !important;
-  }
-}
