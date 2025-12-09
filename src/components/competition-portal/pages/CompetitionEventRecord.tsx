@@ -852,7 +852,10 @@ export const CompetitionEventRecord: React.FC = () => {
                     title="Auto-calculated from score template × judges needed"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <div
+                  title="Weights reflect importance or difficulty of each event"
+                  className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center"
+                >
                   <Label htmlFor="weight" className="text-left md:text-right font-semibold">
                     Weight
                   </Label>
