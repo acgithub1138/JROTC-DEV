@@ -856,7 +856,7 @@ export const CompetitionEventRecord: React.FC = () => {
                   <Label
                     htmlFor="weight"
                     className="text-left md:text-right font-semibold"
-                    title="Weights reflect importance or difficulty of each event"
+                    title="Weights reflect importance or difficulty of each event 1.0-2.0"
                   >
                     Weight
                   </Label>
