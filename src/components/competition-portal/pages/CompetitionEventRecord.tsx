@@ -852,11 +852,12 @@ export const CompetitionEventRecord: React.FC = () => {
                     title="Auto-calculated from score template × judges needed"
                   />
                 </div>
-                <div
-                  title="Weights reflect importance or difficulty of each event"
-                  className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center"
-                >
-                  <Label htmlFor="weight" className="text-left md:text-right font-semibold">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label
+                    htmlFor="weight"
+                    className="text-left md:text-right font-semibold"
+                    title="Weights reflect importance or difficulty of each event"
+                  >
                     Weight
                   </Label>
                   <Input
@@ -875,7 +876,10 @@ export const CompetitionEventRecord: React.FC = () => {
                     disabled={isViewMode}
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <div
+                  className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center"
+                  title="Event is rquired for placement"
+                >
                   <Label htmlFor="required" className="text-left md:text-right font-semibold">
                     Required
                   </Label>
