@@ -892,9 +892,6 @@ export const CompetitionEventRecord: React.FC = () => {
                       disabled={isViewMode}
                     />
                   </div>
-                  <Label htmlFor="required" className="text-sm text-muted-foreground w-full">
-                    Event is required for Overall Placement
-                  </Label>
                 </div>
               </div>
 
