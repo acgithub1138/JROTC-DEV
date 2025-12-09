@@ -881,7 +881,7 @@ export const CompetitionEventRecord: React.FC = () => {
                   title="Event is rquired for placement"
                 >
                   <Label htmlFor="required" className="text-left md:text-right font-semibold">
-                    Required
+                    Required for Placement
                   </Label>
                   <Checkbox
                     id="required"
