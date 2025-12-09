@@ -853,7 +853,11 @@ export const CompetitionEventRecord: React.FC = () => {
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label htmlFor="weight" className="text-left md:text-right font-semibold" title="Weights reflect importance or difficulty of each event">
+                  <Label
+                    htmlFor="weight"
+                    className="text-left md:text-right font-semibold"
+                    title="Weights reflect importance or difficulty of each event"
+                  >
                     Weight
                   </Label>
                   <Input
@@ -874,7 +878,11 @@ export const CompetitionEventRecord: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                    <Label htmlFor="required" className="text-left md:text-right font-semibold" title="Event is required for Overall Placement">
+                    <Label
+                      htmlFor="required"
+                      className="text-left md:text-right font-semibold"
+                      title="Event is required for Overall Placement"
+                    >
                       Required
                     </Label>
                     <Checkbox
@@ -886,7 +894,10 @@ export const CompetitionEventRecord: React.FC = () => {
                           required: checked === true,
                         }))
                       }
+                      disabled={isViewMode}
                     />
+                  </div>
+                </div>
               </div>
 
               {/* Fee & Location */}
