@@ -768,7 +768,7 @@ export const CompetitionEventRecord: React.FC = () => {
                     }))}
                     disabled={isViewMode}
                   />
-                  <Label htmlFor="required" className="text-sm text-muted-foreground mt-1">
+                  <Label htmlFor="required" className="text-sm text-muted-foreground mt-1 w-full">
                     Event is required for participation
                   </Label>
                 </div>
