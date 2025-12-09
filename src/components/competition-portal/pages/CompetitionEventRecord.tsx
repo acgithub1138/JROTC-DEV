@@ -875,7 +875,6 @@ export const CompetitionEventRecord: React.FC = () => {
                     placeholder="Weight multiplier"
                     disabled={isViewMode}
                   />
-                </div>
                 <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                     <Label
@@ -898,7 +897,6 @@ export const CompetitionEventRecord: React.FC = () => {
                     />
                   </div>
                 </div>
-              </div>
 
               {/* Fee & Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
