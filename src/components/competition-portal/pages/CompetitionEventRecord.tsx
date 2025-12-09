@@ -758,7 +758,7 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
                 <Label htmlFor="required" className="text-left md:text-right font-semibold mt-2">Required</Label>
-                <div className="flex flex-col w-full">
+                <div className="flex flex-col">
                   <Checkbox 
                     id="required" 
                     checked={formData.required}
@@ -767,7 +767,6 @@ export const CompetitionEventRecord: React.FC = () => {
                       required: checked === true
                     }))}
                     disabled={isViewMode}
-                    className="w-full"
                   />
                   <Label htmlFor="required" className="text-sm text-muted-foreground mt-1">
                     Event is required for participation
