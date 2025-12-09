@@ -1,40 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, Calendar } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
-import type { Database } from '@/integrations/supabase/types';
-import { useSchoolUsers } from '@/hooks/useSchoolUsers';
-import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { useJudges } from '@/hooks/competition-portal/useJudges';
-import { convertToUI } from '@/utils/timezoneUtils';
-import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
-import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useEventsWithTemplates } from '@/hooks/competition-portal/useEventsWithTemplates';
-import { MultiSelectJudges } from '../components/MultiSelectJudges';
-import { MultiSelectResources } from '../components/MultiSelectResources';
-import { AttachmentSection } from '@/components/attachments/AttachmentSection';
-type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Save, Trash2, Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Database } from "@/integrations/supabase/types";
+import { useSchoolUsers } from "@/hooks/useSchoolUsers";
+import { useSchoolTimezone } from "@/hooks/useSchoolTimezone";
+import { useJudges } from "@/hooks/competition-portal/useJudges";
+import { convertToUI } from "@/utils/timezoneUtils";
+import { formatInTimeZone, toZonedTime, fromZonedTime } from "date-fns-tz";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useCompetitionEventTypes } from "../../competition-management/hooks/useCompetitionEventTypes";
+import { useCompetitionEventsPermissions } from "@/hooks/useModuleSpecificPermissions";
+import { useEventsWithTemplates } from "@/hooks/competition-portal/useEventsWithTemplates";
+import { MultiSelectJudges } from "../components/MultiSelectJudges";
+import { MultiSelectResources } from "../components/MultiSelectResources";
+import { AttachmentSection } from "@/components/attachments/AttachmentSection";
+type CompEvent = Database["public"]["Tables"]["cp_comp_events"]["Row"] & {
   competition_event_types?: {
     name: string;
   } | null;
 };
-type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
-type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
+type CompEventInsert = Database["public"]["Tables"]["cp_comp_events"]["Insert"];
+type CompEventUpdate = Database["public"]["Tables"]["cp_comp_events"]["Update"];
 interface FormData {
   event: string;
   location: string;
@@ -61,9 +70,7 @@ interface FormData {
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    userProfile
-  } = useAuth();
+  const { userProfile } = useAuth();
   const queryClient = useQueryClient();
 
   // Extract competition ID from pathname since route isn't parameterized
@@ -72,97 +79,86 @@ export const CompetitionEventRecord: React.FC = () => {
     return match?.[1] || null;
   }, [location.pathname]);
   const [searchParams] = useSearchParams();
-  const eventId = searchParams.get('id');
-  const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || 'create';
+  const eventId = searchParams.get("id");
+  const mode = (searchParams.get("mode") as "create" | "edit" | "view") || "create";
   const [existingEvent, setExistingEvent] = useState<CompEvent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [competitionProgram, setCompetitionProgram] = useState<string | null>(null);
-  const [scoreSheets, setScoreSheets] = useState<Array<{
-    id: string;
-    template_name: string;
-    jrotc_program: string;
-  }>>([]);
+  const [scoreSheets, setScoreSheets] = useState<
+    Array<{
+      id: string;
+      template_name: string;
+      jrotc_program: string;
+    }>
+  >([]);
   const [existingCompEventIds, setExistingCompEventIds] = useState<string[]>([]);
-  const {
-    timezone,
-    isLoading: timezoneLoading
-  } = useSchoolTimezone();
-  const {
-    eventTypes,
-    isLoading: eventTypesLoading
-  } = useCompetitionEventTypes();
-  const {
-    events: eventsWithTemplates,
-    isLoading: eventsWithTemplatesLoading
-  } = useEventsWithTemplates(competitionProgram || undefined);
-  const {
-    canCreate,
-    canEdit,
-    canDelete
-  } = useCompetitionEventsPermissions();
+  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
+  const { events: eventsWithTemplates, isLoading: eventsWithTemplatesLoading } = useEventsWithTemplates(
+    competitionProgram || undefined,
+  );
+  const { canCreate, canEdit, canDelete } = useCompetitionEventsPermissions();
   const initialFormData: FormData = {
-    event: '',
-    location: '',
-    start_date: '',
-    start_hour: '09',
-    start_minute: '00',
-    end_date: '',
-    end_hour: '15',
-    end_minute: '00',
-    lunch_start_hour: '12',
-    lunch_start_minute: '00',
-    lunch_end_hour: '13',
-    lunch_end_minute: '00',
-    max_participants: '',
-    fee: '',
-    interval: '',
-    judges_needed: '',
-    notes: '',
-    score_sheet: '',
-    max_points: '0',
-    weight: '1',
-    required: false
+    event: "",
+    location: "",
+    start_date: "",
+    start_hour: "09",
+    start_minute: "00",
+    end_date: "",
+    end_hour: "15",
+    end_minute: "00",
+    lunch_start_hour: "12",
+    lunch_start_minute: "00",
+    lunch_end_hour: "13",
+    lunch_end_minute: "00",
+    max_participants: "",
+    fee: "",
+    interval: "",
+    judges_needed: "",
+    notes: "",
+    score_sheet: "",
+    max_points: "0",
+    weight: "1",
+    required: false,
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const {
-    hasUnsavedChanges,
-    resetChanges
-  } = useUnsavedChanges({
-    initialData: mode === 'create' ? initialFormData : existingEvent ? convertEventToFormData(existingEvent) : initialFormData,
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData:
+      mode === "create" ? initialFormData : existingEvent ? convertEventToFormData(existingEvent) : initialFormData,
     currentData: formData,
-    enabled: mode !== 'view'
+    enabled: mode !== "view",
   });
-  const isEditMode = mode === 'edit';
-  const isViewMode = mode === 'view';
-  const isCreateMode = mode === 'create';
+  const isEditMode = mode === "edit";
+  const isViewMode = mode === "view";
+  const isCreateMode = mode === "create";
 
   // Filter out events that are already added to the competition
   const availableEvents = React.useMemo(() => {
     let events = eventsWithTemplates;
-    
+
     if (isEditMode && existingEvent) {
       // In edit mode, ensure the current event is included even if it doesn't have a template
       const currentEventId = existingEvent.event;
-      const isCurrentEventInList = eventsWithTemplates.some(e => e.id === currentEventId);
-      
+      const isCurrentEventInList = eventsWithTemplates.some((e) => e.id === currentEventId);
+
       if (!isCurrentEventInList && currentEventId) {
         // Find the event type from eventTypes and add it
-        const currentEventType = eventTypes.find(et => et.id === currentEventId);
+        const currentEventType = eventTypes.find((et) => et.id === currentEventId);
         if (currentEventType) {
           events = [
-            { id: currentEventType.id, name: currentEventType.name, jrotc_program: competitionProgram || '' },
-            ...eventsWithTemplates
+            { id: currentEventType.id, name: currentEventType.name, jrotc_program: competitionProgram || "" },
+            ...eventsWithTemplates,
           ];
         }
       }
     } else {
       // In create mode, exclude events that are already added
-      events = eventsWithTemplates.filter(event => !existingCompEventIds.includes(event.id));
+      events = eventsWithTemplates.filter((event) => !existingCompEventIds.includes(event.id));
     }
-    
+
     return events;
   }, [eventsWithTemplates, existingCompEventIds, isEditMode, existingEvent, eventTypes, competitionProgram]);
 
@@ -214,15 +210,35 @@ export const CompetitionEventRecord: React.FC = () => {
 
   // Calculate max participants when interval is set
   useEffect(() => {
-    if (formData.interval && formData.start_date && formData.start_hour && formData.start_minute && formData.end_hour && formData.end_minute) {
-      const startTime = new Date(`${formData.start_date}T${formData.start_hour.padStart(2, '0')}:${formData.start_minute.padStart(2, '0')}:00`);
-      const endTime = new Date(`${formData.start_date}T${formData.end_hour.padStart(2, '0')}:${formData.end_minute.padStart(2, '0')}:00`);
+    if (
+      formData.interval &&
+      formData.start_date &&
+      formData.start_hour &&
+      formData.start_minute &&
+      formData.end_hour &&
+      formData.end_minute
+    ) {
+      const startTime = new Date(
+        `${formData.start_date}T${formData.start_hour.padStart(2, "0")}:${formData.start_minute.padStart(2, "0")}:00`,
+      );
+      const endTime = new Date(
+        `${formData.start_date}T${formData.end_hour.padStart(2, "0")}:${formData.end_minute.padStart(2, "0")}:00`,
+      );
       let totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
 
       // Subtract lunch break if defined
-      if (formData.lunch_start_hour && formData.lunch_start_minute && formData.lunch_end_hour && formData.lunch_end_minute) {
-        const lunchStart = new Date(`${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`);
-        const lunchEnd = new Date(`${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`);
+      if (
+        formData.lunch_start_hour &&
+        formData.lunch_start_minute &&
+        formData.lunch_end_hour &&
+        formData.lunch_end_minute
+      ) {
+        const lunchStart = new Date(
+          `${formData.start_date}T${formData.lunch_start_hour.padStart(2, "0")}:${formData.lunch_start_minute.padStart(2, "0")}:00`,
+        );
+        const lunchEnd = new Date(
+          `${formData.start_date}T${formData.lunch_end_hour.padStart(2, "0")}:${formData.lunch_end_minute.padStart(2, "0")}:00`,
+        );
         const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
         totalMinutes -= lunchMinutes;
       }
@@ -231,92 +247,108 @@ export const CompetitionEventRecord: React.FC = () => {
         const maxParticipants = Math.floor(totalMinutes / interval);
         // Only update if the calculated value is different from current value
         if (formData.max_participants !== maxParticipants.toString()) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            max_participants: maxParticipants.toString()
+            max_participants: maxParticipants.toString(),
           }));
         }
       }
     }
-  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
+  }, [
+    formData.interval,
+    formData.start_date,
+    formData.start_hour,
+    formData.start_minute,
+    formData.end_hour,
+    formData.end_minute,
+    formData.lunch_start_hour,
+    formData.lunch_start_minute,
+    formData.lunch_end_hour,
+    formData.lunch_end_minute,
+    formData.max_participants,
+  ]);
 
   // Recalculate max_points when judges_needed changes
   useEffect(() => {
     const recalculateMaxPoints = async () => {
       if (!formData.score_sheet || !formData.judges_needed) return;
-      
+
       const judgesNeeded = parseInt(formData.judges_needed);
       if (isNaN(judgesNeeded) || judgesNeeded <= 0) return;
-      
+
       const { data: template } = await supabase
-        .from('competition_templates')
-        .select('scores')
-        .eq('id', formData.score_sheet)
+        .from("competition_templates")
+        .select("scores")
+        .eq("id", formData.score_sheet)
         .single();
-      
+
       if (template?.scores) {
         const maxPointsFromTemplate = calculateTemplateMaxPoints(template.scores);
         const totalMaxPoints = maxPointsFromTemplate * judgesNeeded;
-        
+
         if (formData.max_points !== totalMaxPoints.toString()) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            max_points: totalMaxPoints.toString()
+            max_points: totalMaxPoints.toString(),
           }));
         }
       }
     };
-    
+
     recalculateMaxPoints();
   }, [formData.judges_needed, formData.score_sheet]);
   function convertEventToFormData(event: CompEvent): FormData {
     // Convert UTC times to school timezone Date objects
     const startDate = event.start_time ? toZonedTime(new Date(event.start_time), timezone) : null;
     const endDate = event.end_time ? toZonedTime(new Date(event.end_time), timezone) : null;
-    const lunchStartDate = (event as any).lunch_start_time ? toZonedTime(new Date((event as any).lunch_start_time), timezone) : null;
-    const lunchEndDate = (event as any).lunch_end_time ? toZonedTime(new Date((event as any).lunch_end_time), timezone) : null;
+    const lunchStartDate = (event as any).lunch_start_time
+      ? toZonedTime(new Date((event as any).lunch_start_time), timezone)
+      : null;
+    const lunchEndDate = (event as any).lunch_end_time
+      ? toZonedTime(new Date((event as any).lunch_end_time), timezone)
+      : null;
 
     // Find the matching event type by name or ID
     let matchingEventType = null;
     if (event.competition_event_types?.name) {
-      matchingEventType = eventTypes.find(et => et.name === event.competition_event_types!.name);
+      matchingEventType = eventTypes.find((et) => et.name === event.competition_event_types!.name);
     } else if (event.event) {
-      matchingEventType = eventTypes.find(et => et.id === event.event);
+      matchingEventType = eventTypes.find((et) => et.id === event.event);
     }
     return {
-      event: matchingEventType?.id || '',
-      location: event.location || '',
-      start_date: startDate ? convertToUI(startDate, timezone, 'dateKey') : '',
-      start_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
-      start_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
-      end_date: endDate ? convertToUI(endDate, timezone, 'dateKey') : '',
-      end_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
-      end_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
-      lunch_start_hour: lunchStartDate ? lunchStartDate.getHours().toString().padStart(2, '0') : '12',
-      lunch_start_minute: lunchStartDate ? lunchStartDate.getMinutes().toString().padStart(2, '0') : '00',
-      lunch_end_hour: lunchEndDate ? lunchEndDate.getHours().toString().padStart(2, '0') : '13',
-      lunch_end_minute: lunchEndDate ? lunchEndDate.getMinutes().toString().padStart(2, '0') : '00',
-      max_participants: event.max_participants?.toString() || '',
-      fee: (event as any).fee?.toString() || '',
-      interval: (event as any).interval?.toString() || '',
-      judges_needed: (event as any).judges_needed?.toString() || '',
-      notes: event.notes || '',
-      score_sheet: (event as any).score_sheet || '',
-      max_points: (event as any).max_points?.toString() || '0',
-      weight: (event as any).weight?.toString() || '1',
-      required: (event as any).required || false
+      event: matchingEventType?.id || "",
+      location: event.location || "",
+      start_date: startDate ? convertToUI(startDate, timezone, "dateKey") : "",
+      start_hour: startDate ? startDate.getHours().toString().padStart(2, "0") : "09",
+      start_minute: startDate ? startDate.getMinutes().toString().padStart(2, "0") : "00",
+      end_date: endDate ? convertToUI(endDate, timezone, "dateKey") : "",
+      end_hour: endDate ? endDate.getHours().toString().padStart(2, "0") : "10",
+      end_minute: endDate ? endDate.getMinutes().toString().padStart(2, "0") : "00",
+      lunch_start_hour: lunchStartDate ? lunchStartDate.getHours().toString().padStart(2, "0") : "12",
+      lunch_start_minute: lunchStartDate ? lunchStartDate.getMinutes().toString().padStart(2, "0") : "00",
+      lunch_end_hour: lunchEndDate ? lunchEndDate.getHours().toString().padStart(2, "0") : "13",
+      lunch_end_minute: lunchEndDate ? lunchEndDate.getMinutes().toString().padStart(2, "0") : "00",
+      max_participants: event.max_participants?.toString() || "",
+      fee: (event as any).fee?.toString() || "",
+      interval: (event as any).interval?.toString() || "",
+      judges_needed: (event as any).judges_needed?.toString() || "",
+      notes: event.notes || "",
+      score_sheet: (event as any).score_sheet || "",
+      max_points: (event as any).max_points?.toString() || "0",
+      weight: (event as any).weight?.toString() || "1",
+      required: (event as any).required || false,
     };
   }
 
   // Calculate max points from template scores (sum of all maxValue fields, excluding penalties)
   function calculateTemplateMaxPoints(scores: any): number {
     if (!scores?.criteria || !Array.isArray(scores.criteria)) return 0;
-    
+
     return scores.criteria.reduce((total: number, field: any) => {
       // Skip penalties and section headers
-      if (field.penalty || field.type === 'section_header') return total;
+      if (field.penalty || field.type === "section_header") return total;
       // Add maxValue for scoring fields
-      if (field.maxValue && typeof field.maxValue === 'number') {
+      if (field.maxValue && typeof field.maxValue === "number") {
         return total + field.maxValue;
       }
       return total;
@@ -327,18 +359,22 @@ export const CompetitionEventRecord: React.FC = () => {
     if (!eventId || !competitionId) return;
     setIsLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_comp_events').select(`
+      const { data, error } = await supabase
+        .from("cp_comp_events")
+        .select(
+          `
           *,
           competition_event_types:event(name)
-        `).eq('id', eventId).eq('competition_id', competitionId).single();
+        `,
+        )
+        .eq("id", eventId)
+        .eq("competition_id", competitionId)
+        .single();
       if (error) throw error;
       setExistingEvent(data);
     } catch (error) {
-      console.error('Error fetching event:', error);
-      toast.error('Failed to load event data');
+      console.error("Error fetching event:", error);
+      toast.error("Failed to load event data");
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } finally {
       setIsLoading(false);
@@ -347,49 +383,44 @@ export const CompetitionEventRecord: React.FC = () => {
   const fetchCompetitionProgram = async () => {
     if (!competitionId) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_competitions').select('program').eq('id', competitionId).single();
+      const { data, error } = await supabase.from("cp_competitions").select("program").eq("id", competitionId).single();
       if (error) throw error;
       setCompetitionProgram(data?.program || null);
     } catch (error) {
-      console.error('Error fetching competition program:', error);
+      console.error("Error fetching competition program:", error);
     }
   };
   const fetchExistingCompEvents = async () => {
     if (!competitionId) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_comp_events').select('event').eq('competition_id', competitionId);
+      const { data, error } = await supabase.from("cp_comp_events").select("event").eq("competition_id", competitionId);
       if (error) throw error;
-      const eventIds = data?.map(e => e.event).filter(Boolean) as string[];
+      const eventIds = data?.map((e) => e.event).filter(Boolean) as string[];
       setExistingCompEventIds(eventIds);
     } catch (error) {
-      console.error('Error fetching existing competition events:', error);
+      console.error("Error fetching existing competition events:", error);
     }
   };
   const fetchCompetitionDate = async () => {
     if (!competitionId || !timezone) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_competitions').select('start_date, end_date').eq('id', competitionId).single();
+      const { data, error } = await supabase
+        .from("cp_competitions")
+        .select("start_date, end_date")
+        .eq("id", competitionId)
+        .single();
       if (error) throw error;
       if (data?.start_date) {
-        const startDate = formatInTimeZone(new Date(data.start_date), timezone, 'yyyy-MM-dd');
-        const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, 'yyyy-MM-dd') : startDate;
-        setFormData(prev => ({
+        const startDate = formatInTimeZone(new Date(data.start_date), timezone, "yyyy-MM-dd");
+        const endDate = data?.end_date ? formatInTimeZone(new Date(data.end_date), timezone, "yyyy-MM-dd") : startDate;
+        setFormData((prev) => ({
           ...prev,
           start_date: startDate,
-          end_date: endDate
+          end_date: endDate,
         }));
       }
     } catch (error) {
-      console.error('Error fetching competition date:', error);
+      console.error("Error fetching competition date:", error);
     }
   };
   const fetchFilteredScoreSheets = async (eventId?: string) => {
@@ -399,52 +430,56 @@ export const CompetitionEventRecord: React.FC = () => {
       return;
     }
     try {
-      const {
-        data: competitionData,
-        error: competitionError
-      } = await supabase.from('cp_competitions').select('program').eq('id', competitionId).maybeSingle();
+      const { data: competitionData, error: competitionError } = await supabase
+        .from("cp_competitions")
+        .select("program")
+        .eq("id", competitionId)
+        .maybeSingle();
       if (competitionError) throw competitionError;
-      
+
       let sheets: Array<{ id: string; template_name: string; jrotc_program: string }> = [];
-      
+
       if (competitionData?.program) {
-        const {
-          data,
-          error
-        } = await supabase.from('competition_templates').select('id, template_name, jrotc_program').eq('is_active', true).eq('jrotc_program', competitionData.program).eq('event', eventToUse).order('template_name', {
-          ascending: true
-        });
+        const { data, error } = await supabase
+          .from("competition_templates")
+          .select("id, template_name, jrotc_program")
+          .eq("is_active", true)
+          .eq("jrotc_program", competitionData.program)
+          .eq("event", eventToUse)
+          .order("template_name", {
+            ascending: true,
+          });
         if (error) throw error;
         sheets = data || [];
       }
-      
+
       // In edit mode, ensure the existing score sheet is included even if it doesn't match filters
       if (isEditMode && existingEvent?.score_sheet) {
         const existingSheetId = (existingEvent as any).score_sheet;
-        const isExistingInList = sheets.some(s => s.id === existingSheetId);
-        
+        const isExistingInList = sheets.some((s) => s.id === existingSheetId);
+
         if (!isExistingInList) {
           const { data: existingSheet } = await supabase
-            .from('competition_templates')
-            .select('id, template_name, jrotc_program')
-            .eq('id', existingSheetId)
+            .from("competition_templates")
+            .select("id, template_name, jrotc_program")
+            .eq("id", existingSheetId)
             .single();
-          
+
           if (existingSheet) {
             sheets = [existingSheet, ...sheets];
           }
         }
       }
-      
+
       setScoreSheets(sheets);
     } catch (error) {
-      console.error('Error fetching filtered score sheets:', error);
-      toast.error('Failed to load score sheets');
+      console.error("Error fetching filtered score sheets:", error);
+      toast.error("Failed to load score sheets");
     }
   };
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
     if (!date || !hour || !minute || !timezone) return null;
-    const schoolDateTime = new Date(`${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`);
+    const schoolDateTime = new Date(`${date}T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:00`);
     const utcDateTime = fromZonedTime(schoolDateTime, timezone);
     return utcDateTime.toISOString();
   };
@@ -453,64 +488,77 @@ export const CompetitionEventRecord: React.FC = () => {
 
     // Validation for mandatory fields
     if (!formData.event) {
-      toast.error('Please select an event');
+      toast.error("Please select an event");
       return;
     }
     if (!formData.location) {
-      toast.error('Please enter a location');
+      toast.error("Please enter a location");
       return;
     }
     if (!formData.start_date) {
-      toast.error('Please select a start date');
+      toast.error("Please select a start date");
       return;
     }
     if (!formData.end_date) {
-      toast.error('Please select an end date');
+      toast.error("Please select an end date");
       return;
     }
     if (!formData.lunch_start_hour || !formData.lunch_end_hour) {
-      toast.error('Please set lunch break times');
+      toast.error("Please set lunch break times");
       return;
     }
     if (!formData.interval) {
-      toast.error('Please enter an interval');
+      toast.error("Please enter an interval");
       return;
     }
     if (!formData.max_participants) {
-      toast.error('Please enter max participants');
+      toast.error("Please enter max participants");
       return;
     }
     if (!formData.fee) {
-      toast.error('Please enter an event fee');
+      toast.error("Please enter an event fee");
       return;
     }
     if (!formData.score_sheet) {
-      toast.error('Please select a score template');
+      toast.error("Please select a score template");
       return;
     }
 
     // Validation for date/time ordering
-    const startDateTime = new Date(`${formData.start_date}T${formData.start_hour.padStart(2, '0')}:${formData.start_minute.padStart(2, '0')}:00`);
-    const endDateTime = new Date(`${formData.end_date}T${formData.end_hour.padStart(2, '0')}:${formData.end_minute.padStart(2, '0')}:00`);
+    const startDateTime = new Date(
+      `${formData.start_date}T${formData.start_hour.padStart(2, "0")}:${formData.start_minute.padStart(2, "0")}:00`,
+    );
+    const endDateTime = new Date(
+      `${formData.end_date}T${formData.end_hour.padStart(2, "0")}:${formData.end_minute.padStart(2, "0")}:00`,
+    );
     if (endDateTime <= startDateTime) {
-      toast.error('End date & time must be after start date & time');
+      toast.error("End date & time must be after start date & time");
       return;
     }
 
     // Validation for lunch break timing
-    if (formData.lunch_start_hour && formData.lunch_start_minute && formData.lunch_end_hour && formData.lunch_end_minute) {
-      const lunchStartDateTime = new Date(`${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`);
-      const lunchEndDateTime = new Date(`${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`);
+    if (
+      formData.lunch_start_hour &&
+      formData.lunch_start_minute &&
+      formData.lunch_end_hour &&
+      formData.lunch_end_minute
+    ) {
+      const lunchStartDateTime = new Date(
+        `${formData.start_date}T${formData.lunch_start_hour.padStart(2, "0")}:${formData.lunch_start_minute.padStart(2, "0")}:00`,
+      );
+      const lunchEndDateTime = new Date(
+        `${formData.start_date}T${formData.lunch_end_hour.padStart(2, "0")}:${formData.lunch_end_minute.padStart(2, "0")}:00`,
+      );
       if (lunchStartDateTime <= startDateTime) {
-        toast.error('Lunch break start must be after event start time');
+        toast.error("Lunch break start must be after event start time");
         return;
       }
       if (lunchEndDateTime >= endDateTime) {
-        toast.error('Lunch break end must be before event end time');
+        toast.error("Lunch break end must be before event end time");
         return;
       }
       if (lunchEndDateTime <= lunchStartDateTime) {
-        toast.error('Lunch break end must be after lunch break start');
+        toast.error("Lunch break end must be after lunch break start");
         return;
       }
     }
@@ -518,7 +566,11 @@ export const CompetitionEventRecord: React.FC = () => {
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
-      const lunch_start_time = combineDateTime(formData.start_date, formData.lunch_start_hour, formData.lunch_start_minute);
+      const lunch_start_time = combineDateTime(
+        formData.start_date,
+        formData.lunch_start_hour,
+        formData.lunch_start_minute,
+      );
       const lunch_end_time = combineDateTime(formData.start_date, formData.lunch_end_hour, formData.lunch_end_minute);
       const eventData = {
         competition_id: competitionId,
@@ -536,38 +588,34 @@ export const CompetitionEventRecord: React.FC = () => {
         score_sheet: formData.score_sheet || null,
         max_points: formData.max_points ? parseFloat(formData.max_points) : 0,
         weight: formData.weight ? parseFloat(formData.weight) : 1,
-        required: formData.required
+        required: formData.required,
       };
       if (isCreateMode) {
-        const {
-          error
-        } = await supabase.from('cp_comp_events').insert({
+        const { error } = await supabase.from("cp_comp_events").insert({
           ...eventData,
           school_id: userProfile?.school_id,
-          created_by: userProfile?.id
+          created_by: userProfile?.id,
         });
         if (error) throw error;
-        toast.success('Event created successfully');
+        toast.success("Event created successfully");
       } else if (isEditMode && eventId) {
-        const {
-          error
-        } = await supabase.from('cp_comp_events').update(eventData).eq('id', eventId);
+        const { error } = await supabase.from("cp_comp_events").update(eventData).eq("id", eventId);
         if (error) throw error;
-        toast.success('Event updated successfully');
+        toast.success("Event updated successfully");
       }
 
       // Invalidate and refetch the events list before navigating
       await queryClient.invalidateQueries({
-        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+        queryKey: ["competition-events", competitionId, userProfile?.school_id],
       });
       await queryClient.refetchQueries({
-        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+        queryKey: ["competition-events", competitionId, userProfile?.school_id],
       });
       resetChanges();
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
-      console.error('Error saving event:', error);
-      toast.error('Failed to save event');
+      console.error("Error saving event:", error);
+      toast.error("Failed to save event");
     } finally {
       setIsSaving(false);
     }
@@ -576,23 +624,21 @@ export const CompetitionEventRecord: React.FC = () => {
     if (!eventId) return;
     setIsSaving(true);
     try {
-      const {
-        error
-      } = await supabase.from('cp_comp_events').delete().eq('id', eventId);
+      const { error } = await supabase.from("cp_comp_events").delete().eq("id", eventId);
       if (error) throw error;
-      toast.success('Event deleted successfully');
+      toast.success("Event deleted successfully");
 
       // Invalidate and refetch the events list before navigating
       await queryClient.invalidateQueries({
-        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+        queryKey: ["competition-events", competitionId, userProfile?.school_id],
       });
       await queryClient.refetchQueries({
-        queryKey: ['competition-events', competitionId, userProfile?.school_id]
+        queryKey: ["competition-events", competitionId, userProfile?.school_id],
       });
       navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
     } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error('Failed to delete event');
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
     } finally {
       setIsSaving(false);
       setShowDeleteDialog(false);
@@ -607,17 +653,29 @@ export const CompetitionEventRecord: React.FC = () => {
   };
   // Show loading state while waiting for data
   if ((isEditMode || isViewMode) && eventId && !existingEvent && isLoading) {
-    return <div className="p-6 space-y-6">
+    return (
+      <div className="p-6 space-y-6">
         <div className="h-8 bg-muted rounded animate-pulse" />
         <div className="h-64 bg-muted rounded animate-pulse" />
-      </div>;
+      </div>
+    );
   }
-  const pageTitle = isCreateMode ? 'Add Competition Event' : isEditMode ? 'Edit Competition Event' : 'View Competition Event';
-  const canEditForm = isCreateMode && canCreate || isEditMode && canEdit;
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
+  const pageTitle = isCreateMode
+    ? "Add Competition Event"
+    : isEditMode
+      ? "Edit Competition Event"
+      : "View Competition Event";
+  const canEditForm = (isCreateMode && canCreate) || (isEditMode && canEdit);
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 space-y-6">
       {/* Mobile Back Button - shown above header */}
       <div className="md:hidden mb-4">
-        <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2 hover:scale-105 transition-transform">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBack}
+          className="flex items-center gap-2 hover:scale-105 transition-transform"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Events
         </Button>
@@ -626,7 +684,12 @@ export const CompetitionEventRecord: React.FC = () => {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/20 shadow-lg">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleBack} className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBack}
+            className="hidden md:flex items-center gap-2 hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to Events
           </Button>
@@ -640,410 +703,621 @@ export const CompetitionEventRecord: React.FC = () => {
           </div>
         </div>
         <div className="hidden md:flex items-center gap-2">
-          {canEditForm && <>
-              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2 hover:scale-105 transition-transform">
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>}
-              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center gap-2 hover:scale-105 transition-transform">
+          {canEditForm && (
+            <>
+              {isEditMode && canDelete && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              )}
+              <Button
+                type="submit"
+                form="event-form"
+                disabled={isSaving}
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+              >
                 <Save className="h-4 w-4" />
-                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
+                {isSaving ? "Saving..." : isCreateMode ? "Create Event" : "Save"}
               </Button>
-            </>}
+            </>
+          )}
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto">
         {/* Mobile action buttons - shown above the card */}
         <div className="md:hidden grid grid-cols-2 gap-2 mb-4">
-          {canEditForm && <>
-              {isEditMode && canDelete && <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center justify-center gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>}
-              <Button type="submit" form="event-form" disabled={isSaving} className="flex items-center justify-center gap-2">
+          {canEditForm && (
+            <>
+              {isEditMode && canDelete && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              )}
+              <Button
+                type="submit"
+                form="event-form"
+                disabled={isSaving}
+                className="flex items-center justify-center gap-2"
+              >
                 <Save className="h-4 w-4" />
-                {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save'}
+                {isSaving ? "Saving..." : isCreateMode ? "Create Event" : "Save"}
               </Button>
-            </>}
+            </>
+          )}
         </div>
 
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
-          
-        <CardContent className="pt-6">
-          <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
-            {/* Event & Score Template */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="event" className="text-left md:text-right font-semibold">Event *</Label>
-                <Select value={formData.event} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  event: value
-                }))} disabled={isViewMode}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an event" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[1000] bg-background">
-                    {availableEvents.map(event => <SelectItem key={event.id} value={event.id}>
-                        {event.name}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="score_sheet" className="text-left md:text-right font-semibold">Score Template *</Label>
-                <Select value={formData.score_sheet} onValueChange={async value => {
-                  setFormData(prev => ({
-                    ...prev,
-                    score_sheet: value
-                  }));
-
-                  // Auto-fill judges_needed from template and calculate max_points
-                  const {
-                    data: template
-                  } = await supabase.from('competition_templates').select('judges, scores').eq('id', value).single();
-                  if (template?.judges) {
-                    // Calculate max points from template
-                    const maxPointsFromTemplate = calculateTemplateMaxPoints(template.scores);
-                    const totalMaxPoints = maxPointsFromTemplate * template.judges;
-                    
-                    setFormData(prev => ({
-                      ...prev,
-                      judges_needed: template.judges.toString(),
-                      max_points: totalMaxPoints.toString()
-                    }));
-                  }
-                }} disabled={isViewMode}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a score template" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[1000] bg-background">
-                    {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
-                        {sheet.template_name}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Max Points, Weight & Required */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="max_points" className="text-left md:text-right font-semibold">Max Points</Label>
-                <Input 
-                  id="max_points" 
-                  type="number" 
-                  value={formData.max_points} 
-                  readOnly 
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                  title="Auto-calculated from score template × judges needed"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="weight" className="text-left md:text-right font-semibold">Weight</Label>
-                <Input 
-                  id="weight" 
-                  type="number" 
-                  step="0.1"
-                  min="0"
-                  value={formData.weight} 
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    weight: e.target.value
-                  }))} 
-                  placeholder="Weight multiplier" 
-                  disabled={isViewMode} 
-                />
-              </div>
-              <div className="flex flex-col gap-1">
+          <CardContent className="pt-6">
+            <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
+              {/* Event & Score Template */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label htmlFor="required" className="text-left md:text-right font-semibold">Required</Label>
-                  <Checkbox 
-                    id="required" 
-                    checked={formData.required}
-                    onCheckedChange={(checked) => setFormData(prev => ({
-                      ...prev,
-                      required: checked === true
-                    }))}
+                  <Label htmlFor="event" className="text-left md:text-right font-semibold">
+                    Event *
+                  </Label>
+                  <Select
+                    value={formData.event}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        event: value,
+                      }))
+                    }
+                    disabled={isViewMode}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an event" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[1000] bg-background">
+                      {availableEvents.map((event) => (
+                        <SelectItem key={event.id} value={event.id}>
+                          {event.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="score_sheet" className="text-left md:text-right font-semibold">
+                    Score Template *
+                  </Label>
+                  <Select
+                    value={formData.score_sheet}
+                    onValueChange={async (value) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        score_sheet: value,
+                      }));
+
+                      // Auto-fill judges_needed from template and calculate max_points
+                      const { data: template } = await supabase
+                        .from("competition_templates")
+                        .select("judges, scores")
+                        .eq("id", value)
+                        .single();
+                      if (template?.judges) {
+                        // Calculate max points from template
+                        const maxPointsFromTemplate = calculateTemplateMaxPoints(template.scores);
+                        const totalMaxPoints = maxPointsFromTemplate * template.judges;
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          judges_needed: template.judges.toString(),
+                          max_points: totalMaxPoints.toString(),
+                        }));
+                      }
+                    }}
+                    disabled={isViewMode}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a score template" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[1000] bg-background">
+                      {scoreSheets.map((sheet) => (
+                        <SelectItem key={sheet.id} value={sheet.id}>
+                          {sheet.template_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Max Points, Weight & Required */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="max_points" className="text-left md:text-right font-semibold">
+                    Max Points
+                  </Label>
+                  <Input
+                    id="max_points"
+                    type="number"
+                    value={formData.max_points}
+                    readOnly
+                    disabled
+                    className="bg-muted cursor-not-allowed"
+                    title="Auto-calculated from score template × judges needed"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="weight" className="text-left md:text-right font-semibold">
+                    Weight
+                  </Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={formData.weight}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        weight: e.target.value,
+                      }))
+                    }
+                    placeholder="Weight multiplier"
                     disabled={isViewMode}
                   />
                 </div>
-                <Label htmlFor="required" className="text-sm text-muted-foreground w-full">
-                  Event is required for participation
-                </Label>
-              </div>
-            </div>
-
-            {/* Fee & Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="fee" className="text-left md:text-right font-semibold">Fee *</Label>
-                <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  fee: e.target.value
-                }))} placeholder="Event fee" disabled={isViewMode} required />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="location" className="text-left md:text-right font-semibold">Location *</Label>
-                <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  location: e.target.value
-                }))} placeholder="Event location" disabled={isViewMode} required />
-              </div>
-            </div>
-
-            {/* Interval & Max Participants */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="interval" className="text-left md:text-right font-semibold">Interval (minutes) *</Label>
-                <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  interval: e.target.value
-                }))} placeholder="Interval in minutes" disabled={isViewMode} required />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="max_participants" className="text-left md:text-right font-semibold">Max Participants *</Label>
-                <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  max_participants: e.target.value
-                }))} placeholder="Maximum participants" disabled={isViewMode} required />
-              </div>
-            </div>
-
-            {/* Start Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
-              <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1">
-                  <Input type="date" value={formData.start_date} onChange={e => {
-                    setFormData(prev => ({
-                      ...prev,
-                      start_date: e.target.value
-                    }));
-                    if (e.target.value && !formData.end_date) {
-                      setFormData(prev => ({
-                        ...prev,
-                        end_date: e.target.value
-                      }));
-                    }
-                  }} disabled={isViewMode} required />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
-                  <div>
-                    <Select value={formData.start_hour} onValueChange={value => {
-                      setFormData(prev => ({
-                        ...prev,
-                        start_hour: value
-                      }));
-                      if (value && !formData.end_hour) {
-                        const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
-                        setFormData(prev => ({
+                <div className="flex flex-col gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                    <Label htmlFor="required" className="text-left md:text-right font-semibold">
+                      Required
+                    </Label>
+                    <Checkbox
+                      id="required"
+                      checked={formData.required}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
                           ...prev,
-                          end_hour: nextHour > '23' ? '23' : nextHour
-                        }));
+                          required: checked === true,
+                        }))
                       }
-                    }} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                      disabled={isViewMode}
+                    />
                   </div>
-                  <div>
-                    <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      start_minute: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="00">00</SelectItem>
-                        <SelectItem value="15">15</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
-                        <SelectItem value="45">45</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <Label htmlFor="required" className="text-sm text-muted-foreground w-full">
+                    Event is required for Overall Placement
+                  </Label>
+                </div>
+              </div>
+
+              {/* Fee & Location */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="fee" className="text-left md:text-right font-semibold">
+                    Fee *
+                  </Label>
+                  <Input
+                    id="fee"
+                    type="number"
+                    step="0.01"
+                    value={formData.fee}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        fee: e.target.value,
+                      }))
+                    }
+                    placeholder="Event fee"
+                    disabled={isViewMode}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="location" className="text-left md:text-right font-semibold">
+                    Location *
+                  </Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
+                    placeholder="Event location"
+                    disabled={isViewMode}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Interval & Max Participants */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="interval" className="text-left md:text-right font-semibold">
+                    Interval (minutes) *
+                  </Label>
+                  <Input
+                    id="interval"
+                    type="number"
+                    value={formData.interval}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        interval: e.target.value,
+                      }))
+                    }
+                    placeholder="Interval in minutes"
+                    disabled={isViewMode}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                  <Label htmlFor="max_participants" className="text-left md:text-right font-semibold">
+                    Max Participants *
+                  </Label>
+                  <Input
+                    id="max_participants"
+                    type="number"
+                    value={formData.max_participants}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        max_participants: e.target.value,
+                      }))
+                    }
+                    placeholder="Maximum participants"
+                    disabled={isViewMode}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Start Date & Time */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
+                <Label className="text-left md:text-right font-semibold">Start Date & Time *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-1">
+                    <Input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          start_date: e.target.value,
+                        }));
+                        if (e.target.value && !formData.end_date) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            end_date: e.target.value,
+                          }));
+                        }
+                      }}
+                      disabled={isViewMode}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select
+                        value={formData.start_hour}
+                        onValueChange={(value) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            start_hour: value,
+                          }));
+                          if (value && !formData.end_hour) {
+                            const nextHour = (parseInt(value) + 1).toString().padStart(2, "0");
+                            setFormData((prev) => ({
+                              ...prev,
+                              end_hour: nextHour > "23" ? "23" : nextHour,
+                            }));
+                          }
+                        }}
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(
+                            {
+                              length: 24,
+                            },
+                            (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+                                {i.toString().padStart(2, "0")}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select
+                        value={formData.start_minute}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            start_minute: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="00">00</SelectItem>
+                          <SelectItem value="15">15</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                          <SelectItem value="45">45</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Lunch Start Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
-              <Label className="text-left md:text-right font-semibold">Lunch Break</Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1 flex items-center justify-center">
-                  <Label className="text-sm font-medium">Start Time</Label>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
-                  <div>
-                    <Select value={formData.lunch_start_hour} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      lunch_start_hour: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+              {/* Lunch Start Time */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
+                <Label className="text-left md:text-right font-semibold">Lunch Break</Label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-1 flex items-center justify-center">
+                    <Label className="text-sm font-medium">Start Time</Label>
                   </div>
-                  <div>
-                    <Select value={formData.lunch_start_minute} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      lunch_start_minute: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="00">00</SelectItem>
-                        <SelectItem value="15">15</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
-                        <SelectItem value="45">45</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Lunch End Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label></Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1 flex items-center justify-center">
-                  <Label className="text-sm font-medium">End Time</Label>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
-                  <div>
-                    <Select value={formData.lunch_end_hour} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      lunch_end_hour: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Select value={formData.lunch_end_minute} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      lunch_end_minute: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="00">00</SelectItem>
-                        <SelectItem value="15">15</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
-                        <SelectItem value="45">45</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select
+                        value={formData.lunch_start_hour}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            lunch_start_hour: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(
+                            {
+                              length: 24,
+                            },
+                            (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+                                {i.toString().padStart(2, "0")}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select
+                        value={formData.lunch_start_minute}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            lunch_start_minute: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="00">00</SelectItem>
+                          <SelectItem value="15">15</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                          <SelectItem value="45">45</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* End Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
-              <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-1">
-                  <Input type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
-                    ...prev,
-                    end_date: e.target.value
-                  }))} disabled={isViewMode} required />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
-                  <div>
-                    <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      end_hour: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+              {/* Lunch End Time */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label></Label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-1 flex items-center justify-center">
+                    <Label className="text-sm font-medium">End Time</Label>
                   </div>
-                  <div>
-                    <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
-                      ...prev,
-                      end_minute: value
-                    }))} disabled={isViewMode}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="00">00</SelectItem>
-                        <SelectItem value="15">15</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
-                        <SelectItem value="45">45</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select
+                        value={formData.lunch_end_hour}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            lunch_end_hour: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(
+                            {
+                              length: 24,
+                            },
+                            (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+                                {i.toString().padStart(2, "0")}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select
+                        value={formData.lunch_end_minute}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            lunch_end_minute: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="00">00</SelectItem>
+                          <SelectItem value="15">15</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                          <SelectItem value="45">45</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
+              {/* End Date & Time */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
+                <Label className="text-left md:text-right font-semibold">End Date & Time *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="md:col-span-1">
+                    <Input
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          end_date: e.target.value,
+                        }))
+                      }
+                      disabled={isViewMode}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:contents">
+                    <div>
+                      <Select
+                        value={formData.end_hour}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            end_hour: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(
+                            {
+                              length: 24,
+                            },
+                            (_, i) => (
+                              <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+                                {i.toString().padStart(2, "0")}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select
+                        value={formData.end_minute}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            end_minute: value,
+                          }))
+                        }
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="00">00</SelectItem>
+                          <SelectItem value="15">15</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                          <SelectItem value="45">45</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              {/* Judges Needed */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20 mx-0 py-[8px] px-[16px]">
+                <Label htmlFor="judges_needed" className="text-left md:text-right font-semibold">
+                  Judges Needed
+                </Label>
+                <Input
+                  id="judges_needed"
+                  type="number"
+                  min="0"
+                  value={formData.judges_needed}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      judges_needed: e.target.value,
+                    }))
+                  }
+                  placeholder="Number of judges needed"
+                  disabled={isViewMode}
+                />
+              </div>
 
+              {/* Notes */}
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <Label htmlFor="notes" className="mt-2 text-left md:text-right font-semibold">
+                  Notes
+                </Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      notes: e.target.value,
+                    }))
+                  }
+                  placeholder="Additional notes about the event"
+                  disabled={isViewMode}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
 
-            {/* Judges Needed */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center p-4 rounded-lg bg-accent/10 border border-accent/20 mx-0 py-[8px] px-[16px]">
-              <Label htmlFor="judges_needed" className="text-left md:text-right font-semibold">Judges Needed</Label>
-              <Input id="judges_needed" type="number" min="0" value={formData.judges_needed} onChange={e => setFormData(prev => ({
-                ...prev,
-                judges_needed: e.target.value
-              }))} placeholder="Number of judges needed" disabled={isViewMode} />
-            </div>
-
-            {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-              <Label htmlFor="notes" className="mt-2 text-left md:text-right font-semibold">Notes</Label>
-              <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
-                ...prev,
-                notes: e.target.value
-              }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} className="resize-none" />
-            </div>
-
-            {/* Attachments */}
-            {eventId && (isEditMode || isViewMode) && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
-                <Label className="mt-2 text-left md:text-right font-semibold">Attachments</Label>
-                <AttachmentSection recordType="cp_comp_event" recordId={eventId} canEdit={!isViewMode} showContentOnly={true} />
-              </div>}
-
-
-          </form>
-        </CardContent>
+              {/* Attachments */}
+              {eventId && (isEditMode || isViewMode) && (
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start p-4 rounded-lg bg-secondary/10 border border-secondary/20 py-[8px]">
+                  <Label className="mt-2 text-left md:text-right font-semibold">Attachments</Label>
+                  <AttachmentSection
+                    recordType="cp_comp_event"
+                    recordId={eventId}
+                    canEdit={!isViewMode}
+                    showContentOnly={true}
+                  />
+                </div>
+              )}
+            </form>
+          </CardContent>
         </Card>
       </div>
 
@@ -1058,17 +1332,27 @@ export const CompetitionEventRecord: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isSaving} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {isSaving ? 'Deleting...' : 'Delete'}
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isSaving}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isSaving ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Unsaved Changes Dialog */}
-      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={() => {
-      setShowUnsavedDialog(false);
-      navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
-    }} onCancel={() => setShowUnsavedDialog(false)} />
-    </div>;
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={() => {
+          setShowUnsavedDialog(false);
+          navigate(`/app/competition-portal/competition-details/${competitionId}/events`);
+        }}
+        onCancel={() => setShowUnsavedDialog(false)}
+      />
+    </div>
+  );
 };
