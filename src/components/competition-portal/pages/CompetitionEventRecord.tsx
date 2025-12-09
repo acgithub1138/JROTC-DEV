@@ -852,12 +852,11 @@ export const CompetitionEventRecord: React.FC = () => {
                     title="Auto-calculated from score template × judges needed"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label
-                    htmlFor="weight"
-                    className="text-left md:text-right font-semibold"
-                    title="Weights reflect importance or difficulty of each event"
-                  >
+                <div
+                  title="Weights reflect importance or difficulty of each event"
+                  className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center"
+                >
+                  <Label htmlFor="weight" className="text-left md:text-right font-semibold">
                     Weight
                   </Label>
                   <Input
@@ -875,12 +874,10 @@ export const CompetitionEventRecord: React.FC = () => {
                     placeholder="Weight multiplier"
                     disabled={isViewMode}
                   />
+                </div>
+                <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                    <Label
-                      htmlFor="required"
-                      className="text-left md:text-right font-semibold"
-                      title="Event is required for Overall Placement"
-                    >
+                    <Label htmlFor="required" className="text-left md:text-right font-semibold">
                       Required
                     </Label>
                     <Checkbox
@@ -895,7 +892,11 @@ export const CompetitionEventRecord: React.FC = () => {
                       disabled={isViewMode}
                     />
                   </div>
+                  <Label htmlFor="required" className="text-sm text-muted-foreground w-full">
+                    Event is required for Overall Placement
+                  </Label>
                 </div>
+              </div>
 
               {/* Fee & Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
