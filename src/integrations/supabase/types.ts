@@ -850,7 +850,9 @@ export type Database = {
           lunch_end_time: string | null
           lunch_start_time: string | null
           max_participants: number | null
+          max_points: number | null
           notes: string | null
+          required: boolean | null
           school_id: string
           score_sheet: string | null
           sop: string | null
@@ -859,6 +861,7 @@ export type Database = {
           start_time: string | null
           updated_at: string
           updated_by: string | null
+          weight: number | null
         }
         Insert: {
           competition_id: string
@@ -874,7 +877,9 @@ export type Database = {
           lunch_end_time?: string | null
           lunch_start_time?: string | null
           max_participants?: number | null
+          max_points?: number | null
           notes?: string | null
+          required?: boolean | null
           school_id: string
           score_sheet?: string | null
           sop?: string | null
@@ -883,6 +888,7 @@ export type Database = {
           start_time?: string | null
           updated_at?: string
           updated_by?: string | null
+          weight?: number | null
         }
         Update: {
           competition_id?: string
@@ -898,7 +904,9 @@ export type Database = {
           lunch_end_time?: string | null
           lunch_start_time?: string | null
           max_participants?: number | null
+          max_points?: number | null
           notes?: string | null
+          required?: boolean | null
           school_id?: string
           score_sheet?: string | null
           sop?: string | null
@@ -907,6 +915,7 @@ export type Database = {
           start_time?: string | null
           updated_at?: string
           updated_by?: string | null
+          weight?: number | null
         }
         Relationships: [
           {
