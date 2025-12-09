@@ -66,6 +66,7 @@ interface CompetitionEvent {
   max_participants: number | null;
   interval: number | null;
   notes?: string | null;
+  required?: boolean | null;
   competition_event_types?: {
     name: string;
     description: string | null;
@@ -917,6 +918,12 @@ export const OpenCompetitionRecord: React.FC = () => {
                             <p className="text-sm text-muted-foreground">
                               <strong>Notes:</strong> {event.notes}
                             </p>
+                          </div>
+                        )}
+
+                        {event.required && (
+                          <div className="text-sm font-medium text-destructive">
+                            Required for Placement
                           </div>
                         )}
 
