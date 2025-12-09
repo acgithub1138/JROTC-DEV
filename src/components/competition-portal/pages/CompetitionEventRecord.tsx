@@ -121,7 +121,7 @@ export const CompetitionEventRecord: React.FC = () => {
     notes: "",
     score_sheet: "",
     max_points: "0",
-    weight: "1",
+    weight: "1.0",
     required: false,
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -335,7 +335,7 @@ export const CompetitionEventRecord: React.FC = () => {
       notes: event.notes || "",
       score_sheet: (event as any).score_sheet || "",
       max_points: (event as any).max_points?.toString() || "0",
-      weight: (event as any).weight?.toString() || "1",
+      weight: (event as any).weight ? parseFloat((event as any).weight).toFixed(1) : "1.0",
       required: (event as any).required || false,
     };
   }
@@ -864,15 +864,36 @@ export const CompetitionEventRecord: React.FC = () => {
                     id="weight"
                     type="number"
                     step="0.1"
-                    min="0"
+                    min="1.0"
+                    max="2.0"
                     value={formData.weight}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        weight: e.target.value,
-                      }))
-                    }
-                    placeholder="Weight multiplier"
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Allow empty or partial input while typing
+                      if (value === '' || value === '.' || value === '1.' || value === '2.') {
+                        setFormData((prev) => ({ ...prev, weight: value }));
+                        return;
+                      }
+                      const numValue = parseFloat(value);
+                      if (!isNaN(numValue)) {
+                        // Clamp value between 1.0 and 2.0
+                        const clampedValue = Math.min(2.0, Math.max(1.0, numValue));
+                        // Format to one decimal place
+                        setFormData((prev) => ({ ...prev, weight: clampedValue.toFixed(1) }));
+                      }
+                    }}
+                    onBlur={() => {
+                      // Ensure valid value on blur
+                      const numValue = parseFloat(formData.weight);
+                      if (isNaN(numValue) || numValue < 1.0) {
+                        setFormData((prev) => ({ ...prev, weight: "1.0" }));
+                      } else if (numValue > 2.0) {
+                        setFormData((prev) => ({ ...prev, weight: "2.0" }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, weight: numValue.toFixed(1) }));
+                      }
+                    }}
+                    placeholder="1.0 - 2.0"
                     disabled={isViewMode}
                   />
                 </div>
