@@ -875,7 +875,6 @@ export const CompetitionEventRecord: React.FC = () => {
                     placeholder="Weight multiplier"
                     disabled={isViewMode}
                   />
-                <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                     <Label
                       htmlFor="required"
