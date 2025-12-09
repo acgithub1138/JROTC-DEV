@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Trash2, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -53,6 +54,9 @@ interface FormData {
   judges_needed: string;
   notes: string;
   score_sheet: string;
+  max_points: string;
+  weight: string;
+  required: boolean;
 }
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
@@ -117,7 +121,10 @@ export const CompetitionEventRecord: React.FC = () => {
     interval: '',
     judges_needed: '',
     notes: '',
-    score_sheet: ''
+    score_sheet: '',
+    max_points: '0',
+    weight: '1',
+    required: false
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const {
@@ -232,6 +239,36 @@ export const CompetitionEventRecord: React.FC = () => {
       }
     }
   }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
+
+  // Recalculate max_points when judges_needed changes
+  useEffect(() => {
+    const recalculateMaxPoints = async () => {
+      if (!formData.score_sheet || !formData.judges_needed) return;
+      
+      const judgesNeeded = parseInt(formData.judges_needed);
+      if (isNaN(judgesNeeded) || judgesNeeded <= 0) return;
+      
+      const { data: template } = await supabase
+        .from('competition_templates')
+        .select('scores')
+        .eq('id', formData.score_sheet)
+        .single();
+      
+      if (template?.scores) {
+        const maxPointsFromTemplate = calculateTemplateMaxPoints(template.scores);
+        const totalMaxPoints = maxPointsFromTemplate * judgesNeeded;
+        
+        if (formData.max_points !== totalMaxPoints.toString()) {
+          setFormData(prev => ({
+            ...prev,
+            max_points: totalMaxPoints.toString()
+          }));
+        }
+      }
+    };
+    
+    recalculateMaxPoints();
+  }, [formData.judges_needed, formData.score_sheet]);
   function convertEventToFormData(event: CompEvent): FormData {
     // Convert UTC times to school timezone Date objects
     const startDate = event.start_time ? toZonedTime(new Date(event.start_time), timezone) : null;
@@ -264,9 +301,28 @@ export const CompetitionEventRecord: React.FC = () => {
       interval: (event as any).interval?.toString() || '',
       judges_needed: (event as any).judges_needed?.toString() || '',
       notes: event.notes || '',
-      score_sheet: (event as any).score_sheet || ''
+      score_sheet: (event as any).score_sheet || '',
+      max_points: (event as any).max_points?.toString() || '0',
+      weight: (event as any).weight?.toString() || '1',
+      required: (event as any).required || false
     };
   }
+
+  // Calculate max points from template scores (sum of all maxValue fields, excluding penalties)
+  function calculateTemplateMaxPoints(scores: any): number {
+    if (!scores?.criteria || !Array.isArray(scores.criteria)) return 0;
+    
+    return scores.criteria.reduce((total: number, field: any) => {
+      // Skip penalties and section headers
+      if (field.penalty || field.type === 'section_header') return total;
+      // Add maxValue for scoring fields
+      if (field.maxValue && typeof field.maxValue === 'number') {
+        return total + field.maxValue;
+      }
+      return total;
+    }, 0);
+  }
+
   const fetchEventData = async () => {
     if (!eventId || !competitionId) return;
     setIsLoading(true);
@@ -477,7 +533,10 @@ export const CompetitionEventRecord: React.FC = () => {
         interval: formData.interval ? parseInt(formData.interval) : null,
         judges_needed: formData.judges_needed ? parseInt(formData.judges_needed) : null,
         notes: formData.notes || null,
-        score_sheet: formData.score_sheet || null
+        score_sheet: formData.score_sheet || null,
+        max_points: formData.max_points ? parseFloat(formData.max_points) : 0,
+        weight: formData.weight ? parseFloat(formData.weight) : 1,
+        required: formData.required
       };
       if (isCreateMode) {
         const {
@@ -639,14 +698,19 @@ export const CompetitionEventRecord: React.FC = () => {
                     score_sheet: value
                   }));
 
-                  // Auto-fill judges_needed from template
+                  // Auto-fill judges_needed from template and calculate max_points
                   const {
                     data: template
-                  } = await supabase.from('competition_templates').select('judges').eq('id', value).single();
+                  } = await supabase.from('competition_templates').select('judges, scores').eq('id', value).single();
                   if (template?.judges) {
+                    // Calculate max points from template
+                    const maxPointsFromTemplate = calculateTemplateMaxPoints(template.scores);
+                    const totalMaxPoints = maxPointsFromTemplate * template.judges;
+                    
                     setFormData(prev => ({
                       ...prev,
-                      judges_needed: template.judges.toString()
+                      judges_needed: template.judges.toString(),
+                      max_points: totalMaxPoints.toString()
                     }));
                   }
                 }} disabled={isViewMode}>
@@ -659,6 +723,55 @@ export const CompetitionEventRecord: React.FC = () => {
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Max Points, Weight & Required */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="max_points" className="text-left md:text-right font-semibold">Max Points</Label>
+                <Input 
+                  id="max_points" 
+                  type="number" 
+                  value={formData.max_points} 
+                  readOnly 
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                  title="Auto-calculated from score template × judges needed"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="weight" className="text-left md:text-right font-semibold">Weight</Label>
+                <Input 
+                  id="weight" 
+                  type="number" 
+                  step="0.1"
+                  min="0"
+                  value={formData.weight} 
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    weight: e.target.value
+                  }))} 
+                  placeholder="Weight multiplier" 
+                  disabled={isViewMode} 
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="required" className="text-left md:text-right font-semibold">Required</Label>
+                <div className="flex items-center h-10">
+                  <Checkbox 
+                    id="required" 
+                    checked={formData.required}
+                    onCheckedChange={(checked) => setFormData(prev => ({
+                      ...prev,
+                      required: checked === true
+                    }))}
+                    disabled={isViewMode}
+                  />
+                  <Label htmlFor="required" className="ml-2 text-sm text-muted-foreground">
+                    Event is required for participation
+                  </Label>
+                </div>
               </div>
             </div>
 
