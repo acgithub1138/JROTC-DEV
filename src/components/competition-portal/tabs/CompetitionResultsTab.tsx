@@ -6,18 +6,21 @@ import { ScoreSheetHistoryModal } from "../components/ScoreSheetHistoryModal";
 import { OverallRankingsTab } from "./results/OverallRankingsTab";
 import { EventResultsTab } from "./results/EventResultsTab";
 import { AllResultsBySchoolTab } from "./results/AllResultsBySchoolTab";
+import {
+  determineEligibleSchools,
+  calculateNormalizedRankings,
+  calculateCategoryRankings,
+  type CompetitionEventRow,
+  type EventMetadata,
+  type EventTypeRow,
+} from "@/utils/competitionRankingCalculations";
 
 interface CompetitionResultsTabProps {
   competitionId: string;
 }
 
-interface CompetitionEventRow {
-  id: string;
-  event: string;
-  total_points: number | null;
-  score_sheet: any;
-  school_id: string;
-  created_at: string;
+// Extended type with additional fields for UI display
+interface CompetitionEventRowWithHistory extends CompetitionEventRow {
   has_history?: boolean;
 }
 
@@ -26,28 +29,9 @@ interface CPSchoolRow {
   school_name: string | null;
 }
 
-interface EventTypeRow {
-  id: string;
-  name: string;
-  category: string;
-}
-
-interface SchoolRanking {
-  schoolId: string;
-  schoolName: string;
-  totalPoints: number;
-  eventCount: number;
-}
-
-interface EventMetadata {
-  maxPoints: number;
-  weight: number;
-  required: boolean;
-}
-
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
   const { canView, canViewDetails } = useCompetitionResultsPermissions();
-  const [rows, setRows] = useState<CompetitionEventRow[]>([]);
+  const [rows, setRows] = useState<CompetitionEventRowWithHistory[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
   const [eventTypes, setEventTypes] = useState<EventTypeRow[]>([]);
   const [eventMetadata, setEventMetadata] = useState<Record<string, EventMetadata>>({});
@@ -102,7 +86,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       has_history: eventIdsWithHistory.has(event.id),
     }));
 
-    setRows(eventsWithHistory as CompetitionEventRow[]);
+    setRows(eventsWithHistory as CompetitionEventRowWithHistory[]);
 
     const schoolNameMap: Record<string, string> = {};
     (schoolsRes.data || []).forEach((s: CPSchoolRow) => {
@@ -148,137 +132,26 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return map;
   }, [eventTypes]);
 
-  // Determine which schools are eligible based on required events
+  // Determine which schools are eligible based on required events - using centralized utility
   const eligibleSchools = useMemo(() => {
-    // Get all required event IDs for this competition
-    const requiredEventIds = Object.entries(eventMetadata)
-      .filter(([_, meta]) => meta.required)
-      .map(([eventId]) => eventId);
-
-    // If no required events, all schools are eligible (return null to indicate no filtering)
-    if (requiredEventIds.length === 0) {
-      return null;
-    }
-
-    // Build map of which events each school participated in
-    const schoolEvents: Record<string, Set<string>> = {};
-    rows.forEach((r) => {
-      if (!schoolEvents[r.school_id]) {
-        schoolEvents[r.school_id] = new Set();
-      }
-      schoolEvents[r.school_id].add(r.event);
-    });
-
-    // Only include schools that have ALL required events
-    const eligibleSchoolIds = new Set<string>();
-    Object.entries(schoolEvents).forEach(([schoolId, events]) => {
-      const hasAllRequired = requiredEventIds.every((reqId) => events.has(reqId));
-      if (hasAllRequired) {
-        eligibleSchoolIds.add(schoolId);
-      }
-    });
-
-    return eligibleSchoolIds;
+    return determineEligibleSchools(rows, eventMetadata);
   }, [rows, eventMetadata]);
 
-  // Calculate normalized rankings for Overall Competition tab
-  const calculateNormalizedRankings = (): SchoolRanking[] => {
-    // Collect each school's event scores with metadata, aggregating by event
-    const schoolData: Record<string, {
-      schoolName: string;
-      events: Record<string, {
-        totalScore: number;
-        maxPoints: number;
-        weight: number;
-        judgeCount: number;
-      }>;
-    }> = {};
-
-    rows.forEach((r) => {
-      // Skip if school is not eligible (when required events exist)
-      if (eligibleSchools && !eligibleSchools.has(r.school_id)) return;
-
-      const meta = eventMetadata[r.event];
-      if (!meta || meta.maxPoints <= 0) return; // Skip events without valid metadata
-
-      const rawScore = typeof r.total_points === "number" ? r.total_points : Number(r.total_points) || 0;
-      const schoolName = schoolMap[r.school_id] || "Unknown School";
-
-      if (!schoolData[r.school_id]) {
-        schoolData[r.school_id] = { schoolName, events: {} };
-      }
-      
-      // Aggregate scores by event (sum all judge scores for this event)
-      if (!schoolData[r.school_id].events[r.event]) {
-        schoolData[r.school_id].events[r.event] = {
-          totalScore: 0,
-          maxPoints: meta.maxPoints,
-          weight: meta.weight,
-          judgeCount: 0,
-        };
-      }
-      schoolData[r.school_id].events[r.event].totalScore += rawScore;
-      schoolData[r.school_id].events[r.event].judgeCount += 1;
-    });
-
-    // Calculate normalized weighted scores
-    return Object.entries(schoolData)
-      .map(([schoolId, data]) => {
-        const eventsList = Object.values(data.events);
-        const totalWeight = eventsList.reduce((sum, e) => sum + e.weight, 0);
-        
-        let overallScore = 0;
-        eventsList.forEach((e) => {
-          // Use aggregated score divided by (maxPoints * judgeCount) for normalization
-          const normalized = e.totalScore / (e.maxPoints * e.judgeCount); // 0-1 scale
-          const wFraction = e.weight / totalWeight;    // relative weight
-          overallScore += normalized * wFraction;
-        });
-
-        return {
-          schoolId,
-          schoolName: data.schoolName,
-          totalPoints: overallScore * 100, // Convert to percentage (0-100)
-          eventCount: Object.keys(data.events).length, // Count unique events
-        };
-      })
-      .sort((a, b) => b.totalPoints - a.totalPoints);
-  };
-
-  // Calculate rankings by total points for category tabs (Armed/Unarmed)
-  const calculateRankings = (filterCategory: string): SchoolRanking[] => {
-    const schoolTotals: Record<string, { totalPoints: number; uniqueEvents: Set<string>; schoolName: string }> = {};
-
-    rows.forEach((r) => {
-      // Skip if school is not eligible (when required events exist)
-      if (eligibleSchools && !eligibleSchools.has(r.school_id)) return;
-
-      const category = eventCategoryMap[r.event] || "other";
-      if (category !== filterCategory) return;
-
-      const points = typeof r.total_points === "number" ? r.total_points : Number(r.total_points) || 0;
-      const schoolName = schoolMap[r.school_id] || "Unknown School";
-
-      if (!schoolTotals[r.school_id]) {
-        schoolTotals[r.school_id] = { totalPoints: 0, uniqueEvents: new Set(), schoolName };
-      }
-      schoolTotals[r.school_id].totalPoints += points;
-      schoolTotals[r.school_id].uniqueEvents.add(r.event); // Track unique events
-    });
-
-    return Object.entries(schoolTotals)
-      .map(([schoolId, data]) => ({
-        schoolId,
-        schoolName: data.schoolName,
-        totalPoints: data.totalPoints,
-        eventCount: data.uniqueEvents.size, // Count unique events
-      }))
-      .sort((a, b) => b.totalPoints - a.totalPoints);
-  };
-
-  const overallRankings = useMemo(() => calculateNormalizedRankings(), [rows, schoolMap, eventMetadata, eligibleSchools]);
-  const armedRankings = useMemo(() => calculateRankings("armed"), [rows, schoolMap, eventCategoryMap, eligibleSchools]);
-  const unarmedRankings = useMemo(() => calculateRankings("unarmed"), [rows, schoolMap, eventCategoryMap, eligibleSchools]);
+  // Calculate rankings using centralized utility functions
+  const overallRankings = useMemo(() => 
+    calculateNormalizedRankings(rows, schoolMap, eventMetadata, eligibleSchools), 
+    [rows, schoolMap, eventMetadata, eligibleSchools]
+  );
+  
+  const armedRankings = useMemo(() => 
+    calculateCategoryRankings(rows, schoolMap, eventCategoryMap, eligibleSchools, "armed"), 
+    [rows, schoolMap, eventCategoryMap, eligibleSchools]
+  );
+  
+  const unarmedRankings = useMemo(() => 
+    calculateCategoryRankings(rows, schoolMap, eventCategoryMap, eligibleSchools, "unarmed"), 
+    [rows, schoolMap, eventCategoryMap, eligibleSchools]
+  );
 
   // Group events for the Events tab
   const grouped = useMemo(() => {
