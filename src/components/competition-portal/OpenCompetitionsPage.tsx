@@ -527,19 +527,26 @@ export const OpenCompetitionsPage = () => {
                             </p>
                           </div>}
 
-                        {event.scoreSheetTemplate && (
-                          <div className="pt-3 border-t flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedScoreSheetTemplate(event.scoreSheetTemplate);
-                                setIsScoreCardModalOpen(true);
-                              }}
-                            >
-                              <FileText className="w-4 h-4 mr-2" />
-                              View Score Card
-                            </Button>
+                        {(event.scoreSheetTemplate || event.required) && (
+                          <div className="pt-3 border-t flex justify-between items-center">
+                            {event.required ? (
+                              <span className="text-sm font-medium text-destructive">Required for placement</span>
+                            ) : (
+                              <span></span>
+                            )}
+                            {event.scoreSheetTemplate && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedScoreSheetTemplate(event.scoreSheetTemplate);
+                                  setIsScoreCardModalOpen(true);
+                                }}
+                              >
+                                <FileText className="w-4 h-4 mr-2" />
+                                View Score Card
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
