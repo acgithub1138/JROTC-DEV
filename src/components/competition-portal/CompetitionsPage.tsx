@@ -77,7 +77,9 @@ const CompetitionsPage = () => {
     isLoading: loading,
     refetch: refetchCompetitions
   } = useHostedCompetitions();
-  const { copyCompetition } = useCompetitions();
+  const {
+    copyCompetition
+  } = useCompetitions();
   const {
     timezone
   } = useSchoolTimezone();
@@ -321,7 +323,7 @@ const CompetitionsPage = () => {
                       </div>
                       {competition.description && <CardDescription className="mt-2 line-clamp-2">{competition.description}</CardDescription>}
                     </CardHeader>
-                    <CardContent className="space-y-5">
+                    <CardContent className="space-y-2">
                       {/* Date Information */}
                       <div className="p-3 bg-muted/30 rounded-lg border border-border/30 py-[6px] px-[12px]">
                         <div className="flex items-center text-sm font-medium">
