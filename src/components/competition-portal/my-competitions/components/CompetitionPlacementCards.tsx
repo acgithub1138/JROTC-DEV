@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, Eye, X } from 'lucide-react';
-import { convertToUI } from '@/utils/timezoneUtils';
+import { Edit, Plus, Trash2, Trophy, Calendar, Eye, X } from 'lucide-react';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
-import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
 import { useCompetitionEventTypes } from '@/components/competition-management/hooks/useCompetitionEventTypes';
 import { useMyCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import type { Database } from '@/integrations/supabase/types';
@@ -91,10 +88,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
   const [newEventName, setNewEventName] = useState('');
   const [newPlacement, setNewPlacement] = useState<string>('');
 
-  // Hooks for fetching event options based on competition source
-  const { events: registeredEvents, isLoading: isLoadingRegistered } = useRegisteredEvents(
-    editingPlacement?.source === 'portal' ? editingPlacement.competitionId : undefined
-  );
+  // Hooks for fetching event options - only needed for internal competitions now
   const { eventTypes, isLoading: isLoadingEventTypes } = useCompetitionEventTypes();
   const { canUpdate, canViewDetails, canCreate, canDelete: canDeletePermission } = useMyCompetitionsPermissions();
 

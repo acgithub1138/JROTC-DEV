@@ -69,6 +69,11 @@ export const useCompetitions = () => {
 
   const updateCompetition = async (id: string, updates: CompetitionUpdate) => {
     try {
+      // Get current competition status before update
+      const currentCompetition = competitions.find(c => c.id === id);
+      const wasNotCompleted = currentCompetition?.status !== 'completed';
+      const willBeCompleted = updates.status === 'completed';
+
       const { data, error } = await supabase
         .from('cp_competitions')
         .update(updates)
@@ -78,10 +83,31 @@ export const useCompetitions = () => {
 
       if (error) throw error;
 
+      // If status changed to 'completed', trigger placement generation
+      if (wasNotCompleted && willBeCompleted) {
+        console.log('Competition status changed to completed, generating placements...');
+        try {
+          const { error: fnError } = await supabase.functions.invoke('generate-competition-placements', {
+            body: { competition_id: id }
+          });
+          
+          if (fnError) {
+            console.error('Error generating placements:', fnError);
+            toast.error('Competition updated but placement generation failed');
+          } else {
+            console.log('Placements generated successfully');
+            toast.success('Competition completed and placements generated');
+          }
+        } catch (placementError) {
+          console.error('Error calling placement generation:', placementError);
+        }
+      } else {
+        toast.success('Competition updated successfully');
+      }
+
       setCompetitions(prev => 
         prev.map(comp => comp.id === id ? data : comp)
       );
-      toast.success('Competition updated successfully');
       return data;
     } catch (error) {
       console.error('Error updating competition:', error);
