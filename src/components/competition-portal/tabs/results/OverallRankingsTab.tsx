@@ -73,6 +73,13 @@ export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings
             </table>
           </div>
         )}
+        {isNormalized && (
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground space-y-2">
+            <p className="font-medium">Event weights use a relative normalization model.</p>
+            <p>Each event has a weight between 1.0 and 2.0 representing its relative impact on overall scoring.</p>
+            <p>For each team, the weights of the events they participate in are normalized so the total influence equals 100%. This ensures fair comparison between teams, regardless of how many events they enter.</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
