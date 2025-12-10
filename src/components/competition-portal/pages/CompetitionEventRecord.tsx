@@ -761,7 +761,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
         <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow bg-background/80 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
+            <form id="event-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Event & Score Template */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
