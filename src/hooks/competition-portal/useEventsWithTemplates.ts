@@ -23,7 +23,17 @@ export const useEventsWithTemplates = (program?: string) => {
       const { data, error } = await query;
       
       if (error) throw error;
-      return (data || []) as EventWithTemplate[];
+      
+      // Deduplicate by ID since the view can return multiple rows per event
+      // when templates exist for multiple JROTC programs
+      const uniqueEvents = (data || []).reduce((acc: EventWithTemplate[], event: EventWithTemplate) => {
+        if (!acc.some(e => e.id === event.id)) {
+          acc.push(event);
+        }
+        return acc;
+      }, []);
+      
+      return uniqueEvents;
     }
   });
 
