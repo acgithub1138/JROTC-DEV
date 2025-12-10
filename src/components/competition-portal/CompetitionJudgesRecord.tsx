@@ -280,25 +280,7 @@ export const CompetitionJudgesRecord = () => {
         
         <CardContent className="pt-6 py-[8px]">
           <Form {...form}>
-            <form id="judge-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
-                <FormField control={form.control} name="judges" rules={{
-                  required: 'At least one judge is required',
-                  validate: value => value && value.length > 0 || 'At least one judge is required'
-                }} render={({
-                  field
-                }) => <FormItem>
-                      <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
-                    <FormControl>
-                      <MultiSelectJudges judges={availableJudges.map(j => ({
-                      id: j.id,
-                      name: j.name
-                    }))} selectedJudgeIds={field.value || []} onChange={field.onChange} disabled={isEditMode} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
-              </div>
-
+            <form id="judge-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
                   <FormField control={form.control} name="event" rules={{
@@ -437,6 +419,24 @@ export const CompetitionJudgesRecord = () => {
                         </FormItem>} />
                   </div>
                 </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/20 py-[8px]">
+                <FormField control={form.control} name="judges" rules={{
+                  required: 'At least one judge is required',
+                  validate: value => value && value.length > 0 || 'At least one judge is required'
+                }} render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel className="font-semibold">Judge{!isEditMode && 's'} *</FormLabel>
+                    <FormControl>
+                      <MultiSelectJudges judges={availableJudges.map(j => ({
+                      id: j.id,
+                      name: j.name
+                    }))} selectedJudgeIds={field.value || []} onChange={field.onChange} disabled={isEditMode} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>} />
               </div>
 
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 py-[8px]">
