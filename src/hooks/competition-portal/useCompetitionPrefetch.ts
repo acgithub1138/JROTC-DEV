@@ -120,6 +120,101 @@ export const useCompetitionPrefetch = () => {
   };
 
   /**
+   * Prefetch competition schedule data
+   */
+  const prefetchCompetitionSchedule = async (competitionId: string) => {
+    await queryClient.prefetchQuery({
+      queryKey: ['competition-schedule', competitionId],
+      queryFn: async () => {
+        const [eventsResult, schedulesResult, schoolsResult] = await Promise.all([
+          supabase
+            .from('cp_comp_events')
+            .select('id, location, event, start_time, end_time, interval, lunch_start_time, lunch_end_time')
+            .eq('competition_id', competitionId),
+          supabase
+            .from('cp_event_schedules')
+            .select('*')
+            .eq('competition_id', competitionId),
+          supabase
+            .from('cp_comp_schools')
+            .select('school_id, school_name, school_initials, color, schools(initials)')
+            .eq('competition_id', competitionId)
+        ]);
+
+        return { eventsResult, schedulesResult, schoolsResult };
+      },
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
+  /**
+   * Prefetch judge schedule data
+   */
+  const prefetchJudgeSchedule = async (competitionId: string) => {
+    await queryClient.prefetchQuery({
+      queryKey: ['judge-schedule', competitionId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('cp_comp_judges')
+          .select(`
+            id, judge, event, location, start_time, end_time,
+            cp_judges!inner(name),
+            cp_comp_events!inner(id, event, interval, competition_event_types!inner(name, initials))
+          `)
+          .eq('competition_id', competitionId);
+
+        if (error) throw error;
+        return data || [];
+      },
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
+  /**
+   * Prefetch resource schedule data
+   */
+  const prefetchResourceSchedule = async (competitionId: string) => {
+    await queryClient.prefetchQuery({
+      queryKey: ['resource-schedule', competitionId],
+      queryFn: async () => {
+        const [resourceResult, eventsResult] = await Promise.all([
+          supabase
+            .from('cp_comp_resources')
+            .select('id, resource, location, start_time, end_time, assignment_details, profiles!inner(first_name, last_name)')
+            .eq('competition_id', competitionId),
+          supabase
+            .from('cp_comp_events')
+            .select('start_time, end_time, interval')
+            .eq('competition_id', competitionId)
+        ]);
+
+        return { resourceResult, eventsResult };
+      },
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
+  /**
+   * Prefetch competition resources
+   */
+  const prefetchCompetitionResources = async (competitionId: string) => {
+    await queryClient.prefetchQuery({
+      queryKey: ['competition-resources', competitionId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('cp_comp_resources')
+          .select('*, cadet_profile:profiles!resource(first_name, last_name)')
+          .eq('competition_id', competitionId)
+          .order('start_time', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+      },
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
+  /**
    * Comprehensive prefetch for competition details page
    * Prefetches all data that will likely be needed
    */
@@ -131,6 +226,10 @@ export const useCompetitionPrefetch = () => {
       prefetchEventRegistrations(competitionId),
       prefetchRegisteredSchools(competitionId),
       prefetchJudges(),
+      prefetchCompetitionSchedule(competitionId),
+      prefetchJudgeSchedule(competitionId),
+      prefetchResourceSchedule(competitionId),
+      prefetchCompetitionResources(competitionId),
     ]);
   };
 
@@ -140,6 +239,10 @@ export const useCompetitionPrefetch = () => {
     prefetchEventRegistrations,
     prefetchJudges,
     prefetchRegisteredSchools,
+    prefetchCompetitionSchedule,
+    prefetchJudgeSchedule,
+    prefetchResourceSchedule,
+    prefetchCompetitionResources,
     prefetchCompetitionDetailsPage,
   };
 };
