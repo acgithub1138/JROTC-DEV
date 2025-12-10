@@ -75,14 +75,16 @@ export const OpenCompetitionsPage = () => {
     isLoading,
     error
   } = useQuery({
-    queryKey: ['open-competitions'],
+    queryKey: ['open-competitions', userProfile?.school_id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_competitions').select('*').eq('status', 'open').eq('is_public', true).order('start_date', {
-        ascending: true
-      });
+      let query = supabase.from('cp_competitions').select('*').eq('status', 'open').eq('is_public', true);
+      
+      // Filter out competitions from the logged-in user's school
+      if (userProfile?.school_id) {
+        query = query.neq('school_id', userProfile.school_id);
+      }
+      
+      const { data, error } = await query.order('start_date', { ascending: true });
       if (error) throw error;
       
       // Fetch registration counts for each competition
@@ -102,7 +104,8 @@ export const OpenCompetitionsPage = () => {
       );
       
       return competitionsWithCounts;
-    }
+    },
+    enabled: !!userProfile
   });
   const filteredCompetitions = React.useMemo(() => {
     const list = competitions || [];
