@@ -226,7 +226,8 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   <div className="flex flex-wrap gap-2">
                     {competitionPlacements.map((placement) => (
                        <div key={placement.id} className="relative flex flex-col items-center gap-2 p-3 bg-muted/50 rounded-lg min-w-0">
-                         {canUpdate && (
+                         {/* Only show delete button for internal competitions */}
+                         {canUpdate && competition.source_type === 'internal' && (
                            <Button
                              variant="ghost"
                              size="sm"
@@ -243,46 +244,36 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                        </div>
                      ))}
                   </div>
+                  {/* Show note for Portal competitions */}
+                  {competition.source_type === 'portal' && (
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                      Placements auto-generated from competition results
+                    </p>
+                  )}
                 </div>
               )}
 
-              {/* Add New Placement */}
-              {canUpdate && editingPlacement?.competitionId === competition.source_competition_id && 
+              {/* Add New Placement - Only for Internal competitions */}
+              {competition.source_type === 'internal' && canUpdate && editingPlacement?.competitionId === competition.source_competition_id && 
                editingPlacement?.source === competition.source_type ? (
                 <div className="space-y-2 p-3 border rounded-lg bg-background">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {/* Event Name Dropdown */}
+                    {/* Event Name Dropdown - Only show event types for internal */}
                     <Select value={newEventName} onValueChange={setNewEventName}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select event" />
                       </SelectTrigger>
                       <SelectContent>
-                        {editingPlacement.source === 'portal' ? (
-                          // Portal competitions: show registered events
-                          isLoadingRegistered ? (
-                            <SelectItem value="loading" disabled>Loading events...</SelectItem>
-                          ) : registeredEvents.length > 0 ? (
-                            registeredEvents.map((event) => (
-                              <SelectItem key={event.id} value={event.name}>
-                                {event.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-events" disabled>No registered events found</SelectItem>
-                          )
+                        {isLoadingEventTypes ? (
+                          <SelectItem value="loading-types" disabled>Loading event types...</SelectItem>
+                        ) : eventTypes.length > 0 ? (
+                          eventTypes.map((eventType) => (
+                            <SelectItem key={eventType.id} value={eventType.name}>
+                              {eventType.name}
+                            </SelectItem>
+                          ))
                         ) : (
-                          // Internal competitions: show competition event types
-                          isLoadingEventTypes ? (
-                            <SelectItem value="loading-types" disabled>Loading event types...</SelectItem>
-                          ) : eventTypes.length > 0 ? (
-                            eventTypes.map((eventType) => (
-                              <SelectItem key={eventType.id} value={eventType.name}>
-                                {eventType.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-types" disabled>No event types available</SelectItem>
-                          )
+                          <SelectItem value="no-types" disabled>No event types available</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
@@ -319,7 +310,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                     </Button>
                   </div>
                 </div>
-              ) : canUpdate ? (
+              ) : competition.source_type === 'internal' && canUpdate ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -331,6 +322,10 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Placement
                 </Button>
+              ) : competition.source_type === 'portal' && competitionPlacements.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">
+                  Placements will be auto-generated when competition is completed
+                </p>
               ) : null}
             </div>
           </div>
