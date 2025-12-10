@@ -12,10 +12,12 @@ interface SchoolRanking {
 interface OverallRankingsTabProps {
   rankings: SchoolRanking[];
   title: string;
+  isNormalized?: boolean;
 }
 
-export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings, title }) => {
+export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings, title, isNormalized = false }) => {
   const isMobile = useIsMobile();
+  const formatScore = (score: number) => isNormalized ? `${score.toFixed(1)}%` : score.toFixed(1);
   const top10 = rankings.slice(0, 10);
 
   if (rankings.length === 0) {
@@ -39,7 +41,7 @@ export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings
                       <span className="ml-2 font-medium">{school.schoolName}</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold">{school.totalPoints.toFixed(1)}</div>
+                      <div className="text-lg font-bold">{formatScore(school.totalPoints)}</div>
                       <div className="text-xs text-muted-foreground">{school.eventCount} events</div>
                     </div>
                   </div>
@@ -54,7 +56,7 @@ export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings
                 <tr className="text-left border-b">
                   <th className="px-3 py-2 w-20">Place</th>
                   <th className="px-3 py-2">School</th>
-                  <th className="px-3 py-2 w-32 text-right">Total Points</th>
+                  <th className="px-3 py-2 w-32 text-right">{isNormalized ? "Score" : "Total Points"}</th>
                   <th className="px-3 py-2 w-24 text-right">Events</th>
                 </tr>
               </thead>
@@ -63,7 +65,7 @@ export const OverallRankingsTab: React.FC<OverallRankingsTabProps> = ({ rankings
                   <tr key={school.schoolId} className="border-b last:border-0">
                     <td className="px-3 py-2 font-bold text-primary">{idx + 1}</td>
                     <td className="px-3 py-2 font-medium">{school.schoolName}</td>
-                    <td className="px-3 py-2 text-right font-bold">{school.totalPoints.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-right font-bold">{formatScore(school.totalPoints)}</td>
                     <td className="px-3 py-2 text-right text-muted-foreground">{school.eventCount}</td>
                   </tr>
                 ))}
