@@ -182,13 +182,14 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
 
   // Calculate normalized rankings for Overall Competition tab
   const calculateNormalizedRankings = (): SchoolRanking[] => {
-    // Collect each school's event scores with metadata
+    // Collect each school's event scores with metadata, aggregating by event
     const schoolData: Record<string, {
       schoolName: string;
-      events: Array<{
-        rawScore: number;
+      events: Record<string, {
+        totalScore: number;
         maxPoints: number;
         weight: number;
+        judgeCount: number;
       }>;
     }> = {};
 
@@ -203,23 +204,32 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       const schoolName = schoolMap[r.school_id] || "Unknown School";
 
       if (!schoolData[r.school_id]) {
-        schoolData[r.school_id] = { schoolName, events: [] };
+        schoolData[r.school_id] = { schoolName, events: {} };
       }
-      schoolData[r.school_id].events.push({
-        rawScore,
-        maxPoints: meta.maxPoints,
-        weight: meta.weight,
-      });
+      
+      // Aggregate scores by event (sum all judge scores for this event)
+      if (!schoolData[r.school_id].events[r.event]) {
+        schoolData[r.school_id].events[r.event] = {
+          totalScore: 0,
+          maxPoints: meta.maxPoints,
+          weight: meta.weight,
+          judgeCount: 0,
+        };
+      }
+      schoolData[r.school_id].events[r.event].totalScore += rawScore;
+      schoolData[r.school_id].events[r.event].judgeCount += 1;
     });
 
     // Calculate normalized weighted scores
     return Object.entries(schoolData)
       .map(([schoolId, data]) => {
-        const totalWeight = data.events.reduce((sum, e) => sum + e.weight, 0);
+        const eventsList = Object.values(data.events);
+        const totalWeight = eventsList.reduce((sum, e) => sum + e.weight, 0);
         
         let overallScore = 0;
-        data.events.forEach((e) => {
-          const normalized = e.rawScore / e.maxPoints; // 0-1 scale
+        eventsList.forEach((e) => {
+          // Use aggregated score divided by (maxPoints * judgeCount) for normalization
+          const normalized = e.totalScore / (e.maxPoints * e.judgeCount); // 0-1 scale
           const wFraction = e.weight / totalWeight;    // relative weight
           overallScore += normalized * wFraction;
         });
@@ -228,7 +238,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           schoolId,
           schoolName: data.schoolName,
           totalPoints: overallScore * 100, // Convert to percentage (0-100)
-          eventCount: data.events.length,
+          eventCount: Object.keys(data.events).length, // Count unique events
         };
       })
       .sort((a, b) => b.totalPoints - a.totalPoints);
@@ -236,7 +246,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
 
   // Calculate rankings by total points for category tabs (Armed/Unarmed)
   const calculateRankings = (filterCategory: string): SchoolRanking[] => {
-    const schoolTotals: Record<string, { totalPoints: number; eventCount: number; schoolName: string }> = {};
+    const schoolTotals: Record<string, { totalPoints: number; uniqueEvents: Set<string>; schoolName: string }> = {};
 
     rows.forEach((r) => {
       // Skip if school is not eligible (when required events exist)
@@ -249,10 +259,10 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       const schoolName = schoolMap[r.school_id] || "Unknown School";
 
       if (!schoolTotals[r.school_id]) {
-        schoolTotals[r.school_id] = { totalPoints: 0, eventCount: 0, schoolName };
+        schoolTotals[r.school_id] = { totalPoints: 0, uniqueEvents: new Set(), schoolName };
       }
       schoolTotals[r.school_id].totalPoints += points;
-      schoolTotals[r.school_id].eventCount += 1;
+      schoolTotals[r.school_id].uniqueEvents.add(r.event); // Track unique events
     });
 
     return Object.entries(schoolTotals)
@@ -260,7 +270,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
         schoolId,
         schoolName: data.schoolName,
         totalPoints: data.totalPoints,
-        eventCount: data.eventCount,
+        eventCount: data.uniqueEvents.size, // Count unique events
       }))
       .sort((a, b) => b.totalPoints - a.totalPoints);
   };
