@@ -41,6 +41,7 @@ interface SchoolRanking {
 interface EventMetadata {
   maxPoints: number;
   weight: number;
+  required: boolean;
 }
 
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
@@ -80,7 +81,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       supabase.from("cp_comp_schools").select("school_id, school_name").eq("competition_id", competitionId),
       supabase.from("competition_event_types").select("id, name, category"),
       supabase.from("competition_events_history").select("competition_event_id"),
-      supabase.from("cp_comp_events").select("event, max_points, weight").eq("competition_id", competitionId),
+      supabase.from("cp_comp_events").select("event, max_points, weight, required").eq("competition_id", competitionId),
     ]);
 
     if (eventsRes.error || schoolsRes.error || eventTypesRes.error) {
@@ -116,6 +117,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
         metadataMap[e.event] = {
           maxPoints: e.max_points || 0,
           weight: e.weight || 1.0,
+          required: e.required || false,
         };
       }
     });
@@ -145,6 +147,39 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return map;
   }, [eventTypes]);
 
+  // Determine which schools are eligible based on required events
+  const eligibleSchools = useMemo(() => {
+    // Get all required event IDs for this competition
+    const requiredEventIds = Object.entries(eventMetadata)
+      .filter(([_, meta]) => meta.required)
+      .map(([eventId]) => eventId);
+
+    // If no required events, all schools are eligible (return null to indicate no filtering)
+    if (requiredEventIds.length === 0) {
+      return null;
+    }
+
+    // Build map of which events each school participated in
+    const schoolEvents: Record<string, Set<string>> = {};
+    rows.forEach((r) => {
+      if (!schoolEvents[r.school_id]) {
+        schoolEvents[r.school_id] = new Set();
+      }
+      schoolEvents[r.school_id].add(r.event);
+    });
+
+    // Only include schools that have ALL required events
+    const eligibleSchoolIds = new Set<string>();
+    Object.entries(schoolEvents).forEach(([schoolId, events]) => {
+      const hasAllRequired = requiredEventIds.every((reqId) => events.has(reqId));
+      if (hasAllRequired) {
+        eligibleSchoolIds.add(schoolId);
+      }
+    });
+
+    return eligibleSchoolIds;
+  }, [rows, eventMetadata]);
+
   // Calculate normalized rankings for Overall Competition tab
   const calculateNormalizedRankings = (): SchoolRanking[] => {
     // Collect each school's event scores with metadata
@@ -158,6 +193,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     }> = {};
 
     rows.forEach((r) => {
+      // Skip if school is not eligible (when required events exist)
+      if (eligibleSchools && !eligibleSchools.has(r.school_id)) return;
+
       const meta = eventMetadata[r.event];
       if (!meta || meta.maxPoints <= 0) return; // Skip events without valid metadata
 
@@ -201,6 +239,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     const schoolTotals: Record<string, { totalPoints: number; eventCount: number; schoolName: string }> = {};
 
     rows.forEach((r) => {
+      // Skip if school is not eligible (when required events exist)
+      if (eligibleSchools && !eligibleSchools.has(r.school_id)) return;
+
       const category = eventCategoryMap[r.event] || "other";
       if (category !== filterCategory) return;
 
@@ -224,9 +265,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       .sort((a, b) => b.totalPoints - a.totalPoints);
   };
 
-  const overallRankings = useMemo(() => calculateNormalizedRankings(), [rows, schoolMap, eventMetadata]);
-  const armedRankings = useMemo(() => calculateRankings("armed"), [rows, schoolMap, eventCategoryMap]);
-  const unarmedRankings = useMemo(() => calculateRankings("unarmed"), [rows, schoolMap, eventCategoryMap]);
+  const overallRankings = useMemo(() => calculateNormalizedRankings(), [rows, schoolMap, eventMetadata, eligibleSchools]);
+  const armedRankings = useMemo(() => calculateRankings("armed"), [rows, schoolMap, eventCategoryMap, eligibleSchools]);
+  const unarmedRankings = useMemo(() => calculateRankings("unarmed"), [rows, schoolMap, eventCategoryMap, eligibleSchools]);
 
   // Group events for the Events tab
   const grouped = useMemo(() => {
@@ -265,6 +306,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     }
 
     (rows || []).forEach((r) => {
+      // Skip if school is not eligible (when required events exist)
+      if (eligibleSchools && !eligibleSchools.has(r.school_id)) return;
+
       const eventId = r.event || "Unknown";
       const eventName = eventMap[eventId] || "Unknown Event";
 
@@ -309,7 +353,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     });
 
     return result;
-  }, [rows, schoolMap, eventMap]);
+  }, [rows, schoolMap, eventMap, eligibleSchools]);
 
   const openHistoryModal = (schoolAgg: any, eventName: string, eventId: string) => {
     setHistoryModal({
