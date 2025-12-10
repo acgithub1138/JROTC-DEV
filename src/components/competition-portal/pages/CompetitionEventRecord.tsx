@@ -870,34 +870,6 @@ export const CompetitionEventRecord: React.FC = () => {
                     readOnly
                     disabled
                     className="bg-muted cursor-not-allowed"
-                    onChange={(e) => {
-                      let value = e.target.value;
-                      // Allow empty or partial input while typing
-                      if (value === "" || value === "." || value === "1." || value === "2.") {
-                        setFormData((prev) => ({ ...prev, weight: value }));
-                        return;
-                      }
-                      const numValue = parseFloat(value);
-                      if (!isNaN(numValue)) {
-                        // Clamp value between 1.0 and 2.0
-                        const clampedValue = Math.min(2.0, Math.max(1.0, numValue));
-                        // Format to one decimal place
-                        setFormData((prev) => ({ ...prev, weight: clampedValue.toFixed(1) }));
-                      }
-                    }}
-                    onBlur={() => {
-                      // Ensure valid value on blur
-                      const numValue = parseFloat(formData.weight);
-                      if (isNaN(numValue) || numValue < 1.0) {
-                        setFormData((prev) => ({ ...prev, weight: "1.0" }));
-                      } else if (numValue > 2.0) {
-                        setFormData((prev) => ({ ...prev, weight: "2.0" }));
-                      } else {
-                        setFormData((prev) => ({ ...prev, weight: numValue.toFixed(1) }));
-                      }
-                    }}
-                    placeholder="1.0 - 2.0"
-                    disabled={isViewMode}
                   />
                 </div>
                 <div
