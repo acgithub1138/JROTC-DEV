@@ -34,6 +34,7 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
   const [newEventTypeInitials, setNewEventTypeInitials] = useState('');
+  const [newEventTypeWeight, setNewEventTypeWeight] = useState('1.0');
 
   // Only show for admin users since event types are global
   if (userProfile?.role !== 'admin') {
@@ -49,12 +50,14 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
   const handleOpenCreateDialog = () => {
     setNewEventTypeName('');
     setNewEventTypeInitials('');
+    setNewEventTypeWeight('1.0');
     setIsDialogOpen(true);
   };
   const handleCloseCreateDialog = () => {
     setIsDialogOpen(false);
     setNewEventTypeName('');
     setNewEventTypeInitials('');
+    setNewEventTypeWeight('1.0');
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +71,8 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
     }
     setIsSubmitting(true);
     try {
-      await addEventType(newEventTypeName.trim(), newEventTypeInitials.trim() || undefined);
+      const weightValue = parseFloat(newEventTypeWeight);
+      await addEventType(newEventTypeName.trim(), newEventTypeInitials.trim() || undefined, weightValue);
       handleCloseCreateDialog();
     } catch (error) {
       console.error('Error creating event type:', error);
@@ -108,6 +112,7 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Initials</TableHead>
+                  <TableHead>Weight</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -116,6 +121,7 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
                 {[...eventTypes].sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <TableRow key={eventType.id}>
                     <TableCell className="font-medium py-[8px]">{eventType.name}</TableCell>
                     <TableCell className="py-[8px]">{eventType.initials || '-'}</TableCell>
+                    <TableCell className="py-[8px]">{eventType.weight?.toFixed(1) || '1.0'}</TableCell>
                     <TableCell>
                       {eventType.is_default && <Badge variant="secondary" className="flex items-center gap-1 w-fit">
                           <Globe className="w-3 h-3" />
@@ -153,6 +159,40 @@ const CompetitionEventTypesManagement: React.FC<CompetitionEventTypesManagementP
               <div className="grid gap-2">
                 <Label htmlFor="initials">Initials (Optional)</Label>
                 <Input id="initials" value={newEventTypeInitials} onChange={e => setNewEventTypeInitials(e.target.value)} placeholder="e.g., ASE, UDE" maxLength={10} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="weight">Weight (1.0 - 2.0)</Label>
+                <Input 
+                  id="weight" 
+                  type="number"
+                  step="0.1"
+                  min="1.0"
+                  max="2.0"
+                  value={newEventTypeWeight} 
+                  onChange={e => {
+                    let value = e.target.value;
+                    if (value === '' || value === '.' || value === '1.' || value === '2.') {
+                      setNewEventTypeWeight(value);
+                      return;
+                    }
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue)) {
+                      const clampedValue = Math.min(2.0, Math.max(1.0, numValue));
+                      setNewEventTypeWeight(clampedValue.toFixed(1));
+                    }
+                  }}
+                  onBlur={() => {
+                    const numValue = parseFloat(newEventTypeWeight);
+                    if (isNaN(numValue) || numValue < 1.0) {
+                      setNewEventTypeWeight("1.0");
+                    } else if (numValue > 2.0) {
+                      setNewEventTypeWeight("2.0");
+                    } else {
+                      setNewEventTypeWeight(numValue.toFixed(1));
+                    }
+                  }}
+                  placeholder="1.0 - 2.0" 
+                />
               </div>
             </div>
             <DialogFooter>

@@ -249,6 +249,7 @@ export type Database = {
           name: string
           sort_order: number
           updated_at: string
+          weight: number | null
         }
         Insert: {
           category?: string
@@ -262,6 +263,7 @@ export type Database = {
           name: string
           sort_order?: number
           updated_at?: string
+          weight?: number | null
         }
         Update: {
           category?: string
@@ -275,6 +277,7 @@ export type Database = {
           name?: string
           sort_order?: number
           updated_at?: string
+          weight?: number | null
         }
         Relationships: [
           {

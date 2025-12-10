@@ -7,6 +7,7 @@ export interface CompetitionEventType {
   id: string;
   name: string;
   initials?: string;
+  weight?: number;
   is_active: boolean;
   is_default: boolean;
   sort_order: number;
@@ -40,7 +41,7 @@ export const useCompetitionEventTypes = () => {
   });
 
   const addEventTypeMutation = useMutation({
-    mutationFn: async ({ name, initials }: { name: string; initials?: string }) => {
+    mutationFn: async ({ name, initials, weight }: { name: string; initials?: string; weight?: number }) => {
       if (!user) throw new Error('User not authenticated');
 
       // Check if event type already exists
@@ -69,6 +70,7 @@ export const useCompetitionEventTypes = () => {
         .insert({
           name,
           initials,
+          weight,
           sort_order: newSortOrder,
           created_by: user.id,
         })
@@ -94,8 +96,8 @@ export const useCompetitionEventTypes = () => {
     },
   });
 
-  const addEventType = (name: string, initials?: string) => {
-    return addEventTypeMutation.mutateAsync({ name, initials });
+  const addEventType = (name: string, initials?: string, weight?: number) => {
+    return addEventTypeMutation.mutateAsync({ name, initials, weight });
   };
 
   return {
