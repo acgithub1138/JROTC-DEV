@@ -5,6 +5,7 @@ import { useCompetitionResultsPermissions } from "@/hooks/useModuleSpecificPermi
 import { ScoreSheetHistoryModal } from "../components/ScoreSheetHistoryModal";
 import { OverallRankingsTab } from "./results/OverallRankingsTab";
 import { EventResultsTab } from "./results/EventResultsTab";
+import { AllResultsBySchoolTab } from "./results/AllResultsBySchoolTab";
 
 interface CompetitionResultsTabProps {
   competitionId: string;
@@ -387,11 +388,12 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="competition">Competition</TabsTrigger>
           <TabsTrigger value="armed">Armed</TabsTrigger>
           <TabsTrigger value="unarmed">Unarmed</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>
 
         <TabsContent value="competition">
@@ -413,6 +415,10 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
             canViewDetails={canViewDetails}
             onOpenHistory={openHistoryModal}
           />
+        </TabsContent>
+
+        <TabsContent value="all">
+          <AllResultsBySchoolTab grouped={grouped} schoolMap={schoolMap} />
         </TabsContent>
       </Tabs>
 
