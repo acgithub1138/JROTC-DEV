@@ -867,10 +867,13 @@ export const CompetitionEventRecord: React.FC = () => {
                     min="1.0"
                     max="2.0"
                     value={formData.weight}
+                    readOnly
+                    disabled
+                    className="bg-muted cursor-not-allowed"
                     onChange={(e) => {
                       let value = e.target.value;
                       // Allow empty or partial input while typing
-                      if (value === '' || value === '.' || value === '1.' || value === '2.') {
+                      if (value === "" || value === "." || value === "1." || value === "2.") {
                         setFormData((prev) => ({ ...prev, weight: value }));
                         return;
                       }
