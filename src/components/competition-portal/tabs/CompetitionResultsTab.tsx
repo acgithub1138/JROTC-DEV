@@ -38,11 +38,17 @@ interface SchoolRanking {
   eventCount: number;
 }
 
+interface EventMetadata {
+  maxPoints: number;
+  weight: number;
+}
+
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
   const { canView, canViewDetails } = useCompetitionResultsPermissions();
   const [rows, setRows] = useState<CompetitionEventRow[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
   const [eventTypes, setEventTypes] = useState<EventTypeRow[]>([]);
+  const [eventMetadata, setEventMetadata] = useState<Record<string, EventMetadata>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("competition");
@@ -65,7 +71,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-    const [eventsRes, schoolsRes, eventTypesRes, historyRes] = await Promise.all([
+    const [eventsRes, schoolsRes, eventTypesRes, historyRes, compEventsRes] = await Promise.all([
       supabase
         .from("competition_events")
         .select("id, event, total_points, score_sheet, school_id, created_at")
@@ -74,6 +80,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       supabase.from("cp_comp_schools").select("school_id, school_name").eq("competition_id", competitionId),
       supabase.from("competition_event_types").select("id, name, category"),
       supabase.from("competition_events_history").select("competition_event_id"),
+      supabase.from("cp_comp_events").select("event, max_points, weight").eq("competition_id", competitionId),
     ]);
 
     if (eventsRes.error || schoolsRes.error || eventTypesRes.error) {
@@ -101,6 +108,19 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     });
     setSchoolMap(schoolNameMap);
     setEventTypes(eventTypesRes.data || []);
+
+    // Build event metadata map for normalized scoring
+    const metadataMap: Record<string, EventMetadata> = {};
+    (compEventsRes.data || []).forEach((e) => {
+      if (e.event) {
+        metadataMap[e.event] = {
+          maxPoints: e.max_points || 0,
+          weight: e.weight || 1.0,
+        };
+      }
+    });
+    setEventMetadata(metadataMap);
+
     setIsLoading(false);
   };
 
@@ -125,15 +145,64 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return map;
   }, [eventTypes]);
 
-  // Calculate overall rankings by category
-  const calculateRankings = (filterCategory?: string): SchoolRanking[] => {
+  // Calculate normalized rankings for Overall Competition tab
+  const calculateNormalizedRankings = (): SchoolRanking[] => {
+    // Collect each school's event scores with metadata
+    const schoolData: Record<string, {
+      schoolName: string;
+      events: Array<{
+        rawScore: number;
+        maxPoints: number;
+        weight: number;
+      }>;
+    }> = {};
+
+    rows.forEach((r) => {
+      const meta = eventMetadata[r.event];
+      if (!meta || meta.maxPoints <= 0) return; // Skip events without valid metadata
+
+      const rawScore = typeof r.total_points === "number" ? r.total_points : Number(r.total_points) || 0;
+      const schoolName = schoolMap[r.school_id] || "Unknown School";
+
+      if (!schoolData[r.school_id]) {
+        schoolData[r.school_id] = { schoolName, events: [] };
+      }
+      schoolData[r.school_id].events.push({
+        rawScore,
+        maxPoints: meta.maxPoints,
+        weight: meta.weight,
+      });
+    });
+
+    // Calculate normalized weighted scores
+    return Object.entries(schoolData)
+      .map(([schoolId, data]) => {
+        const totalWeight = data.events.reduce((sum, e) => sum + e.weight, 0);
+        
+        let overallScore = 0;
+        data.events.forEach((e) => {
+          const normalized = e.rawScore / e.maxPoints; // 0-1 scale
+          const wFraction = e.weight / totalWeight;    // relative weight
+          overallScore += normalized * wFraction;
+        });
+
+        return {
+          schoolId,
+          schoolName: data.schoolName,
+          totalPoints: overallScore * 100, // Convert to percentage (0-100)
+          eventCount: data.events.length,
+        };
+      })
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+  };
+
+  // Calculate rankings by total points for category tabs (Armed/Unarmed)
+  const calculateRankings = (filterCategory: string): SchoolRanking[] => {
     const schoolTotals: Record<string, { totalPoints: number; eventCount: number; schoolName: string }> = {};
 
     rows.forEach((r) => {
       const category = eventCategoryMap[r.event] || "other";
-      
-      // Filter by category if specified
-      if (filterCategory && category !== filterCategory) return;
+      if (category !== filterCategory) return;
 
       const points = typeof r.total_points === "number" ? r.total_points : Number(r.total_points) || 0;
       const schoolName = schoolMap[r.school_id] || "Unknown School";
@@ -155,7 +224,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       .sort((a, b) => b.totalPoints - a.totalPoints);
   };
 
-  const overallRankings = useMemo(() => calculateRankings(), [rows, schoolMap, eventCategoryMap]);
+  const overallRankings = useMemo(() => calculateNormalizedRankings(), [rows, schoolMap, eventMetadata]);
   const armedRankings = useMemo(() => calculateRankings("armed"), [rows, schoolMap, eventCategoryMap]);
   const unarmedRankings = useMemo(() => calculateRankings("unarmed"), [rows, schoolMap, eventCategoryMap]);
 
@@ -272,7 +341,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
         </TabsList>
 
         <TabsContent value="competition">
-          <OverallRankingsTab rankings={overallRankings} title="Overall Competition" />
+          <OverallRankingsTab rankings={overallRankings} title="Overall Competition" isNormalized />
         </TabsContent>
 
         <TabsContent value="armed">
