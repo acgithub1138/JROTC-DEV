@@ -1,42 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+const fetchResourceLocations = async (schoolId: string): Promise<string[]> => {
+  const { data, error } = await supabase
+    .from('cp_resource_locations')
+    .select('location')
+    .eq('school_id', schoolId)
+    .order('location', { ascending: true });
+
+  if (error) throw error;
+
+  return data.map(item => item.location);
+};
+
 export const useResourceLocations = (competitionId?: string) => {
   const { userProfile } = useAuth();
-  const [locations, setLocations] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const schoolId = userProfile?.school_id;
 
-  useEffect(() => {
-    if (!userProfile?.school_id) return;
-    fetchLocations();
-  }, [userProfile?.school_id, competitionId]);
+  const { data: locations = [], isLoading, error } = useQuery({
+    queryKey: ['resource-locations', schoolId],
+    queryFn: () => fetchResourceLocations(schoolId!),
+    enabled: !!schoolId,
+    staleTime: 5 * 60 * 1000, // 5 minutes (semi-static data)
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
-  const fetchLocations = async () => {
-    if (!userProfile?.school_id) return;
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('cp_resource_locations')
-        .select('location')
-        .eq('school_id', userProfile.school_id)
-        .order('location', { ascending: true });
-
-      if (error) throw error;
-
-      const uniqueLocations = data.map(item => item.location);
-      setLocations(uniqueLocations);
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey: ['resource-locations', schoolId] });
   };
 
   return {
     locations,
     isLoading,
-    refetch: fetchLocations
+    error,
+    refetch
   };
 };

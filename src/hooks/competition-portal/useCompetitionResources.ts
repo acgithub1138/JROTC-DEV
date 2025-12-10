@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -15,42 +15,41 @@ type CompResourceWithProfile = CompResource & {
   };
 };
 
+const fetchCompetitionResources = async (competitionId: string): Promise<CompResourceWithProfile[]> => {
+  const { data, error } = await supabase
+    .from('cp_comp_resources')
+    .select(`
+      *,
+      cadet_profile:profiles!resource(
+        first_name,
+        last_name
+      )
+    `)
+    .eq('competition_id', competitionId)
+    .order('start_time', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
+
 export const useCompetitionResources = (competitionId?: string) => {
   const { userProfile } = useAuth();
-  const [resources, setResources] = useState<CompResourceWithProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchResources = async () => {
-    if (!competitionId) return;
+  const queryKey = ['competition-resources', competitionId];
 
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('cp_comp_resources')
-        .select(`
-          *,
-          cadet_profile:profiles!resource(
-            first_name,
-            last_name
-          )
-        `)
-        .eq('competition_id', competitionId)
-        .order('start_time', { ascending: true });
+  const { data: resources = [], isLoading, error } = useQuery({
+    queryKey,
+    queryFn: () => fetchCompetitionResources(competitionId!),
+    enabled: !!competitionId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-      if (error) throw error;
-      setResources(data || []);
-    } catch (error) {
-      console.error('Error fetching competition resources:', error);
-      toast.error('Failed to load resources');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const createMutation = useMutation({
+    mutationFn: async (resourceData: CompResourceInsert) => {
+      if (!userProfile?.school_id) throw new Error('No school ID');
 
-  const createResource = async (resourceData: CompResourceInsert) => {
-    if (!userProfile?.school_id) return;
-
-    try {
       const { data, error } = await supabase
         .from('cp_comp_resources')
         .insert({
@@ -62,21 +61,21 @@ export const useCompetitionResources = (competitionId?: string) => {
         .single();
 
       if (error) throw error;
-
-      setResources(prev => [...prev, data].sort((a, b) => 
-        new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-      ));
-      toast.success('Resource added successfully');
       return data;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['resource-schedule', competitionId] });
+      toast.success('Resource added successfully');
+    },
+    onError: (error) => {
       console.error('Error creating resource:', error);
       toast.error('Failed to add resource');
-      throw error;
     }
-  };
+  });
 
-  const updateResource = async (id: string, updates: CompResourceUpdate) => {
-    try {
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: CompResourceUpdate }) => {
       const { data, error } = await supabase
         .from('cp_comp_resources')
         .update({
@@ -88,50 +87,62 @@ export const useCompetitionResources = (competitionId?: string) => {
         .single();
 
       if (error) throw error;
-
-      setResources(prev => 
-        prev.map(resource => resource.id === id ? data : resource)
-          .sort((a, b) => 
-            new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-          )
-      );
-      toast.success('Resource updated successfully');
       return data;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['resource-schedule', competitionId] });
+      toast.success('Resource updated successfully');
+    },
+    onError: (error) => {
       console.error('Error updating resource:', error);
       toast.error('Failed to update resource');
-      throw error;
     }
-  };
+  });
 
-  const deleteResource = async (id: string) => {
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('cp_comp_resources')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-
-      setResources(prev => prev.filter(resource => resource.id !== id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['resource-schedule', competitionId] });
       toast.success('Resource removed successfully');
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting resource:', error);
       toast.error('Failed to remove resource');
-      throw error;
     }
+  });
+
+  const createResource = async (resourceData: CompResourceInsert) => {
+    return createMutation.mutateAsync(resourceData);
   };
 
-  useEffect(() => {
-    fetchResources();
-  }, [competitionId]);
+  const updateResource = async (id: string, updates: CompResourceUpdate) => {
+    return updateMutation.mutateAsync({ id, updates });
+  };
+
+  const deleteResource = async (id: string) => {
+    return deleteMutation.mutateAsync(id);
+  };
+
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey });
+  };
 
   return {
     resources,
     isLoading,
+    error,
     createResource,
     updateResource,
     deleteResource,
-    refetch: fetchResources
+    refetch
   };
 };

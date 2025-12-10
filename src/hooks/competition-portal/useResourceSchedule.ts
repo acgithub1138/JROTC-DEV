@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 export interface ResourceAssignment {
   id: string;
@@ -18,130 +17,126 @@ export interface ResourceTimeline {
   getResourcesForSlot: (location: string, timeSlot: Date) => Array<{ name: string; details?: string }>;
 }
 
-export const useResourceSchedule = (competitionId?: string) => {
-  const [resourceAssignments, setResourceAssignments] = useState<ResourceAssignment[]>([]);
-  const [timeline, setTimeline] = useState<ResourceTimeline | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface ResourceScheduleData {
+  resourceAssignments: ResourceAssignment[];
+  timeline: ResourceTimeline | null;
+}
 
-  const fetchResourceSchedule = useCallback(async () => {
-    if (!competitionId) return;
+const fetchResourceScheduleData = async (competitionId: string): Promise<ResourceScheduleData> => {
+  // Fetch resource assignments and competition events in parallel
+  const [resourceResult, eventsResult] = await Promise.all([
+    supabase
+      .from('cp_comp_resources')
+      .select(`
+        id,
+        resource,
+        location,
+        start_time,
+        end_time,
+        assignment_details,
+        profiles!inner(first_name, last_name)
+      `)
+      .eq('competition_id', competitionId),
+    supabase
+      .from('cp_comp_events')
+      .select('start_time, end_time, interval')
+      .eq('competition_id', competitionId)
+  ]);
 
-    try {
-      setIsLoading(true);
+  if (resourceResult.error) throw resourceResult.error;
+  if (eventsResult.error) throw eventsResult.error;
 
-      // Fetch resource assignments and competition events in parallel
-      const [resourceResult, eventsResult] = await Promise.all([
-        supabase
-          .from('cp_comp_resources')
-          .select(`
-            id,
-            resource,
-            location,
-            start_time,
-            end_time,
-            assignment_details,
-            profiles!inner(first_name, last_name)
-          `)
-          .eq('competition_id', competitionId),
-        supabase
-          .from('cp_comp_events')
-          .select('start_time, end_time, interval')
-          .eq('competition_id', competitionId)
-      ]);
+  const resourceData = resourceResult.data;
+  const eventsData = eventsResult.data;
 
-      if (resourceResult.error) throw resourceResult.error;
-      if (eventsResult.error) throw eventsResult.error;
+  // Process resource assignments
+  const assignments: ResourceAssignment[] = resourceData?.map(r => ({
+    id: r.id,
+    resource_id: r.resource,
+    resource_name: `${(r.profiles as any)?.last_name || ''}, ${(r.profiles as any)?.first_name || ''}`.trim() || 'Unknown Resource',
+    location: r.location || 'Unknown Location',
+    start_time: r.start_time || '',
+    end_time: r.end_time || '',
+    assignment_details: r.assignment_details
+  })) || [];
 
-      const resourceData = resourceResult.data;
-      const eventsData = eventsResult.data;
+  // Generate timeline based on competition events
+  let timeline: ResourceTimeline | null = null;
 
-      // Process resource assignments
-      const assignments: ResourceAssignment[] = resourceData?.map(r => ({
-        id: r.id,
-        resource_id: r.resource,
-        resource_name: `${(r.profiles as any)?.last_name || ''}, ${(r.profiles as any)?.first_name || ''}`.trim() || 'Unknown Resource',
-        location: r.location || 'Unknown Location',
-        start_time: r.start_time || '',
-        end_time: r.end_time || '',
-        assignment_details: r.assignment_details
-      })) || [];
+  if (assignments.length > 0) {
+    // Collect all times from both events and assignments
+    const allStartTimes: Date[] = [];
+    const allEndTimes: Date[] = [];
 
-      setResourceAssignments(assignments);
+    // Add event times (for full competition range)
+    eventsData?.forEach(event => {
+      if (event.start_time) allStartTimes.push(new Date(event.start_time));
+      if (event.end_time) allEndTimes.push(new Date(event.end_time));
+    });
 
-      // Generate timeline based on competition events (full comp time) rather than just assignments
-      if (assignments.length > 0) {
-        // Collect all times from both events and assignments
-        const allStartTimes: Date[] = [];
-        const allEndTimes: Date[] = [];
+    // Also include assignment times as fallback
+    assignments.forEach(a => {
+      if (a.start_time) allStartTimes.push(new Date(a.start_time));
+      if (a.end_time) allEndTimes.push(new Date(a.end_time));
+    });
 
-        // Add event times (for full competition range)
-        eventsData?.forEach(event => {
-          if (event.start_time) allStartTimes.push(new Date(event.start_time));
-          if (event.end_time) allEndTimes.push(new Date(event.end_time));
-        });
+    if (allStartTimes.length > 0 && allEndTimes.length > 0) {
+      const timelineStart = new Date(Math.min(...allStartTimes.map(t => t.getTime())));
+      const timelineEnd = new Date(Math.max(...allEndTimes.map(t => t.getTime())));
 
-        // Also include assignment times as fallback
-        assignments.forEach(a => {
-          if (a.start_time) allStartTimes.push(new Date(a.start_time));
-          if (a.end_time) allEndTimes.push(new Date(a.end_time));
-        });
+      // Get interval from events (use first event's interval, default to 15 min)
+      const intervalMinutes = eventsData?.find(e => e.interval)?.interval || 15;
 
-        if (allStartTimes.length === 0 || allEndTimes.length === 0) {
-          setTimeline(null);
-          return;
-        }
-
-        const timelineStart = new Date(Math.min(...allStartTimes.map(t => t.getTime())));
-        const timelineEnd = new Date(Math.max(...allEndTimes.map(t => t.getTime())));
-
-        // Get interval from events (use first event's interval, default to 15 min)
-        const intervalMinutes = eventsData?.find(e => e.interval)?.interval || 15;
-
-        // Generate time slots based on event interval
-        const timeSlots: Date[] = [];
-        const current = new Date(timelineStart);
-        while (current < timelineEnd) {
-          timeSlots.push(new Date(current));
-          current.setMinutes(current.getMinutes() + intervalMinutes);
-        }
-
-        // Get unique locations
-        const uniqueLocations = Array.from(new Set(assignments.map(a => a.location))).filter(Boolean);
-
-        const resourceTimeline: ResourceTimeline = {
-          timeSlots,
-          locations: uniqueLocations,
-          getResourcesForSlot: (location: string, timeSlot: Date) => {
-            const resources = assignments.filter(a => {
-              if (a.location !== location) return false;
-              const start = new Date(a.start_time);
-              const end = new Date(a.end_time);
-              return timeSlot >= start && timeSlot < end;
-            });
-            return resources.map(r => ({ name: r.resource_name, details: r.assignment_details }));
-          }
-        };
-
-        setTimeline(resourceTimeline);
+      // Generate time slots based on event interval
+      const timeSlots: Date[] = [];
+      const current = new Date(timelineStart);
+      while (current < timelineEnd) {
+        timeSlots.push(new Date(current));
+        current.setMinutes(current.getMinutes() + intervalMinutes);
       }
-    } catch (error) {
-      console.error('Error fetching resource schedule:', error);
-      toast.error('Failed to load resource schedule');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [competitionId]);
 
-  useEffect(() => {
-    if (competitionId) {
-      fetchResourceSchedule();
+      // Get unique locations
+      const uniqueLocations = Array.from(new Set(assignments.map(a => a.location))).filter(Boolean);
+
+      timeline = {
+        timeSlots,
+        locations: uniqueLocations,
+        getResourcesForSlot: (location: string, timeSlot: Date) => {
+          const resources = assignments.filter(a => {
+            if (a.location !== location) return false;
+            const start = new Date(a.start_time);
+            const end = new Date(a.end_time);
+            return timeSlot >= start && timeSlot < end;
+          });
+          return resources.map(r => ({ name: r.resource_name, details: r.assignment_details }));
+        }
+      };
     }
-  }, [competitionId, fetchResourceSchedule]);
+  }
+
+  return { resourceAssignments: assignments, timeline };
+};
+
+export const useResourceSchedule = (competitionId?: string) => {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['resource-schedule', competitionId],
+    queryFn: () => fetchResourceScheduleData(competitionId!),
+    enabled: !!competitionId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey: ['resource-schedule', competitionId] });
+  };
 
   return {
-    resourceAssignments,
-    timeline,
+    resourceAssignments: data?.resourceAssignments || [],
+    timeline: data?.timeline || null,
     isLoading,
-    refetch: fetchResourceSchedule
+    error,
+    refetch
   };
 };
