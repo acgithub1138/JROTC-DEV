@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EmailBuilderToolbar } from './EmailBuilderToolbar';
 import { EmailBuilderSidebar } from './EmailBuilderSidebar';
 import { EmailBuilderCanvas } from './EmailBuilderCanvas';
@@ -6,6 +6,7 @@ import { EmailBuilderPropertiesPanel } from './EmailBuilderPropertiesPanel';
 import { EmailBuilderPreview } from './EmailBuilderPreview';
 import { useEmailBuilderStore, DEFAULT_DOCUMENT, type EmailBuilderDocument } from './EmailBuilderContext';
 import { VariablesPanel } from '@/components/email-management/dialogs/components/VariablesPanel';
+import { cn } from '@/lib/utils';
 
 interface EmailBuilderProps {
   initialDocument?: EmailBuilderDocument | null;
@@ -26,6 +27,7 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
   enhancedVariables = [],
   groupedReferenceFields = [],
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { 
     document, 
     setDocument, 
@@ -55,6 +57,17 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
     onChange?.(document);
   }, [document, onChange]);
 
+  // Handle escape key to exit fullscreen
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isFullscreen]);
+
   const handleVariableInsert = (variableName: string) => {
     const variableText = `{{${variableName}}}`;
     
@@ -83,10 +96,19 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-background">
-      <EmailBuilderToolbar />
+    <div className={cn(
+      "border rounded-lg overflow-hidden bg-background",
+      isFullscreen && "fixed inset-0 z-50 rounded-none border-0"
+    )}>
+      <EmailBuilderToolbar 
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+      />
       
-      <div className="flex h-[500px]">
+      <div className={cn(
+        "flex",
+        isFullscreen ? "h-[calc(100vh-49px)]" : "h-[500px]"
+      )}>
         {viewMode === 'editor' && (
           <>
             {/* Sidebar */}

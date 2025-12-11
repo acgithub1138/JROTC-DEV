@@ -2,14 +2,20 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Undo2, Redo2, Monitor, Smartphone, Settings } from 'lucide-react';
+import { Undo2, Redo2, Monitor, Smartphone, Settings, Maximize2, Minimize2 } from 'lucide-react';
 import { useEmailBuilderStore, ViewMode, PreviewMode } from './EmailBuilderContext';
 
 interface EmailBuilderToolbarProps {
   onOpenSettings?: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
-export const EmailBuilderToolbar: React.FC<EmailBuilderToolbarProps> = ({ onOpenSettings }) => {
+export const EmailBuilderToolbar: React.FC<EmailBuilderToolbarProps> = ({ 
+  onOpenSettings,
+  isFullscreen,
+  onToggleFullscreen 
+}) => {
   const { 
     viewMode, 
     setViewMode, 
@@ -81,6 +87,22 @@ export const EmailBuilderToolbar: React.FC<EmailBuilderToolbarProps> = ({ onOpen
               <Smartphone className="h-4 w-4" />
             </ToggleGroupItem>
           </ToggleGroup>
+        )}
+        
+        {onToggleFullscreen && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleFullscreen}
+            className="h-8 w-8 p-0"
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </Button>
         )}
       </div>
     </div>
