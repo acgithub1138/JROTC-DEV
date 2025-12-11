@@ -141,24 +141,19 @@ export const useDynamicTableVariables = (tableName: string | null) => {
   };
 };
 
-// Hook to get available email source tables
+// Hook to get available email source tables - dynamically from information_schema
 export const useEmailSourceTables = () => {
   return useQuery({
     queryKey: ['email-source-tables'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_email_source_tables');
+      const { data, error } = await supabase.rpc('get_public_tables');
       
       if (error) throw error;
       
-      // Filter to tables that make sense for email templates
-      const allowedTables = ['tasks', 'subtasks', 'incidents', 'profiles', 'cp_comp_schools'];
-      
-      return (data || [])
-        .filter((t: { table_name: string }) => allowedTables.includes(t.table_name))
-        .map((t: { table_name: string; display_label: string }) => ({
-          name: t.table_name,
-          label: t.display_label,
-        }));
+      return (data || []).map((t: { table_name: string; display_label: string }) => ({
+        name: t.table_name,
+        label: t.display_label,
+      }));
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });

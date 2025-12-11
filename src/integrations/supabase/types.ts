@@ -4861,6 +4861,13 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_public_tables: {
+        Args: never
+        Returns: {
+          display_label: string
+          table_name: string
+        }[]
+      }
       get_stuck_emails: {
         Args: { threshold_time?: string }
         Returns: {
