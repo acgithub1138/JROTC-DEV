@@ -2055,8 +2055,10 @@ export type Database = {
       email_templates: {
         Row: {
           body: string
+          body_json: Json | null
           created_at: string
           created_by: string | null
+          editor_type: string | null
           id: string
           is_active: boolean
           is_global: boolean | null
@@ -2070,8 +2072,10 @@ export type Database = {
         }
         Insert: {
           body: string
+          body_json?: Json | null
           created_at?: string
           created_by?: string | null
+          editor_type?: string | null
           id?: string
           is_active?: boolean
           is_global?: boolean | null
@@ -2085,8 +2089,10 @@ export type Database = {
         }
         Update: {
           body?: string
+          body_json?: Json | null
           created_at?: string
           created_by?: string | null
+          editor_type?: string | null
           id?: string
           is_active?: boolean
           is_global?: boolean | null

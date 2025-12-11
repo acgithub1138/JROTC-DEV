@@ -1,3 +1,14 @@
+import { renderToStaticMarkup } from '@usewaypoint/email-builder';
+
+// Render email builder JSON document to HTML
+export const renderEmailBuilderDocument = (bodyJson: Record<string, any>): string => {
+  try {
+    return renderToStaticMarkup(bodyJson as any, { rootBlockId: 'root' });
+  } catch (error) {
+    console.error('Error rendering email builder document:', error);
+    return '<p>Error rendering email</p>';
+  }
+};
 
 export const processTemplate = (template: string, data: Record<string, any>): string => {
   if (!template || !data) return template;
