@@ -35,15 +35,18 @@ const formatLabel = (columnName: string): string => {
 };
 
 // Columns to exclude from variables (internal/system columns)
-const EXCLUDED_COLUMNS = ['id', 'school_id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
+const EXCLUDED_COLUMNS = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
 
 // Tables that should be expandable as reference fields
-const EXPANDABLE_TABLES = ['profiles', 'schools'];
+const EXPANDABLE_TABLES = ['profiles', 'schools', 'cp_competitions', 'competition_event_types', 'competitions'];
 
 // Useful columns from reference tables
 const REFERENCE_TABLE_COLUMNS: Record<string, string[]> = {
   profiles: ['first_name', 'last_name', 'email', 'phone', 'grade', 'flight', 'role'],
-  schools: ['name', 'logo_url', 'address', 'city', 'state', 'zip'],
+  schools: ['name', 'logo_url', 'address', 'city', 'state', 'zip', 'initials'],
+  cp_competitions: ['name', 'description', 'location', 'start_date', 'end_date', 'status', 'fee', 'hosting_school'],
+  competition_event_types: ['name', 'initials', 'description', 'category'],
+  competitions: ['name', 'location', 'competition_date', 'description'],
 };
 
 export const useDynamicTableVariables = (tableName: string | null) => {
