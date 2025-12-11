@@ -5,12 +5,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useState, useMemo } from 'react';
+import { EmailBuilderDocument } from '@/components/email-builder';
 
 export interface EmailTemplate {
   id: string;
   name: string;
   subject: string;
   body: string;
+  body_json?: EmailBuilderDocument | null;
+  editor_type?: 'legacy' | 'builder';
   source_table: string;
   recipient_field: string;
   variables_used: string[];
@@ -84,6 +87,8 @@ export const useEmailTemplates = () => {
         .from('email_templates')
         .insert({
           ...templateData,
+          body_json: templateData.body_json || null,
+          editor_type: templateData.editor_type || 'builder',
           created_by: userProfile?.id,
           school_id: templateData.is_global ? null : userProfile?.school_id,
         })
@@ -113,6 +118,8 @@ export const useEmailTemplates = () => {
     mutationFn: async ({ id, ...templateData }: Partial<EmailTemplate> & { id: string }) => {
       const updateData = {
         ...templateData,
+        body_json: templateData.body_json || null,
+        editor_type: templateData.editor_type,
         school_id: templateData.is_global ? null : (templateData.school_id || userProfile?.school_id)
       };
       
@@ -176,6 +183,8 @@ export const useEmailTemplates = () => {
         name: `${originalTemplate.name} (Copy)`,
         subject: originalTemplate.subject,
         body: originalTemplate.body,
+        body_json: originalTemplate.body_json || null,
+        editor_type: originalTemplate.editor_type || 'legacy',
         source_table: originalTemplate.source_table,
         recipient_field: originalTemplate.recipient_field,
         variables_used: originalTemplate.variables_used,
