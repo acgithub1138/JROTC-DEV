@@ -75,7 +75,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   });
   
   // Use the new dynamic variables hook
-  const { basicFields, referenceGroups } = useDynamicTableVariables(formData.source_table);
+  const { basicFields, referenceGroups, contextVariables } = useDynamicTableVariables(formData.source_table);
   useEffect(() => {
     if (template && mode === 'edit') {
       setFormData({
@@ -248,6 +248,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
                   columns={basicFields.map(f => ({ name: f.name, label: f.label }))} 
                   enhancedVariables={[]} 
                   groupedReferenceFields={referenceGroups} 
+                  contextVariables={contextVariables}
                   onVariableInsert={insertVariableAtCursor} 
                 />
               </div>
