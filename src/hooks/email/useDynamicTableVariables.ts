@@ -34,20 +34,11 @@ const formatLabel = (columnName: string): string => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-// Columns to exclude from variables (internal/system columns)
+// Columns to exclude from source table variables (internal/system columns)
 const EXCLUDED_COLUMNS = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
 
-// Tables that should be expandable as reference fields
-const EXPANDABLE_TABLES = ['profiles', 'schools', 'cp_competitions', 'competition_event_types', 'competitions'];
-
-// Useful columns from reference tables
-const REFERENCE_TABLE_COLUMNS: Record<string, string[]> = {
-  profiles: ['first_name', 'last_name', 'email', 'phone', 'grade', 'flight', 'role'],
-  schools: ['name', 'logo_url', 'address', 'city', 'state', 'zip', 'initials'],
-  cp_competitions: ['name', 'description', 'location', 'start_date', 'end_date', 'status', 'fee', 'hosting_school'],
-  competition_event_types: ['name', 'initials', 'description', 'category'],
-  competitions: ['name', 'location', 'competition_date', 'description'],
-};
+// Columns to exclude from referenced table variables
+const SYSTEM_COLUMNS = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by', 'school_id'];
 
 export const useDynamicTableVariables = (tableName: string | null) => {
   // Fetch columns with relations for the source table
@@ -81,34 +72,45 @@ export const useDynamicTableVariables = (tableName: string | null) => {
         // Skip excluded columns
         if (EXCLUDED_COLUMNS.includes(col.column_name)) continue;
 
-        // Check if this is a foreign key to an expandable table
-        if (col.referenced_table && EXPANDABLE_TABLES.includes(col.referenced_table)) {
-          const refColumns = REFERENCE_TABLE_COLUMNS[col.referenced_table] || [];
-          const groupLabel = formatLabel(col.column_name);
+        // Check if this is a foreign key - dynamically fetch referenced table columns
+        if (col.referenced_table) {
+          // Fetch columns for the referenced table dynamically
+          const { data: refTableColumns } = await supabase.rpc('get_table_columns', {
+            table_name: col.referenced_table,
+          });
           
-          const fields = refColumns.map((refCol) => ({
-            name: `${col.column_name}.${refCol}`,
-            label: `${formatLabel(refCol)}`,
-          }));
+          if (refTableColumns && refTableColumns.length > 0) {
+            const groupLabel = formatLabel(col.column_name);
+            
+            // Filter out system columns from referenced table
+            const usefulColumns = refTableColumns.filter(
+              (refCol: { column_name: string }) => !SYSTEM_COLUMNS.includes(refCol.column_name)
+            );
+            
+            const fields = usefulColumns.map((refCol: { column_name: string }) => ({
+              name: `${col.column_name}.${refCol.column_name}`,
+              label: formatLabel(refCol.column_name),
+            }));
 
-          if (fields.length > 0) {
-            referenceGroups.push({
-              group: col.column_name,
-              groupLabel,
-              fields,
-            });
-
-            // Add to all variables with description
-            fields.forEach((field) => {
-              allVariables.push({
-                name: field.name,
-                label: `${groupLabel} - ${field.label}`,
-                description: `From ${col.referenced_table} table`,
+            if (fields.length > 0) {
+              referenceGroups.push({
+                group: col.column_name,
+                groupLabel,
+                fields,
               });
-            });
+
+              // Add to all variables with description
+              fields.forEach((field) => {
+                allVariables.push({
+                  name: field.name,
+                  label: `${groupLabel} - ${field.label}`,
+                  description: `From ${col.referenced_table} table`,
+                });
+              });
+            }
           }
         } else {
-          // Basic field (non-FK or FK to non-expandable table)
+          // Basic field (non-FK)
           basicFields.push({
             name: col.column_name,
             label: formatLabel(col.column_name),
