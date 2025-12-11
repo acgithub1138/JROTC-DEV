@@ -14,11 +14,11 @@ import { ArrowLeft, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useDynamicTableVariables, useEmailSourceTables } from '@/hooks/email/useDynamicTableVariables';
-import { VariablesPanel } from './dialogs/components/VariablesPanel';
-import { extractVariables } from '@/utils/templateProcessor';
+import { extractVariables, renderEmailBuilderDocument } from '@/utils/templateProcessor';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { EmailBuilder, DEFAULT_DOCUMENT, type EmailBuilderDocument } from '@/components/email-builder';
 import 'react-quill/dist/quill.snow.css';
 
 const modules = {
@@ -64,6 +64,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
     name: '',
     subject: '',
     body: '',
+    body_json: DEFAULT_DOCUMENT as EmailBuilderDocument,
+    editor_type: 'builder' as 'legacy' | 'builder',
     source_table: '',
     recipient_field: '',
     is_active: true,
@@ -83,6 +85,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
     name: template.name,
     subject: template.subject,
     body: template.body,
+    body_json: (template.body_json || DEFAULT_DOCUMENT) as EmailBuilderDocument,
+    editor_type: (template.editor_type || 'legacy') as 'legacy' | 'builder',
     source_table: template.source_table,
     recipient_field: template.recipient_field || '',
     is_active: template.is_active,
@@ -91,6 +95,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
     name: '',
     subject: '',
     body: '',
+    body_json: DEFAULT_DOCUMENT as EmailBuilderDocument,
+    editor_type: 'builder' as 'legacy' | 'builder',
     source_table: '',
     recipient_field: '',
     is_active: true,
@@ -115,6 +121,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
         name: template.name,
         subject: template.subject,
         body: template.body,
+        body_json: (template.body_json || DEFAULT_DOCUMENT) as EmailBuilderDocument,
+        editor_type: (template.editor_type || 'legacy') as 'legacy' | 'builder',
         source_table: template.source_table,
         recipient_field: template.recipient_field || '',
         is_active: template.is_active,
@@ -159,13 +167,20 @@ export const EmailTemplateRecordPage: React.FC = () => {
     
     if (mode === 'view') return;
 
+    // Render body from builder if using new editor
+    let finalBody = formData.body;
+    if (formData.editor_type === 'builder' && formData.body_json) {
+      finalBody = renderEmailBuilderDocument(formData.body_json);
+    }
+
     // Use the new template processor to extract variables
-    const variables_used = extractVariables(formData.subject + ' ' + formData.body);
+    const variables_used = extractVariables(formData.subject + ' ' + finalBody);
     
     if (mode === 'edit' && template) {
       updateTemplate({
         id: template.id,
         ...formData,
+        body: finalBody,
         variables_used
       }, {
         onSuccess: () => {
@@ -177,6 +192,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
     } else {
       createTemplate({
         ...formData,
+        body: finalBody,
         variables_used
       }, {
         onSuccess: () => {
@@ -208,7 +224,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
           input.setSelectionRange(start + variable.length, start + variable.length);
         }, 0);
       }
-    } else {
+    } else if (formData.editor_type === 'legacy') {
       // Insert into Quill editor
       if (quillRef.current) {
         const quill = quillRef.current.getEditor();
@@ -227,6 +243,11 @@ export const EmailTemplateRecordPage: React.FC = () => {
         });
       }
     }
+    // For builder editor, variable insertion is handled by EmailBuilder component
+  };
+
+  const handleBuilderChange = (document: EmailBuilderDocument) => {
+    handleFormChange({ body_json: document });
   };
 
   const getTitle = () => {
@@ -238,7 +259,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
     }
   };
 
-  const canPreview = formData.source_table && (formData.subject || formData.body);
+  const canPreview = formData.source_table && (formData.subject || formData.body || (formData.editor_type === 'builder' && formData.body_json));
   const isReadOnly = mode === 'view';
 
   if (isLoading) {
@@ -302,10 +323,13 @@ export const EmailTemplateRecordPage: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={() => {
+                  const previewBody = formData.editor_type === 'builder' && formData.body_json 
+                    ? renderEmailBuilderDocument(formData.body_json)
+                    : formData.body;
                   navigate('/app/email/email_preview_record', {
                     state: {
                       subject: formData.subject,
-                      body: formData.body,
+                      body: previewBody,
                       sourceTable: formData.source_table,
                       from: location.pathname + location.search
                     }
@@ -336,10 +360,13 @@ export const EmailTemplateRecordPage: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={() => {
+                  const previewBody = formData.editor_type === 'builder' && formData.body_json 
+                    ? renderEmailBuilderDocument(formData.body_json)
+                    : formData.body;
                   navigate('/app/email/email_preview_record', {
                     state: {
                       subject: formData.subject,
-                      body: formData.body,
+                      body: previewBody,
                       sourceTable: formData.source_table,
                       from: location.pathname + location.search
                     }
@@ -455,58 +482,100 @@ export const EmailTemplateRecordPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
-          <div className={isMobile ? 'space-y-6' : 'col-span-3 space-y-6'}>
-            {/* Subject Field */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Subject</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  ref={subjectRef}
-                  id="subject"
-                  value={formData.subject}
-                  onChange={(e) => handleFormChange({ subject: e.target.value })}
-                  placeholder="Enter email subject"
-                  required
-                  disabled={isReadOnly}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Body Field */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Body</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md">
-                  <ReactQuill
-                    ref={quillRef}
-                    theme="snow"
-                    value={formData.body}
-                    onChange={(value) => handleFormChange({ body: value })}
-                    modules={modules}
-                    formats={formats}
-                    style={{ minHeight: '300px' }}
-                    readOnly={isReadOnly}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Variables Panel */}
-          <div className="space-y-2">
-            <VariablesPanel 
-              columns={basicFields.map(f => ({ name: f.name, label: f.label }))} 
-              enhancedVariables={[]} 
-              groupedReferenceFields={referenceGroups} 
-              onVariableInsert={insertVariableAtCursor} 
+        {/* Subject Field */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Subject</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input
+              ref={subjectRef}
+              id="subject"
+              value={formData.subject}
+              onChange={(e) => handleFormChange({ subject: e.target.value })}
+              placeholder="Enter email subject"
+              required
+              disabled={isReadOnly}
             />
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        {/* Email Body - Conditionally render based on editor_type */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Email Body</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {formData.editor_type === 'builder' ? (
+              <EmailBuilder
+                initialDocument={formData.body_json}
+                onChange={handleBuilderChange}
+                columns={basicFields.map(f => ({ name: f.name, label: f.label }))}
+                groupedReferenceFields={referenceGroups}
+              />
+            ) : (
+              <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
+                <div className={isMobile ? 'space-y-6' : 'col-span-3'}>
+                  <div className="border rounded-md">
+                    <ReactQuill
+                      ref={quillRef}
+                      theme="snow"
+                      value={formData.body}
+                      onChange={(value) => handleFormChange({ body: value })}
+                      modules={modules}
+                      formats={formats}
+                      style={{ minHeight: '300px' }}
+                      readOnly={isReadOnly}
+                    />
+                  </div>
+                </div>
+                {/* Variables Panel for legacy editor */}
+                <div className="space-y-2">
+                  <Card className="h-fit">
+                    <CardHeader className="py-3">
+                      <CardTitle className="text-sm">Variables</CardTitle>
+                    </CardHeader>
+                    <CardContent className="py-2">
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                        {basicFields.map((field) => (
+                          <Button
+                            key={field.name}
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-xs h-7"
+                            onClick={() => insertVariableAtCursor(field.name)}
+                            disabled={isReadOnly}
+                          >
+                            {field.label}
+                          </Button>
+                        ))}
+                        {referenceGroups.map((group) => (
+                          <div key={group.group} className="pt-2 border-t">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">{group.groupLabel}</p>
+                            {group.fields.map((field) => (
+                              <Button
+                                key={field.name}
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="w-full justify-start text-xs h-7"
+                                onClick={() => insertVariableAtCursor(field.name)}
+                                disabled={isReadOnly}
+                              >
+                                {field.label}
+                              </Button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Actions */}
         {mode !== 'view' && (
