@@ -20,46 +20,48 @@ import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { EmailBuilder, DEFAULT_DOCUMENT, type EmailBuilderDocument } from '@/components/email-builder';
 import 'react-quill/dist/quill.snow.css';
-
 const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    [{ 'indent': '-1'}, { 'indent': '+1' }],
-    ['link'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'align': [] }],
-    ['clean']
-  ],
+  toolbar: [[{
+    'header': [1, 2, 3, 4, 5, 6, false]
+  }], ['bold', 'italic', 'underline', 'strike'], [{
+    'list': 'ordered'
+  }, {
+    'list': 'bullet'
+  }], [{
+    'indent': '-1'
+  }, {
+    'indent': '+1'
+  }], ['link'], [{
+    'color': []
+  }, {
+    'background': []
+  }], [{
+    'align': []
+  }], ['clean']]
 };
-
-const formats = [
-  'header', 'bold', 'italic', 'underline', 'strike',
-  'list', 'bullet', 'indent', 'link', 'color', 'background', 'align'
-];
-
+const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'indent', 'link', 'color', 'background', 'align'];
 export const EmailTemplateRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
+  const {
+    id
+  } = useParams();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || (id ? 'view' : 'create');
   const isMobile = useIsMobile();
-  
   const {
     templates,
     createTemplate,
     updateTemplate,
     isLoading
   } = useEmailTemplates();
-  
-  const { userProfile } = useAuth();
+  const {
+    userProfile
+  } = useAuth();
   const permissions = useTablePermissions('email_templates');
   const {
     data: availableTables = []
   } = useEmailSourceTables();
-
   const [formData, setFormData] = useState({
     name: '',
     subject: '',
@@ -71,16 +73,13 @@ export const EmailTemplateRecordPage: React.FC = () => {
     is_active: true,
     is_global: false
   });
-
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-
   const subjectRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<ReactQuill>(null);
 
   // Find template if in edit/view mode
   const template = id ? templates.find(t => t.id === id) : null;
-
   const initialFormData = template && (mode === 'edit' || mode === 'view') ? {
     name: template.name,
     subject: template.subject,
@@ -102,7 +101,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
     is_active: true,
     is_global: false
   };
-
   const {
     hasUnsavedChanges,
     resetChanges
@@ -113,8 +111,11 @@ export const EmailTemplateRecordPage: React.FC = () => {
   });
 
   // Use the new dynamic variables hook
-  const { basicFields, referenceGroups, contextVariables } = useDynamicTableVariables(formData.source_table);
-
+  const {
+    basicFields,
+    referenceGroups,
+    contextVariables
+  } = useDynamicTableVariables(formData.source_table);
   useEffect(() => {
     if (template && (mode === 'edit' || mode === 'view')) {
       setFormData({
@@ -130,7 +131,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
       });
     }
   }, [template, mode]);
-
   const handleFormChange = (updates: Partial<typeof formData>) => {
     if (mode === 'view') return;
     setFormData(prev => ({
@@ -138,7 +138,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
       ...updates
     }));
   };
-
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -147,7 +146,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
       navigate(path);
     }
   };
-
   const handleDiscardChanges = () => {
     resetChanges();
     setShowUnsavedDialog(false);
@@ -156,15 +154,12 @@ export const EmailTemplateRecordPage: React.FC = () => {
       setPendingNavigation(null);
     }
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (mode === 'view') return;
 
     // Render body from builder if using new editor
@@ -175,7 +170,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
 
     // Use the new template processor to extract variables
     const variables_used = extractVariables(formData.subject + ' ' + finalBody);
-    
     if (mode === 'edit' && template) {
       updateTemplate({
         id: template.id,
@@ -203,10 +197,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
       });
     }
   };
-
   const insertVariableAtCursor = (variableName: string) => {
     if (mode === 'view') return;
-    
     const variable = `{{${variableName}}}`;
 
     // Check if subject field is focused
@@ -245,30 +237,30 @@ export const EmailTemplateRecordPage: React.FC = () => {
     }
     // For builder editor, variable insertion is handled by EmailBuilder component
   };
-
   const handleBuilderChange = (document: EmailBuilderDocument) => {
-    handleFormChange({ body_json: document });
+    handleFormChange({
+      body_json: document
+    });
   };
-
   const getTitle = () => {
     switch (mode) {
-      case 'create': return 'Create Email Template';
-      case 'edit': return 'Edit Email Template';
-      case 'view': return 'View Email Template';
-      default: return 'Email Template';
+      case 'create':
+        return 'Create Email Template';
+      case 'edit':
+        return 'Edit Email Template';
+      case 'view':
+        return 'View Email Template';
+      default:
+        return 'Email Template';
     }
   };
-
-  const canPreview = formData.source_table && (formData.subject || formData.body || (formData.editor_type === 'builder' && formData.body_json));
+  const canPreview = formData.source_table && (formData.subject || formData.body || formData.editor_type === 'builder' && formData.body_json);
   const isReadOnly = mode === 'view';
-
   if (isLoading) {
     return <div className="flex items-center justify-center h-64">Loading...</div>;
   }
-
   if (id && !template && !isLoading) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Template Not Found</h1>
           <Button onClick={() => navigate('/app/email_templates')}>
@@ -276,111 +268,65 @@ export const EmailTemplateRecordPage: React.FC = () => {
             Back to Email Templates
           </Button>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container mx-auto p-6 space-y-6 overflow-x-hidden">
+  return <div className="container mx-auto p-6 space-y-6 overflow-x-hidden">
       {/* Back Button - Above header on mobile */}
-      {isMobile && (
-        <Button
-          variant="ghost"
-          onClick={() => handleNavigation('/app/email_templates')}
-          className="w-fit"
-        >
+      {isMobile && <Button variant="ghost" onClick={() => handleNavigation('/app/email_templates')} className="w-fit">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Email Templates
-        </Button>
-      )}
+        </Button>}
 
       {/* Header */}
       <div className={`flex ${isMobile ? 'flex-col gap-4' : 'items-center justify-between'}`}>
         <div className={`flex items-center ${isMobile ? 'flex-col items-start' : 'gap-4'}`}>
-          {!isMobile && (
-            <Button
-              variant="ghost"
-              onClick={() => handleNavigation('/app/email_templates')}
-            >
+          {!isMobile && <Button variant="ghost" onClick={() => handleNavigation('/app/email_templates')}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Email Templates
-            </Button>
-          )}
+              ​
+            </Button>}
           <h1 className="text-3xl font-bold">{getTitle()}</h1>
         </div>
 
-        {!isMobile && (
-          <div className="flex items-center gap-2">
-            {mode === 'view' && permissions.canEdit && (
-              <Button
-                onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}
-              >
+        {!isMobile && <div className="flex items-center gap-2">
+            {mode === 'view' && permissions.canEdit && <Button onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}>
                 Edit Template
-              </Button>
-            )}
-            {mode !== 'view' && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  const previewBody = formData.editor_type === 'builder' && formData.body_json 
-                    ? renderEmailBuilderDocument(formData.body_json)
-                    : formData.body;
-                  navigate('/app/email/email_preview_record', {
-                    state: {
-                      subject: formData.subject,
-                      body: previewBody,
-                      sourceTable: formData.source_table,
-                      from: location.pathname + location.search
-                    }
-                  });
-                }}
-                disabled={!canPreview}
-              >
+              </Button>}
+            {mode !== 'view' && <Button type="button" variant="outline" onClick={() => {
+          const previewBody = formData.editor_type === 'builder' && formData.body_json ? renderEmailBuilderDocument(formData.body_json) : formData.body;
+          navigate('/app/email/email_preview_record', {
+            state: {
+              subject: formData.subject,
+              body: previewBody,
+              sourceTable: formData.source_table,
+              from: location.pathname + location.search
+            }
+          });
+        }} disabled={!canPreview}>
                 <Eye className="w-4 h-4 mr-2" />
                 Preview Email
-              </Button>
-            )}
-          </div>
-        )}
+              </Button>}
+          </div>}
 
         {/* Mobile Action Buttons - Below header */}
-        {isMobile && (
-          <div className="grid grid-cols-2 gap-2 w-full">
-            {mode === 'view' && permissions.canEdit && (
-              <Button
-                onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)}
-                className="w-full"
-              >
+        {isMobile && <div className="grid grid-cols-2 gap-2 w-full">
+            {mode === 'view' && permissions.canEdit && <Button onClick={() => handleNavigation(`/app/email/template_record/${id}?mode=edit`)} className="w-full">
                 Edit Template
-              </Button>
-            )}
-            {mode !== 'view' && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  const previewBody = formData.editor_type === 'builder' && formData.body_json 
-                    ? renderEmailBuilderDocument(formData.body_json)
-                    : formData.body;
-                  navigate('/app/email/email_preview_record', {
-                    state: {
-                      subject: formData.subject,
-                      body: previewBody,
-                      sourceTable: formData.source_table,
-                      from: location.pathname + location.search
-                    }
-                  });
-                }}
-                disabled={!canPreview}
-                className="w-full col-span-2"
-              >
+              </Button>}
+            {mode !== 'view' && <Button type="button" variant="outline" onClick={() => {
+          const previewBody = formData.editor_type === 'builder' && formData.body_json ? renderEmailBuilderDocument(formData.body_json) : formData.body;
+          navigate('/app/email/email_preview_record', {
+            state: {
+              subject: formData.subject,
+              body: previewBody,
+              sourceTable: formData.source_table,
+              from: location.pathname + location.search
+            }
+          });
+        }} disabled={!canPreview} className="w-full col-span-2">
                 <Eye className="w-4 h-4 mr-2" />
                 Preview Email
-              </Button>
-            )}
-          </div>
-        )}
+              </Button>}
+          </div>}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -393,37 +339,28 @@ export const EmailTemplateRecordPage: React.FC = () => {
               {/* Template Name */}
               <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
                 <Label htmlFor="name" className={isMobile ? '' : 'w-32 text-right'}>Template Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleFormChange({ name: e.target.value })}
-                  placeholder="Enter template name"
-                  className="flex-1"
-                  required
-                  disabled={isReadOnly}
-                />
+                <Input id="name" value={formData.name} onChange={e => handleFormChange({
+                name: e.target.value
+              })} placeholder="Enter template name" className="flex-1" required disabled={isReadOnly} />
               </div>
 
               {/* Source Table */}
               <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
                 <Label className={isMobile ? '' : 'w-32 text-right'}>Source Table</Label>
-                <Select
-                  value={formData.source_table}
-                  onValueChange={(value) => {
-                    // Reset recipient field when table changes
-                    handleFormChange({ source_table: value, recipient_field: '' });
-                  }}
-                  disabled={isReadOnly}
-                >
+                <Select value={formData.source_table} onValueChange={value => {
+                // Reset recipient field when table changes
+                handleFormChange({
+                  source_table: value,
+                  recipient_field: ''
+                });
+              }} disabled={isReadOnly}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select table" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableTables.map((table) => (
-                      <SelectItem key={table.name} value={table.name}>
+                    {availableTables.map(table => <SelectItem key={table.name} value={table.name}>
                         {table.label}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -432,11 +369,9 @@ export const EmailTemplateRecordPage: React.FC = () => {
               <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
                 <Label className={isMobile ? '' : 'w-32 text-right'}>Active Status</Label>
                 <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => handleFormChange({ is_active: checked })}
-                    disabled={isReadOnly}
-                  />
+                  <Switch checked={formData.is_active} onCheckedChange={checked => handleFormChange({
+                  is_active: checked
+                })} disabled={isReadOnly} />
                   <span className="text-sm text-muted-foreground">
                     {formData.is_active ? 'Active' : 'Inactive'}
                   </span>
@@ -445,31 +380,24 @@ export const EmailTemplateRecordPage: React.FC = () => {
             </div>
 
             {/* Global Template Checkbox - Only for Admins */}
-            {userProfile?.role === 'admin' && (
-              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
+            {userProfile?.role === 'admin' && <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
                 <Label className={isMobile ? '' : 'w-32 text-right'}>Global Template</Label>
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_global"
-                    checked={formData.is_global}
-                    onCheckedChange={(checked) => handleFormChange({ is_global: !!checked })}
-                    disabled={isReadOnly}
-                  />
+                  <Checkbox id="is_global" checked={formData.is_global} onCheckedChange={checked => handleFormChange({
+                is_global: !!checked
+              })} disabled={isReadOnly} />
                   <Label htmlFor="is_global" className="text-sm font-medium">
                     Visible to all schools
                   </Label>
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Email Recipient Field */}
             <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
               <Label className={isMobile ? '' : 'w-32 text-right'}>Email Recipient</Label>
-              <Select 
-                value={formData.recipient_field} 
-                onValueChange={value => handleFormChange({ recipient_field: value })} 
-                disabled={!formData.source_table || isReadOnly}
-              >
+              <Select value={formData.recipient_field} onValueChange={value => handleFormChange({
+              recipient_field: value
+            })} disabled={!formData.source_table || isReadOnly}>
                 <SelectTrigger className={isMobile ? 'w-full' : 'w-1/3'}>
                   <SelectValue placeholder="Select recipient" />
                 </SelectTrigger>
@@ -488,15 +416,9 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <CardTitle>Subject</CardTitle>
           </CardHeader>
           <CardContent>
-            <Input
-              ref={subjectRef}
-              id="subject"
-              value={formData.subject}
-              onChange={(e) => handleFormChange({ subject: e.target.value })}
-              placeholder="Enter email subject"
-              required
-              disabled={isReadOnly}
-            />
+            <Input ref={subjectRef} id="subject" value={formData.subject} onChange={e => handleFormChange({
+            subject: e.target.value
+          })} placeholder="Enter email subject" required disabled={isReadOnly} />
           </CardContent>
         </Card>
 
@@ -506,28 +428,17 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <CardTitle>Email Body</CardTitle>
           </CardHeader>
           <CardContent>
-            {formData.editor_type === 'builder' ? (
-              <EmailBuilder
-                initialDocument={formData.body_json}
-                onChange={handleBuilderChange}
-                columns={basicFields.map(f => ({ name: f.name, label: f.label }))}
-                groupedReferenceFields={referenceGroups}
-                contextVariables={contextVariables}
-              />
-            ) : (
-              <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
+            {formData.editor_type === 'builder' ? <EmailBuilder initialDocument={formData.body_json} onChange={handleBuilderChange} columns={basicFields.map(f => ({
+            name: f.name,
+            label: f.label
+          }))} groupedReferenceFields={referenceGroups} contextVariables={contextVariables} /> : <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>
                 <div className={isMobile ? 'space-y-6' : 'col-span-3'}>
                   <div className="border rounded-md">
-                    <ReactQuill
-                      ref={quillRef}
-                      theme="snow"
-                      value={formData.body}
-                      onChange={(value) => handleFormChange({ body: value })}
-                      modules={modules}
-                      formats={formats}
-                      style={{ minHeight: '300px' }}
-                      readOnly={isReadOnly}
-                    />
+                    <ReactQuill ref={quillRef} theme="snow" value={formData.body} onChange={value => handleFormChange({
+                  body: value
+                })} modules={modules} formats={formats} style={{
+                  minHeight: '300px'
+                }} readOnly={isReadOnly} />
                   </div>
                 </div>
                 {/* Variables Panel for legacy editor */}
@@ -538,70 +449,34 @@ export const EmailTemplateRecordPage: React.FC = () => {
                     </CardHeader>
                     <CardContent className="py-2">
                       <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                        {basicFields.map((field) => (
-                          <Button
-                            key={field.name}
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-xs h-7"
-                            onClick={() => insertVariableAtCursor(field.name)}
-                            disabled={isReadOnly}
-                          >
+                        {basicFields.map(field => <Button key={field.name} type="button" variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => insertVariableAtCursor(field.name)} disabled={isReadOnly}>
                             {field.label}
-                          </Button>
-                        ))}
-                        {referenceGroups.map((group) => (
-                          <div key={group.group} className="pt-2 border-t">
+                          </Button>)}
+                        {referenceGroups.map(group => <div key={group.group} className="pt-2 border-t">
                             <p className="text-xs font-medium text-muted-foreground mb-1">{group.groupLabel}</p>
-                            {group.fields.map((field) => (
-                              <Button
-                                key={field.name}
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-xs h-7"
-                                onClick={() => insertVariableAtCursor(field.name)}
-                                disabled={isReadOnly}
-                              >
+                            {group.fields.map(field => <Button key={field.name} type="button" variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => insertVariableAtCursor(field.name)} disabled={isReadOnly}>
                                 {field.label}
-                              </Button>
-                            ))}
-                          </div>
-                        ))}
+                              </Button>)}
+                          </div>)}
                       </div>
                     </CardContent>
                   </Card>
                 </div>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
 
         {/* Actions */}
-        {mode !== 'view' && (
-          <div className={`${isMobile ? 'grid grid-cols-2 gap-2' : 'flex justify-end space-x-2'}`}>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleNavigation('/app/email_templates')}
-              className={isMobile ? 'w-full' : ''}
-            >
+        {mode !== 'view' && <div className={`${isMobile ? 'grid grid-cols-2 gap-2' : 'flex justify-end space-x-2'}`}>
+            <Button type="button" variant="outline" onClick={() => handleNavigation('/app/email_templates')} className={isMobile ? 'w-full' : ''}>
               Cancel
             </Button>
             <Button type="submit" className={isMobile ? 'w-full' : ''}>
               {mode === 'edit' ? 'Update Template' : 'Create Template'}
             </Button>
-          </div>
-        )}
+          </div>}
       </form>
 
-      <UnsavedChangesDialog 
-        open={showUnsavedDialog} 
-        onOpenChange={setShowUnsavedDialog} 
-        onDiscard={handleDiscardChanges} 
-        onCancel={handleContinueEditing} 
-      />
-    </div>
-  );
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+    </div>;
 };
