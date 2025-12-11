@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useAvailableTables, useTableColumns, useEnhancedVariables, useGroupedReferenceFields } from '@/hooks/email/useTableColumns';
+import { useDynamicTableVariables, useEmailSourceTables } from '@/hooks/email/useDynamicTableVariables';
 import { VariablesPanel } from './dialogs/components/VariablesPanel';
 import { extractVariables } from '@/utils/templateProcessor';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -58,7 +58,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
   const permissions = useTablePermissions('email_templates');
   const {
     data: availableTables = []
-  } = useAvailableTables();
+  } = useEmailSourceTables();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -106,17 +106,8 @@ export const EmailTemplateRecordPage: React.FC = () => {
     enabled: mode !== 'view'
   });
 
-  const {
-    data: columns = []
-  } = useTableColumns(formData.source_table);
-
-  const {
-    data: enhancedVariables = []
-  } = useEnhancedVariables(formData.source_table);
-
-  const {
-    data: groupedReferenceFields = []
-  } = useGroupedReferenceFields(formData.source_table);
+  // Use the new dynamic variables hook
+  const { basicFields, referenceGroups } = useDynamicTableVariables(formData.source_table);
 
   useEffect(() => {
     if (template && (mode === 'edit' || mode === 'view')) {
@@ -509,16 +500,9 @@ export const EmailTemplateRecordPage: React.FC = () => {
           {/* Variables Panel */}
           <div className="space-y-2">
             <VariablesPanel 
-              columns={columns.map(col => ({
-                name: col.column_name,
-                label: col.display_label
-              }))} 
-              enhancedVariables={enhancedVariables.map(ev => ({
-                name: ev.variable,
-                label: ev.label,
-                description: 'Profile reference'
-              }))} 
-              groupedReferenceFields={groupedReferenceFields} 
+              columns={basicFields.map(f => ({ name: f.name, label: f.label }))} 
+              enhancedVariables={[]} 
+              groupedReferenceFields={referenceGroups} 
               onVariableInsert={insertVariableAtCursor} 
             />
           </div>
