@@ -18,6 +18,7 @@ interface EmailBuilderProps {
     groupLabel: string;
     fields: Array<{ name: string; label: string }>;
   }>;
+  contextVariables?: Array<{ name: string; label: string; description?: string }>;
 }
 
 export const EmailBuilder: React.FC<EmailBuilderProps> = ({
@@ -26,6 +27,7 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
   columns = [],
   enhancedVariables = [],
   groupedReferenceFields = [],
+  contextVariables = [],
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { 
@@ -128,10 +130,11 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
             
             {/* Variables Panel */}
             <div className="w-56 flex-shrink-0 border-l">
-              <VariablesPanel
+            <VariablesPanel
                 columns={columns}
                 enhancedVariables={enhancedVariables}
                 groupedReferenceFields={groupedReferenceFields}
+                contextVariables={contextVariables}
                 onVariableInsert={handleVariableInsert}
               />
             </div>

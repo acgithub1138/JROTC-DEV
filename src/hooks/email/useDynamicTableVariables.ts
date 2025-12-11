@@ -21,11 +21,24 @@ interface ReferenceGroup {
   fields: Array<{ name: string; label: string }>;
 }
 
+interface ContextVariable {
+  name: string;
+  label: string;
+  description: string;
+}
+
 interface DynamicVariables {
   basicFields: BasicField[];
   referenceGroups: ReferenceGroup[];
+  contextVariables: ContextVariable[];
   allVariables: Array<{ name: string; label: string; description?: string }>;
 }
+
+// Context variables that are always available regardless of source table
+const CONTEXT_VARIABLES: ContextVariable[] = [
+  { name: 'school_name', label: 'School Name', description: 'Current school name' },
+  { name: 'school_logo_url', label: 'School Logo URL', description: 'Current school logo image URL' },
+];
 
 // Convert column_name to display label: assigned_to -> Assigned To
 const formatLabel = (columnName: string): string => {
@@ -131,7 +144,16 @@ export const useDynamicTableVariables = (tableName: string | null) => {
         description: 'Most recent non-system comment on the record',
       });
 
-      return { basicFields, referenceGroups, allVariables };
+      // Add context variables to allVariables
+      CONTEXT_VARIABLES.forEach((cv) => {
+        allVariables.push({
+          name: cv.name,
+          label: cv.label,
+          description: cv.description,
+        });
+      });
+
+      return { basicFields, referenceGroups, contextVariables: CONTEXT_VARIABLES, allVariables };
     },
     enabled: !!columnsQuery.data && columnsQuery.data.length > 0,
     staleTime: 5 * 60 * 1000,
@@ -140,6 +162,7 @@ export const useDynamicTableVariables = (tableName: string | null) => {
   return {
     basicFields: processedVariables.data?.basicFields || [],
     referenceGroups: processedVariables.data?.referenceGroups || [],
+    contextVariables: processedVariables.data?.contextVariables || CONTEXT_VARIABLES,
     allVariables: processedVariables.data?.allVariables || [],
     isLoading: columnsQuery.isLoading || processedVariables.isLoading,
     error: columnsQuery.error || processedVariables.error,

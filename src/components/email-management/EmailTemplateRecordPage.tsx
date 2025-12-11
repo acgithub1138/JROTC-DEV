@@ -113,7 +113,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
   });
 
   // Use the new dynamic variables hook
-  const { basicFields, referenceGroups } = useDynamicTableVariables(formData.source_table);
+  const { basicFields, referenceGroups, contextVariables } = useDynamicTableVariables(formData.source_table);
 
   useEffect(() => {
     if (template && (mode === 'edit' || mode === 'view')) {
@@ -512,6 +512,7 @@ export const EmailTemplateRecordPage: React.FC = () => {
                 onChange={handleBuilderChange}
                 columns={basicFields.map(f => ({ name: f.name, label: f.label }))}
                 groupedReferenceFields={referenceGroups}
+                contextVariables={contextVariables}
               />
             ) : (
               <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-4'} gap-6`}>

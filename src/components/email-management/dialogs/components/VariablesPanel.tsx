@@ -14,6 +14,7 @@ interface VariablesPanelProps {
     groupLabel: string; 
     fields: Array<{ name: string; label: string }> 
   }>;
+  contextVariables?: Array<{ name: string; label: string; description?: string }>;
   onVariableInsert: (variableName: string) => void;
 }
 
@@ -21,6 +22,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
   enhancedVariables,
   groupedReferenceFields = [],
+  contextVariables = [],
   onVariableInsert,
 }) => {
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -145,6 +147,37 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                       }}
                     >
                       <span className="truncate">{column.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {contextVariables.length > 0 && (
+              <div>
+                <h4 className="text-xs font-medium mb-2">Context Variables</h4>
+                <div className="space-y-1">
+                  {contextVariables.map((variable) => (
+                    <Button
+                      key={variable.name}
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start text-xs h-auto p-2"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onVariableInsert(variable.name);
+                      }}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">{variable.label}</div>
+                        {variable.description && (
+                          <div className="text-muted-foreground text-xs">
+                            {variable.description}
+                          </div>
+                        )}
+                      </div>
                     </Button>
                   ))}
                 </div>
