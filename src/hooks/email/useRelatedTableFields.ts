@@ -1,7 +1,12 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getColumnLabel } from '@/utils/columnLabels';
+
+// Convert column_name to display label: assigned_to -> Assigned To
+const formatLabel = (columnName: string): string => {
+  return columnName
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+};
 
 export interface RelatedField {
   column_name: string;
@@ -56,7 +61,7 @@ export const useRelatedTableFields = (columnName: string, enabled: boolean = tru
       
       return commonFields.map((column: any) => ({
         column_name: column.column_name,
-        display_label: getColumnLabel(column.column_name, relatedTableName),
+        display_label: formatLabel(column.column_name),
         data_type: column.data_type
       })) as RelatedField[];
     },

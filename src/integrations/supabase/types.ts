@@ -4811,6 +4811,13 @@ export type Database = {
       get_current_user_id: { Args: never; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
       get_current_user_school_id_safe: { Args: never; Returns: string }
+      get_email_source_tables: {
+        Args: never
+        Returns: {
+          display_label: string
+          table_name: string
+        }[]
+      }
       get_incident_category_values: {
         Args: never
         Returns: {
@@ -4866,6 +4873,16 @@ export type Database = {
         Returns: {
           column_name: string
           data_type: string
+        }[]
+      }
+      get_table_columns_with_relations: {
+        Args: { source_table: string }
+        Returns: {
+          column_name: string
+          data_type: string
+          is_nullable: boolean
+          referenced_column: string
+          referenced_table: string
         }[]
       }
       get_user_school_id: { Args: never; Returns: string }
