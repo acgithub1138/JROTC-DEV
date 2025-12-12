@@ -392,33 +392,42 @@ export const EmailTemplateRecordPage: React.FC = () => {
                 </div>
               </div>}
 
-            {/* Email Recipient Field */}
-            <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4 mt-6`}>
-              <Label className={isMobile ? '' : 'w-32 text-right'}>Email Recipient</Label>
-              <Select value={formData.recipient_field} onValueChange={value => handleFormChange({
-              recipient_field: value
-            })} disabled={!formData.source_table || isReadOnly}>
-                <SelectTrigger className={isMobile ? 'w-full' : 'w-1/3'}>
-                  <SelectValue placeholder="Select recipient" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="assigned_to">Assigned To</SelectItem>
-                  <SelectItem value="assigned_by">Created By</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Subject Field */}
+        {/* Recipient & Subject */}
         <Card>
           <CardHeader>
-            <CardTitle>Subject</CardTitle>
+            <CardTitle>Recipient & Subject</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Input ref={subjectRef} id="subject" value={formData.subject} onChange={e => handleFormChange({
-            subject: e.target.value
-          })} placeholder="Enter email subject" required disabled={isReadOnly} />
+          <CardContent className="space-y-4">
+            {/* Email Recipient Field */}
+            <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+              <Label htmlFor="recipient_field" className={isMobile ? '' : 'w-24 text-right shrink-0'}>Recipient</Label>
+              <Input
+                id="recipient_field"
+                value={formData.recipient_field}
+                onChange={e => handleFormChange({ recipient_field: e.target.value })}
+                placeholder="e.g. {{contact.email}}"
+                disabled={isReadOnly}
+                className="flex-1"
+              />
+            </div>
+
+            {/* Subject Field */}
+            <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+              <Label htmlFor="subject" className={isMobile ? '' : 'w-24 text-right shrink-0'}>Subject</Label>
+              <Input
+                ref={subjectRef}
+                id="subject"
+                value={formData.subject}
+                onChange={e => handleFormChange({ subject: e.target.value })}
+                placeholder="Enter email subject"
+                required
+                disabled={isReadOnly}
+                className="flex-1"
+              />
+            </div>
           </CardContent>
         </Card>
 
