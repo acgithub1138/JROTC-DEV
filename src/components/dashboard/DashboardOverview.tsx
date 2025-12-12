@@ -20,6 +20,7 @@ import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUs
 import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
 import { AnnouncementDialog } from '@/components/announcements/AnnouncementDialog';
 import { useCreateAnnouncement } from '@/hooks/useAnnouncements';
+import { TwoColumnGrid } from '@/components/ui/layout';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const {
@@ -343,7 +344,7 @@ const DashboardOverview = () => {
       })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <TwoColumnGrid>
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
           {/* My Cadets Widget for parents, My Tasks for others */}
@@ -393,7 +394,7 @@ const DashboardOverview = () => {
             </CardContent>
           </Card>}
         </div>
-      </div>
+      </TwoColumnGrid>
 
       {/* Modals - Only show for roles that can use them */}
       {userProfile?.role === 'instructor' && <>
