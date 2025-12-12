@@ -53,6 +53,7 @@ export const EmailBuilderToolbar: React.FC<EmailBuilderToolbarProps> = ({
         <div className="h-4 w-px bg-border mx-2" />
         
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => setSelectedBlockId(null)}
