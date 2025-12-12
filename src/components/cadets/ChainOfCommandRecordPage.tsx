@@ -15,6 +15,7 @@ import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useRoleValidation } from '@/components/job-board/hooks/useRoleValidation';
 import { JobBoardWithCadet, NewJobBoard } from '@/components/job-board/types';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { TwoColumnGrid } from '@/components/ui/layout';
 
 type ChainOfCommandRecordMode = 'create' | 'edit';
 
@@ -280,7 +281,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-6">
               {/* First row: Cadet and Role */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TwoColumnGrid>
                 <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
                   <Label htmlFor="cadet" className="sm:w-32 sm:text-right text-left sm:shrink-0">Cadet</Label>
                   <div className="flex-1">
@@ -327,10 +328,10 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </TwoColumnGrid>
 
               {/* Second row: Reports To and Assistant */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TwoColumnGrid>
                 <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">
                   <Label htmlFor="reports_to" className="sm:w-32 sm:text-right text-left sm:shrink-0">Reports To *</Label>
                   <div className="flex-1">
@@ -374,7 +375,7 @@ export const ChainOfCommandRecordPage: React.FC = () => {
                     </Select>
                   </div>
                 </div>
-              </div>
+              </TwoColumnGrid>
 
               {/* Third row: Email Address */}
               <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4">

@@ -25,6 +25,7 @@ import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { convertToUI, convertToUTC } from '@/utils/timezoneUtils';
+import { TwoColumnGrid } from '@/components/ui/layout';
 
 const expenseSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -388,7 +389,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                     e.preventDefault();
                   }
                 }} className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <TwoColumnGrid>
                     <FormField
                       control={form.control}
                       name="item"
@@ -528,7 +529,7 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                  </div>
+                  </TwoColumnGrid>
 
                   <FormField
                     control={form.control}
