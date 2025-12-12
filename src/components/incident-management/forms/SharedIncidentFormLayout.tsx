@@ -6,6 +6,7 @@ import { IncidentInfoLeftFields } from './fields/IncidentInfoLeftFields';
 import { IncidentInfoRightFields } from './fields/IncidentInfoRightFields';
 import type { Incident } from '@/hooks/incidents/types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FormWrapper, FormSection, TwoColumnGrid, FieldRow } from '@/components/ui/layout';
 
 interface SharedIncidentFormLayoutProps {
   form: UseFormReturn<any>;
@@ -41,7 +42,7 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
   const isMobile = useIsMobile();
   
   return (
-    <div className="bg-background p-6 rounded-lg border">
+    <FormWrapper>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Form Actions - Mobile Only (Top) */}
@@ -57,46 +58,48 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
           )}
 
           {/* Top section - Two columns */}
-          <div className="grid gap-6 lg:grid-cols-2 p-6 border rounded-lg bg-card">
-            {/* Left Column */}
-            <div className="space-y-4">
-              <IncidentInfoLeftFields
-                form={form}
-                mode={mode}
-                incident={incident}
-                categoryOptions={categoryOptions}
-              />
-            </div>
+          <FormSection>
+            <TwoColumnGrid>
+              {/* Left Column */}
+              <div className="space-y-4">
+                <IncidentInfoLeftFields
+                  form={form}
+                  mode={mode}
+                  incident={incident}
+                  categoryOptions={categoryOptions}
+                />
+              </div>
 
-            {/* Right Column */}
-            <div className="space-y-4">
-              <IncidentInfoRightFields
-                form={form}
-                mode={mode}
-                canAssignIncidents={canAssignIncidents}
-                priorityOptions={priorityOptions}
-              />
-            </div>
-          </div>
+              {/* Right Column */}
+              <div className="space-y-4">
+                <IncidentInfoRightFields
+                  form={form}
+                  mode={mode}
+                  canAssignIncidents={canAssignIncidents}
+                  priorityOptions={priorityOptions}
+                />
+              </div>
+            </TwoColumnGrid>
+          </FormSection>
 
           {/* Bottom section - Single column */}
-          <div className="space-y-6 p-6 border rounded-lg bg-card">
+          <FormSection>
             <div className="space-y-4">
               {titleField}
               {descriptionField}
             </div>
 
             {attachmentSection && (
-              <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
+              <FieldRow className={isMobile ? 'flex-col items-start' : ''}>
                 <label className={`${isMobile ? '' : 'w-24 text-right'} flex-shrink-0 text-sm font-medium`}>
                   Attachments
                 </label>
                 <div className="flex-1">
                   {attachmentSection}
                 </div>
-              </div>
+              </FieldRow>
             )}
-          </div>
+          </FormSection>
 
           {/* Form Actions - Desktop Only (Bottom) */}
           {!isMobile && (
@@ -111,6 +114,6 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
           )}
         </form>
       </Form>
-    </div>
+    </FormWrapper>
   );
 };
