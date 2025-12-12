@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Clock, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageContainer, FieldRow } from '@/components/ui/layout';
 
 const EmailManagementPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
+    <PageContainer>
+      <FieldRow>
         <Mail className="w-8 h-8 text-primary" />
         <h1 className="text-3xl font-bold">Email Management</h1>
-      </div>
+      </FieldRow>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/app/email_templates')}>
@@ -60,7 +61,7 @@ const EmailManagementPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

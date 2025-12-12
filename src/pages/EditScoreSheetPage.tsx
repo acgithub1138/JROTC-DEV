@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, AudioLines, Play, Pause } from 'lucide-react';
+import { ArrowLeft, Save, AudioLines } from 'lucide-react';
 import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
 import { useCompetitionTemplates } from '@/components/competition-management/hooks/useCompetitionTemplates';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { PageContainer, FieldRow } from '@/components/ui/layout';
 
 export const EditScoreSheetPage = () => {
   const navigate = useNavigate();
@@ -157,10 +158,10 @@ export const EditScoreSheetPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <PageContainer>
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-96 w-full" />
-      </div>
+      </PageContainer>
     );
   }
 
@@ -169,8 +170,8 @@ export const EditScoreSheetPage = () => {
   const judgeNumber = scoreSheetData?.judge_number || 'Unknown Judge';
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
+    <PageContainer>
+      <FieldRow>
         <Button
           variant="ghost"
           size="icon"
@@ -184,7 +185,7 @@ export const EditScoreSheetPage = () => {
             Judge {judgeNumber}
           </p>
         </div>
-      </div>
+      </FieldRow>
 
       <Card>
         <CardHeader>
@@ -241,6 +242,6 @@ export const EditScoreSheetPage = () => {
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
-    </div>
+    </PageContainer>
   );
 };
