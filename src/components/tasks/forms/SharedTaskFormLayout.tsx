@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { TaskInfoFields } from './fields/TaskInfoFields';
 import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
+import { FormWrapper, FormSection, TwoColumnGrid, FormButtonRow, FormSpacer } from '@/components/ui/layout';
 
 interface SharedTaskFormLayoutProps {
   form: any;
@@ -49,37 +50,41 @@ export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
   hideActionButtons = false,
 }) => {
   return (
-    <div className="bg-background p-6 rounded-lg border">
+    <FormWrapper>
       <Form {...form}>
         <form onSubmit={onSubmit} className="space-y-6" id="task-form">
           {/* Top Section - Two Columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
-            <TaskInfoFields
-              mode={mode}
-              taskNumber={taskNumber}
-              createdAt={createdAt}
-              createdBy={createdBy}
-            />
-            
-            <TaskPriorityStatusDueDateFields
-              form={form}
-              canAssignTasks={canAssignTasks}
-              canEditThisTask={canEditThisTask}
-              isEditingAssignedTask={isEditingAssignedTask}
-              statusOptions={statusOptions}
-              priorityOptions={priorityOptions}
-            />
-          </div>
+          <FormSection>
+            <TwoColumnGrid>
+              <TaskInfoFields
+                mode={mode}
+                taskNumber={taskNumber}
+                createdAt={createdAt}
+                createdBy={createdBy}
+              />
+              
+              <TaskPriorityStatusDueDateFields
+                form={form}
+                canAssignTasks={canAssignTasks}
+                canEditThisTask={canEditThisTask}
+                isEditingAssignedTask={isEditingAssignedTask}
+                statusOptions={statusOptions}
+                priorityOptions={priorityOptions}
+              />
+            </TwoColumnGrid>
+          </FormSection>
 
           {/* Bottom Section - Single Column */}
-          <div className="space-y-6 p-6 border rounded-lg bg-card">
-            {titleField}
-            {descriptionField}
-          {attachmentSection}
-          </div>
+          <FormSection>
+            <FormSpacer size="lg">
+              {titleField}
+              {descriptionField}
+              {attachmentSection}
+            </FormSpacer>
+          </FormSection>
 
           {!hideActionButtons && (
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <FormButtonRow>
               <Button
                 type="button"
                 variant="outline"
@@ -95,10 +100,10 @@ export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
               >
                 {isSubmitting ? 'Saving...' : submitButtonText}
               </Button>
-            </div>
+            </FormButtonRow>
           )}
         </form>
       </Form>
-    </div>
+    </FormWrapper>
   );
 };
