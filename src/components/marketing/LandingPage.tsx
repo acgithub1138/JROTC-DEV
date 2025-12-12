@@ -1,23 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LazySection } from "@/components/ui/lazy-section";
 import {
-  Users,
-  ClipboardList,
   Trophy,
-  HelpCircle,
-  UserCheck,
-  DollarSign,
-  Package,
-  Calendar,
-  Contact,
-  Mail,
-  Shield,
-  Building,
-  Settings,
-  ArrowRight,
   CheckCircle,
-  Star,
 } from "lucide-react";
 const LandingPage = () => {
   const modules = [
@@ -177,8 +164,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Problem/Solution */}
-      <section className="py-16 bg-muted/30">
+      {/* Problem/Solution - Lazy loaded */}
+      <LazySection className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-8">
@@ -218,15 +205,10 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </LazySection>
 
-      {/* Features Grid - Deferred rendering */}
-      <section
-        className="py-20"
-        style={{
-          contentVisibility: "auto",
-        }}
-      >
+      {/* Features Grid - Lazy loaded */}
+      <LazySection className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">
@@ -267,12 +249,10 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </LazySection>
 
-      {/* Testimonials */}
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      {/* CTA Section - Lazy loaded */}
+      <LazySection className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Ready to Transform Your JROTC Program?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
@@ -288,7 +268,7 @@ const LandingPage = () => {
           </div>
           <p className="text-sm mt-4 opacity-75">Email support included • Custom setup available • Training provided</p>
         </div>
-      </section>
+      </LazySection>
     </div>
   );
 };
