@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,13 +131,12 @@ export const EmailTemplateRecordPage: React.FC = () => {
       });
     }
   }, [template, mode]);
-  const handleFormChange = (updates: Partial<typeof formData>) => {
-    if (mode === 'view') return;
+  const handleFormChange = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({
       ...prev,
       ...updates
     }));
-  };
+  }, []);
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -237,11 +236,11 @@ export const EmailTemplateRecordPage: React.FC = () => {
     }
     // For builder editor, variable insertion is handled by EmailBuilder component
   };
-  const handleBuilderChange = (document: EmailBuilderDocument) => {
+  const handleBuilderChange = useCallback((doc: EmailBuilderDocument) => {
     handleFormChange({
-      body_json: document
+      body_json: doc
     });
-  };
+  }, [handleFormChange]);
   const getTitle = () => {
     switch (mode) {
       case 'create':

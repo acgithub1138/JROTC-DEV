@@ -54,10 +54,11 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
     }
   }, []);
 
-  // Notify parent of changes
+  // Notify parent of changes - only trigger when document changes, not when onChange callback reference changes
   useEffect(() => {
     onChange?.(document);
-  }, [document, onChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document]);
 
   // Handle escape key to exit fullscreen
   useEffect(() => {
