@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { EmailBuilderToolbar } from './EmailBuilderToolbar';
 import { EmailBuilderSidebar } from './EmailBuilderSidebar';
 import { EmailBuilderCanvas } from './EmailBuilderCanvas';
@@ -30,6 +30,9 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
   contextVariables = [],
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const hasInitialized = useRef(false);
+  const previousDocRef = useRef<EmailBuilderDocument | null>(null);
+  
   const { 
     document, 
     setDocument, 
@@ -43,20 +46,35 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
   // Initialize with provided document or reset to default
   useEffect(() => {
     if (initialDocument && Object.keys(initialDocument).length > 0) {
-      // Set document without adding to history (initial load)
       useEmailBuilderStore.setState({ 
         document: initialDocument,
         history: [initialDocument],
         historyIndex: 0 
       });
+      previousDocRef.current = initialDocument;
     } else {
       reset();
+      previousDocRef.current = DEFAULT_DOCUMENT;
     }
+    // Mark as initialized after the first render cycle
+    requestAnimationFrame(() => {
+      hasInitialized.current = true;
+    });
   }, []);
 
-  // Notify parent of changes - only trigger when document changes, not when onChange callback reference changes
+  // Notify parent of changes - only after initialization and when document actually changes
   useEffect(() => {
-    onChange?.(document);
+    // Skip if not initialized yet
+    if (!hasInitialized.current) return;
+    
+    // Deep compare to avoid unnecessary updates
+    const docString = JSON.stringify(document);
+    const prevString = JSON.stringify(previousDocRef.current);
+    
+    if (docString !== prevString) {
+      previousDocRef.current = document;
+      onChange?.(document);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [document]);
 
