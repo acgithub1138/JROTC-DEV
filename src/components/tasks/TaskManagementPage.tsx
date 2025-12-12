@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AccessDeniedDialog } from '../incident-management/AccessDeniedDialog';
+import { PageContainer } from '@/components/ui/layout';
 
 const TaskManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -54,13 +54,9 @@ const TaskManagementPage: React.FC = () => {
       setOverdueFilter(true);
     }
   }, [searchParams, setOverdueFilter]);
-  
-  // Removed console.log to prevent excessive rendering logs
 
   const handleTaskSelect = (task: Task | Subtask) => {
-    // Check if user has view permissions
     if (canView) {
-      // Navigate to view page for both tasks and subtasks using their own ID
       navigate(`/app/tasks/task_record?id=${task.id}`);
     } else {
       setShowAccessDenied(true);
@@ -68,7 +64,6 @@ const TaskManagementPage: React.FC = () => {
   };
 
   const handleEditTask = (task: Task | Subtask) => {
-    // Navigate to edit page using the record's own ID
     navigate(`/app/tasks/task_record?mode=edit&id=${task.id}`);
   };
 
@@ -77,7 +72,7 @@ const TaskManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <PageContainer>
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <h1 className="text-3xl font-bold">Task Management</h1>
         {canCreate && (
@@ -93,36 +88,34 @@ const TaskManagementPage: React.FC = () => {
         onSearchChange={setSearchTerm}
       />
 
-        <TaskTabs
-          myActiveTasks={myActiveTasks}
-          allSchoolTasks={allSchoolTasks}
-          completedTasks={completedTasks}
-          currentPageMyTasks={currentPageMyTasks}
-          currentPageAllTasks={currentPageAllTasks}
-          currentPageCompleted={currentPageCompleted}
-          myTasksPages={myTasksPages}
-          allTasksPages={allTasksPages}
-          completedTasksPages={completedTasksPages}
-          onTaskSelect={handleTaskSelect}
-          onEditTask={handleEditTask}
-          onPageChangeMyTasks={setCurrentPageMyTasks}
-          onPageChangeAllTasks={setCurrentPageAllTasks}
-          onPageChangeCompleted={setCurrentPageCompleted}
-          overdueFilter={overdueFilter}
-          onOverdueFilterChange={setOverdueFilter}
-          onRefresh={handleRefresh}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-
-      {/* All modals removed - now using dedicated task record page */}
+      <TaskTabs
+        myActiveTasks={myActiveTasks}
+        allSchoolTasks={allSchoolTasks}
+        completedTasks={completedTasks}
+        currentPageMyTasks={currentPageMyTasks}
+        currentPageAllTasks={currentPageAllTasks}
+        currentPageCompleted={currentPageCompleted}
+        myTasksPages={myTasksPages}
+        allTasksPages={allTasksPages}
+        completedTasksPages={completedTasksPages}
+        onTaskSelect={handleTaskSelect}
+        onEditTask={handleEditTask}
+        onPageChangeMyTasks={setCurrentPageMyTasks}
+        onPageChangeAllTasks={setCurrentPageAllTasks}
+        onPageChangeCompleted={setCurrentPageCompleted}
+        overdueFilter={overdueFilter}
+        onOverdueFilterChange={setOverdueFilter}
+        onRefresh={handleRefresh}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
         onClose={() => setShowAccessDenied(false)}
         message="You do not have permission to view task details."
       />
-    </div>
+    </PageContainer>
   );
 };
 
