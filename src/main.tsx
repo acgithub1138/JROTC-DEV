@@ -26,30 +26,6 @@ const setupGlobalErrorHandling = () => {
     'Failed to fetch dynamically imported module'
   ];
 
-  // Suppress Chrome's [Violation] warnings from Tailwind CDN postMessage handlers
-  // These are development-only warnings caused by Lovable's live preview JIT compilation
-  if (import.meta.env.DEV) {
-    const originalWarn = console.warn;
-    const originalLog = console.log;
-    
-    const suppressPattern = /\[Violation\].*handler took/;
-    
-    console.warn = (...args: unknown[]) => {
-      const message = args[0];
-      if (typeof message === 'string' && suppressPattern.test(message)) {
-        return; // Suppress Tailwind CDN JIT violation warnings
-      }
-      originalWarn.apply(console, args);
-    };
-    
-    console.log = (...args: unknown[]) => {
-      const message = args[0];
-      if (typeof message === 'string' && suppressPattern.test(message)) {
-        return; // Suppress Tailwind CDN JIT violation warnings
-      }
-      originalLog.apply(console, args);
-    };
-  }
 
   let errorCount = 0;
   let lastErrorTime = 0;
