@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { EmailBuilderToolbar } from './EmailBuilderToolbar';
 import { EmailBuilderSidebar } from './EmailBuilderSidebar';
 import { EmailBuilderCanvas } from './EmailBuilderCanvas';
@@ -62,21 +63,20 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
     });
   }, []);
 
-  // Notify parent of changes - only after initialization and when document actually changes
+  // Debounced onChange to avoid expensive operations on every keystroke
+  const debouncedOnChange = useDebouncedCallback(
+    (doc: EmailBuilderDocument) => {
+      onChange?.(doc);
+    },
+    300
+  );
+
+  // Notify parent of changes - only after initialization, debounced
   useEffect(() => {
-    // Skip if not initialized yet
     if (!hasInitialized.current) return;
-    
-    // Deep compare to avoid unnecessary updates
-    const docString = JSON.stringify(document);
-    const prevString = JSON.stringify(previousDocRef.current);
-    
-    if (docString !== prevString) {
-      previousDocRef.current = document;
-      onChange?.(document);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [document]);
+    previousDocRef.current = document;
+    debouncedOnChange(document);
+  }, [document, debouncedOnChange]);
 
   // Handle escape key to exit fullscreen
   useEffect(() => {

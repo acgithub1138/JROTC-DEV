@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,27 +80,32 @@ export const EmailTemplateRecordPage: React.FC = () => {
 
   // Find template if in edit/view mode
   const template = id ? templates.find(t => t.id === id) : null;
-  const initialFormData = template && (mode === 'edit' || mode === 'view') ? {
-    name: template.name,
-    subject: template.subject,
-    body: template.body,
-    body_json: (template.body_json || DEFAULT_DOCUMENT) as EmailBuilderDocument,
-    editor_type: (template.editor_type || 'legacy') as 'legacy' | 'builder',
-    source_table: template.source_table,
-    recipient_field: template.recipient_field || '',
-    is_active: template.is_active,
-    is_global: template.is_global || false
-  } : {
-    name: '',
-    subject: '',
-    body: '',
-    body_json: DEFAULT_DOCUMENT as EmailBuilderDocument,
-    editor_type: 'builder' as 'legacy' | 'builder',
-    source_table: '',
-    recipient_field: '',
-    is_active: true,
-    is_global: false
-  };
+  const initialFormData = useMemo(() => {
+    if (template && (mode === 'edit' || mode === 'view')) {
+      return {
+        name: template.name,
+        subject: template.subject,
+        body: template.body,
+        body_json: (template.body_json || DEFAULT_DOCUMENT) as EmailBuilderDocument,
+        editor_type: (template.editor_type || 'legacy') as 'legacy' | 'builder',
+        source_table: template.source_table,
+        recipient_field: template.recipient_field || '',
+        is_active: template.is_active,
+        is_global: template.is_global || false
+      };
+    }
+    return {
+      name: '',
+      subject: '',
+      body: '',
+      body_json: DEFAULT_DOCUMENT as EmailBuilderDocument,
+      editor_type: 'builder' as 'legacy' | 'builder',
+      source_table: '',
+      recipient_field: '',
+      is_active: true,
+      is_global: false
+    };
+  }, [template, mode]);
   const {
     hasUnsavedChanges,
     resetChanges
