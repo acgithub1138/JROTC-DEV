@@ -14,8 +14,8 @@ export const SubjectField: React.FC<SubjectFieldProps> = ({
   inputRef,
 }) => {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="subject">Subject</Label>
+    <div className="flex items-center gap-4">
+      <Label htmlFor="subject" className="w-20 text-right shrink-0">Subject</Label>
       <Input
         ref={inputRef}
         id="subject"
@@ -23,6 +23,7 @@ export const SubjectField: React.FC<SubjectFieldProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter email subject"
         required
+        className="flex-1"
       />
     </div>
   );
