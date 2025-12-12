@@ -73,7 +73,7 @@ export const useDynamicTableVariables = (tableName: string | null) => {
 
   // Process columns into structured variables
   const processedVariables = useQuery({
-    queryKey: ['processed-variables', tableName],
+    queryKey: ['processed-variables', tableName, columnsQuery.data],
     queryFn: async (): Promise<DynamicVariables> => {
       const columns = columnsQuery.data || [];
       
